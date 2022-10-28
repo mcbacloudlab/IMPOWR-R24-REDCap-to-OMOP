@@ -1,0 +1,2 @@
+# Description
+Processes input CSV. Grabs the concept ids from the CSV and then queries the UMLS API in attempt to get SNOMED id. Pairs these and outputs into a CSV. Any concept IDS where nothing is returned from the UMLS API is outputted into a separate error CSV file.
