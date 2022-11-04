@@ -2,7 +2,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const csv = require("csv-parser");
 const fs = require("fs");
-const results = [];
+let results = [];
 require("dotenv").config();
 var axios = require("axios");
 import { stringify } from "csv-stringify/sync";
@@ -10,33 +10,39 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+var mysql_pool = require('./db/mysqlConnection.cjs');
 
 let ddMap = [];
 initCSVFiles()
-readCSV()
-
-function readCSV(){
+readInputCSV()
+let totalConceptCallCount = 0
+let conceptCallCounter = 0
+function readInputCSV(){
+  console.log('Read Input CSV...')
 fs.createReadStream("./work/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv")
   .pipe(csv())
   .on("data", (data) => results.push(data))
   .on("end", () => {
     let csvRowCount = 0;
-
     for (let item of results) {
       if (item["Form Name"] == "impowr_demographics") {
         csvRowCount++;
         ddMap.push(transform(item));
       }
     }
+    // console.log('ddMap', ddMap)
+    console.log('Total records of input CSV', csvRowCount)
+    
     for (let item of ddMap) {
       for (let ccID of item["Field Annotations"]) {
         if (ccID.trim().substring(0, 1) == "C") {
           // if (ccID.trim() == "C0007457") {
+          totalConceptCallCount++
           callUMLSAPI(ccID.trim(), item);
         }
       }
     }
-    // console.log('Total records', csvRowCount)
+    console.log(`Start calling to get Snomed IDs from UMLS API. ${totalConceptCallCount} calls to make`)  
   });
 }
 
@@ -49,49 +55,68 @@ function transform(item) {
   };
 }
 
-function initCSVFiles() {
-  //clear files before writing
-  fs.writeFile(__dirname + "/someData.csv", "", function () {
-    // console.log("done");
-  });
+function writeCSVHeader(file, headers){
   //write headers for match file
   fs.appendFile(
-    __dirname + "/someData.csv",
-    "UMLS Name/Label, SNOMED UI, Concept ID, CSV Label, Match Percent\n",
-    function (err, result) {
-      if (err) console.log("error", err);
-    }
-  );
-
-  fs.writeFile(__dirname + "/someDataErr.csv", "", function () {
-    // console.log("done");
-  });
-  //write headers for error file
-  fs.appendFile(
-    __dirname + "/someDataErr.csv",
-    "CSV Name/Label, Concept ID\n",
+    __dirname + file,
+    headers,
     function (err, result) {
       if (err) console.log("error", err);
     }
   );
 }
 
-function callUMLSAPI(conceptID, itemObj) {
-  // console.log('itemobj', itemObj)
+function clearFile(file){
+  fs.writeFile(__dirname + file, "", function () {
+    // console.log("done");
+  });
+}
+
+function initCSVFiles() {
+  console.log('Init CSV files...')
+  clearFile("/someData.csv")
+  writeCSVHeader("/someData.csv", "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent\n")
+
+  clearFile("/someDataErr.csv")
+  writeCSVHeader("/someDataErr.csv", "FieldLabel,Concept ID\n")
+
+  clearFile("/someDataExtendedErr.csv")
+  writeCSVHeader("/someDataExtendedErr.csv", "FieldLabel,Concept ID\n")
+
+  clearFile("/someDataExtended.csv")
+  writeCSVHeader("/someDataExtended.csv",  "UMLS Name/Label,UI,CSV C Code,CSV Label,Match,concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concept,concept_code,valid_start_date,valid_end_date,invalid_reason\n")
+
+  // clearFile("/conceptIDs.csv")
+  // writeCSVHeader("/conceptIDs.csv", `UMLS Label/Name,UMLS SNOMED ID,CSV Name/Label,CSV Concept IDs,MatchPercent\n`)
+
+  // clearFile("/conceptIDsErr.csv")
+  // writeCSVHeader("/conceptIDsErr.csv",`CSV Name/Label\n`)
+}
+let lncEmpty = []
+function callUMLSAPI(conceptID, itemObj, vocab, errorLookup) {
+  let _errorLookup = errorLookup
+  let url = process.env.UMLS_API_SNOMED_URL + conceptID
+  if(vocab == 'LNC') url = process.env.UMLS_API_LNC_URL + conceptID
+
   var config = {
     method: "get",
-    url:
-      process.env.UMLS_API_URL +
-      process.env.UMLS_API_KEY +
-      "&string=" +
-      conceptID,
+    url: url,
     headers: {},
   };
 
   axios(config)
     .then(function (response) {
-      // console.log(response.data.result.results);
       let data = response.data.result.results;
+      
+      // console.log(data.length)
+      if(vocab == 'LNC' && data.length == 0){
+        // console.log('data', data)
+        // console.log('concept', conceptID)
+        // console.log('itemObj', itemObj)
+        if(!lncEmpty.includes(conceptID)) {
+          lncEmpty.push(itemObj)
+        }
+      } 
       let closestMatch = "";
       let tempMaxPercentMatch = 0;
       let textPercentMatch = 0;
@@ -99,22 +124,20 @@ function callUMLSAPI(conceptID, itemObj) {
       let finalMap = [];
       let errorMap = [];
       for (let [index, item] of data.entries()) {
-        tempMaxPercentMatch = similarity(item.name, itemObj.FieldLabel);
+        // console.log('item', item.ui.substring(0,2))
+        
+        tempMaxPercentMatch = similarity(item.name, itemObj['FieldLabel']);
+        if(vocab == 'LNC' && item.ui.substring(0,2) != 'LP') tempMaxPercentMatch = 0
         if (tempMaxPercentMatch >= textPercentMatch) {
           closestMatch = item.name;
           textPercentMatch = tempMaxPercentMatch;
           textMaxIdx = index;
         }
       }
-      console.log(
-        "Closest match:",
-        closestMatch + ":" + textPercentMatch + " at idx:" + textMaxIdx
-      );
 
       if (!data[textMaxIdx]) {
-        console.log("Error with API and textMaxIdx: " + conceptID);
         errorMap.push({
-          Label: itemObj.FieldLabel,
+          Label: itemObj['FieldLabel'],
           ConceptID: conceptID,
         });
         const errOutput = stringify(errorMap, { header: false });
@@ -123,15 +146,33 @@ function callUMLSAPI(conceptID, itemObj) {
           errOutput,
           function (err, result) {
             if (err) console.log("error", err);
+            else{
+              
+            }
+            conceptCallCounter++
+            if(totalConceptCallCount == conceptCallCounter){
+              console.log('All concept calls done! Ended in error')
+              //TODO -- before looking up in Athena, we need to try to get LNC ids from UMLS API
+              conceptCallCounter = 0
+              if(!_errorLookup) {
+                umlsErrorLookup()
+              }else{
+                // console.log('Still missing:')
+                // console.log(lncEmpty)
+                appendCSV('/someDataExtendedErr.csv', lncEmpty)
+                startAthenaLookup()
+              }
+            }
           }
         );
         return;
       }
+
       finalMap.push({
         Name: closestMatch,
         Snomed: data[textMaxIdx].ui,
         ConceptIDs: conceptID,
-        CSVLabel: itemObj.FieldLabel,
+        CSVLabel: itemObj['FieldLabel'],
         MatchPercent: textPercentMatch,
       });
 
@@ -142,6 +183,21 @@ function callUMLSAPI(conceptID, itemObj) {
         output,
         function (err, result) {
           if (err) console.log("error", err);
+          else{
+          }
+          conceptCallCounter++
+          // console.log('conceptCallCounter', conceptCallCounter)
+          // console.log('totalConceptCallCount', totalConceptCallCount)
+          if(totalConceptCallCount == conceptCallCounter){
+            console.log('All concept calls done! Ended in success')
+            conceptCallCounter = 0  
+            if(!_errorLookup) {
+              umlsErrorLookup()
+            }else{
+              // console.log('Still missing:' + lncEmpty)
+              startAthenaLookup()
+            }
+          }
         }
       );
     })
@@ -150,6 +206,118 @@ function callUMLSAPI(conceptID, itemObj) {
     });
 }
 
+function appendCSV(filename, data){
+  const _data = stringify(data, { header: false });
+        fs.appendFile(
+          __dirname + filename,
+          _data,
+          function (err, result) {
+            if (err) console.log("error", err);
+            return;
+          }
+        );
+}
+
+function umlsErrorLookup(){
+  console.log('Start UMLS Error Lookup...')
+  let results = []
+  let ddMap = []
+  totalConceptCallCount = 0
+  fs.createReadStream("./someDataErr.csv")
+  .pipe(csv())
+  .on("data", (data) => results.push(data))
+  .on("end", () => {
+    let csvRowCount = 0;
+    for (let item of results) {
+      // if (item["Form Name"] == "impowr_demographics") {
+        csvRowCount++;
+        // ddMap.push(transform(item));
+      // }
+    }
+    // console.log('ddMap', ddMap)
+    console.log('Total records of error CSV', csvRowCount)
+    
+    for (let item of results) {
+      // console.log('item', item)
+      // for (let ccID of item["Concept ID"]) {
+        let ccID = item["Concept ID"];
+        if (ccID.trim().substring(0, 1) == "C") {
+          // if (ccID.trim() == "C0007457") {
+          totalConceptCallCount++
+          // console.log('conceptID:', ccID.trim())
+          callUMLSAPI(ccID.trim(), item, 'LNC', true);
+        }
+      // }
+    }
+    console.log(`Start calling to get LNC from UMLS API. ${totalConceptCallCount} calls to make`)  
+  });
+}
+
+let totalMySqlQueriesCount = 0
+let mysqlComplete = false;
+function startAthenaLookup(){
+  console.log('Starting Athena lookup...')
+  results = [] //clear stream
+  ddMap = [] //clear map
+  fs.createReadStream("./someData.csv")
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", () => {
+      for (let item of results) {
+        totalMySqlQueriesCount++
+      }
+      console.log('Total MySQL Queries:' + totalMySqlQueriesCount)
+      for (let item of results) {
+        mysqlQuery(item, function(){
+          console.log('All MySQL Queries Done')
+          mysqlComplete= true
+          if(mysqlComplete) {
+            console.log('Everything done!')
+          }
+        })
+      }
+    });
+}
+let mysqlInsertCount = 0;
+function mysqlQuery(item, callback){
+  // execute will internally call prepare and query
+  let finalMap = []
+  mysql_pool.execute(
+    `SELECT * FROM athena.concept where concept_code = ?
+    `,
+    [item['UI'].trim()],
+    function(err, results, fields) {
+      if(err) console.log(`Error! ${err}`)
+      else{
+        for(let i of results){
+          for (const [key, value] of Object.entries(i)) {
+            item[key] = value
+          }
+        }
+
+        const output = stringify([item], { header: false });
+  
+        fs.appendFile(
+          __dirname + "/someDataExtended.csv",
+          output,
+          function (err, result) {
+            if (err) console.log("error", err);
+            else{
+
+            }
+            mysqlInsertCount++
+          if(mysqlInsertCount == totalMySqlQueriesCount){
+            callback()
+          }
+          }
+        );   
+      }
+    }
+  );
+}
+
+
+//Levenshtein Distance
 function similarity(s1, s2) {
   var longer = s1;
   var shorter = s2;
