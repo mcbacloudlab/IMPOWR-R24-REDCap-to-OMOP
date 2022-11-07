@@ -32,7 +32,6 @@ function readInputCSV() {
           ddMap.push(transform(item));
         }
       }
-      // console.log(ddMap)
       console.info("Total records of input CSV", csvRowCount);
 
       for (let item of ddMap) {
@@ -51,17 +50,13 @@ function readInputCSV() {
 
 function transform(item) {
   let ccIDs = item["Field Annotation"].split(",").map(element => element.trim())
-  // console.log(ccIDs)
   let patchObj = [
       {'C0011292':'C1830323'},
       {'C123': 'C45'}
     ]
     let patchCNumIdx
     for (var i in patchObj){
-      // console.log(i);
       for (var key in patchObj[i]){
-        // console.log('key', key)
-        // console.log(ccIDs)
         patchCNumIdx = ccIDs.indexOf(key)
         if(patchCNumIdx >= 0){
           ccIDs[patchCNumIdx] = patchObj[i][key]
@@ -154,8 +149,6 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
       let finalMap = [];
       let errorMap = [];
       for (let [index, item] of data.entries()) {
-        // console.log('item', item)
-        // console.log('itemObj', itemObj)
         tempMaxPercentMatch = similarity(
           item.name,
           itemObj["CSV Label"] ? itemObj["CSV Label"] : itemObj["FieldLabel"]
@@ -198,7 +191,6 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
               if (!_errorLookup) {
                 umlsErrorLookup();
               } else {
-                console.log('append error to extedned')
                 appendCSV(
                   "/work/output/someDataExtendedErr.csv",
                   lncEmpty,
@@ -216,7 +208,6 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
       }
       let _vocab = vocab
       if(vocab == 'text') _vocab = data[textMaxIdx].rootSource
-      // console.log('data', data)
       finalMap.push({
         Name: closestMatch ? closestMatch : "null",
         Snomed: data[textMaxIdx].ui ? data[textMaxIdx].ui : "null",
