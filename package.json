@@ -8,6 +8,9 @@
     "dev": "nodemon index.js",
     "start": "node index.js"
   },
+  "nodemonConfig": {
+    "ignore": ["work/*"]
+  },
   "author": "Matt Perkins",
   "license": "ISC",
   "dependencies": {
