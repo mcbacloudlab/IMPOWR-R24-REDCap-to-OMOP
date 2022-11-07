@@ -8,6 +8,7 @@ var axios = require("axios");
 import { stringify } from "csv-stringify/sync";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { start } from "repl";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 var mysql_pool = require("./db/mysqlConnection.cjs");
@@ -19,9 +20,7 @@ let totalConceptCallCount = 0;
 let conceptCallCounter = 0;
 function readInputCSV() {
   console.info("Read Input CSV...");
-  fs.createReadStream(
-    "./work/input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv"
-  )
+  fs.createReadStream("./work/input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv")
     // fs.createReadStream("./work/input/test.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
@@ -33,27 +32,49 @@ function readInputCSV() {
           ddMap.push(transform(item));
         }
       }
+      // console.log(ddMap)
       console.info("Total records of input CSV", csvRowCount);
-      console.info(
-        `Start calling to get Snomed IDs from UMLS API. ${totalConceptCallCount} calls to make`
-      );
+
       for (let item of ddMap) {
         for (let ccID of item["Field Annotations"]) {
-          if (ccID.trim().substring(0, 1) == "C") {
+          if (ccID.substring(0, 1) == "C") {
             totalConceptCallCount++;
-            callUMLSAPI(ccID.trim(), item);
+            callUMLSAPI(ccID, item);
           }
         }
       }
+      console.info(
+        `\n*****\nStart calling to get Snomed IDs from UMLS API. ${totalConceptCallCount} calls to make`
+      );
     });
 }
 
 function transform(item) {
+  let ccIDs = item["Field Annotation"].split(",").map(element => element.trim())
+  // console.log(ccIDs)
+  let patchObj = [
+      {'C0011292':'C1830323'},
+      {'C123': 'C45'}
+    ]
+    let patchCNumIdx
+    for (var i in patchObj){
+      // console.log(i);
+      for (var key in patchObj[i]){
+        // console.log('key', key)
+        // console.log(ccIDs)
+        patchCNumIdx = ccIDs.indexOf(key)
+        if(patchCNumIdx >= 0){
+          ccIDs[patchCNumIdx] = patchObj[i][key]
+        }
+      }
+  }
+  
+
   return {
     FieldName: item["Variable / Field Name"],
     "CSV Label": item["Field Label"],
     "Concept IDs": item["concept_id"].split("\n"),
-    "Field Annotations": item["Field Annotation"].split(","),
+    "Field Annotations": ccIDs,
   };
 }
 
@@ -96,6 +117,8 @@ function initCSVFiles() {
 
 }
 let lncEmpty = [];
+
+//this function gets called multiple times, first call is for SNOMED and then LNC
 function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
   if (noErr) {
     console.info("No errors to lookup");
@@ -104,7 +127,8 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
   let _errorLookup = errorLookup;
   let url = process.env.UMLS_API_SNOMED_URL + conceptID;
   if (!vocab) vocab = "SNOMED";
-  if (vocab == "LNC") url = process.env.UMLS_API_LNC_URL + conceptID;
+  else if (vocab == "LNC") url = process.env.UMLS_API_LNC_URL + conceptID;
+  else if (vocab == 'text') url = process.env.UMLS_API_TEXT_URL + conceptID
 
   var config = {
     method: "get",
@@ -130,12 +154,13 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
       let finalMap = [];
       let errorMap = [];
       for (let [index, item] of data.entries()) {
+        // console.log('item', item)
+        // console.log('itemObj', itemObj)
         tempMaxPercentMatch = similarity(
           item.name,
           itemObj["CSV Label"] ? itemObj["CSV Label"] : itemObj["FieldLabel"]
         );
-        if (vocab == "LNC" && item.ui.substring(0, 2) != "LP")
-          tempMaxPercentMatch = 0;
+        if(vocab == 'LNC' && item.ui.substring(0,2) != 'LP') tempMaxPercentMatch = 0 //athena dictionary only has LP concept codes
         if (tempMaxPercentMatch >= textPercentMatch) {
           closestMatch = item.name;
           textPercentMatch = tempMaxPercentMatch;
@@ -167,17 +192,20 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
             if (err) console.info("error", err);
             conceptCallCounter++;
             if (totalConceptCallCount == conceptCallCounter) {
-              console.info("All concept calls done! Ended in error");
+              console.info("All concept calls done! Ended in error. \n*****");
               //TODO -- before looking up in Athena, we need to try to get LNC ids from UMLS API
               conceptCallCounter = 0;
               if (!_errorLookup) {
                 umlsErrorLookup();
               } else {
+                console.log('append error to extedned')
                 appendCSV(
                   "/work/output/someDataExtendedErr.csv",
                   lncEmpty,
                   function () {
-                    startAthenaLookup();
+                    // if(vocab != 'text') callUMLSTextAPI();
+                    // else startAthenaLookup();
+                    startAthenaLookup()
                   }
                 );
               }
@@ -186,6 +214,9 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
         );
         return;
       }
+      let _vocab = vocab
+      if(vocab == 'text') _vocab = data[textMaxIdx].rootSource
+      // console.log('data', data)
       finalMap.push({
         Name: closestMatch ? closestMatch : "null",
         Snomed: data[textMaxIdx].ui ? data[textMaxIdx].ui : "null",
@@ -194,7 +225,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
           ? itemObj["CSV Label"]
           : "No Field Label",
         MatchPercent: textPercentMatch ? textPercentMatch : 0,
-        Vocab: vocab,
+        Vocab: _vocab,
       });
 
       const output = stringify(finalMap, { header: false });
@@ -204,8 +235,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
         output,
         function (err, result) {
           if (err) console.info("error", err);
-          else {
-          }
+
           conceptCallCounter++;
           if (totalConceptCallCount == conceptCallCounter) {
             console.info("All concept calls done! Ended in success");
@@ -213,7 +243,9 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
             if (!_errorLookup) {
               umlsErrorLookup();
             } else {
-              startAthenaLookup();
+              // if(vocab != 'text')callUMLSTextAPI()
+              // else startAthenaLookup();
+              startAthenaLookup()
             }
           }
         }
@@ -224,7 +256,6 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
     });
 }
 
-function callUMLSAltLookup(conceptID, itemObj, vocab, noErr) {}
 
 function appendCSV(filename, data, callback) {
   const _data = stringify(data, { header: false });
@@ -235,8 +266,38 @@ function appendCSV(filename, data, callback) {
   });
 }
 
+//after trying to lookup using C codes provided, try text search
+function callUMLSTextAPI(){
+  console.info("\n*****\nStart UMLS Text Error Lookup...");
+  let results = [];
+  totalConceptCallCount = 0;
+  fs.createReadStream("./work/output/someDataExtendedErr.csv")
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", () => {
+      let csvRowCount = 0;
+      for (let item of results) {
+        csvRowCount++;
+      }
+
+      console.info("Total records of text error CSV", csvRowCount);
+
+      for (let item of results) {
+        let ccID = item["Concept ID"];
+        if (ccID.substring(0, 1) == "C") {
+          totalConceptCallCount++;
+          callUMLSAPI(ccID, item, 'text', true, false);
+        }
+      }
+      // if (!totalConceptCallCount) callUMLSAPI(null, null, null, null, true); //no errors to lookup
+      console.info(
+        `Start calling to get text lookups from UMLS API. ${totalConceptCallCount} calls to make...`
+      );
+    });
+}
+
 function umlsErrorLookup() {
-  console.info("Start UMLS Error Lookup...");
+  console.info("\n*****\nStart UMLS LNC Error Lookup...");
   let results = [];
   let ddMap = [];
   totalConceptCallCount = 0;
@@ -253,14 +314,14 @@ function umlsErrorLookup() {
 
       for (let item of results) {
         let ccID = item["Concept ID"];
-        if (ccID.trim().substring(0, 1) == "C") {
+        if (ccID.substring(0, 1) == "C") {
           totalConceptCallCount++;
-          callUMLSAPI(ccID.trim(), item, "LNC", true, false);
+          callUMLSAPI(ccID, item, "LNC", true, false);
         }
       }
       if (!totalConceptCallCount) callUMLSAPI(null, null, null, null, true); //no errors to lookup
       console.info(
-        `Start calling to get LNC from UMLS API. ${totalConceptCallCount} calls to make`
+        `Start calling to get LNC from UMLS API. ${totalConceptCallCount} calls to make...`
       );
     });
 }
@@ -268,7 +329,7 @@ function umlsErrorLookup() {
 let totalMySqlQueriesCount = 0;
 let mysqlComplete = false;
 function startAthenaLookup() {
-  console.info("Starting Athena lookup...");
+  console.info("\n*****\nStarting Athena lookup...");
   results = []; //clear stream
   ddMap = []; //clear map
   fs.createReadStream("./work/output/someData.csv")
@@ -284,7 +345,7 @@ function startAthenaLookup() {
           console.info("All MySQL Queries Done");
           mysqlComplete = true;
           if (mysqlComplete) {
-            console.info("Everything done!");
+            console.info("Everything done!\n**********");
           }
         });
       }
@@ -299,7 +360,7 @@ function mysqlQuery(item, callback) {
   mysql_pool.execute(
     `SELECT * FROM athena.concept where concept_code = ?
     `,
-    [concept_code.trim()],
+    [concept_code],
     function (err, results, fields) {
       if (err) console.info(`Error! ${err}`);
       else {
