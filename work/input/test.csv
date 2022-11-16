@@ -21,3 +21,27 @@ LA27922-6","38003563
 45877986
 36210418"
 impdrace_bl_aa,impowr_demographics,,calc,Black/African American,"if([impd_race(2)] = 1, 1, 0)",,,,,,,,,,,,"C0011292, C5441680, @HIDDEN",Black or African American,Race,Race,S,3,8516
+impd_brthdtc,impowr_demographics,,text,What is your birth date? ,,,date_mdy,,,y,,,,,,,"C0421451, C0011292, @HIDEBUTTON",,,,,,
+imp_age,impowr_demographics,,calc,Age (yrs),"datediff([impd_brthdtc], [imp_enroll_date], ""y"", ""mdy"")",,,,,,,,,,,, @HIDDEN,,,,,,
+impd_ethnic,impowr_demographics,,radio,"Are you of Hispanic, Latino, or Spanish origin?","0, Not Hispanic or Latino | 1, Yes Hispanic or Latino | 2, Unknown | 3, Decline to answer",,,,,,,,,,,,"C0011292, C5441846","Hispanic or Latino
+Not Hispanic or Latino
+Unknown
+Decline to answer","Ethnicity
+Ethnicity
+Meas Value
+Meas Value","Ethnicity
+Ethnicity
+Meas Value
+Meas Value","S
+S
+S
+S","Hispanic
+Not Hispanic
+LA4489-6
+LA27922-6","38003563
+38003564
+45877986
+36210418"
+pegpainpastwkgenrlactscl,peg_pain_screening_tool,Select the one number that describes your pain interfering with your general activity. Use the scale of 0 = Does not interfere and 10 = Completely interferes.,radio,"What number best describes how, during the past week, pain has interfered with your general activity?","0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10",,,,,,,,,,,,"C0150055, C4740017, C4740014",,,,,,
+pegoverallscore,peg_pain_screening_tool,,calc,PEG - overall score,"mean([pegavgpainpastweekscl], [pegpainpastwkenjoylifescl], [pegpainpastwkgenrlactscl])",,,,,,,,,,,,"C4740016, C0150055, C0150055, @HIDDEN",,,,,,
+mbodycp,michigan_body_map_image_chronic_pain,,checkbox,@IMAGEMAP=MBODY,"0, MFace | 1, MRJaw | 2, MLJaw | 3, MRChest | 4, MLChest | 5, MRUpArm | 6, MLUpArM | 7, MRElbw | 8, MLElbw | 9, MRLowArm | 10, MLLowArm | 11, MRHand | 12, MLHand | 13, MAbdomen | 14, MPelvis | 15, MRGroin | 16, MLGroin | 17, MRUpLeg | 18, MLUpLeg | 19, MRKnee | 20, MLKnee | 21, MRLowLeg | 22, MLLowLeg | 23, MRFoot | 24, MLFoot | 25, MHead | 26, MNeck | 27, MLShldr | 28, MRShldr | 29, MUpBack | 30, MLowBack | 31, MLHip | 32, MRHip | 33, MLBttck | 34, MRBttck | 35, Mnone",,,,,,,,,,,, @IMAGEMAP=MBODY,,,,,,

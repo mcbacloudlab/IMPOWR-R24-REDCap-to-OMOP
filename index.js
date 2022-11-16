@@ -18,6 +18,9 @@ initCSVFiles();
 readInputCSV();
 let totalConceptCallCount = 0;
 let conceptCallCounter = 0;
+let allCUICodes = [];
+let foundCUICodes = [];
+let vocabPriorityList = ['SNOMEDCT_US', 'LNC', 'MSH', 'NCI', 'MEDCIN', 'CCPSS'] //order of API checks
 function readInputCSV() {
   console.info("Read Input CSV...");
   fs.createReadStream("./work/input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv")
@@ -38,6 +41,7 @@ function readInputCSV() {
         for (let ccID of item["Field Annotations"]) {
           if (ccID.substring(0, 1) == "C") {
             totalConceptCallCount++;
+            allCUICodes.push(ccID)
             callUMLSAPI(ccID, item);
           }
         }
@@ -50,9 +54,10 @@ function readInputCSV() {
 
 function transform(item) {
   let ccIDs = item["Field Annotation"].split(",").map(element => element.trim())
+  //can directly add CUI code corrections here to patchObj
   let patchObj = [
-      {'C0011292':'C1830323'},
-      {'C123': 'C45'}
+      // {'C0011292':'C1830323'},
+      // {'C123': 'C45'}
     ]
     let patchCNumIdx
     for (var i in patchObj){
@@ -113,17 +118,16 @@ function initCSVFiles() {
 }
 let lncEmpty = [];
 
+
 //this function gets called multiple times, first call is for SNOMED and then LNC
-function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
+function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorCheck) {
   if (noErr) {
     console.info("No errors to lookup");
     startAthenaLookup(); //no errors to lookup, just start athenaLookup
   }
   let _errorLookup = errorLookup;
-  let url = process.env.UMLS_API_SNOMED_URL + conceptID;
-  if (!vocab) vocab = "SNOMED";
-  else if (vocab == "LNC") url = process.env.UMLS_API_LNC_URL + conceptID;
-  else if (vocab == 'text') url = process.env.UMLS_API_TEXT_URL + conceptID
+  if (!vocab) vocab = "SNOMEDCT_US";
+  let url = process.env.UMLS_API_URI + '&sabs=' + vocab + '&string=' + conceptID
 
   var config = {
     method: "get",
@@ -135,9 +139,9 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
     .then(function (response) {
       let data = response.data.result.results;
 
-      if (vocab == "LNC" && data.length == 0) {
+      if (vocab != "SNOMEDCT_US" && data.length == 0) {
         if (!lncEmpty.includes(conceptID)) {
-          itemObj.Vocab += ",LNC";
+          itemObj.Vocab += "," + vocab;
           lncEmpty.push(itemObj);
         }
       }
@@ -148,13 +152,25 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
       let textMaxIdx = 0;
       let finalMap = [];
       let errorMap = [];
+      let priorityPick = false
       for (let [index, item] of data.entries()) {
+        // console.log('item', item.name)
+        // console.log(itemObj["CSV Label"])
         tempMaxPercentMatch = similarity(
           item.name,
           itemObj["CSV Label"] ? itemObj["CSV Label"] : itemObj["FieldLabel"]
         );
-        if(vocab == 'LNC' && item.ui.substring(0,2) != 'LP') tempMaxPercentMatch = 0 //athena dictionary only has LP concept codes
-        if (tempMaxPercentMatch >= textPercentMatch) {
+        if(vocab == 'LNC' && item.ui.substring(0,2) == 'LP') { //athena dictionary only has LP concept codes
+          console.log('priority! for', item.ui)
+          priorityPick = true
+        } 
+        
+        if(priorityPick){
+          closestMatch = item.name;
+          textPercentMatch = tempMaxPercentMatch;
+          textMaxIdx = index;
+          break; //jump out of loop already found priority
+        } else if (tempMaxPercentMatch >= textPercentMatch) {
           closestMatch = item.name;
           textPercentMatch = tempMaxPercentMatch;
           textMaxIdx = index;
@@ -188,18 +204,10 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
               console.info("All concept calls done! Ended in error. \n*****");
               //TODO -- before looking up in Athena, we need to try to get LNC ids from UMLS API
               conceptCallCounter = 0;
-              if (!_errorLookup) {
+              if (!lastErrorCheck) {
                 umlsErrorLookup();
               } else {
-                appendCSV(
-                  "/work/output/someDataExtendedErr.csv",
-                  lncEmpty,
-                  function () {
-                    // if(vocab != 'text') callUMLSTextAPI();
-                    // else startAthenaLookup();
-                    startAthenaLookup()
-                  }
-                );
+                startAthenaLookup()
               }
             }
           }
@@ -231,11 +239,9 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
           if (totalConceptCallCount == conceptCallCounter) {
             console.info("All concept calls done! Ended in success");
             conceptCallCounter = 0;
-            if (!_errorLookup) {
+            if (!lastErrorCheck) {
               umlsErrorLookup();
             } else {
-              // if(vocab != 'text')callUMLSTextAPI()
-              // else startAthenaLookup();
               startAthenaLookup()
             }
           }
@@ -249,10 +255,11 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr) {
 
 
 function appendCSV(filename, data, callback) {
+  results = [] //clear read stream
   const _data = stringify(data, { header: false });
   fs.appendFile(__dirname + filename, _data, function (err, result) {
     if (err) console.info("error", err);
-    console.info(`${filename} wrote. Callback now`);
+    // console.info(`${filename} wrote. Callback now`);
     callback();
   });
 }
@@ -287,10 +294,21 @@ function callUMLSTextAPI(){
     });
 }
 
+let umlsErrLookupCount = 0
+let lastErr = false
 function umlsErrorLookup() {
-  console.info("\n*****\nStart UMLS LNC Error Lookup...");
+  console.info("\n*****\nStart UMLS Error Lookup...");
+  umlsErrLookupCount++
+  let err_codes = []
+  for(let i = 0; i<vocabPriorityList.length;i++){
+    // console.log(vocabPriorityList[i])
+    if(i) err_codes.push(vocabPriorityList[i])
+  }
+  let errLookUpCode = err_codes[umlsErrLookupCount - 1] 
+  if(err_codes.length == umlsErrLookupCount) lastErr = true
+  console.info(`Looking up ${errLookUpCode}`)
+  
   let results = [];
-  let ddMap = [];
   totalConceptCallCount = 0;
   fs.createReadStream("./work/output/someDataErr.csv")
     .pipe(csv())
@@ -305,14 +323,14 @@ function umlsErrorLookup() {
 
       for (let item of results) {
         let ccID = item["Concept ID"];
-        if (ccID.substring(0, 1) == "C") {
+        if (ccID.substring(0, 1) == "C" && item['Vocab'] == vocabPriorityList[umlsErrLookupCount - 1]) { //only lookup previous API vocab errors
           totalConceptCallCount++;
-          callUMLSAPI(ccID, item, "LNC", true, false);
+          callUMLSAPI(ccID, item, errLookUpCode, true, false, lastErr);
         }
       }
       if (!totalConceptCallCount) callUMLSAPI(null, null, null, null, true); //no errors to lookup
       console.info(
-        `Start calling to get LNC from UMLS API. ${totalConceptCallCount} calls to make...`
+        `Start calling to get ${errLookUpCode} from UMLS API. ${totalConceptCallCount} calls to make...`
       );
     });
 }
@@ -322,7 +340,7 @@ let mysqlComplete = false;
 function startAthenaLookup() {
   console.info("\n*****\nStarting Athena lookup...");
   results = []; //clear stream
-  ddMap = []; //clear map
+  // ddMap = []; //clear map
   fs.createReadStream("./work/output/someData.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
@@ -336,7 +354,8 @@ function startAthenaLookup() {
           console.info("All MySQL Queries Done");
           mysqlComplete = true;
           if (mysqlComplete) {
-            console.info("Everything done!\n**********");
+            errorReport() //generate error report, compare found cui codes to all cui codes
+            // console.info("Everything done!\n**********");
           }
         });
       }
@@ -377,6 +396,78 @@ function mysqlQuery(item, callback) {
       }
     }
   );
+}
+
+function errorReport(){
+  console.info('*****')
+  console.info('Start error report')
+  let lastErrCode = vocabPriorityList[vocabPriorityList.length - 1]
+  console.info('Last error code is: ' + lastErrCode)
+  console.info('All CUI Codes', allCUICodes.length)
+  results = [] //clear read stream
+  //compare found cui codes to original allCui codes
+  console.info("Read Input CSV...");
+  fs.createReadStream("./work/output/someDataExtended.csv")
+    // fs.createReadStream("./work/input/test.csv")
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", () => {
+      //count total found CUI codes
+      for (let item of results) {
+        if (item["UI"]) {
+          foundCUICodes.push(item['CSV C Code']);
+        }
+      }
+      // console.log(ddMap)
+      console.info('FoundCUICodes', foundCUICodes.length)
+      if(allCUICodes.length - foundCUICodes.length == 0) {
+        console.info('All codes found! No error report necessary.')
+        process.exit(0)
+      }
+      // if(foundCUICodes.length < allCUICodes.length) console.info("CUI codes not found:", allCUICodes.length - foundCUICodes.length)
+      // else console.info('Something weird happened. Found counts make no sense.')
+      
+      //the initial error file will contain the last not found. 
+    // since the API calls output to the error file with the vocab used. It will be the records where the last element in vocabPriorityList is listed under the vocab column
+    results = [] //clear results
+    let errorCount = 0
+    fs.createReadStream("./work/output/someDataErr.csv")
+    // fs.createReadStream("./work/input/test.csv")
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", () => {
+      for (let item of results) {
+        // console.log('item', item)
+        let errArr = []
+        
+        if (item["Vocab"] == vocabPriorityList[vocabPriorityList.length - 1]) {
+          errArr.push(item)
+          appendCSV(
+                "/work/output/someDataExtendedErr.csv",
+                errArr,
+                function () {
+                  errorCount++
+                  if(errorCount == allCUICodes.length - foundCUICodes.length){
+                    console.log('Error report generated. Everything done!')
+                    process.exit(0)
+                  }
+                  // if(vocab != 'text') callUMLSTextAPI();
+                  // else startAthenaLookup();
+                  // console.log('appended to error csv!')
+                  // startAthenaLookup()
+                }
+              );
+        }
+      }
+      // console.log(ddMap)
+      // console.log('foundCUICodes', foundCUICodes.length)
+      console.info("CUI codes not found:", allCUICodes.length - foundCUICodes.length)
+    });
+
+
+    });
+
+    
 }
 
 //Levenshtein Distance
