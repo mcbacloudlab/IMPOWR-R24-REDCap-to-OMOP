@@ -20,7 +20,7 @@ let totalConceptCallCount = 0;
 let conceptCallCounter = 0;
 let allCUICodes = [];
 let foundCUICodes = [];
-let vocabPriorityList = ['SNOMEDCT_US', 'LNC', 'MSH', 'NCI', 'MEDCIN', 'CCPSS'] //order of API checks
+let vocabPriorityList = ['SNOMEDCT_US', 'LNC', 'MSH', 'NCI', 'MEDCIN', 'CCPSS', 'NANDA-I'] //order of API vocab checks
 function readInputCSV() {
   console.info("Read Input CSV...");
   fs.createReadStream("./work/input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv")
@@ -91,27 +91,27 @@ function clearFile(file) {
 
 function initCSVFiles() {
   console.info("Init CSV files...");
-  clearFile("/work/output/someData.csv");
+  clearFile("/work/output/outputData.csv");
   writeCSVHeader(
-    "/work/output/someData.csv",
+    "/work/output/outputData.csv",
     "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
-  clearFile("/work/output/someDataErr.csv");
+  clearFile("/work/output/outputDataErr.csv");
   writeCSVHeader(
-    "/work/output/someDataErr.csv",
+    "/work/output/outputDataErr.csv",
     "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
-  clearFile("/work/output/someDataExtendedErr.csv");
+  clearFile("/work/output/outputDataExtendedErr.csv");
   writeCSVHeader(
-    "/work/output/someDataExtendedErr.csv",
+    "/work/output/outputDataExtendedErr.csv",
     "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
-  clearFile("/work/output/someDataExtended.csv");
+  clearFile("/work/output/outputDataExtended.csv");
   writeCSVHeader(
-    "/work/output/someDataExtended.csv",
+    "/work/output/outputDataExtended.csv",
     "UMLS Name/Label,UI,CSV C Code,CSV Label,Match,Vocab,concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concept,concept_code,valid_start_date,valid_end_date,invalid_reason\n"
   );
 
@@ -125,7 +125,6 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
     console.info("No errors to lookup");
     startAthenaLookup(); //no errors to lookup, just start athenaLookup
   }
-  let _errorLookup = errorLookup;
   if (!vocab) vocab = "SNOMEDCT_US";
   let url = process.env.UMLS_API_URI + '&sabs=' + vocab + '&string=' + conceptID
 
@@ -153,9 +152,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
       let finalMap = [];
       let errorMap = [];
       let priorityPick = false
-      for (let [index, item] of data.entries()) {
-        // console.log('item', item.name)
-        // console.log(itemObj["CSV Label"])
+      for (let [index, item] of data.entries()){
         tempMaxPercentMatch = similarity(
           item.name,
           itemObj["CSV Label"] ? itemObj["CSV Label"] : itemObj["FieldLabel"]
@@ -169,7 +166,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
           closestMatch = item.name;
           textPercentMatch = tempMaxPercentMatch;
           textMaxIdx = index;
-          break; //jump out of loop already found priority
+          break; //jump out of loop, already found priority
         } else if (tempMaxPercentMatch >= textPercentMatch) {
           closestMatch = item.name;
           textPercentMatch = tempMaxPercentMatch;
@@ -179,7 +176,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
 
       //direct map fix, probably need to make this robust later
       let uiCode = "";
-      //write to someDataErr.csv if no results from UMLS API
+      //write to outputDataErr.csv if no results from UMLS API
       if (!data[textMaxIdx]) {
         errorMap.push({
           Name: itemObj["CSV Label"] ? itemObj["CSV Label"] : "No Field Label",
@@ -194,7 +191,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
         const errOutput = stringify(errorMap, { header: false });
 
         fs.appendFile(
-          __dirname + "/work/output/someDataErr.csv",
+          __dirname + "/work/output/outputDataErr.csv",
           errOutput,
 
           function (err, result) {
@@ -230,7 +227,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
       const output = stringify(finalMap, { header: false });
 
       fs.appendFile(
-        __dirname + "/work/output/someData.csv",
+        __dirname + "/work/output/outputData.csv",
         output,
         function (err, result) {
           if (err) console.info("error", err);
@@ -269,7 +266,7 @@ function callUMLSTextAPI(){
   console.info("\n*****\nStart UMLS Text Error Lookup...");
   let results = [];
   totalConceptCallCount = 0;
-  fs.createReadStream("./work/output/someDataExtendedErr.csv")
+  fs.createReadStream("./work/output/outputDataExtendedErr.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
@@ -310,7 +307,7 @@ function umlsErrorLookup() {
   
   let results = [];
   totalConceptCallCount = 0;
-  fs.createReadStream("./work/output/someDataErr.csv")
+  fs.createReadStream("./work/output/outputDataErr.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
@@ -341,7 +338,7 @@ function startAthenaLookup() {
   console.info("\n*****\nStarting Athena lookup...");
   results = []; //clear stream
   // ddMap = []; //clear map
-  fs.createReadStream("./work/output/someData.csv")
+  fs.createReadStream("./work/output/outputData.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
@@ -381,7 +378,7 @@ function mysqlQuery(item, callback) {
         }
         const output = stringify([item], { header: false });
         fs.appendFile(
-          __dirname + "/work/output/someDataExtended.csv",
+          __dirname + "/work/output/outputDataExtended.csv",
           output,
           function (err, result) {
             if (err) console.info("error", err);
@@ -407,7 +404,7 @@ function errorReport(){
   results = [] //clear read stream
   //compare found cui codes to original allCui codes
   console.info("Read Input CSV...");
-  fs.createReadStream("./work/output/someDataExtended.csv")
+  fs.createReadStream("./work/output/outputDataExtended.csv")
     // fs.createReadStream("./work/input/test.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
@@ -431,7 +428,7 @@ function errorReport(){
     // since the API calls output to the error file with the vocab used. It will be the records where the last element in vocabPriorityList is listed under the vocab column
     results = [] //clear results
     let errorCount = 0
-    fs.createReadStream("./work/output/someDataErr.csv")
+    fs.createReadStream("./work/output/outputDataErr.csv")
     // fs.createReadStream("./work/input/test.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
@@ -443,7 +440,7 @@ function errorReport(){
         if (item["Vocab"] == vocabPriorityList[vocabPriorityList.length - 1]) {
           errArr.push(item)
           appendCSV(
-                "/work/output/someDataExtendedErr.csv",
+                "/work/output/outputDataExtendedErr.csv",
                 errArr,
                 function () {
                   errorCount++
