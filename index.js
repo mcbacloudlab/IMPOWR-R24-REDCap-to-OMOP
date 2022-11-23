@@ -5,10 +5,13 @@ const fs = require("fs");
 let results = [];
 require("dotenv").config();
 var axios = require("axios");
+// import rateLimit from 'axios-rate-limit';
+// import axiosThrottle from 'axios-request-throttle';
+// axiosThrottle.use(axios, { requestsPerSecond: 5 }); //UMLS API Limit is 20 per second
 import { stringify } from "csv-stringify/sync";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { start } from "repl";
+// import { start } from "repl";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 var mysql_pool = require("./db/mysqlConnection.cjs");
@@ -20,20 +23,26 @@ let totalConceptCallCount = 0;
 let conceptCallCounter = 0;
 let allCUICodes = [];
 let foundCUICodes = [];
-let vocabPriorityList = ['SNOMEDCT_US', 'LNC', 'MSH', 'NCI', 'MEDCIN', 'CCPSS', 'NANDA-I'] //order of API vocab checks
+let vocabPriorityList = ['SNOMEDCT_US', 'LNC', 'MSH', 'NCI', 'MEDCIN', 'CCPSS', 'NANDA-I', 'AOD', 'ICD10CM',
+                          'LCH_NW','PCDS','USPMG', 'MEDLINEPLUS', 'MDR', 'MTH'] //order of API vocab checks
+
+let rateLimitPerSec = 20;
+let sleepTime = 1
+
+// let vocabPriorityList = ['SNOMEDCT_US'] //order of API vocab checks
 function readInputCSV() {
   console.info("Read Input CSV...");
   fs.createReadStream("./work/input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv")
     // fs.createReadStream("./work/input/test.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
-    .on("end", () => {
+    .on("end", async () => {
       let csvRowCount = 0;
       for (let item of results) {
-        if (item["Form Name"] == "impowr_demographics") {
+        // if (item["Form Name"] == "impowr_demographics") {
           csvRowCount++;
           ddMap.push(transform(item));
-        }
+        // }
       }
       console.info("Total records of input CSV", csvRowCount);
 
@@ -41,7 +50,12 @@ function readInputCSV() {
         for (let ccID of item["Field Annotations"]) {
           if (ccID.substring(0, 1) == "C") {
             totalConceptCallCount++;
+            if(totalConceptCallCount % rateLimitPerSec == 0) {
+              // console.log(`${rateLimitPerSec} req hit, now sleeping`)
+              await sleep(sleepTime) //sleep 1 second 
+            }
             allCUICodes.push(ccID)
+            // console.log("call umls api: " + new Date().toLocaleTimeString())
             callUMLSAPI(ccID, item);
           }
         }
@@ -56,7 +70,7 @@ function transform(item) {
   let ccIDs = item["Field Annotation"].split(",").map(element => element.trim())
   //can directly add CUI code corrections here to patchObj
   let patchObj = [
-      // {'C0011292':'C1830323'},
+      // {'C00115674':'C0015674'},
       // {'C123': 'C45'}
     ]
     let patchCNumIdx
@@ -71,6 +85,7 @@ function transform(item) {
   
 
   return {
+    Form: item["Form Name"],
     FieldName: item["Variable / Field Name"],
     "CSV Label": item["Field Label"],
     "Concept IDs": item["concept_id"].split("\n"),
@@ -94,36 +109,43 @@ function initCSVFiles() {
   clearFile("/work/output/outputData.csv");
   writeCSVHeader(
     "/work/output/outputData.csv",
-    "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
+    "Form,UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
   clearFile("/work/output/outputDataErr.csv");
   writeCSVHeader(
     "/work/output/outputDataErr.csv",
-    "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
+    "Form,UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
   clearFile("/work/output/outputDataExtendedErr.csv");
   writeCSVHeader(
     "/work/output/outputDataExtendedErr.csv",
-    "UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
+    "Form,UMLS Name/Label,UI,Concept ID,CSV Label,Match Percent,Vocab\n"
   );
 
   clearFile("/work/output/outputDataExtended.csv");
   writeCSVHeader(
     "/work/output/outputDataExtended.csv",
-    "UMLS Name/Label,UI,CSV C Code,CSV Label,Match,Vocab,concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concept,concept_code,valid_start_date,valid_end_date,invalid_reason\n"
+    "Form,UMLS Name/Label,UI,CSV C Code,CSV Label,Match,Vocab,concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concept,concept_code,valid_start_date,valid_end_date,invalid_reason\n"
   );
 
 }
 let lncEmpty = [];
 
-
+const sleep = (time) => {
+  return new Promise((resolve) => setTimeout(resolve, Math.ceil(time * 1000)));
+};
+// const http = rateLimit(axios.create(), { maxRequests: 2, perMilliseconds: 1000, maxRPS: 2 })
+// http.getMaxRPS() // 2
+let apiCounter = 0
 //this function gets called multiple times, first call is for SNOMED and then LNC
 function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorCheck) {
+
   if (noErr) {
     console.info("No errors to lookup");
     startAthenaLookup(); //no errors to lookup, just start athenaLookup
+    return;
   }
   if (!vocab) vocab = "SNOMEDCT_US";
   let url = process.env.UMLS_API_URI + '&sabs=' + vocab + '&string=' + conceptID
@@ -133,7 +155,9 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
     url: url,
     headers: {},
   };
-
+  // sleep(1)
+  // console.log('Axios call ' + new Date().toLocaleTimeString())
+  // http.get(url)
   axios(config)
     .then(function (response) {
       let data = response.data.result.results;
@@ -158,7 +182,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
           itemObj["CSV Label"] ? itemObj["CSV Label"] : itemObj["FieldLabel"]
         );
         if(vocab == 'LNC' && item.ui.substring(0,2) == 'LP') { //athena dictionary only has LP concept codes
-          console.log('priority! for', item.ui)
+          // console.log('priority! for', item.ui)
           priorityPick = true
         } 
         
@@ -179,6 +203,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
       //write to outputDataErr.csv if no results from UMLS API
       if (!data[textMaxIdx]) {
         errorMap.push({
+          Form: itemObj["Form"],
           Name: itemObj["CSV Label"] ? itemObj["CSV Label"] : "No Field Label",
           Snomed: uiCode,
           ConceptIDs: conceptID ? conceptID : "null",
@@ -197,6 +222,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
           function (err, result) {
             if (err) console.info("error", err);
             conceptCallCounter++;
+            // console.log(`Response received:' ${conceptCallCounter} / ${totalConceptCallCount} ${new Date().toLocaleTimeString()}`)
             if (totalConceptCallCount == conceptCallCounter) {
               console.info("All concept calls done! Ended in error. \n*****");
               //TODO -- before looking up in Athena, we need to try to get LNC ids from UMLS API
@@ -214,6 +240,7 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
       let _vocab = vocab
       if(vocab == 'text') _vocab = data[textMaxIdx].rootSource
       finalMap.push({
+        Form: itemObj["Form"],
         Name: closestMatch ? closestMatch : "null",
         Snomed: data[textMaxIdx].ui ? data[textMaxIdx].ui : "null",
         ConceptIDs: conceptID ? conceptID : "null",
@@ -247,6 +274,8 @@ function callUMLSAPI(conceptID, itemObj, vocab, errorLookup, noErr, lastErrorChe
     })
     .catch(function (error) {
       console.info(error);
+      console.info("Error with: " + url)
+      conceptCallCounter++;
     });
 }
 
@@ -310,7 +339,7 @@ function umlsErrorLookup() {
   fs.createReadStream("./work/output/outputDataErr.csv")
     .pipe(csv())
     .on("data", (data) => results.push(data))
-    .on("end", () => {
+    .on("end", async () => {
       let csvRowCount = 0;
       for (let item of results) {
         csvRowCount++;
@@ -322,10 +351,18 @@ function umlsErrorLookup() {
         let ccID = item["Concept ID"];
         if (ccID.substring(0, 1) == "C" && item['Vocab'] == vocabPriorityList[umlsErrLookupCount - 1]) { //only lookup previous API vocab errors
           totalConceptCallCount++;
+          if(totalConceptCallCount % rateLimitPerSec == 0) {
+            // console.log(`${rateLimitPerSec} req hit, now sleeping`)
+            await sleep(sleepTime) //sleep 1 second 
+          }
           callUMLSAPI(ccID, item, errLookUpCode, true, false, lastErr);
         }
       }
-      if (!totalConceptCallCount) callUMLSAPI(null, null, null, null, true); //no errors to lookup
+      if (!totalConceptCallCount) {
+        console.info("No Errors to lookup now.")
+        callUMLSAPI(null, null, null, null, true); //no errors to lookup
+      }
+      // if (!totalConceptCallCount) return; //no errors to lookup
       console.info(
         `Start calling to get ${errLookUpCode} from UMLS API. ${totalConceptCallCount} calls to make...`
       );
@@ -445,7 +482,7 @@ function errorReport(){
                 function () {
                   errorCount++
                   if(errorCount == allCUICodes.length - foundCUICodes.length){
-                    console.log('Error report generated. Everything done!')
+                    console.info('Error report generated. Everything done!')
                     process.exit(0)
                   }
                   // if(vocab != 'text') callUMLSTextAPI();
