@@ -15,6 +15,7 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 var mysql_pool = require("./db/mysqlConnection.cjs");
+var pg_pool = require("./db/postgresqlConnection.cjs");
 
 let ddMap = [];
 initCSVFiles();
@@ -39,10 +40,10 @@ function readInputCSV() {
     .on("end", async () => {
       let csvRowCount = 0;
       for (let item of results) {
-        // if (item["Form Name"] == "impowr_demographics") {
+        if (item["Form Name"] == "impowr_demographics") {
           csvRowCount++;
           ddMap.push(transform(item));
-        // }
+        }
       }
       console.info("Total records of input CSV", csvRowCount);
 
@@ -382,10 +383,10 @@ function startAthenaLookup() {
       for (let item of results) {
         totalMySqlQueriesCount++;
       }
-      console.info("Total MySQL Queries:" + totalMySqlQueriesCount);
+      console.info("Total Athena Queries:" + totalMySqlQueriesCount);
       for (let item of results) {
-        mysqlQuery(item, function () {
-          console.info("All MySQL Queries Done");
+        pgQuery(item, function () {
+          console.info("All Athena Queries Done");
           mysqlComplete = true;
           if (mysqlComplete) {
             errorReport() //generate error report, compare found cui codes to all cui codes
@@ -430,6 +431,43 @@ function mysqlQuery(item, callback) {
       }
     }
   );
+}
+
+function pgQuery(item, callback){
+   // execute will internally call prepare and query
+   let finalMap = [];
+
+   let concept_code = item["UI"];
+   pg_pool.query(
+     `SELECT * FROM public.concept where concept_code = $1
+     `,
+     [concept_code],
+     function (err, results, fields) {
+      // console.log('results', results.rows)
+       if (err) console.info(`Error! ${err}`);
+       else {
+         for (let i of results.rows) {
+           for (const [key, value] of Object.entries(i)) {
+             item[key] = value;
+           }
+         }
+         const output = stringify([item], { header: false });
+         fs.appendFile(
+           __dirname + "/work/output/outputDataExtended.csv",
+           output,
+           function (err, result) {
+             if (err) console.info("error", err);
+             else {
+             }
+             mysqlInsertCount++;
+             if (mysqlInsertCount == totalMySqlQueriesCount) {
+               callback();
+             }
+           }
+         );
+       }
+     }
+   );
 }
 
 function errorReport(){
