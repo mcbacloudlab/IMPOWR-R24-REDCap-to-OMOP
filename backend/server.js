@@ -9,7 +9,7 @@ require("dotenv").config();
 const fileUpload = require("express-fileupload");
 const morgan = require("morgan");
 var fs = require("fs");
-const formidable = require("formidable");
+const path = require("path");
 const XLSX = require("xlsx");
 
 let appPort = process.env.EXPRESS_PORT;
@@ -25,9 +25,54 @@ app.use(
   })
 );
 
+app.get("/get_data_dictionary_list", function (req, res) {
+  console.log(
+    `Incoming Data Dictionary List GET request at ${new Date().toLocaleString()}`
+  );
+
+  const directoryPath = path.join(__dirname, "uploads");
+  //passsing directoryPath and callback function
+  console.log(directoryPath);
+  let fileReturnObject = []
+  fs.readdir(directoryPath, function (err, files) {
+    //handling error
+    if (err) {
+      return console.log("Unable to scan directory: " + err);
+    }
+    //listing all files using forEach
+    files.forEach(function (file, index) {
+      // Do whatever you want to do with the file
+      console.log(file);
+      // fetch file details
+      fs.stat(__dirname + "/uploads/" + file, (err, stats) => {
+        if (err) {
+          console.log("error!", err);
+          // throw err;
+        } else {
+          // print file last modified date
+          let date = new Date(stats.mtime);
+          console.log(date.toLocaleString('en-US'));
+          date = date.toLocaleString('en-US')
+          fileReturnObject.push({
+            fileName: file,
+            lastModified: date
+          })
+          console.log(`File Data Last Modified: ${stats.mtime}`);
+          // console.log(`File Status Last Modified: ${stats.ctime}`);
+
+          if(index === files.length -1){
+            res.status(200).send(fileReturnObject);
+          }
+        }
+      });
+    });
+
+  });
+});
+
 app.post("/add_data_dictionary", function (req, res) {
   console.log(
-    `Incoming Data Dictionary Add/Post request at ${new Date().toLocaleString()}`
+    `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
   );
   let ssColDefs, ssData, ssFileName;
 
@@ -66,44 +111,44 @@ app.post("/add_data_dictionary", function (req, res) {
       const importExcel = (req) => {
         const file = dataFile.name;
         csvFileName = file.name;
-        console.log('start reading spreadsheet')
-        console.log(req.files.dataFile)
-          /* grab the first file */
-          // console.log('files', files)
-          // const f = Object.entries(files)[0][1];
-          // const path = f.filepath;
-          const workBook = XLSX.read(req.files.dataFile.data);
-          console.log('got workbook')
-          /* DO SOMETHING WITH workbook HERE */
-          // const workBook = XLSX.read(bstr, { type: "binary" });
+        console.log("start reading spreadsheet");
+        console.log(req.files.dataFile);
+        /* grab the first file */
+        // console.log('files', files)
+        // const f = Object.entries(files)[0][1];
+        // const path = f.filepath;
+        const workBook = XLSX.read(req.files.dataFile.data);
+        console.log("got workbook");
+        /* DO SOMETHING WITH workbook HERE */
+        // const workBook = XLSX.read(bstr, { type: "binary" });
 
-          //get first sheet
-          const workSheetName = workBook.SheetNames[0];
-          const workSheet = workBook.Sheets[workSheetName];
-          //convert to array
-          const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
-          const headers = fileData[0];
-          const heads = headers.map((head) => ({
-            accessorKey: head.replaceAll(".", ""),
-            header: head.replaceAll(".", ""),
-          }));
-          console.log('heads', heads)
-          ssColDefs = heads;
-          //removing header
-          fileData.splice(0, 1);
-          ssData = convertToJson(headers, fileData);
+        //get first sheet
+        const workSheetName = workBook.SheetNames[0];
+        const workSheet = workBook.Sheets[workSheetName];
+        //convert to array
+        const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+        const headers = fileData[0];
+        const heads = headers.map((head) => ({
+          accessorKey: head.replaceAll(".", ""),
+          header: head.replaceAll(".", ""),
+        }));
+        console.log("heads", heads);
+        ssColDefs = heads;
+        //removing header
+        fileData.splice(0, 1);
+        ssData = convertToJson(headers, fileData);
 
-          console.log("ssData", ssData);
-          //send response
-          res.send({
-            status: true,
-            message: "File is uploaded",
-            data: {
-              name: dataFile.name,
-              mimetype: dataFile.mimetype,
-              size: dataFile.size,
-            },
-          });
+        console.log("ssData", ssData);
+        //send response
+        res.send({
+          status: true,
+          message: "File is uploaded",
+          data: {
+            name: dataFile.name,
+            mimetype: dataFile.mimetype,
+            size: dataFile.size,
+          },
+        });
       };
 
       if (dataFile) {
@@ -116,8 +161,6 @@ app.post("/add_data_dictionary", function (req, res) {
         ssData = [];
         ssColDefs = [];
       }
-
-
     }
   } catch (err) {
     console.log("ERROR!", err);

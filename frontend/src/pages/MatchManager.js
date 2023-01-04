@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
@@ -23,7 +23,6 @@ import IconButton from "@mui/material/IconButton";
 // import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
-import * as axios from 'axios';
 // import {
 //   MRT_Cell,
 //   MRT_ColumnDef,
@@ -38,8 +37,40 @@ export default function MatchManager() {
   const [csvFilename, setCSVFilename] = useState("");
   const [value, setValue] = useState(0);
   // const [dense, setDense] = React.useState(false);
-  const [secondary, setSecondary] = React.useState("stuff");
+  // const [secondary, setSecondary] = React.useState("stuff");
+  const [fileList, setFileList] = React.useState([]);
+  const [fileLastMod, setFileLastMod] = React.useState([])
 
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+   getFileList()
+  }, []);
+
+  function getFileList(){
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/get_data_dictionary_list", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+
+        let resultFiles = [];
+        let resultFilesLastMod = []
+        result.map((value) =>{
+          resultFiles.push(value.fileName)
+          resultFilesLastMod.push(value.lastModified)
+          return result
+        })
+        // resultFiles.;
+        setFileList(resultFiles);
+        setFileLastMod(resultFilesLastMod)
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+  }
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -74,11 +105,7 @@ export default function MatchManager() {
         aria-labelledby={`simple-tab-${index}`}
         {...other}
       >
-        {value === index && (
-          <Box sx={{ p: 1 }}>
-            {children}
-          </Box>
-        )}
+        {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
       </div>
     );
   }
@@ -98,19 +125,22 @@ export default function MatchManager() {
 
   const uploadDD = (e) => {
     var formdata = new FormData();
-    let fileInput = e.target
+    let fileInput = e.target;
     formdata.append("dataFile", fileInput.files[0]);
-    
+
     var requestOptions = {
-      method: 'POST',
+      method: "POST",
       body: formdata,
-      redirect: 'follow'
+      redirect: "follow",
     };
-    
+
     fetch("http://localhost:5000/add_data_dictionary", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result)
+        getFileList()
+      })
+      .catch((error) => console.log("error", error));
   };
 
   const importExcel = (e) => {
@@ -151,13 +181,6 @@ export default function MatchManager() {
     }
   };
 
-  function generate(element) {
-    return [0, 1, 2].map((value) =>
-      React.cloneElement(element, {
-        key: value,
-      })
-    );
-  }
 
   // const columns = useMemo<MRT_ColumnDef<Person>[]>(
   //   () => [
@@ -211,27 +234,31 @@ export default function MatchManager() {
                 />
               </Button>
 
-              <List dense={false}>
-                {generate(
-                  <ListItem
-                    secondaryAction={
-                      <IconButton edge="end" aria-label="delete">
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemAvatar>
-                      <Avatar>
-                        <FolderIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary="Single-line item"
-                      secondary={secondary ? "Secondary text" : null}
-                    />
-                  </ListItem>
-                )}
-              </List>
+              <List dense={true}>
+                { fileList? fileList.map((value, index) => {
+                         return( <ListItem
+                         key={value}
+                          secondaryAction={
+                            <IconButton edge="end" aria-label="delete">
+                              <DeleteIcon />
+                            </IconButton>
+                          }
+                        >
+                          <ListItemAvatar>
+                            <Avatar>
+                              <FolderIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={value}
+                            secondary={fileLastMod[index]}
+                          />
+                        </ListItem>
+                         )
+                } ) : ''
+
+                }
+                </List>
             </Grid>
 
             <Grid item xs={10}>
