@@ -385,7 +385,7 @@ function startAthenaLookup() {
       }
       console.info("Total Athena Queries:" + totalMySqlQueriesCount);
       for (let item of results) {
-        pgQuery(item, function () {
+        mysqlQuery(item, function () {
           console.info("All Athena Queries Done");
           mysqlComplete = true;
           if (mysqlComplete) {

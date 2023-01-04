@@ -1,0 +1,6 @@
+1. run this command from gcloud prompt to connect to the project:
+gcloud compute ssh --zone "us-east1-b" "omopdev"  --project "wf-pain"
+
+2. su -l redcap2omop
+
+db pwd: 

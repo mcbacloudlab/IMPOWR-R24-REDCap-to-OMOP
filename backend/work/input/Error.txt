@@ -1,0 +1,491 @@
+*** Generic error information ***
+Message: C:\repo\redcap_omop\work\input\ScanReport.xlsx (The process cannot access the file because it is being used by another process)
+Time: Dec 12, 2022 4:02:20 PM
+Processor type: amd64
+Available processors: 8
+Maximum available memory: 1,118,830,592 bytes
+Used memory: 77,226,880 bytes
+Java version: 1.8.0_351
+Java vendor: Oracle Corporation
+OS architecture: amd64
+OS name: Windows 10
+OS version: 10.0
+OS patch level: 
+
+*** Stack trace ***
+org.ohdsi.whiteRabbit.scan.SourceDataScan.generateReport(SourceDataScan.java:196)
+org.ohdsi.whiteRabbit.scan.SourceDataScan.process(SourceDataScan.java:117)
+org.ohdsi.whiteRabbit.WhiteRabbitMain$ScanThread.run(WhiteRabbitMain.java:1054)
+
+*** Console ***
+Dec 12, 2022 4:00:29 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:29 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:29 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:30 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:30 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:33 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:33 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:33 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:34 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:34 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:34 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:35 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:35 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:36 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:36 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:36 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:36 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:37 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:37 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:37 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:44 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:44 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:44 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:44 PM sun.awt.shell.Win32ShellFolderManager2 getPersonal
+WARNING: Cannot access 'Personal'
+java.io.IOException: Could not get shell folder ID list
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath0(Native Method)
+	at sun.awt.shell.Win32ShellFolder2.access$800(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$7.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker.invoke(Unknown Source)
+	at sun.awt.shell.ShellFolder.invoke(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2.getFileSystemPath(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2.getPersonal(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at sun.awt.shell.Win32ShellFolder2$9.call(Unknown Source)
+	at java.util.concurrent.FutureTask.run(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at sun.awt.shell.Win32ShellFolderManager2$ComInvoker$3.run(Unknown Source)
+	at java.lang.Thread.run(Unknown Source)
+
+Dec 12, 2022 4:00:50 PM	Started new scan of 1 tables...
+Dec 12, 2022 4:00:50 PM	Scanning table C:\repo\redcap_omop\work\input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv
+Dec 12, 2022 4:00:50 PM	Generating scan report
+Dec 12, 2022 4:00:52 PM	Scan report generated: C:\repo\redcap_omop\work\input/ScanReport.xlsx
+Dec 12, 2022 4:02:20 PM	Started new scan of 1 tables...
+Dec 12, 2022 4:02:20 PM	Scanning table C:\repo\redcap_omop\work\input/IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv
+Dec 12, 2022 4:02:20 PM	Generating scan report
+Error: C:\repo\redcap_omop\work\input\ScanReport.xlsx (The process cannot access the file because it is being used by another process)
+
+
+*** Working folder contents ***
+Directory of C:\repo\redcap_omop\work\input
+
+IMPOWRREDCapLibrary_DataDictionary_2022-10-23.csv                        210,019                   08-11-2022 02:45:39
+test.csv                                                                   3,318                   14-11-2022 10:55:36
+IMPOWRREDCapLibrary_DataDictionary_2022-10-23.xlsx                       105,909                   22-11-2022 01:49:41
+ScanReport.xlsx                                                           15,966                   12-12-2022 04:00:52
+~$ScanReport.xlsx                                                            165                   12-12-2022 04:01:09
+Error.txt                                                                 16,384                   12-12-2022 04:02:20
+
+Available disc space: 837,403,389,952 bytes
