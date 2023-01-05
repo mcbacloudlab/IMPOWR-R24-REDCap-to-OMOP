@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
@@ -18,11 +18,15 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
+// import Alert from "@mui/material/Alert";
+// import AlertTitle from "@mui/material/AlertTitle";
 // import FormGroup from "@mui/material/FormGroup";
 // import FormControlLabel from "@mui/material/FormControlLabel";
 // import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 // import {
 //   MRT_Cell,
 //   MRT_ColumnDef,
@@ -39,14 +43,19 @@ export default function MatchManager() {
   // const [dense, setDense] = React.useState(false);
   // const [secondary, setSecondary] = React.useState("stuff");
   const [fileList, setFileList] = React.useState([]);
-  const [fileLastMod, setFileLastMod] = React.useState([])
+  const [fileLastMod, setFileLastMod] = React.useState([]);
+  const [getListError, setGetListError] = React.useState();
+  const [addSSError, setaddSSError] = React.useState();
+  const [open, setOpen] = React.useState(false);
+  const [sorting, setSorting] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-   getFileList()
+    getFileList();
   }, []);
 
-  function getFileList(){
+  function getFileList() {
     var requestOptions = {
       method: "GET",
       redirect: "follow",
@@ -55,24 +64,62 @@ export default function MatchManager() {
     fetch("http://localhost:5000/get_data_dictionary_list", requestOptions)
       .then((response) => response.json())
       .then((result) => {
-
         let resultFiles = [];
-        let resultFilesLastMod = []
-        result.map((value) =>{
-          resultFiles.push(value.fileName)
-          resultFilesLastMod.push(value.lastModified)
-          return result
-        })
+        let resultFilesLastMod = [];
+        if (result.length) {
+          result.map((value) => {
+            resultFiles.push(value.fileName);
+            resultFilesLastMod.push(value.lastModified);
+          });
+        }
+        console.log("got result files");
         // resultFiles.;
+        console.log(resultFiles);
         setFileList(resultFiles);
-        setFileLastMod(resultFilesLastMod)
+        setFileLastMod(resultFilesLastMod);
+        setGetListError("");
       })
       .catch((error) => {
         console.log("error", error);
+        setGetListError("Error occurred.");
       });
   }
+
+  function getFile(e, value) {
+    // console.log("e", e);
+    // console.log("value", value);
+    var formdata = new FormData();
+    formdata.append("file", value);
+
+    var requestOptions = {
+      method: "POST",
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/get_data_dictionary", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log(result)
+        importExcel(JSON.parse(result));
+      })
+      .catch((error) => console.log("error", error));
+  }
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
   };
 
   const EXTENSIONS = ["xlsx", "xls", "csv"];
@@ -135,52 +182,66 @@ export default function MatchManager() {
     };
 
     fetch("http://localhost:5000/add_data_dictionary", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        console.log(result)
-        getFileList()
+      .then((response) => {
+        if (response.ok) response.text();
+        else throw new Error("Upload Error");
       })
-      .catch((error) => console.log("error", error));
+      .then((result) => {
+        // console.log(result);
+        getFileList();
+        setaddSSError("");
+        e.target.value = null;
+      })
+      .catch((error) => {
+        setaddSSError("Upload Error");
+        setOpen(true);
+        console.log("error", error);
+        e.target.value = null;
+      });
   };
 
-  const importExcel = (e) => {
-    const file = e.target.files[0];
+  function importExcel(e) {
+    console.log("e", e);
+    const file = e.data;
     setCSVFilename(file.name);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      //parse data
-      const bstr = event.target.result;
-      const workBook = XLSX.read(bstr, { type: "binary" });
+    // const reader = new FileReader();
+    // reader.onload = (event) => {
+    //parse data
+    // const bstr = event.target.result;
+    // const workBook = XLSX.read(bstr, { type: "binary" });
+    // const workBook = XLSX.utils.json_to_sheet(file.data);
+    // console.log(file.data)
 
-      //get first sheet
-      const workSheetName = workBook.SheetNames[0];
-      const workSheet = workBook.Sheets[workSheetName];
-      //convert to array
-      const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
-      const headers = fileData[0];
-      const heads = headers.map((head) => ({
-        accessorKey: head.replaceAll(".", ""),
-        header: head.replaceAll(".", ""),
-      }));
-      setColDefs(heads);
+    //get first sheet
+    // const workSheetName = workBook.SheetNames[0];
+    // const workSheet = workBook.Sheets[workSheetName];
+    const workSheet = XLSX.utils.json_to_sheet(file.data);
+    //convert to array
+    const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+    const headers = fileData[0];
+    const heads = headers.map((head) => ({
+      accessorKey: head.replaceAll(".", ""),
+      header: head.replaceAll(".", ""),
+    }));
+    setColDefs(heads);
 
-      //removing header
-      fileData.splice(0, 1);
-      setData(convertToJson(headers, fileData));
-    };
+    //removing header
+    fileData.splice(0, 1);
+    setData(convertToJson(headers, fileData));
+    setIsLoading(false)
+    // };
 
-    if (file) {
-      if (getExtension(file)) {
-        reader.readAsBinaryString(file);
-      } else {
-        alert("Invalid file input, Select Excel, CSV file");
-      }
-    } else {
-      setData([]);
-      setColDefs([]);
-    }
-  };
-
+    // if (file) {
+    //   if (getExtension(file)) {
+    //     reader.readAsText(file.data);
+    //   } else {
+    //     alert("Invalid file input, Select Excel, CSV file");
+    //   }
+    // } else {
+    //   setData([]);
+    //   setColDefs([]);
+    // }
+  }
 
   // const columns = useMemo<MRT_ColumnDef<Person>[]>(
   //   () => [
@@ -196,7 +257,43 @@ export default function MatchManager() {
     data[cell.row.index][cell.column.id] = value;
     //send/receive api updates here
     setData([...data]); //re-render with new data
+    setIsLoading(false)
   };
+
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  function deleteFile(e, value) {
+    var formdata = new FormData();
+    formdata.append("file", value);
+    var requestOptions = {
+      method: "POST",
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        getFileList();
+      })
+      .catch((error) => console.log("error", error));
+  }
+
+  function resetScreen() {
+    console.log("reset screen");
+    setData([]);
+    setIsLoading(false)
+    setCSVFilename("");
+  }
+  //optionally access the underlying virtualizer instance
+  const rowVirtualizerInstanceRef = useRef(null);
+  useEffect(() => {
+    //scroll to the top of the table when the sorting changes
+    rowVirtualizerInstanceRef.current?.scrollToIndex(0);
+  }, [sorting]);
 
   //   const formRef = React.useRef();
   const uploadInputRef = React.useRef(null);
@@ -209,9 +306,10 @@ export default function MatchManager() {
             minHeight: 800,
             paddingLeft: 1,
             paddingRight: 1,
+            m: 2
           }}
         >
-          <h1>Data Dictionary Mapping Manager</h1>
+          {/* <h2>Data Dictionary Mapping Manager</h2> */}
           <Grid container spacing={1}>
             <Grid item xs={2}>
               <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
@@ -234,18 +332,54 @@ export default function MatchManager() {
                 />
               </Button>
 
+              {addSSError ? (
+                <Snackbar
+                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  open={open}
+                  autoHideDuration={6000}
+                  onClose={handleClose}
+                >
+                  <Alert
+                    onClose={handleClose}
+                    severity="error"
+                    sx={{ width: "100%" }}
+                  >
+                    Error Occurred!
+                  </Alert>
+                </Snackbar>
+              ) : (
+                ""
+              )}
+
               <List dense={true}>
-                { fileList? fileList.map((value, index) => {
-                         return( <ListItem
-                         key={value}
+                {getListError
+                  ? getListError
+                  : fileList
+                  ? fileList.map((value, index) => {
+                      return (
+                        <ListItem
+                          key={value}
                           secondaryAction={
-                            <IconButton edge="end" aria-label="delete">
+                            <IconButton
+                              onClick={(event) => deleteFile(event, value)}
+                              edge="end"
+                              aria-label="delete"
+                            >
                               <DeleteIcon />
                             </IconButton>
                           }
                         >
                           <ListItemAvatar>
-                            <Avatar>
+                            <Avatar
+                              onClick={(event) => getFile(event, value)}
+                              sx={{
+                                ":hover": {
+                                  bgcolor: "primary.main", // theme.palette.primary.main
+                                  color: "white",
+                                  cursor: "pointer",
+                                },
+                              }}
+                            >
                               <FolderIcon />
                             </Avatar>
                           </ListItemAvatar>
@@ -254,11 +388,10 @@ export default function MatchManager() {
                             secondary={fileLastMod[index]}
                           />
                         </ListItem>
-                         )
-                } ) : ''
-
-                }
-                </List>
+                      );
+                    })
+                  : ""}
+              </List>
             </Grid>
 
             <Grid item xs={10}>
@@ -272,69 +405,110 @@ export default function MatchManager() {
                       alignItems: "center",
                     }}
                   >
-                    <Grid item xs={12}>
-                      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                        <h2>{csvFilename}</h2>
-                        <Tabs
-                          centered
+                    {data.length ? (
+                      <Grid item xs={12}>
+                        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                          <h2>{csvFilename}</h2>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            component="label"
+                            onClick={(event) => resetScreen(event, value)}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            component="label"
+                            onClick={(event) => resetScreen(event, value)}
+                          >
+                            Close
+                          </Button>
+                          <Tabs
+                            centered
+                            value={value}
+                            onChange={handleChange}
+                            aria-label="basic tabs example"
+                          >
+                            <Tab label="Needs Review" {...a11yProps(0)} />
+                            <Tab label="Approved" {...a11yProps(1)} />
+                          </Tabs>
+                        </Box>
+                        <TabPanel
                           value={value}
-                          onChange={handleChange}
-                          aria-label="basic tabs example"
+                          index={0}
+                          style={{ minWidth: "800px" }}
                         >
-                          <Tab label="Needs Review" {...a11yProps(0)} />
-                          <Tab label="Approved" {...a11yProps(1)} />
-                        </Tabs>
-                      </Box>
-                      <TabPanel
-                        value={value}
-                        index={0}
-                        style={{ minWidth: "800px" }}
-                      >
-                        {/* <Grid container xs={12} spacing={1}> */}
-                        {/* <Grid item xs={1}>
-              </Grid> */}
-                        {/* <Grid item xs={12} id="dvCSV"> */}
-                        <Grid container id="dvCSV">
-                          <Grid item xs={12}>
-                            <div>
-                              <MaterialReactTable
-                                columns={colDefs}
-                                data={data}
-                                enableColumnOrdering //enable some features
-                                enableRowSelection
-                                editingMode="cell"
-                                initialState={{ density: "compact" }}
-                                enableEditing
-                                muiTableBodyCellEditTextFieldProps={({
-                                  cell,
-                                }) => ({
-                                  //onBlur is more efficient, but could use onChange instead
-                                  onBlur: (event) => {
-                                    handleSaveCell(cell, event.target.value);
-                                  },
-                                })}
-                                enablePagination={true} //disable a default feature
-                                // onRowSelectionChange={setRowSelection} //hoist internal state to your own state (optional)
-                                // state={{ rowSelection }} //manage your own state, pass it back to the table (optional)
-                                // tableInstanceRef={tableInstanceRef} //get a reference to the underlying table instance (optional)
-                              />
-                            </div>
-                            {/* ) : (
+                          <Grid container id="dvCSV">
+                            <Grid item xs={12}>
+                              <div>
+                                <MaterialReactTable
+                                  columns={colDefs}
+                                  data={data}
+                                  enableColumnOrdering //enable some features
+                                  enableRowSelection
+                                  editingMode="cell"
+                                  initialState={{
+                                    density: "compact",
+
+                                    // pagination: { pageSize: 50, pageIndex: 0 },
+                                  }}
+                                  enableEditing
+                                  enableStickyHeader
+                                  enableStickyFooter
+                                  enableRowNumbers
+                                  muiTableBodyCellEditTextFieldProps={({
+                                    cell,
+                                  }) => ({
+                                    //onBlur is more efficient, but could use onChange instead
+                                    onBlur: (event) => {
+                                      handleSaveCell(cell, event.target.value);
+                                    },
+                                  })}
+                                  enablePagination={false} //disable a default feature
+                                  enableColumnVirtualization
+                                  enableGlobalFilterModes
+                                  enablePinning
+                                  enableRowVirtualization
+                                  muiTableContainerProps={{
+                                    sx: { maxHeight: "600px" },
+                                  }}
+                                  onSortingChange={setSorting}
+                                  state={{ isLoading, sorting }}
+                                  rowVirtualizerInstanceRef={
+                                    rowVirtualizerInstanceRef
+                                  } //optional
+                                  rowVirtualizerProps={{ overscan: 5 }} //optionally customize the row virtualizer
+                                  columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
+                                  // onRowSelectionChange={setRowSelection} //hoist internal state to your own state (optional)
+                                  // state={{ rowSelection }} //manage your own state, pass it back to the table (optional)
+                                  // tableInstanceRef={tableInstanceRef} //get a reference to the underlying table instance (optional)
+                                />
+                              </div>
+                              {/* ) : (
                       ""
                     )} */}
+                            </Grid>
+                            <Grid item></Grid>
                           </Grid>
-                          <Grid item></Grid>
-                        </Grid>
-                        {/* </Grid> */}
-                        {/* </Grid> */}
-                      </TabPanel>
-                      <TabPanel value={value} index={1}>
-                        Item Two
-                      </TabPanel>
-                      <TabPanel value={value} index={2}>
-                        Item Three
-                      </TabPanel>
-                    </Grid>
+
+                          {/* </Grid> */}
+                          {/* </Grid> */}
+                        </TabPanel>
+                        <TabPanel value={value} index={1}>
+                          Item Two
+                        </TabPanel>
+                        <TabPanel value={value} index={2}>
+                          Item Three
+                        </TabPanel>
+                      </Grid>
+                    ) : (
+                      <Typography>
+                        Please select a data dictionary to the left or add a new
+                        one
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
               </Grid>

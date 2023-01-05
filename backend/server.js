@@ -40,6 +40,10 @@ app.get("/get_data_dictionary_list", function (req, res) {
       return console.log("Unable to scan directory: " + err);
     }
     //listing all files using forEach
+    console.log('files', files)
+    if(!files.length){
+      res.status(200).send({});
+    }
     files.forEach(function (file, index) {
       // Do whatever you want to do with the file
       console.log(file);
@@ -86,8 +90,7 @@ app.post("/add_data_dictionary", function (req, res) {
       //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
       let dataFile = req.files.dataFile;
 
-      //Use the mv() method to place the file in the upload directory (i.e. "uploads")
-      dataFile.mv("./uploads/" + dataFile.name);
+
 
       const extensions = ["xlsx", "xls", "csv"];
       const getExtension = (file) => {
@@ -111,16 +114,8 @@ app.post("/add_data_dictionary", function (req, res) {
       const importExcel = (req) => {
         const file = dataFile.name;
         csvFileName = file.name;
-        console.log("start reading spreadsheet");
-        console.log(req.files.dataFile);
         /* grab the first file */
-        // console.log('files', files)
-        // const f = Object.entries(files)[0][1];
-        // const path = f.filepath;
         const workBook = XLSX.read(req.files.dataFile.data);
-        console.log("got workbook");
-        /* DO SOMETHING WITH workbook HERE */
-        // const workBook = XLSX.read(bstr, { type: "binary" });
 
         //get first sheet
         const workSheetName = workBook.SheetNames[0];
@@ -128,17 +123,20 @@ app.post("/add_data_dictionary", function (req, res) {
         //convert to array
         const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
         const headers = fileData[0];
+        if(!headers.includes('Approved')) headers.push('Approved')
         const heads = headers.map((head) => ({
           accessorKey: head.replaceAll(".", ""),
           header: head.replaceAll(".", ""),
         }));
-        console.log("heads", heads);
         ssColDefs = heads;
         //removing header
         fileData.splice(0, 1);
         ssData = convertToJson(headers, fileData);
 
-        console.log("ssData", ssData);
+        //Use the mv() method to place the file in the upload directory (i.e. "uploads")
+        // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+        // XLSX.writeFile(ssData, "./uploads/" + "Report.csv");
+        dataFile.mv("./uploads/" + dataFile.name);
         //send response
         res.send({
           status: true,
@@ -166,44 +164,125 @@ app.post("/add_data_dictionary", function (req, res) {
     console.log("ERROR!", err);
     res.status(500).send("Something went wrong");
   }
+});
 
-  // { searchText: 'White' }
+app.post("/remove_data_dictionary", function (req, res) {
+  console.log(
+    `Incoming Data Dictionary Remove POST request at ${new Date().toLocaleString()}`
+  );
 
-  //   if (!req.body.searchText) {
-  //     res.status(400).send(JSON.stringify("Error"));
-  //     return;
-  //   }
+  try {
+    if (!req.body.file) {
+      res.send({
+        status: false,
+        message: "No file",
+      });
+    } else {
+        let dataFile = './uploads/' + req.body.file;
+        fs.rename(__dirname + '/uploads/' + req.body.file, __dirname + "/deleted/" + req.body.file, (error) =>{
+          if(error) console.log(error)
+          res.send({
+            data: {
+              name: dataFile
+            },
+          });
+        });
+        
+      };
+        
+  } catch (err) {
+    console.log("ERROR!", err);
+    res.status(500).send("Something went wrong");
+  }
+});
 
-  //   let searchText = req.body.searchText;
 
-  //   var config = {
-  //     method: "get",
-  //     url:
-  //       process.env.UMLS_API_TEXT_SEARCH_SNOMED_URI +
-  //       "&apiKey=" +
-  //       process.env.UMLS_API_KEY +
-  //       "&string=" +
-  //       searchText + "&searchType=approximate",
-  //     headers: {},
-  //   };
+app.post("/get_data_dictionary", function (req, res) {
+  console.log(
+    `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
+  );
+  let ssColDefs, ssData, ssFileName;
+    console.log(req.body.file)
+  try {
+    if (!req.body.file) {
+      res.send({
+        status: false,
+        message: "No file uploaded",
+      });
+    } else {
+      //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
+      let dataFile = req.body.file;
 
-  //   axios(config)
-  //     .then(function (response) {
-  //       for (let item of response.data.result.results) {
-  //         item.similarity = Math.floor(
-  //           stringSimilarity.compareTwoStrings(
-  //             item.name.toLowerCase(),
-  //             searchText.toLowerCase()
-  //           ) * 100
-  //         );
-  //       }
-  //       console.log('Sending back data...')
-  //       res.send(response.data);
-  //     })
-  //     .catch(function (error) {
-  //       console.log(error);
-  //       res.status(500).send(JSON.stringify("Error"));
-  //     });
+      const extensions = ["xlsx", "xls", "csv"];
+      const getExtension = (file) => {
+        const parts = file.split(".");
+        const extension = parts[parts.length - 1];
+        return extensions.includes(extension); // return boolean
+      };
+
+      const convertToJson = (headers, data) => {
+        const rows = [];
+        console.log(headers)
+        // console.log('data', data)
+        let indexList = [0,1,3,4,17,23,24]
+        let allowedColumns = ['Variable / Field Name', 'Form Name', 'Field Type', 'Field Label', 'Field Annotation', 'OMOP concept_name']
+        data.forEach((row) => {
+          let rowData = {};
+          // console.log('row', row)
+          row.forEach((element, index) => {
+            // console.log(headers)
+            if(allowedColumns.includes(headers[index])) rowData[headers[index]] = element;
+          });
+          rows.push(rowData);
+        });
+        return rows;
+      };
+
+      const importExcel = (req) => {
+        /* grab the first file */
+        const workBook = XLSX.readFile(__dirname + '/uploads/' + dataFile);
+
+        //get first sheet
+        const workSheetName = workBook.SheetNames[0];
+        const workSheet = workBook.Sheets[workSheetName];
+        //convert to array
+        const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+        const headers = fileData[0];
+        if(!headers.includes('Approved')) headers.push('Approved')
+        const heads = headers.map((head) => ({
+          accessorKey: head.replaceAll(".", ""),
+          header: head.replaceAll(".", ""),
+        }));
+        // console.log(heads)
+        ssColDefs = heads;
+        //removing header
+        fileData.splice(0, 1);
+        ssData = convertToJson(headers, fileData);
+        // console.log('ssData', ssData)
+        //send response
+        res.send({
+          data: {
+            name: dataFile,
+            data: ssData,
+          },
+        });
+      };
+
+      if (dataFile) {
+        if (getExtension(dataFile)) {
+          importExcel(req);
+        } else {
+          throw new Error("Unsupported File Extension");
+        }
+      } else {
+        ssData = [];
+        ssColDefs = [];
+      }
+    }
+  } catch (err) {
+    console.log("ERROR!", err);
+    res.status(500).send("Something went wrong");
+  }
 });
 
 var server = app.listen(appPort, function () {
