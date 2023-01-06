@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
@@ -14,10 +14,16 @@ import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
+import SaveIcon from '@mui/icons-material/Save';
 // import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
+import InboxIcon from '@mui/icons-material/Inbox';
+import DraftsIcon from '@mui/icons-material/Drafts';
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 // import Alert from "@mui/material/Alert";
 // import AlertTitle from "@mui/material/AlertTitle";
 // import FormGroup from "@mui/material/FormGroup";
@@ -27,6 +33,9 @@ import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { darken } from "@mui/material";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { ExportToCsv } from "export-to-csv"; //or use your library of choice here
 // import {
 //   MRT_Cell,
 //   MRT_ColumnDef,
@@ -34,6 +43,12 @@ import MuiAlert from "@mui/material/Alert";
 var XLSX = require("xlsx");
 
 const theme = createTheme();
+
+// const darkTheme = createTheme({
+//   palette: {
+//     mode: 'dark',
+//   },
+// });
 
 export default function MatchManager() {
   const [colDefs, setColDefs] = useState([]);
@@ -49,11 +64,57 @@ export default function MatchManager() {
   const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = React.useState(1);
 
+  const csvOptions = {
+    fieldSeparator: ",",
+    quoteStrings: '"',
+    decimalSeparator: ".",
+    showLabels: true,
+    useBom: false,
+    useKeysAsHeaders: false,
+    headers: colDefs.map((c) => {
+      return c.header;
+    }),
+  };
+
+  const csvExporter = new ExportToCsv(csvOptions);
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     getFileList();
   }, []);
+
+  const handleExportRows = (rows) => {
+    csvExporter.generateCsv(rows.map((row) => row.original));
+  };
+
+  const handleExportData = () => {
+    console.log("colDefs", colDefs);
+    let _data = data;
+    let keys = _data.reduce(function (acc, obj) {
+      Object.keys(obj).forEach(function (key) {
+        if (!acc.includes(key)) acc.push(key);
+      });
+      return acc;
+    }, []);
+
+    _data.forEach(function (obj) {
+      keys.forEach(function (key) {
+        if (!obj[key]) obj[key] = "";
+      });
+    });
+
+    console.log("_data", _data);
+    csvExporter.generateCsv(_data);
+  };
+
+  useEffect(() => {
+    //scroll to the top of the table when the sorting changes
+    rowVirtualizerInstanceRef.current?.scrollToIndex(0);
+  }, [sorting]);
+
+  const columns = useMemo(() => colDefs, [colDefs]);
+  // const tableData = useMemo(() => data, [data]);
 
   function getFileList() {
     var requestOptions = {
@@ -72,9 +133,9 @@ export default function MatchManager() {
             resultFilesLastMod.push(value.lastModified);
           });
         }
-        console.log("got result files");
+        // console.log("got result files");
         // resultFiles.;
-        console.log(resultFiles);
+        // console.log(resultFiles);
         setFileList(resultFiles);
         setFileLastMod(resultFilesLastMod);
         setGetListError("");
@@ -86,8 +147,9 @@ export default function MatchManager() {
   }
 
   function getFile(e, value) {
-    // console.log("e", e);
-    // console.log("value", value);
+    setSelectedIndex(value);
+    console.log("e", e);
+    console.log("value", value);
     var formdata = new FormData();
     formdata.append("file", value);
 
@@ -103,7 +165,7 @@ export default function MatchManager() {
         // console.log(result)
         importExcel(JSON.parse(result));
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => console.error("error", error));
   }
 
   const handleChange = (event, newValue) => {
@@ -195,7 +257,7 @@ export default function MatchManager() {
       .catch((error) => {
         setaddSSError("Upload Error");
         setOpen(true);
-        console.log("error", error);
+        console.info("error", error);
         e.target.value = null;
       });
   };
@@ -228,7 +290,7 @@ export default function MatchManager() {
     //removing header
     fileData.splice(0, 1);
     setData(convertToJson(headers, fileData));
-    setIsLoading(false)
+    setIsLoading(false);
     // };
 
     // if (file) {
@@ -243,13 +305,6 @@ export default function MatchManager() {
     // }
   }
 
-  // const columns = useMemo<MRT_ColumnDef<Person>[]>(
-  //   () => [
-  //     //column definitions...
-  //   ],
-  //   [],
-  // );
-
   // const [tableData, setTableData] = useState(() => data);
 
   const handleSaveCell = (cell, value) => {
@@ -257,7 +312,7 @@ export default function MatchManager() {
     data[cell.row.index][cell.column.id] = value;
     //send/receive api updates here
     setData([...data]); //re-render with new data
-    setIsLoading(false)
+    setIsLoading(false);
   };
 
   const Alert = React.forwardRef(function Alert(props, ref) {
@@ -276,7 +331,7 @@ export default function MatchManager() {
     fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         getFileList();
       })
       .catch((error) => console.log("error", error));
@@ -285,8 +340,9 @@ export default function MatchManager() {
   function resetScreen() {
     console.log("reset screen");
     setData([]);
-    setIsLoading(false)
+    setIsLoading(false);
     setCSVFilename("");
+    setSelectedIndex('')
   }
   //optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef(null);
@@ -294,6 +350,27 @@ export default function MatchManager() {
     //scroll to the top of the table when the sorting changes
     rowVirtualizerInstanceRef.current?.scrollToIndex(0);
   }, [sorting]);
+
+  const handleSaveRow = async ({ exitEditingMode, row, values }) => {
+    //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
+    data[row.index] = values;
+    //send/receive api updates here
+    setData([...data]);
+    exitEditingMode(); //required to exit editing mode
+  };
+
+  function ListItemTextC(fileListMod, index) {
+    console.log("fileList", fileListMod);
+    console.log("index", index);
+
+    return (
+      <ListItemText
+        primary={fileListMod}
+        primaryTypographyProps={{ style: { whiteSpace: "normal", wordWrap: 'break-word'} }}
+        secondary={"Last Save:" + fileLastMod[index]}
+      />
+    );
+  }
 
   //   const formRef = React.useRef();
   const uploadInputRef = React.useRef(null);
@@ -303,98 +380,119 @@ export default function MatchManager() {
         <CssBaseline />
         <Paper
           sx={{
-            minHeight: 800,
+            minHeight: "90vh",
             paddingLeft: 1,
             paddingRight: 1,
-            m: 2
+            m: 2,
           }}
         >
           {/* <h2>Data Dictionary Mapping Manager</h2> */}
           <Grid container spacing={1}>
-            <Grid item xs={2}>
-              <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-                Data Dictionaries
-              </Typography>
-              <Button
-                variant="contained"
-                component="label"
-                onClick={() =>
-                  uploadInputRef.current && uploadInputRef.current.click()
-                }
-              >
-                Add Data Dictionary
-                <input
-                  id="fileUpload"
-                  // onChange={(e)=>{importExcel(e)}}
-                  onChange={uploadDD}
-                  type="file"
-                  hidden
-                />
-              </Button>
-
-              {addSSError ? (
-                <Snackbar
-                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                  open={open}
-                  autoHideDuration={6000}
-                  onClose={handleClose}
+            <Grid item md={12} lg={2} >
+              <Box>
+                <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                  Data Dictionaries
+                </Typography>
+                <Button
+                  variant="contained"
+                  component="label"
+                  onClick={() =>
+                    uploadInputRef.current && uploadInputRef.current.click()
+                  }
                 >
-                  <Alert
-                    onClose={handleClose}
-                    severity="error"
-                    sx={{ width: "100%" }}
-                  >
-                    Error Occurred!
-                  </Alert>
-                </Snackbar>
-              ) : (
-                ""
-              )}
+                  Add Data Dictionary
+                  <input
+                    id="fileUpload"
+                    // onChange={(e)=>{importExcel(e)}}
+                    onChange={uploadDD}
+                    type="file"
+                    hidden
+                  />
+                </Button>
 
-              <List dense={true}>
-                {getListError
-                  ? getListError
-                  : fileList
-                  ? fileList.map((value, index) => {
-                      return (
-                        <ListItem
-                          key={value}
-                          secondaryAction={
-                            <IconButton
-                              onClick={(event) => deleteFile(event, value)}
-                              edge="end"
-                              aria-label="delete"
+                {addSSError ? (
+                  <Snackbar
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                    open={open}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="error"
+                      sx={{ width: "100%" }}
+                    >
+                      Error Occurred!
+                    </Alert>
+                  </Snackbar>
+                ) : (
+                  ""
+                )}
+
+                <List
+                  dense={true}
+                  sx={{
+                    color: "success.main",
+                  }}
+                >
+                  {getListError
+                    ? getListError
+                    : fileList
+                    ? fileList.map((value, index) => {
+                        return (
+                          <ListItem
+                            key={value}
+                            
+                            // secondaryAction={
+                            // <IconButton
+                            //   onClick={(event) => deleteFile(event, value)}
+                            //   edge="end"
+                            //   aria-label="delete"
+                            // >
+                            //   <DeleteIcon />
+                            // </IconButton>
+                            // }
+                          >
+                            {/* <ListItemAvatar>
+                              <Avatar
+                                onClick={(event) => getFile(event, value)}
+                                selected={true}
+                                sx={{
+                                  ":hover": {
+                                    bgcolor: "primary.main", // theme.palette.primary.main
+                                    color: "white",
+                                    cursor: "pointer",
+                                  },
+                                }}
+                              >
+                                <FolderIcon />
+                              </Avatar>
+                            </ListItemAvatar> */}
+                            {/* {ListItemTextC(value, index)} */}
+                            <ListItemButton
+                              selected={selectedIndex === value}
+                              onClick={(event) => getFile(event, value)}
                             >
+                              <ListItemIcon>
+                                <FolderIcon />
+                              </ListItemIcon>
+                              {ListItemTextC(value, index)}
+                              {/* <ListItemText primary="Inbox" /> */}
+                            </ListItemButton>
+                            <ListItemSecondaryAction>
+                            <IconButton edge="end" aria-label="delete" onClick={(event) => deleteFile(event, value)}>
                               <DeleteIcon />
                             </IconButton>
-                          }
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              onClick={(event) => getFile(event, value)}
-                              sx={{
-                                ":hover": {
-                                  bgcolor: "primary.main", // theme.palette.primary.main
-                                  color: "white",
-                                  cursor: "pointer",
-                                },
-                              }}
-                            >
-                              <FolderIcon />
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={value}
-                            secondary={fileLastMod[index]}
-                          />
-                        </ListItem>
-                      );
-                    })
-                  : ""}
-              </List>
+                          </ListItemSecondaryAction>
+                          </ListItem>
+                        );
+                      })
+                    : ""}
+                </List>
+              </Box>
             </Grid>
 
-            <Grid item xs={10}>
+            <Grid item sm={12} md={10}>
               <Grid container>
                 <Grid item xs={12}>
                   <Box
@@ -409,22 +507,7 @@ export default function MatchManager() {
                       <Grid item xs={12}>
                         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                           <h2>{csvFilename}</h2>
-                          <Button
-                            variant="contained"
-                            color="success"
-                            component="label"
-                            onClick={(event) => resetScreen(event, value)}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            component="label"
-                            onClick={(event) => resetScreen(event, value)}
-                          >
-                            Close
-                          </Button>
+                          <Box sx={{ justifyContent: "flex-end" }}></Box>
                           <Tabs
                             centered
                             value={value}
@@ -442,22 +525,32 @@ export default function MatchManager() {
                         >
                           <Grid container id="dvCSV">
                             <Grid item xs={12}>
+                              {/* <div sx={{ minWidth: "800px" }}> */}
                               <div>
                                 <MaterialReactTable
-                                  columns={colDefs}
-                                  data={data}
-                                  enableColumnOrdering //enable some features
-                                  enableRowSelection
-                                  editingMode="cell"
+                                  columns={columns}
+                                  data={data} //10,000 rows
+                                  enableBottomToolbar={false}
+                                  enableGlobalFilterModes
+                                  enablePagination={false}
+                                  // enableRowNumbers
+                                  enableRowVirtualization
+                                  muiTableContainerProps={{
+                                    sx: { maxHeight: "600px" },
+                                  }}
+                                  onSortingChange={setSorting}
+                                  // state={{ isLoading, sorting }}
+                                  rowVirtualizerInstanceRef={
+                                    rowVirtualizerInstanceRef
+                                  } //optional
+                                  rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
                                   initialState={{
                                     density: "compact",
-
                                     // pagination: { pageSize: 50, pageIndex: 0 },
                                   }}
                                   enableEditing
-                                  enableStickyHeader
-                                  enableStickyFooter
-                                  enableRowNumbers
+                                  // onEditingRowSave={handleSaveRow}
+                                  editingMode="cell"
                                   muiTableBodyCellEditTextFieldProps={({
                                     cell,
                                   }) => ({
@@ -466,24 +559,101 @@ export default function MatchManager() {
                                       handleSaveCell(cell, event.target.value);
                                     },
                                   })}
-                                  enablePagination={false} //disable a default feature
-                                  enableColumnVirtualization
-                                  enableGlobalFilterModes
-                                  enablePinning
-                                  enableRowVirtualization
-                                  muiTableContainerProps={{
-                                    sx: { maxHeight: "600px" },
+                                  enableColumnResizing={true}
+                                  enableSorting={true}
+                                  enableStickyHeader
+                                  muiTablePaperProps={{
+                                    elevation: 2, //change the mui box shadow
+                                    //customize paper styles
+                                    sx: {
+                                      borderRadius: "0",
+                                      border: "1px solid #e0e0e0",
+                                    },
                                   }}
-                                  onSortingChange={setSorting}
-                                  state={{ isLoading, sorting }}
-                                  rowVirtualizerInstanceRef={
-                                    rowVirtualizerInstanceRef
-                                  } //optional
-                                  rowVirtualizerProps={{ overscan: 5 }} //optionally customize the row virtualizer
-                                  columnVirtualizerProps={{ overscan: 2 }} //optionally customize the column virtualizer
-                                  // onRowSelectionChange={setRowSelection} //hoist internal state to your own state (optional)
-                                  // state={{ rowSelection }} //manage your own state, pass it back to the table (optional)
-                                  // tableInstanceRef={tableInstanceRef} //get a reference to the underlying table instance (optional)
+                                  muiTableBodyProps={{
+                                    sx: (theme) => ({
+                                      "& tr:nth-of-type(odd)": {
+                                        backgroundColor: darken(
+                                          theme.palette.background.default,
+                                          0.1
+                                        ),
+                                      },
+                                    }),
+                                  }}
+                                  muiTableHeadProps={{
+                                    sx: (theme) => ({
+                                      "& tr": {
+                                        backgroundColor: "#4a4a4a",
+                                        color: "#ffffff",
+                                      },
+                                    }),
+                                  }}
+                                  muiTableHeadCellProps={{
+                                    sx: (theme) => ({
+                                      div: {
+                                        backgroundColor: "#4a4a4a",
+                                        color: "#ffffff",
+                                      },
+                                    }),
+                                  }}
+                                  defaultColumn={{
+                                    minSize: 20, //allow columns to get smaller than default
+                                    maxSize: 9000, //allow columns to get larger than default
+                                    size: 380, //make columns wider by default
+                                  }}
+                                  // enableStickyFooter
+
+                                  positionToolbarAlertBanner="bottom"
+                                  renderTopToolbarCustomActions={({
+                                    table,
+                                  }) => (
+                                    <Box
+                                      width="100%"
+                                      sx={{
+                                        display: "flex",
+                                        gap: "1rem",
+                                        p: "0.5rem",
+                                        flexWrap: "wrap",
+                                      }}
+                                    >
+                                      
+
+                                      <Button
+                                        variant="contained"
+                                        color="primary"
+                                        component="label"
+                                        startIcon={<SaveIcon />}
+                                        onClick={(event) =>
+                                          resetScreen(event, value)
+                                        }
+                                      >
+                                        Save
+                                      </Button>
+
+                                      <Button
+                                        color="success"
+                                        //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                                        onClick={handleExportData}
+                                        startIcon={<FileDownloadIcon />}
+                                        variant="contained"
+                                      >
+                                        Export All Data
+                                      </Button>
+
+                                      <Box style={{ marginLeft: "auto" }}>
+                                        <Button
+                                          variant="outlined"
+                                          color="error"
+                                          component="label"
+                                          onClick={(event) =>
+                                            resetScreen(event, value)
+                                          }
+                                        >
+                                          Close
+                                        </Button>
+                                      </Box>
+                                    </Box>
+                                  )}
                                 />
                               </div>
                               {/* ) : (

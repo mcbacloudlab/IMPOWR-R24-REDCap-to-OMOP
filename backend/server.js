@@ -61,10 +61,14 @@ app.get("/get_data_dictionary_list", function (req, res) {
             fileName: file,
             lastModified: date
           })
+
+          
           console.log(`File Data Last Modified: ${stats.mtime}`);
           // console.log(`File Status Last Modified: ${stats.ctime}`);
-
-          if(index === files.length -1){
+          if(index === files.length - 1){
+            fileReturnObject.sort(function (a,b){
+              return new Date(b.lastModified) - new Date(a.lastModified)
+            })
             res.status(200).send(fileReturnObject);
           }
         }
@@ -222,10 +226,11 @@ app.post("/get_data_dictionary", function (req, res) {
 
       const convertToJson = (headers, data) => {
         const rows = [];
-        console.log(headers)
+        // console.log(headers)
+        console.log('data',data)
         // console.log('data', data)
-        let indexList = [0,1,3,4,17,23,24]
-        let allowedColumns = ['Variable / Field Name', 'Form Name', 'Field Type', 'Field Label', 'Field Annotation', 'OMOP concept_name']
+        // let indexList = [0,1,3,4,17,23,24]
+        let allowedColumns = ['Form Name', 'Field Label', 'Field Annotation', 'OMOP concept_name']
         data.forEach((row) => {
           let rowData = {};
           // console.log('row', row)
@@ -246,7 +251,8 @@ app.post("/get_data_dictionary", function (req, res) {
         const workSheetName = workBook.SheetNames[0];
         const workSheet = workBook.Sheets[workSheetName];
         //convert to array
-        const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+        const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1,sheetStubs: true });
+        console.log('fileData', fileData)
         const headers = fileData[0];
         if(!headers.includes('Approved')) headers.push('Approved')
         const heads = headers.map((head) => ({
