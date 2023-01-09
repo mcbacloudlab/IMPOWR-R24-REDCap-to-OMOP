@@ -26,14 +26,31 @@ app.use(
 );
 
 app.get("/get_data_dictionary_list", function (req, res) {
-  console.info(
-    `Incoming Data Dictionary List GET request at ${new Date().toLocaleString()}`
-  );
-
   const directoryPath = path.join(__dirname, "uploads");
+
+  async function getFileDetails(files) {
+    const filePromises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        fs.stat(__dirname + '/uploads/' + file, (err, stats) => {
+          if (err) {
+            return reject(err);
+          }
+          let date = new Date(stats.mtime);
+          date = date.toLocaleString('en-US');
+          resolve({
+            fileName: file,
+            lastModified: date,
+          });
+        });
+      });
+    });
+  
+    const fileDetails = await Promise.all(filePromises);
+    return fileDetails;
+  }
+
   //passsing directoryPath and callback function
-  let fileReturnObject = [];
-  fs.readdir(directoryPath, function (err, files) {
+  fs.readdir(directoryPath, async function (err, files) {
     //handling error
     if (err) {
       return console.error("Unable to scan directory: " + err);
@@ -42,37 +59,21 @@ app.get("/get_data_dictionary_list", function (req, res) {
     if (!files.length) {
       res.status(200).send({});
     }
-    files.forEach(function (file, index) {
-      // fetch file details
-      fs.stat(__dirname + "/uploads/" + file, (err, stats) => {
-        if (err) {
-          console.error("error!", err);
-          // throw err;
-        } else {
-          // print file last modified date
-          let date = new Date(stats.mtime);
-          // console.log(date.toLocaleString('en-US'));
-          date = date.toLocaleString("en-US");
-          fileReturnObject.push({
-            fileName: file,
-            lastModified: date,
-          });
-          if (index === files.length - 1) {
-            fileReturnObject.sort(function (a, b) {
-              return new Date(b.lastModified) - new Date(a.lastModified);
-            });
-            res.status(200).send(fileReturnObject);
-          }
-        }
-      });
+
+
+    fs.readdir(__dirname + '/uploads/', async (err, files) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error reading files');
+      }
+      const fileDetails = await getFileDetails(files);
+      fileDetails.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+      res.status(200).send(fileDetails);
     });
   });
 });
 
 app.post("/add_data_dictionary", function (req, res) {
-  console.info(
-    `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
-  );
   try {
     if (!req.files) {
       res.send({
@@ -126,16 +127,20 @@ app.post("/add_data_dictionary", function (req, res) {
         //Use the mv() method to place the file in the upload directory (i.e. "uploads")
         // Package and Release Data (`writeFile` tries to write and save an XLSB file)
         // XLSX.writeFile(ssData, "./uploads/" + "Report.csv");
-        dataFile.mv("./uploads/" + dataFile.name);
-        //send response
-        res.send({
-          status: true,
-          message: "File is uploaded",
-          data: {
-            name: dataFile.name,
-            mimetype: dataFile.mimetype,
-            size: dataFile.size,
-          },
+        dataFile.mv("./uploads/" + dataFile.name, (err) => {
+          if (err) throw err;
+          else {
+            //send response
+            res.send({
+              status: true,
+              message: "File is uploaded",
+              data: {
+                name: dataFile.name,
+                mimetype: dataFile.mimetype,
+                size: dataFile.size,
+              },
+            });
+          }
         });
       };
 
@@ -157,10 +162,6 @@ app.post("/add_data_dictionary", function (req, res) {
 });
 
 app.post("/remove_data_dictionary", function (req, res) {
-  console.info(
-    `Incoming Data Dictionary Remove POST request at ${new Date().toLocaleString()}`
-  );
-
   try {
     if (!req.body.file) {
       res.send({
@@ -193,10 +194,7 @@ app.post("/remove_data_dictionary", function (req, res) {
 });
 
 app.post("/get_data_dictionary", function (req, res) {
-  console.info(
-    `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
-  );
-  let ssData
+  let ssData;
   try {
     if (!req.body.file) {
       res.send({
