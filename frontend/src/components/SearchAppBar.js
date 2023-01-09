@@ -13,14 +13,12 @@ export default function SearchAppBar() {
       <AppBar position="static">
         <Toolbar>
           <TemporaryDrawer/>
-          
           <Typography
             variant="h6"
             noWrap
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            
           </Typography>
         </Toolbar>
       </AppBar>

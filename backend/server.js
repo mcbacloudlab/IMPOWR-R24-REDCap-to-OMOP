@@ -25,55 +25,45 @@ app.use(
   })
 );
 
-app.get("/get_data_dictionary_list", function (req, res) {
-  const directoryPath = path.join(__dirname, "uploads");
-
-  async function getFileDetails(files) {
-    const filePromises = files.map((file) => {
-      return new Promise((resolve, reject) => {
-        fs.stat(__dirname + '/uploads/' + file, (err, stats) => {
-          if (err) {
-            return reject(err);
-          }
-          let date = new Date(stats.mtime);
-          date = date.toLocaleString('en-US');
-          resolve({
-            fileName: file,
-            lastModified: date,
-          });
+async function getFileDetails(files) {
+  const filePromises = files.map((file) => {
+    return new Promise((resolve, reject) => {
+      fs.stat(__dirname + "/uploads/" + file, (err, stats) => {
+        if (err) {
+          return reject(err);
+        }
+        let date = new Date(stats.mtime);
+        date = date.toLocaleString("en-US");
+        resolve({
+          fileName: file,
+          lastModified: date,
         });
       });
     });
-  
-    const fileDetails = await Promise.all(filePromises);
-    return fileDetails;
-  }
+  });
 
-  //passsing directoryPath and callback function
-  fs.readdir(directoryPath, async function (err, files) {
-    //handling error
+  const fileDetails = await Promise.all(filePromises);
+  return fileDetails;
+}
+
+app.get("/get_data_dictionary_list", function (req, res) {
+  const directoryPath = path.join(__dirname, "uploads");
+  fs.readdir(__dirname + "/uploads/", async (err, files) => {
     if (err) {
-      return console.error("Unable to scan directory: " + err);
+      console.error(err);
+      return res.status(500).send("Error reading files");
     }
-    //listing all files using forEach
-    if (!files.length) {
-      res.status(200).send({});
-    }
-
-
-    fs.readdir(__dirname + '/uploads/', async (err, files) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error reading files');
-      }
-      const fileDetails = await getFileDetails(files);
-      fileDetails.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-      res.status(200).send(fileDetails);
-    });
+    const fileDetails = await getFileDetails(files);
+    fileDetails.sort(
+      (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
+    );
+    res.status(200).send(fileDetails);
   });
 });
 
 app.post("/add_data_dictionary", function (req, res) {
+  const directoryPath = path.join(__dirname, "uploads");
+
   try {
     if (!req.files) {
       res.send({
@@ -83,6 +73,38 @@ app.post("/add_data_dictionary", function (req, res) {
     } else {
       //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
       let dataFile = req.files.dataFile;
+
+      //first check to see if filename already exists
+      //passsing directoryPath and callback function
+      fs.readdir(__dirname + "/uploads/", async (err, files) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send("Error reading files");
+        }
+        const fileDetails = await getFileDetails(files);
+        console.log(fileDetails);
+        console.log(req.files.dataFile.name);
+        const exists = fileDetails.some(
+          (item) => item["fileName"] === req.files.dataFile.name
+        );
+        if (exists) {
+          res.status(500).send({
+            status: false,
+            message: "File already exists",
+          });
+        } else {
+          if (dataFile) {
+            if (getExtension(dataFile)) {
+              importExcel(req);
+            } else {
+              throw new Error("Unsupported File Extension");
+            }
+          } else {
+            ssData = [];
+            ssColDefs = [];
+          }
+        }
+      });
 
       const extensions = ["xlsx", "xls", "csv"];
       const getExtension = (file) => {
@@ -116,8 +138,8 @@ app.post("/add_data_dictionary", function (req, res) {
         const headers = fileData[0];
         if (!headers.includes("Approved")) headers.push("Approved");
         const heads = headers.map((head) => ({
-          accessorKey: head.replaceAll(".", ""),
-          header: head.replaceAll(".", ""),
+          accessorKey: head.toString().replaceAll(".", ""),
+          header: head.toString().replaceAll(".", ""),
         }));
         ssColDefs = heads;
         //removing header
@@ -143,17 +165,6 @@ app.post("/add_data_dictionary", function (req, res) {
           }
         });
       };
-
-      if (dataFile) {
-        if (getExtension(dataFile)) {
-          importExcel(req);
-        } else {
-          throw new Error("Unsupported File Extension");
-        }
-      } else {
-        ssData = [];
-        ssColDefs = [];
-      }
     }
   } catch (err) {
     console.error("ERROR!", err);
@@ -246,8 +257,8 @@ app.post("/get_data_dictionary", function (req, res) {
         const headers = fileData[0];
         if (!headers.includes("Approved")) headers.push("Approved");
         const heads = headers.map((head) => ({
-          accessorKey: head.replaceAll(".", ""),
-          header: head.replaceAll(".", ""),
+          accessorKey: head.toString().replaceAll(".", ""),
+          header: head.toString().replaceAll(".", ""),
         }));
         ssColDefs = heads;
         //removing header

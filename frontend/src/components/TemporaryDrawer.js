@@ -12,6 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 // import MailIcon from '@mui/icons-material/Mail';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import DeleteIcon from "@mui/icons-material/Delete";
 import { NavLink } from 'react-router-dom';
 
 export default function TemporaryDrawer() {
@@ -60,6 +61,14 @@ export default function TemporaryDrawer() {
               <SearchIcon />
               </ListItemIcon>
               <ListItemText primary={'Data Dictionary Mapping Manager'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={'Archived'} component={NavLink} to="/redcap_omop/archived" disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+              <DeleteIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Archived'} />
             </ListItemButton>
           </ListItem>
       </List>

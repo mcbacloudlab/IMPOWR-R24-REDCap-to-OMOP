@@ -27,14 +27,12 @@ import { darken } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
 import LinearProgress from "@mui/material/LinearProgress";
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
 
 var XLSX = require("xlsx");
 
 const theme = createTheme();
 
-export default function MatchManager() {
+export default function Archived() {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
@@ -52,7 +50,6 @@ export default function MatchManager() {
     fieldSeparator: ",",
     quoteStrings: '"',
     decimalSeparator: ".",
-    filename: csvFilename.replace(/\.[^/.]+$/, ''),
     showLabels: true,
     useBom: false,
     useKeysAsHeaders: false,
@@ -327,12 +324,11 @@ export default function MatchManager() {
             <Grid item md={12} lg={2}>
               <Box>
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-                  Data Dictionaries
+                  Archived Data Dictionaries
                 </Typography>
-                <Button
+                {/* <Button
                   variant="contained"
                   component="label"
-                  startIcon={<AddIcon />}
                   onClick={() =>
                     uploadInputRef.current && uploadInputRef.current.click()
                   }
@@ -345,7 +341,7 @@ export default function MatchManager() {
                     type="file"
                     hidden
                   />
-                </Button>
+                </Button> */}
 
                 {addSSError ? (
                   <Snackbar
@@ -387,7 +383,7 @@ export default function MatchManager() {
                               </ListItemIcon>
                               {ListItemTextC(value, index)}
                             </ListItemButton>
-                            <ListItemSecondaryAction>
+                            {/* <ListItemSecondaryAction>
                               <IconButton
                                 edge="end"
                                 aria-label="delete"
@@ -395,7 +391,7 @@ export default function MatchManager() {
                               >
                                 <DeleteIcon />
                               </IconButton>
-                            </ListItemSecondaryAction>
+                            </ListItemSecondaryAction> */}
                           </ListItem>
                         );
                       })
@@ -541,7 +537,7 @@ export default function MatchManager() {
                                           resetScreen(event, value)
                                         }
                                       >
-                                        Save
+                                        Restore
                                       </Button>
 
                                       <Button
@@ -558,7 +554,6 @@ export default function MatchManager() {
                                         <Button
                                           variant="outlined"
                                           color="error"
-                                          startIcon={<CloseIcon/>}
                                           component="label"
                                           onClick={(event) =>
                                             resetScreen(event, value)
@@ -584,8 +579,7 @@ export default function MatchManager() {
                       </Grid>
                     ) : (
                       <Typography>
-                        Please select a data dictionary to the left or add a new
-                        one
+                        Please select a data dictionary to the left
                       </Typography>
                     )}
                   </Box>
