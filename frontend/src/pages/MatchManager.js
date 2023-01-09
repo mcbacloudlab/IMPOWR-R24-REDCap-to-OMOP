@@ -13,57 +13,37 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import SaveIcon from '@mui/icons-material/Save';
-// import ListItemIcon from "@mui/material/ListItemIcon";
+import SaveIcon from "@mui/icons-material/Save";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Avatar from "@mui/material/Avatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
-import InboxIcon from '@mui/icons-material/Inbox';
-import DraftsIcon from '@mui/icons-material/Drafts';
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
-// import Alert from "@mui/material/Alert";
-// import AlertTitle from "@mui/material/AlertTitle";
-// import FormGroup from "@mui/material/FormGroup";
-// import FormControlLabel from "@mui/material/FormControlLabel";
-// import Checkbox from "@mui/material/Checkbox";
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { darken } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { ExportToCsv } from "export-to-csv"; //or use your library of choice here
-// import {
-//   MRT_Cell,
-//   MRT_ColumnDef,
-// } from 'material-react-table';
+import { ExportToCsv } from "export-to-csv";
+import LinearProgress from "@mui/material/LinearProgress";
+
 var XLSX = require("xlsx");
 
 const theme = createTheme();
-
-// const darkTheme = createTheme({
-//   palette: {
-//     mode: 'dark',
-//   },
-// });
 
 export default function MatchManager() {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
   const [value, setValue] = useState(0);
-  // const [dense, setDense] = React.useState(false);
-  // const [secondary, setSecondary] = React.useState("stuff");
   const [fileList, setFileList] = React.useState([]);
   const [fileLastMod, setFileLastMod] = React.useState([]);
   const [getListError, setGetListError] = React.useState();
   const [addSSError, setaddSSError] = React.useState();
   const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState();
   const [selectedIndex, setSelectedIndex] = React.useState(1);
 
   const csvOptions = {
@@ -84,12 +64,7 @@ export default function MatchManager() {
     getFileList();
   }, []);
 
-  const handleExportRows = (rows) => {
-    csvExporter.generateCsv(rows.map((row) => row.original));
-  };
-
   const handleExportData = () => {
-    console.log("colDefs", colDefs);
     let _data = data;
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
@@ -104,7 +79,6 @@ export default function MatchManager() {
       });
     });
 
-    console.log("_data", _data);
     csvExporter.generateCsv(_data);
   };
 
@@ -131,25 +105,22 @@ export default function MatchManager() {
           result.map((value) => {
             resultFiles.push(value.fileName);
             resultFilesLastMod.push(value.lastModified);
+            return result;
           });
         }
-        // console.log("got result files");
-        // resultFiles.;
-        // console.log(resultFiles);
         setFileList(resultFiles);
         setFileLastMod(resultFilesLastMod);
         setGetListError("");
       })
       .catch((error) => {
-        console.log("error", error);
+        console.error("error", error);
         setGetListError("Error occurred.");
       });
   }
 
   function getFile(e, value) {
+    setIsLoading(true);
     setSelectedIndex(value);
-    console.log("e", e);
-    console.log("value", value);
     var formdata = new FormData();
     formdata.append("file", value);
 
@@ -162,18 +133,17 @@ export default function MatchManager() {
     fetch("http://localhost:5000/get_data_dictionary", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        // console.log(result)
+        setIsLoading(false);
         importExcel(JSON.parse(result));
       })
-      .catch((error) => console.error("error", error));
+      .catch((error) => {
+        setIsLoading(false);
+        console.error("error", error);
+      });
   }
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-  };
-
-  const handleClick = () => {
-    setOpen(true);
   };
 
   const handleClose = (event, reason) => {
@@ -182,13 +152,6 @@ export default function MatchManager() {
     }
 
     setOpen(false);
-  };
-
-  const EXTENSIONS = ["xlsx", "xls", "csv"];
-  const getExtension = (file) => {
-    const parts = file.name.split(".");
-    const extension = parts[parts.length - 1];
-    return EXTENSIONS.includes(extension); // return boolean
   };
 
   const convertToJson = (headers, data) => {
@@ -249,7 +212,6 @@ export default function MatchManager() {
         else throw new Error("Upload Error");
       })
       .then((result) => {
-        // console.log(result);
         getFileList();
         setaddSSError("");
         e.target.value = null;
@@ -263,20 +225,9 @@ export default function MatchManager() {
   };
 
   function importExcel(e) {
-    console.log("e", e);
     const file = e.data;
     setCSVFilename(file.name);
-    // const reader = new FileReader();
-    // reader.onload = (event) => {
-    //parse data
-    // const bstr = event.target.result;
-    // const workBook = XLSX.read(bstr, { type: "binary" });
-    // const workBook = XLSX.utils.json_to_sheet(file.data);
-    // console.log(file.data)
 
-    //get first sheet
-    // const workSheetName = workBook.SheetNames[0];
-    // const workSheet = workBook.Sheets[workSheetName];
     const workSheet = XLSX.utils.json_to_sheet(file.data);
     //convert to array
     const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
@@ -291,21 +242,7 @@ export default function MatchManager() {
     fileData.splice(0, 1);
     setData(convertToJson(headers, fileData));
     setIsLoading(false);
-    // };
-
-    // if (file) {
-    //   if (getExtension(file)) {
-    //     reader.readAsText(file.data);
-    //   } else {
-    //     alert("Invalid file input, Select Excel, CSV file");
-    //   }
-    // } else {
-    //   setData([]);
-    //   setColDefs([]);
-    // }
   }
-
-  // const [tableData, setTableData] = useState(() => data);
 
   const handleSaveCell = (cell, value) => {
     //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here
@@ -331,18 +268,16 @@ export default function MatchManager() {
     fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        // console.log(result);
         getFileList();
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => console.error("error", error));
   }
 
   function resetScreen() {
-    console.log("reset screen");
     setData([]);
     setIsLoading(false);
     setCSVFilename("");
-    setSelectedIndex('')
+    setSelectedIndex("");
   }
   //optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef(null);
@@ -351,28 +286,18 @@ export default function MatchManager() {
     rowVirtualizerInstanceRef.current?.scrollToIndex(0);
   }, [sorting]);
 
-  const handleSaveRow = async ({ exitEditingMode, row, values }) => {
-    //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
-    data[row.index] = values;
-    //send/receive api updates here
-    setData([...data]);
-    exitEditingMode(); //required to exit editing mode
-  };
-
   function ListItemTextC(fileListMod, index) {
-    console.log("fileList", fileListMod);
-    console.log("index", index);
-
     return (
       <ListItemText
         primary={fileListMod}
-        primaryTypographyProps={{ style: { whiteSpace: "normal", wordWrap: 'break-word'} }}
+        primaryTypographyProps={{
+          style: { whiteSpace: "normal", wordWrap: "break-word" },
+        }}
         secondary={"Last Save:" + fileLastMod[index]}
       />
     );
   }
 
-  //   const formRef = React.useRef();
   const uploadInputRef = React.useRef(null);
   return (
     <ThemeProvider theme={theme}>
@@ -387,8 +312,9 @@ export default function MatchManager() {
           }}
         >
           {/* <h2>Data Dictionary Mapping Manager</h2> */}
+
           <Grid container spacing={1}>
-            <Grid item md={12} lg={2} >
+            <Grid item md={12} lg={2}>
               <Box>
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
                   Data Dictionaries
@@ -440,35 +366,7 @@ export default function MatchManager() {
                     : fileList
                     ? fileList.map((value, index) => {
                         return (
-                          <ListItem
-                            key={value}
-                            
-                            // secondaryAction={
-                            // <IconButton
-                            //   onClick={(event) => deleteFile(event, value)}
-                            //   edge="end"
-                            //   aria-label="delete"
-                            // >
-                            //   <DeleteIcon />
-                            // </IconButton>
-                            // }
-                          >
-                            {/* <ListItemAvatar>
-                              <Avatar
-                                onClick={(event) => getFile(event, value)}
-                                selected={true}
-                                sx={{
-                                  ":hover": {
-                                    bgcolor: "primary.main", // theme.palette.primary.main
-                                    color: "white",
-                                    cursor: "pointer",
-                                  },
-                                }}
-                              >
-                                <FolderIcon />
-                              </Avatar>
-                            </ListItemAvatar> */}
-                            {/* {ListItemTextC(value, index)} */}
+                          <ListItem key={value}>
                             <ListItemButton
                               selected={selectedIndex === value}
                               onClick={(event) => getFile(event, value)}
@@ -477,13 +375,16 @@ export default function MatchManager() {
                                 <FolderIcon />
                               </ListItemIcon>
                               {ListItemTextC(value, index)}
-                              {/* <ListItemText primary="Inbox" /> */}
                             </ListItemButton>
                             <ListItemSecondaryAction>
-                            <IconButton edge="end" aria-label="delete" onClick={(event) => deleteFile(event, value)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </ListItemSecondaryAction>
+                              <IconButton
+                                edge="end"
+                                aria-label="delete"
+                                onClick={(event) => deleteFile(event, value)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </ListItemSecondaryAction>
                           </ListItem>
                         );
                       })
@@ -503,7 +404,11 @@ export default function MatchManager() {
                       alignItems: "center",
                     }}
                   >
-                    {data.length ? (
+                    {isLoading ? (
+                      <Box sx={{ width: "100%" }}>
+                        <LinearProgress />
+                      </Box>
+                    ) : data.length ? (
                       <Grid item xs={12}>
                         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                           <h2>{csvFilename}</h2>
@@ -616,8 +521,6 @@ export default function MatchManager() {
                                         flexWrap: "wrap",
                                       }}
                                     >
-                                      
-
                                       <Button
                                         variant="contained"
                                         color="primary"
@@ -656,15 +559,9 @@ export default function MatchManager() {
                                   )}
                                 />
                               </div>
-                              {/* ) : (
-                      ""
-                    )} */}
                             </Grid>
                             <Grid item></Grid>
                           </Grid>
-
-                          {/* </Grid> */}
-                          {/* </Grid> */}
                         </TabPanel>
                         <TabPanel value={value} index={1}>
                           Item Two
@@ -683,6 +580,7 @@ export default function MatchManager() {
                 </Grid>
               </Grid>
             </Grid>
+            {/* } */}
           </Grid>
         </Paper>
       </Container>
