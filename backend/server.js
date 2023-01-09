@@ -26,64 +26,53 @@ app.use(
 );
 
 app.get("/get_data_dictionary_list", function (req, res) {
-  console.log(
+  console.info(
     `Incoming Data Dictionary List GET request at ${new Date().toLocaleString()}`
   );
 
   const directoryPath = path.join(__dirname, "uploads");
   //passsing directoryPath and callback function
-  console.log(directoryPath);
-  let fileReturnObject = []
+  let fileReturnObject = [];
   fs.readdir(directoryPath, function (err, files) {
     //handling error
     if (err) {
-      return console.log("Unable to scan directory: " + err);
+      return console.error("Unable to scan directory: " + err);
     }
     //listing all files using forEach
-    console.log('files', files)
-    if(!files.length){
+    if (!files.length) {
       res.status(200).send({});
     }
     files.forEach(function (file, index) {
-      // Do whatever you want to do with the file
-      console.log(file);
       // fetch file details
       fs.stat(__dirname + "/uploads/" + file, (err, stats) => {
         if (err) {
-          console.log("error!", err);
+          console.error("error!", err);
           // throw err;
         } else {
           // print file last modified date
           let date = new Date(stats.mtime);
-          console.log(date.toLocaleString('en-US'));
-          date = date.toLocaleString('en-US')
+          // console.log(date.toLocaleString('en-US'));
+          date = date.toLocaleString("en-US");
           fileReturnObject.push({
             fileName: file,
-            lastModified: date
-          })
-
-          
-          console.log(`File Data Last Modified: ${stats.mtime}`);
-          // console.log(`File Status Last Modified: ${stats.ctime}`);
-          if(index === files.length - 1){
-            fileReturnObject.sort(function (a,b){
-              return new Date(b.lastModified) - new Date(a.lastModified)
-            })
+            lastModified: date,
+          });
+          if (index === files.length - 1) {
+            fileReturnObject.sort(function (a, b) {
+              return new Date(b.lastModified) - new Date(a.lastModified);
+            });
             res.status(200).send(fileReturnObject);
           }
         }
       });
     });
-
   });
 });
 
 app.post("/add_data_dictionary", function (req, res) {
-  console.log(
+  console.info(
     `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
   );
-  let ssColDefs, ssData, ssFileName;
-
   try {
     if (!req.files) {
       res.send({
@@ -93,8 +82,6 @@ app.post("/add_data_dictionary", function (req, res) {
     } else {
       //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
       let dataFile = req.files.dataFile;
-
-
 
       const extensions = ["xlsx", "xls", "csv"];
       const getExtension = (file) => {
@@ -118,7 +105,6 @@ app.post("/add_data_dictionary", function (req, res) {
       const importExcel = (req) => {
         const file = dataFile.name;
         csvFileName = file.name;
-        /* grab the first file */
         const workBook = XLSX.read(req.files.dataFile.data);
 
         //get first sheet
@@ -127,7 +113,7 @@ app.post("/add_data_dictionary", function (req, res) {
         //convert to array
         const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
         const headers = fileData[0];
-        if(!headers.includes('Approved')) headers.push('Approved')
+        if (!headers.includes("Approved")) headers.push("Approved");
         const heads = headers.map((head) => ({
           accessorKey: head.replaceAll(".", ""),
           header: head.replaceAll(".", ""),
@@ -165,13 +151,13 @@ app.post("/add_data_dictionary", function (req, res) {
       }
     }
   } catch (err) {
-    console.log("ERROR!", err);
+    console.error("ERROR!", err);
     res.status(500).send("Something went wrong");
   }
 });
 
 app.post("/remove_data_dictionary", function (req, res) {
-  console.log(
+  console.info(
     `Incoming Data Dictionary Remove POST request at ${new Date().toLocaleString()}`
   );
 
@@ -182,31 +168,35 @@ app.post("/remove_data_dictionary", function (req, res) {
         message: "No file",
       });
     } else {
-        let dataFile = './uploads/' + req.body.file;
-        fs.rename(__dirname + '/uploads/' + req.body.file, __dirname + "/deleted/" + req.body.file, (error) =>{
-          if(error) console.log(error)
+      let dataFile = "./uploads/" + req.body.file;
+      fs.rename(
+        __dirname + "/uploads/" + req.body.file,
+        __dirname +
+          "/deleted/" +
+          new Date().toJSON().slice(0, 23).replaceAll(":", "_") +
+          "_" +
+          req.body.file,
+        (error) => {
+          if (error) console.error(error);
           res.send({
             data: {
-              name: dataFile
+              message: "Success",
             },
           });
-        });
-        
-      };
-        
+        }
+      );
+    }
   } catch (err) {
-    console.log("ERROR!", err);
+    console.error("ERROR!", err);
     res.status(500).send("Something went wrong");
   }
 });
 
-
 app.post("/get_data_dictionary", function (req, res) {
-  console.log(
+  console.info(
     `Incoming Data Dictionary Add POST request at ${new Date().toLocaleString()}`
   );
-  let ssColDefs, ssData, ssFileName;
-    console.log(req.body.file)
+  let ssData
   try {
     if (!req.body.file) {
       res.send({
@@ -226,17 +216,17 @@ app.post("/get_data_dictionary", function (req, res) {
 
       const convertToJson = (headers, data) => {
         const rows = [];
-        // console.log(headers)
-        console.log('data',data)
-        // console.log('data', data)
-        // let indexList = [0,1,3,4,17,23,24]
-        let allowedColumns = ['Form Name', 'Field Label', 'Field Annotation', 'OMOP concept_name']
+        let allowedColumns = [
+          "Form Name",
+          "Field Label",
+          "Field Annotation",
+          "OMOP concept_name",
+        ];
         data.forEach((row) => {
           let rowData = {};
-          // console.log('row', row)
           row.forEach((element, index) => {
-            // console.log(headers)
-            if(allowedColumns.includes(headers[index])) rowData[headers[index]] = element;
+            if (allowedColumns.includes(headers[index]))
+              rowData[headers[index]] = element;
           });
           rows.push(rowData);
         });
@@ -245,26 +235,26 @@ app.post("/get_data_dictionary", function (req, res) {
 
       const importExcel = (req) => {
         /* grab the first file */
-        const workBook = XLSX.readFile(__dirname + '/uploads/' + dataFile);
+        const workBook = XLSX.readFile(__dirname + "/uploads/" + dataFile);
 
         //get first sheet
         const workSheetName = workBook.SheetNames[0];
         const workSheet = workBook.Sheets[workSheetName];
         //convert to array
-        const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1,sheetStubs: true });
-        console.log('fileData', fileData)
+        const fileData = XLSX.utils.sheet_to_json(workSheet, {
+          header: 1,
+          sheetStubs: true,
+        });
         const headers = fileData[0];
-        if(!headers.includes('Approved')) headers.push('Approved')
+        if (!headers.includes("Approved")) headers.push("Approved");
         const heads = headers.map((head) => ({
           accessorKey: head.replaceAll(".", ""),
           header: head.replaceAll(".", ""),
         }));
-        // console.log(heads)
         ssColDefs = heads;
         //removing header
         fileData.splice(0, 1);
         ssData = convertToJson(headers, fileData);
-        // console.log('ssData', ssData)
         //send response
         res.send({
           data: {
@@ -286,7 +276,7 @@ app.post("/get_data_dictionary", function (req, res) {
       }
     }
   } catch (err) {
-    console.log("ERROR!", err);
+    console.error("ERROR!", err);
     res.status(500).send("Something went wrong");
   }
 });
@@ -294,7 +284,7 @@ app.post("/get_data_dictionary", function (req, res) {
 var server = app.listen(appPort, function () {
   var host = server.address().address;
   var port = server.address().port;
-  console.log("Port to use:", port);
+  console.info("Port to use:", port);
   if (host === "::") host = "localhost";
-  console.log("Backend Express Server listening at http://%s:%s", host, port);
+  console.info("Backend Express Server listening at http://%s:%s", host, port);
 });
