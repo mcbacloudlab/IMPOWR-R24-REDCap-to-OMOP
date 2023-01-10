@@ -27,8 +27,10 @@ import { darken } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
 import LinearProgress from "@mui/material/LinearProgress";
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
+import CheckIcon from "@mui/icons-material/Check";
 
 var XLSX = require("xlsx");
 
@@ -39,20 +41,23 @@ export default function MatchManager() {
   const [data, setData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
   const [value, setValue] = useState(0);
-  const [fileList, setFileList] = React.useState([]);
-  const [fileLastMod, setFileLastMod] = React.useState([]);
-  const [getListError, setGetListError] = React.useState();
-  const [addSSError, setaddSSError] = React.useState();
-  const [open, setOpen] = React.useState(false);
+  const [fileList, setFileList] = useState([]);
+  const [fileLastMod, setFileLastMod] = useState([]);
+  const [getListError, setGetListError] = useState();
+  const [addSSError, setaddSSError] = useState();
+  const [open, setOpen] = useState(false);
   const [sorting, setSorting] = useState([]);
-  const [isLoading, setIsLoading] = useState();
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingErr, setIsSavingErr] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(1);
 
   const csvOptions = {
     fieldSeparator: ",",
     quoteStrings: '"',
     decimalSeparator: ".",
-    filename: csvFilename.replace(/\.[^/.]+$/, ''),
+    filename: csvFilename.replace(/\.[^/.]+$/, ""),
     showLabels: true,
     useBom: false,
     useKeysAsHeaders: false,
@@ -137,7 +142,7 @@ export default function MatchManager() {
       .then((response) => response.text())
       .then((result) => {
         setIsLoading(false);
-        setData('')
+        setData("");
         importExcel(JSON.parse(result));
       })
       .catch((error) => {
@@ -258,6 +263,51 @@ export default function MatchManager() {
     setIsLoading(false);
   };
 
+  const handleSaveRow = async ({ exitEditingMode, row, values }) => {
+    //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
+    data[row.index] = values;
+    //send/receive api updates here
+    setData([...data]);
+    saveFile();
+    exitEditingMode(); //required to exit editing mode
+  };
+
+  function saveFile() {
+    console.log("Saving file...");
+    setIsSaving(true);
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      data: { fileName: csvFilename, fileData: data },
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/save_data_dictionary", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        setSaveSuccess(true);
+        setTimeout(function () {
+          setSaveSuccess(false);
+        }, 2000);
+
+        setIsSaving(false);
+        setIsSavingErr(false);
+      })
+      .catch((error) => {
+        setIsSaving(false);
+        setIsSavingErr(true);
+        console.log("error", error);
+      });
+  }
+
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
@@ -275,16 +325,16 @@ export default function MatchManager() {
       .then((response) => response.text())
       .then((result) => {
         getFileList();
-        resetScreen()
+        resetScreen();
       })
       .catch((error) => {
-        resetScreen()
-        console.error("error", error)
+        resetScreen();
+        console.error("error", error);
       });
   }
 
   function resetScreen() {
-    setData('');
+    setData("");
     setIsLoading(false);
     setCSVFilename("");
     setSelectedIndex("");
@@ -416,8 +466,8 @@ export default function MatchManager() {
                     }}
                   >
                     {isLoading ? (
-                      <Box sx={{ width: "100%" }}>
-                        <LinearProgress />
+                      <Box sx={{ marginTop: "100px", width: "100%" }}>
+                        <CircularProgress size={80} thickness={4} />
                       </Box>
                     ) : data.length ? (
                       <Grid item xs={12}>
@@ -465,16 +515,16 @@ export default function MatchManager() {
                                     // pagination: { pageSize: 50, pageIndex: 0 },
                                   }}
                                   enableEditing
-                                  // onEditingRowSave={handleSaveRow}
-                                  editingMode="cell"
-                                  muiTableBodyCellEditTextFieldProps={({
-                                    cell,
-                                  }) => ({
-                                    //onBlur is more efficient, but could use onChange instead
-                                    onBlur: (event) => {
-                                      handleSaveCell(cell, event.target.value);
-                                    },
-                                  })}
+                                  onEditingRowSave={handleSaveRow}
+                                  editingMode="modal"
+                                  // muiTableBodyCellEditTextFieldProps={({
+                                  //   cell,
+                                  // }) => ({
+                                  //   //onBlur is more efficient, but could use onChange instead
+                                  //   onBlur: (event) => {
+                                  //     handleSaveCell(cell, event.target.value);
+                                  //   },
+                                  // })}
                                   enableColumnResizing={true}
                                   enableSorting={true}
                                   enableStickyHeader
@@ -536,9 +586,21 @@ export default function MatchManager() {
                                         variant="contained"
                                         color="primary"
                                         component="label"
-                                        startIcon={<SaveIcon />}
+                                        startIcon={
+                                          saveSuccess ? (
+                                            <CheckIcon />
+                                          ) : isSaving ? (
+                                            <CircularProgress
+                                              size={20}
+                                              thickness={4}
+                                              color="secondary"
+                                            />
+                                          ) : (
+                                            <SaveIcon />
+                                          )
+                                        }
                                         onClick={(event) =>
-                                          resetScreen(event, value)
+                                          saveFile(event, value)
                                         }
                                       >
                                         Save
@@ -553,18 +615,25 @@ export default function MatchManager() {
                                       >
                                         Export
                                       </Button>
+                                      <Typography
+                                        color="textSecondary"
+                                        variant="subtitle2"
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        Last Saved At:{" "}
+                                      </Typography>
 
                                       <Box style={{ marginLeft: "auto" }}>
                                         <Button
                                           variant="outlined"
                                           color="error"
-                                          startIcon={<CloseIcon/>}
+                                          startIcon={<CloseIcon />}
                                           component="label"
                                           onClick={(event) =>
                                             resetScreen(event, value)
                                           }
                                         >
-                                          Close
+                                          Close File
                                         </Button>
                                       </Box>
                                     </Box>
