@@ -26,7 +26,7 @@ import MuiAlert from "@mui/material/Alert";
 import { darken } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
-import LinearProgress from "@mui/material/LinearProgress";
+// import LinearProgress from "@mui/material/LinearProgress";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -39,6 +39,7 @@ const theme = createTheme();
 export default function MatchManager() {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
+  const [approvedData, setApprovedData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
   const [value, setValue] = useState(0);
   const [fileList, setFileList] = useState([]);
@@ -126,9 +127,10 @@ export default function MatchManager() {
       });
   }
 
-  function getFile(e, value) {
+  function getFile(e, value, switching) {
     setIsLoading(true);
     setSelectedIndex(value);
+    if (!switching) handleChange(e, 0); //reset tab to default tab
     var formdata = new FormData();
     formdata.append("file", value);
 
@@ -143,6 +145,7 @@ export default function MatchManager() {
       .then((result) => {
         setIsLoading(false);
         setData("");
+        setApprovedData("");
         importExcel(JSON.parse(result));
       })
       .catch((error) => {
@@ -165,14 +168,23 @@ export default function MatchManager() {
     setOpen(false);
   };
 
-  const convertToJson = (headers, data) => {
+  const convertToJson = (headers, data, approved) => {
     const rows = [];
+    let approvedIdx = headers.indexOf("Approved");
     data.forEach((row) => {
       let rowData = {};
       row.forEach((element, index) => {
-        rowData[headers[index]] = element;
+        if (approved) {
+          if (row[approvedIdx] === "Y") {
+            rowData[headers[index]] = element;
+          }
+        } else {
+          rowData[headers[index]] = element;
+        }
       });
-      rows.push(rowData);
+      if (Object.keys(rowData).length !== 0) {
+        rows.push(rowData);
+      }
     });
     return rows;
   };
@@ -243,25 +255,26 @@ export default function MatchManager() {
     //convert to array
     const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
     const headers = fileData[0];
+
     const heads = headers.map((head) => ({
       accessorKey: head.replaceAll(".", ""),
       header: head.replaceAll(".", ""),
     }));
     setColDefs(heads);
-
     //removing header
     fileData.splice(0, 1);
     setData(convertToJson(headers, fileData));
+    setApprovedData(convertToJson(headers, fileData, true));
     setIsLoading(false);
   }
 
-  const handleSaveCell = (cell, value) => {
-    //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here
-    data[cell.row.index][cell.column.id] = value;
-    //send/receive api updates here
-    setData([...data]); //re-render with new data
-    setIsLoading(false);
-  };
+  // const handleSaveCell = (cell, value) => {
+  //   //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here
+  //   data[cell.row.index][cell.column.id] = value;
+  //   //send/receive api updates here
+  //   setData([...data]); //re-render with new data
+  //   setIsLoading(false);
+  // };
 
   const handleSaveRow = async ({ exitEditingMode, row, values }) => {
     //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
@@ -273,7 +286,6 @@ export default function MatchManager() {
   };
 
   function saveFile() {
-    console.log("Saving file...");
     setIsSaving(true);
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -292,11 +304,10 @@ export default function MatchManager() {
     fetch("http://localhost:5000/save_data_dictionary", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        console.log(result);
         setSaveSuccess(true);
         setTimeout(function () {
           setSaveSuccess(false);
-        }, 2000);
+        }, 5000);
 
         setIsSaving(false);
         setIsSavingErr(false);
@@ -304,7 +315,7 @@ export default function MatchManager() {
       .catch((error) => {
         setIsSaving(false);
         setIsSavingErr(true);
-        console.log("error", error);
+        console.info("error", error);
       });
   }
 
@@ -335,6 +346,7 @@ export default function MatchManager() {
 
   function resetScreen() {
     setData("");
+    setApprovedData("");
     setIsLoading(false);
     setCSVFilename("");
     setSelectedIndex("");
@@ -379,23 +391,27 @@ export default function MatchManager() {
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
                   Data Dictionaries
                 </Typography>
-                <Button
-                  variant="contained"
-                  component="label"
-                  startIcon={<AddIcon />}
-                  onClick={() =>
-                    uploadInputRef.current && uploadInputRef.current.click()
-                  }
-                >
-                  Add Data Dictionary
-                  <input
-                    id="fileUpload"
-                    // onChange={(e)=>{importExcel(e)}}
-                    onChange={uploadDD}
-                    type="file"
-                    hidden
-                  />
-                </Button>
+                {getListError ? (
+                  getListError
+                ) : (
+                  <Button
+                    variant="contained"
+                    component="label"
+                    startIcon={<AddIcon />}
+                    onClick={() =>
+                      uploadInputRef.current && uploadInputRef.current.click()
+                    }
+                  >
+                    Add Data Dictionary
+                    <input
+                      id="fileUpload"
+                      // onChange={(e)=>{importExcel(e)}}
+                      onChange={uploadDD}
+                      type="file"
+                      hidden
+                    />
+                  </Button>
+                )}
 
                 {addSSError ? (
                   <Snackbar
@@ -420,10 +436,12 @@ export default function MatchManager() {
                   dense={true}
                   sx={{
                     color: "success.main",
+                    maxHeight: "70vh",
+                    overflow: "auto",
                   }}
                 >
                   {getListError
-                    ? getListError
+                    ? ""
                     : fileList
                     ? fileList.map((value, index) => {
                         return (
@@ -469,7 +487,7 @@ export default function MatchManager() {
                       <Box sx={{ marginTop: "100px", width: "100%" }}>
                         <CircularProgress size={80} thickness={4} />
                       </Box>
-                    ) : data.length ? (
+                    ) : data.length || approvedData.length ? (
                       <Grid item xs={12}>
                         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                           <h2>{csvFilename}</h2>
@@ -480,8 +498,20 @@ export default function MatchManager() {
                             onChange={handleChange}
                             aria-label="basic tabs example"
                           >
-                            <Tab label="Needs Review" {...a11yProps(0)} />
-                            <Tab label="Approved" {...a11yProps(1)} />
+                            <Tab
+                              onClick={(event) =>
+                                getFile(event, csvFilename, true)
+                              }
+                              label="Needs Review"
+                              {...a11yProps(0)}
+                            />
+                            <Tab
+                              onClick={(event) =>
+                                getFile(event, csvFilename, true)
+                              }
+                              label="Approved"
+                              {...a11yProps(1)}
+                            />
                           </Tabs>
                         </Box>
                         <TabPanel
@@ -496,6 +526,8 @@ export default function MatchManager() {
                                 <MaterialReactTable
                                   columns={columns}
                                   data={data} //10,000 rows
+                                  enableDensityToggle={false} //density does not work with memoized cells
+                                  memoMode="cells" // memoize table cells to improve render performance, but break some features
                                   enableBottomToolbar={false}
                                   enableGlobalFilterModes
                                   enablePagination={false}
@@ -645,11 +677,166 @@ export default function MatchManager() {
                           </Grid>
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                          Item Two
+                          <Grid container id="dvCSV">
+                            <Grid item xs={12}>
+                              {/* <div sx={{ minWidth: "800px" }}> */}
+                              <div>
+                                <MaterialReactTable
+                                  columns={columns}
+                                  data={approvedData} //10,000 rows
+                                  enableDensityToggle={false} //density does not work with memoized cells
+                                  memoMode="cells" // memoize table cells to improve render performance, but break some features
+                                  enableBottomToolbar={false}
+                                  enableGlobalFilterModes
+                                  enablePagination={false}
+                                  // enableRowNumbers
+                                  enableRowVirtualization
+                                  muiTableContainerProps={{
+                                    sx: { maxHeight: "600px" },
+                                  }}
+                                  onSortingChange={setSorting}
+                                  // state={{ isLoading, sorting }}
+                                  rowVirtualizerInstanceRef={
+                                    rowVirtualizerInstanceRef
+                                  } //optional
+                                  rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
+                                  initialState={{
+                                    density: "compact",
+                                    // pagination: { pageSize: 50, pageIndex: 0 },
+                                  }}
+                                  enableEditing
+                                  onEditingRowSave={handleSaveRow}
+                                  editingMode="modal"
+                                  // muiTableBodyCellEditTextFieldProps={({
+                                  //   cell,
+                                  // }) => ({
+                                  //   //onBlur is more efficient, but could use onChange instead
+                                  //   onBlur: (event) => {
+                                  //     handleSaveCell(cell, event.target.value);
+                                  //   },
+                                  // })}
+                                  enableColumnResizing={true}
+                                  enableSorting={true}
+                                  enableStickyHeader
+                                  muiTablePaperProps={{
+                                    elevation: 2, //change the mui box shadow
+                                    //customize paper styles
+                                    sx: {
+                                      borderRadius: "0",
+                                      border: "1px solid #e0e0e0",
+                                    },
+                                  }}
+                                  muiTableBodyProps={{
+                                    sx: (theme) => ({
+                                      "& tr:nth-of-type(odd)": {
+                                        backgroundColor: darken(
+                                          theme.palette.background.default,
+                                          0.1
+                                        ),
+                                      },
+                                    }),
+                                  }}
+                                  muiTableHeadProps={{
+                                    sx: (theme) => ({
+                                      "& tr": {
+                                        backgroundColor: "#4a4a4a",
+                                        color: "#ffffff",
+                                      },
+                                    }),
+                                  }}
+                                  muiTableHeadCellProps={{
+                                    sx: (theme) => ({
+                                      div: {
+                                        backgroundColor: "#4a4a4a",
+                                        color: "#ffffff",
+                                      },
+                                    }),
+                                  }}
+                                  defaultColumn={{
+                                    minSize: 20, //allow columns to get smaller than default
+                                    maxSize: 9000, //allow columns to get larger than default
+                                    size: 380, //make columns wider by default
+                                  }}
+                                  // enableStickyFooter
+
+                                  positionToolbarAlertBanner="bottom"
+                                  renderTopToolbarCustomActions={({
+                                    table,
+                                  }) => (
+                                    <Box
+                                      width="100%"
+                                      sx={{
+                                        display: "flex",
+                                        gap: "1rem",
+                                        p: "0.5rem",
+                                        flexWrap: "wrap",
+                                      }}
+                                    >
+                                      <Button
+                                        variant="contained"
+                                        color="primary"
+                                        component="label"
+                                        startIcon={
+                                          saveSuccess ? (
+                                            <CheckIcon />
+                                          ) : isSaving || isSavingErr ? (
+                                            <CircularProgress
+                                              size={20}
+                                              thickness={4}
+                                              color="secondary"
+                                            />
+                                          ) : (
+                                            <SaveIcon />
+                                          )
+                                        }
+                                        onClick={(event) =>
+                                          saveFile(event, value)
+                                        }
+                                      >
+                                        Save
+                                      </Button>
+
+                                      <Button
+                                        color="success"
+                                        //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+                                        onClick={handleExportData}
+                                        startIcon={<FileDownloadIcon />}
+                                        variant="contained"
+                                      >
+                                        Export
+                                      </Button>
+                                      <Typography
+                                        color="textSecondary"
+                                        variant="subtitle2"
+                                        style={{ marginLeft: "auto" }}
+                                      >
+                                        Last Saved At:{" "}
+                                      </Typography>
+
+                                      <Box style={{ marginLeft: "auto" }}>
+                                        <Button
+                                          variant="outlined"
+                                          color="error"
+                                          startIcon={<CloseIcon />}
+                                          component="label"
+                                          onClick={(event) =>
+                                            resetScreen(event, value)
+                                          }
+                                        >
+                                          Close File
+                                        </Button>
+                                      </Box>
+                                    </Box>
+                                  )}
+                                />
+                              </div>
+                            </Grid>
+                            <Grid item></Grid>
+                          </Grid>
                         </TabPanel>
-                        <TabPanel value={value} index={2}>
+                        {/* <TabPanel value={value} index={2}>
                           Item Three
-                        </TabPanel>
+                        </TabPanel> */}
                       </Grid>
                     ) : (
                       <Typography>

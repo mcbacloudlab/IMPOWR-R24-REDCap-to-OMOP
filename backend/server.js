@@ -13,8 +13,8 @@ const path = require("path");
 const XLSX = require("xlsx");
 
 let appPort = process.env.EXPRESS_PORT;
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.use(bodyParser.json({ limit :'50mb'}));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
 app.use(morgan("dev"));
 
@@ -25,10 +25,12 @@ app.use(
   })
 );
 
-async function getFileDetails(files) {
+async function getFileDetails(files, readDir) {
+  if (!readDir) readDir = __dirname + "/uploads/";
+
   const filePromises = files.map((file) => {
     return new Promise((resolve, reject) => {
-      fs.stat(__dirname + "/uploads/" + file, (err, stats) => {
+      fs.stat(readDir + file, (err, stats) => {
         if (err) {
           return reject(err);
         }
@@ -47,13 +49,24 @@ async function getFileDetails(files) {
 }
 
 app.get("/get_data_dictionary_list", function (req, res) {
-  const directoryPath = path.join(__dirname, "uploads");
-  fs.readdir(__dirname + "/uploads/", async (err, files) => {
+  // const directoryPath = path.join(__dirname, "uploads");
+  console.log("req", req.query);
+  console.log(req.query.archived);
+  let readDir;
+  if (req.query.archived) {
+    console.log("get del");
+    readDir = __dirname + "/deleted/";
+  } else {
+    console.log("get uploads");
+    readDir = __dirname + "/uploads/";
+  }
+  console.log("readDir", readDir);
+  fs.readdir(readDir, async (err, files) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error reading files");
     }
-    const fileDetails = await getFileDetails(files);
+    const fileDetails = await getFileDetails(files, readDir);
     fileDetails.sort(
       (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
     );
@@ -82,8 +95,6 @@ app.post("/add_data_dictionary", function (req, res) {
           return res.status(500).send("Error reading files");
         }
         const fileDetails = await getFileDetails(files);
-        // console.log(fileDetails);
-        // console.log(req.files.dataFile.name);
         const exists = fileDetails.some(
           (item) => item["fileName"] === req.files.dataFile.name
         );
@@ -117,12 +128,36 @@ app.post("/add_data_dictionary", function (req, res) {
         const rows = [];
         data.forEach((row) => {
           let rowData = {};
-          row.forEach((element, index) => {
-            rowData[headers[index]] = element;
-          });
+          row.push("");
+          for (let i = 0; i < row.length; i++) {
+            rowData[headers[i]] = row[i];
+          }
           rows.push(rowData);
         });
-        return rows;
+
+        //append approved to final rows
+        rows.forEach((row, index) => {
+          if (!row["Approved"]) row["Approved"] = "";
+          if (index == Object.keys(rows).length - 1) {
+            var worksheet2 = XLSX.utils.json_to_sheet(rows);
+            let workbook2 = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook2, worksheet2, "Dates");
+            XLSX.writeFile(workbook2, "./uploads/" + dataFile.name, {
+              compression: true,
+            });
+            //send response
+            res.send({
+              status: true,
+              message: "File is uploaded",
+              data: {
+                name: dataFile.name,
+                mimetype: dataFile.mimetype,
+                size: dataFile.size,
+              },
+            });
+            return rows;
+          }
+        });
       };
 
       const importExcel = (req) => {
@@ -149,21 +184,21 @@ app.post("/add_data_dictionary", function (req, res) {
         //Use the mv() method to place the file in the upload directory (i.e. "uploads")
         // Package and Release Data (`writeFile` tries to write and save an XLSB file)
         // XLSX.writeFile(ssData, "./uploads/" + "Report.csv");
-        dataFile.mv("./uploads/" + dataFile.name, (err) => {
-          if (err) throw err;
-          else {
-            //send response
-            res.send({
-              status: true,
-              message: "File is uploaded",
-              data: {
-                name: dataFile.name,
-                mimetype: dataFile.mimetype,
-                size: dataFile.size,
-              },
-            });
-          }
-        });
+        // dataFile.mv("./uploads/" + dataFile.name, (err) => {
+        //   if (err) throw err;
+        //   else {
+        //     //send response
+        //     res.send({
+        //       status: true,
+        //       message: "File is uploaded",
+        //       data: {
+        //         name: dataFile.name,
+        //         mimetype: dataFile.mimetype,
+        //         size: dataFile.size,
+        //       },
+        //     });
+        //   }
+        // });
       };
     }
   } catch (err) {
@@ -206,6 +241,13 @@ app.post("/remove_data_dictionary", function (req, res) {
 
 app.post("/get_data_dictionary", function (req, res) {
   let ssData;
+  console.log("body", req.query);
+  let readDir;
+  if (req.query.archived) {
+    readDir = __dirname + "/deleted/";
+  } else {
+    readDir = __dirname + "/uploads/";
+  }
   try {
     if (!req.body.file) {
       res.send({
@@ -230,6 +272,7 @@ app.post("/get_data_dictionary", function (req, res) {
           "Field Label",
           "Field Annotation",
           "OMOP concept_name",
+          "Approved",
         ];
         data.forEach((row) => {
           let rowData = {};
@@ -244,7 +287,7 @@ app.post("/get_data_dictionary", function (req, res) {
 
       const importExcel = (req) => {
         /* grab the first file */
-        const workBook = XLSX.readFile(__dirname + "/uploads/" + dataFile);
+        const workBook = XLSX.readFile(readDir + dataFile);
 
         //get first sheet
         const workSheetName = workBook.SheetNames[0];
@@ -253,6 +296,7 @@ app.post("/get_data_dictionary", function (req, res) {
         const fileData = XLSX.utils.sheet_to_json(workSheet, {
           header: 1,
           sheetStubs: true,
+          defval: "",
         });
         const headers = fileData[0];
         if (!headers.includes("Approved")) headers.push("Approved");
@@ -291,8 +335,6 @@ app.post("/get_data_dictionary", function (req, res) {
 });
 
 app.post("/save_data_dictionary", function (req, res) {
-  console.log("save data dic");
-  // console.log(req.body)
   const directoryPath = path.join(__dirname, "uploads");
 
   try {
@@ -308,15 +350,11 @@ app.post("/save_data_dictionary", function (req, res) {
       //first check to see if filename already exists
       //passsing directoryPath and callback function
       fs.readdir(__dirname + "/uploads/", async (err, files) => {
-        // console.log('read dir')
         if (err) {
           console.error(err);
           return res.status(500).send("Error reading files");
         } else {
-          console.log("get file details");
           const fileDetails = await getFileDetails(files);
-          // console.log("fileDetails", fileDetails);
-          // console.log("fileName", req.body.data.fileName);
           const exists = fileDetails.some(
             (item) => item["fileName"] === req.body.data.fileName
           );
@@ -324,26 +362,29 @@ app.post("/save_data_dictionary", function (req, res) {
             //overwrite and save file with new contents
             console.log("File exists now saving...");
             //convert json data to csv/xlsx
-            let fileData = req.body.data.fileData
+            let fileData = req.body.data.fileData;
             var worksheet = XLSX.utils.json_to_sheet(fileData);
-            var workbook =  XLSX.utils.book_new();
+            var workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Dates");
-            console.log('Writing file...')
+            console.log("Writing file...");
             /* create an XLSX file and try to save to Presidents.xlsx */
-          XLSX.writeFile(workbook, __dirname + "/uploads/" + req.body.data.fileName, { compression: true });
+            XLSX.writeFile(
+              workbook,
+              __dirname + "/uploads/" + req.body.data.fileName,
+              { compression: true }
+            );
             // XLSX.writeFile(workbook, __dirname + "/uploads/" + 'file.xlsx', function(err) {
             //   if(err) console.log(err)
             //   else{
             //     console.log('File saved!')
-                res.status(200).send({
-                  status: true,
-                  message: "File saved",
-                });
-              // }
+            res.status(200).send({
+              status: true,
+              message: "File saved",
+            });
+            // }
             // });
-            
           } else {
-            console.log("File does not exist. not saving.");
+            // console.log("File does not exist. not saving.");
             res.status(500).send({
               status: false,
               message: "File does not exist",

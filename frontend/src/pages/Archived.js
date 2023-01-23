@@ -17,10 +17,10 @@ import SaveIcon from "@mui/icons-material/Save";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import IconButton from "@mui/material/IconButton";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+// import IconButton from "@mui/material/IconButton";
+// import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import FolderIcon from "@mui/icons-material/Folder";
-import DeleteIcon from "@mui/icons-material/Delete";
+// import DeleteIcon from "@mui/icons-material/Delete";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { darken } from "@mui/material";
@@ -96,7 +96,10 @@ export default function Archived() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/get_data_dictionary_list", requestOptions)
+    fetch(
+      "http://localhost:5000/get_data_dictionary_list?archived=true",
+      requestOptions
+    )
       .then((response) => response.json())
       .then((result) => {
         let resultFiles = [];
@@ -130,11 +133,14 @@ export default function Archived() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/get_data_dictionary", requestOptions)
+    fetch(
+      "http://localhost:5000/get_data_dictionary?archived=true",
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
         setIsLoading(false);
-        setData('')
+        setData("");
         importExcel(JSON.parse(result));
       })
       .catch((error) => {
@@ -198,34 +204,34 @@ export default function Archived() {
     };
   }
 
-  const uploadDD = (e) => {
-    var formdata = new FormData();
-    let fileInput = e.target;
-    formdata.append("dataFile", fileInput.files[0]);
+  // const uploadDD = (e) => {
+  //   var formdata = new FormData();
+  //   let fileInput = e.target;
+  //   formdata.append("dataFile", fileInput.files[0]);
 
-    var requestOptions = {
-      method: "POST",
-      body: formdata,
-      redirect: "follow",
-    };
+  //   var requestOptions = {
+  //     method: "POST",
+  //     body: formdata,
+  //     redirect: "follow",
+  //   };
 
-    fetch("http://localhost:5000/add_data_dictionary", requestOptions)
-      .then((response) => {
-        if (response.ok) response.text();
-        else throw new Error("Upload Error");
-      })
-      .then((result) => {
-        getFileList();
-        setaddSSError("");
-        e.target.value = null;
-      })
-      .catch((error) => {
-        setaddSSError("Upload Error");
-        setOpen(true);
-        console.info("error", error);
-        e.target.value = null;
-      });
-  };
+  //   fetch("http://localhost:5000/add_data_dictionary", requestOptions)
+  //     .then((response) => {
+  //       if (response.ok) response.text();
+  //       else throw new Error("Upload Error");
+  //     })
+  //     .then((result) => {
+  //       getFileList();
+  //       setaddSSError("");
+  //       e.target.value = null;
+  //     })
+  //     .catch((error) => {
+  //       setaddSSError("Upload Error");
+  //       setOpen(true);
+  //       console.info("error", error);
+  //       e.target.value = null;
+  //     });
+  // };
 
   function importExcel(e) {
     const file = e.data;
@@ -259,29 +265,29 @@ export default function Archived() {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-  function deleteFile(e, value) {
-    var formdata = new FormData();
-    formdata.append("file", value);
-    var requestOptions = {
-      method: "POST",
-      body: formdata,
-      redirect: "follow",
-    };
+  // function deleteFile(e, value) {
+  //   var formdata = new FormData();
+  //   formdata.append("file", value);
+  //   var requestOptions = {
+  //     method: "POST",
+  //     body: formdata,
+  //     redirect: "follow",
+  //   };
 
-    fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        getFileList();
-        resetScreen()
-      })
-      .catch((error) => {
-        resetScreen()
-        console.error("error", error)
-      });
-  }
+  //   fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
+  //     .then((response) => response.text())
+  //     .then((result) => {
+  //       getFileList();
+  //       resetScreen()
+  //     })
+  //     .catch((error) => {
+  //       resetScreen()
+  //       console.error("error", error)
+  //     });
+  // }
 
   function resetScreen() {
-    setData('');
+    setData("");
     setIsLoading(false);
     setCSVFilename("");
     setSelectedIndex("");
@@ -305,7 +311,7 @@ export default function Archived() {
     );
   }
 
-  const uploadInputRef = React.useRef(null);
+  // const uploadInputRef = React.useRef(null);
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
@@ -326,22 +332,6 @@ export default function Archived() {
                 <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
                   Archived Data Dictionaries
                 </Typography>
-                {/* <Button
-                  variant="contained"
-                  component="label"
-                  onClick={() =>
-                    uploadInputRef.current && uploadInputRef.current.click()
-                  }
-                >
-                  Add Data Dictionary
-                  <input
-                    id="fileUpload"
-                    // onChange={(e)=>{importExcel(e)}}
-                    onChange={uploadDD}
-                    type="file"
-                    hidden
-                  />
-                </Button> */}
 
                 {addSSError ? (
                   <Snackbar
@@ -366,6 +356,8 @@ export default function Archived() {
                   dense={true}
                   sx={{
                     color: "success.main",
+                    maxHeight: "70vh",
+                    overflow: "auto",
                   }}
                 >
                   {getListError
