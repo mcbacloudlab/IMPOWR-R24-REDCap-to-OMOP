@@ -52,7 +52,8 @@ export default function MatchManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingErr, setIsSavingErr] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedFile, setSelectedFile] = useState(1);
+  const [selectedTabIdx, setSelectedTabIdx] = useState(0);
 
   const csvOptions = {
     fieldSeparator: ",",
@@ -75,6 +76,9 @@ export default function MatchManager() {
 
   const handleExportData = () => {
     let _data = data;
+    if(selectedTabIdx) {
+      _data = approvedData //change export data if on approved tab
+    }
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
         if (!acc.includes(key)) acc.push(key);
@@ -127,9 +131,12 @@ export default function MatchManager() {
       });
   }
 
-  function getFile(e, value, switching) {
+
+  function getFile(e, value, switching, panelIndex) {
     setIsLoading(true);
-    setSelectedIndex(value);
+    setSelectedFile(value);
+    if(!panelIndex) panelIndex = 0
+    setSelectedTabIdx(panelIndex)
     if (!switching) handleChange(e, 0); //reset tab to default tab
     var formdata = new FormData();
     formdata.append("file", value);
@@ -349,7 +356,7 @@ export default function MatchManager() {
     setApprovedData("");
     setIsLoading(false);
     setCSVFilename("");
-    setSelectedIndex("");
+    setSelectedFile("");
   }
   //optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef(null);
@@ -447,7 +454,7 @@ export default function MatchManager() {
                         return (
                           <ListItem key={value}>
                             <ListItemButton
-                              selected={selectedIndex === value}
+                              selected={selectedFile === value}
                               onClick={(event) => getFile(event, value)}
                             >
                               <ListItemIcon>
@@ -500,14 +507,14 @@ export default function MatchManager() {
                           >
                             <Tab
                               onClick={(event) =>
-                                getFile(event, csvFilename, true)
+                                getFile(event, csvFilename, true, 0)
                               }
                               label="Needs Review"
                               {...a11yProps(0)}
                             />
                             <Tab
                               onClick={(event) =>
-                                getFile(event, csvFilename, true)
+                                getFile(event, csvFilename, true, 1)
                               }
                               label="Approved"
                               {...a11yProps(1)}

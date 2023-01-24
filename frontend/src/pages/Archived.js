@@ -302,7 +302,7 @@ export default function Archived() {
   function ListItemTextC(fileListMod, index) {
     return (
       <ListItemText
-        primary={fileListMod}
+        primary={fileListMod.substring(24,fileListMod.length)}
         primaryTypographyProps={{
           style: { whiteSpace: "normal", wordWrap: "break-word" },
         }}
