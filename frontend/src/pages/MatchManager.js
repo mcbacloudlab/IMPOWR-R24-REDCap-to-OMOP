@@ -535,19 +535,19 @@ export default function MatchManager() {
                                   data={data} //10,000 rows
                                   enableDensityToggle={false} //density does not work with memoized cells
                                   memoMode="cells" // memoize table cells to improve render performance, but break some features
-                                  enableBottomToolbar={false}
-                                  enableGlobalFilterModes
-                                  enablePagination={false}
+                                  enableBottomToolbar={true}
+                                  enableGlobalFilterModes={true}
+                                  enablePagination={true}
                                   // enableRowNumbers
-                                  enableRowVirtualization
+                                  // enableRowVirtualization
                                   muiTableContainerProps={{
                                     sx: { maxHeight: "600px" },
                                   }}
                                   onSortingChange={setSorting}
                                   // state={{ isLoading, sorting }}
-                                  rowVirtualizerInstanceRef={
-                                    rowVirtualizerInstanceRef
-                                  } //optional
+                                  // rowVirtualizerInstanceRef={
+                                  //   rowVirtualizerInstanceRef
+                                  // } //optional
                                   rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
                                   initialState={{
                                     density: "compact",
@@ -693,20 +693,20 @@ export default function MatchManager() {
                                   data={approvedData} //10,000 rows
                                   enableDensityToggle={false} //density does not work with memoized cells
                                   memoMode="cells" // memoize table cells to improve render performance, but break some features
-                                  enableBottomToolbar={false}
-                                  enableGlobalFilterModes
-                                  enablePagination={false}
+                                  enableBottomToolbar={true}
+                                  enableGlobalFilterModes={true}
+                                  enablePagination={true}
                                   // enableRowNumbers
-                                  enableRowVirtualization
+                                  // enableRowVirtualization
                                   muiTableContainerProps={{
                                     sx: { maxHeight: "600px" },
                                   }}
                                   onSortingChange={setSorting}
                                   // state={{ isLoading, sorting }}
-                                  rowVirtualizerInstanceRef={
-                                    rowVirtualizerInstanceRef
-                                  } //optional
-                                  rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
+                                  // rowVirtualizerInstanceRef={
+                                  //   rowVirtualizerInstanceRef
+                                  // } //optional
+                                  // rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
                                   initialState={{
                                     density: "compact",
                                     // pagination: { pageSize: 50, pageIndex: 0 },
