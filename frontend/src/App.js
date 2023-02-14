@@ -23,7 +23,7 @@ function App() {
             <div>
               <SearchAppBar />
               <Routes>
-                {/* <Route path="/" element={<MatchManager></MatchManager>} exact/> */}
+                <Route path="/" element={<MatchManager></MatchManager>} exact/>
                 <Route
                   path="/redcap_omop/match-manager"
                   element={<MatchManager></MatchManager>}
