@@ -20,41 +20,46 @@ const pgClient = new Client({
 });
 
 let pgResults;
-pgClient.connect((err) => {
+
+pgClient.connect(async (err) => {
   if (err) {
     console.error("connection error", err.stack);
   } else {
     console.info("Connected to PostgreSQL");
+    try {
+      const res = await query();
+      console.info('Got PostGres rows: ', res.rows.length)
+      pgResults = res.rows;
+      await startMongo();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      pgClient.end();
+    }
   }
 });
 
-const query = () =>
-  new Promise((resolve, reject) => {
-    pgClient.query(
-      `SELECT * FROM public.concept where vocabulary_id = 'SNOMED' limit 30 `,
-      (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res);
-        }
+const query = () => new Promise((resolve, reject) => {
+  console.info("Querying Postgres DB...");
+  pgClient.query(
+    `SELECT * 
+     FROM public.concept 
+     WHERE vocabulary_id = 'SNOMED' 
+     AND standard_concept = 'S'
+     `,
+    (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
       }
-    );
-  });
+    }
+  );
+});
 
-(async () => {
-  try {
-    const res = await query();
-    pgResults = res.rows;
-    startMongo();
-  } catch (error) {
-    console.error(error);
-  } finally {
-    pgClient.end();
-  }
-})();
 
 async function startMongo() {
+  console.info("Start Mongo");
   // Connection URL
   const url = "mongodb://127.0.0.1:27017";
   const dbName = "GPT3_Embeddings";
@@ -106,14 +111,14 @@ const bar = new ProgressBar.Bar(
 
 async function getData(snomedDataCollection) {
   console.info("Loading DBs...takes a bit of time.");
-  const cursor = snomedDataCollection.find({});
-  const snomed_data_docs = await cursor.toArray();
-  console.info("Total SNOMED elems length:", snomed_data_docs.length);
+  // const cursor = snomedDataCollection.find({});
+  // const snomed_data_docs = await cursor.toArray();
+  // console.info("Total SNOMED elems length:", snomed_data_docs.length);
   let snomedNotEmbeddedCount = 0;
   let snomedAlreadyEmbeddedCount = 0;
   let snomedToEmbedList = [];
   let totalWords = 0;
-
+  console.info("Calculating total words...");
   for (const elem of pgResults) {
     try {
       let words = elem.concept_name.split(" ");
@@ -199,7 +204,7 @@ async function getData(snomedDataCollection) {
 
         Promise.all(calls)
           .then((results) => {
-            console.info("\nAll writes done!")
+            console.info("\nAll writes done!");
             // console.info(results)
             // client.close();
             process.exit(0);
