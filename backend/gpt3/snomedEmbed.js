@@ -28,7 +28,7 @@ pgClient.connect(async (err) => {
     console.info("Connected to PostgreSQL");
     try {
       const res = await query();
-      console.info('Got PostGres rows: ', res.rows.length)
+      console.info("Got PostGres rows: ", res.rows.length);
       pgResults = res.rows;
       await startMongo();
     } catch (error) {
@@ -39,24 +39,24 @@ pgClient.connect(async (err) => {
   }
 });
 
-const query = () => new Promise((resolve, reject) => {
-  console.info("Querying Postgres DB...");
-  pgClient.query(
-    `SELECT * 
+const query = () =>
+  new Promise((resolve, reject) => {
+    console.info("Querying Postgres DB...");
+    pgClient.query(
+      `SELECT * 
      FROM public.concept 
      WHERE vocabulary_id = 'SNOMED' 
      AND standard_concept = 'S'
      `,
-    (err, res) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(res);
+      (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res);
+        }
       }
-    }
-  );
-});
-
+    );
+  });
 
 async function startMongo() {
   console.info("Start Mongo");
@@ -104,27 +104,48 @@ let total = 0;
 let barCount = 0;
 const bar = new ProgressBar.Bar(
   {
-    format: "Processing... |{bar}| {percentage}% || {value}/{total}",
+    format:
+      "Processing... |{bar}| {percentage}% |  ETA: {eta}s  | {value}/{total}",
   },
   ProgressBar.Presets.shades_classic
 );
 
 async function getData(snomedDataCollection) {
-  console.info("Loading DBs...takes a bit of time.");
-  // const cursor = snomedDataCollection.find({});
-  // const snomed_data_docs = await cursor.toArray();
-  // console.info("Total SNOMED elems length:", snomed_data_docs.length);
   let snomedNotEmbeddedCount = 0;
   let snomedAlreadyEmbeddedCount = 0;
   let snomedToEmbedList = [];
   let totalWords = 0;
-  console.info("Calculating total words...");
+
+  let wordBarTotal = pgResults.length;
+  let wordBarCount = 0;
+  const wordBar = new ProgressBar.Bar(
+    {
+      format:
+        "Processing... |{bar}| {percentage}% |  ETA: {eta}s  | {value}/{total}",
+    },
+    ProgressBar.Presets.shades_classic
+  );
+
+  console.info("Calculating total words...takes a bit of time");
+  console.log("Loading to array...");
+  wordBar.start(wordBarTotal, 0);
+  const snomedIds = pgResults.map((elem) => elem.concept_id);
+
+  const projection = { _id: 0, snomed_id: 1 };
+  const cursor = snomedDataCollection
+    .find({ snomed_id: { $in: snomedIds } })
+    .project(projection);
+  const snomedResults = await cursor.toArray();
+
+  // console.log("snomedResults", snomedResults);
+  // console.log("Loaded to array!");
+
   for (const elem of pgResults) {
     try {
+      const result = snomedResults.find(
+        (res) => res.snomed_id === elem.concept_id
+      );
       let words = elem.concept_name.split(" ");
-      const result = await snomedDataCollection.findOne({
-        snomed_id: elem.concept_id,
-      });
       if (!result) {
         totalWords += words.length;
         snomedNotEmbeddedCount++;
@@ -134,6 +155,11 @@ async function getData(snomedDataCollection) {
         });
       } else {
         snomedAlreadyEmbeddedCount++;
+      }
+      wordBarCount++;
+      wordBar.update(wordBarCount);
+      if (wordBarCount === wordBarTotal) {
+        wordBar.stop();
       }
     } catch (err) {
       console.error(err);
@@ -152,6 +178,11 @@ async function getData(snomedDataCollection) {
     `Total words to convert ${totalWords} will cost $0.0004 per 1000 tokens for a grand total of ~$` +
       (totalWords / 1000) * 0.0004
   );
+
+  if (snomedNotEmbeddedCount == 0) {
+    console.info("You already have everything converted!");
+    process.exit(0);
+  }
 
   const continueResponse = await prompts({
     type: "confirm",
