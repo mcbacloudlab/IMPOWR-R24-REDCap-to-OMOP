@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [   
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Compare REDCap to SNOMED",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\backend\\gpt3\\compareRedcapToSnomed.js",
+            "envFile": "${workspaceFolder}\\backend\\.env",
+            "args": [
+                "--max-old-space-size=16384"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Snomed Embed GPT3",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\backend\\gpt3\\snomedEmbed.js",
+            "envFile": "${workspaceFolder}\\backend\\.env",
+            "args": [
+                "--max-old-space-size=16384"
+            ]
+        }
+    ]
+}

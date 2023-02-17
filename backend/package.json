@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compareRedcapSnomed": "node ./gpt3/compareRedcapToSnomed.js",
+    "compareRedcapSnomed": "node --max-old-space-size=32768 ./gpt3/compareRedcapToSnomed.js ",
     "dev": "nodemon index.js",
     "devServer": "nodemon server.js",
-    "gpt3Snomed": "node ./gpt3/snomedEmbed.js",
+    "gpt3Snomed": "node --max-old-space-size=32768 ./gpt3/snomedEmbed.js",
     "start": "node index.js",
     "pm2": "pm2 start server.js --name redcap-omop-server --watch"
   },
