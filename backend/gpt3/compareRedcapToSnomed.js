@@ -131,6 +131,7 @@ async function startProcessing(redCapCollectionArray, snomedCollectionArray) {
 
   const totalProcTime = Date.now() - startProcTime;
   console.info("Total processing time:", totalProcTime / 1000 + " secs");
+  console.info("Average time per REDCap question: ", totalProcTime/redCapCollectionArray.length/1000 + " secs")
   redCapCollectionArray = [];
   snomedCollectionArray = [];
   return finalList;
@@ -148,7 +149,6 @@ function writeExcelFile(data) {
     { header: "SNOMED Text", key: "snomedText", width: 35 },
     { header: "SNOMED ID", key: "snomedID", width: 35 },
     { header: "Cosine Similarity", key: "similarity", width: 35 },
-    { header: "Euclidean Distance", key: "eDistance", width: 35 },
   ];
 
   data.forEach((outerArr) => {

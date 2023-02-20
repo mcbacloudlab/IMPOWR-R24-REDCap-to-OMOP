@@ -39,23 +39,7 @@ export default function TemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-          {/* <ListItem key={'UMLS Search'} component={NavLink} to="/cde-project/umls-search" disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-              <SearchIcon />
-              </ListItemIcon>
-              <ListItemText primary={'UMLS Search'} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem key={'Semantic Search'} component={NavLink} to="/cde-project/semantic-search" disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-              <SearchIcon />
-              </ListItemIcon>
-              <ListItemText primary={'Semantic Search'} />
-            </ListItemButton>
-          </ListItem> */}
-          <ListItem key={'Data Dictionary Mapping Manager'} component={NavLink} to="/redcap_omop/match-manager" disablePadding>
+          <ListItem key={'Data Dictionary Mapping Manager'} component={NavLink} to="/match-manager" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <SearchIcon />
@@ -63,7 +47,7 @@ export default function TemporaryDrawer() {
               <ListItemText primary={'Data Dictionary Mapping Manager'} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={'Archived'} component={NavLink} to="/redcap_omop/archived" disablePadding>
+          <ListItem key={'Archived'} component={NavLink} to="/archived" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <DeleteIcon />

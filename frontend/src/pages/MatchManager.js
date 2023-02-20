@@ -108,8 +108,7 @@ export default function MatchManager() {
       method: "GET",
       redirect: "follow",
     };
-
-    fetch("http://localhost:5000/get_data_dictionary_list", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`, requestOptions)
       .then((response) => response.json())
       .then((result) => {
         let resultFiles = [];
@@ -147,7 +146,7 @@ export default function MatchManager() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/get_data_dictionary", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         setIsLoading(false);
@@ -236,7 +235,7 @@ export default function MatchManager() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/add_data_dictionary", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/add_data_dictionary`, requestOptions)
       .then((response) => {
         if (response.ok) response.text();
         else throw new Error("Upload Error");
@@ -308,7 +307,7 @@ export default function MatchManager() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/save_data_dictionary", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/save_data_dictionary`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         setSaveSuccess(true);
@@ -339,7 +338,7 @@ export default function MatchManager() {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/remove_data_dictionary`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         getFileList();

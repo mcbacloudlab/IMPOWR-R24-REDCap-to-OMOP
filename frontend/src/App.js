@@ -6,6 +6,8 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import MatchManager from "./pages/MatchManager";
 import Archived from "./pages/Archived";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 
 const darkTheme = createTheme({
   palette: {
@@ -23,17 +25,15 @@ function App() {
             <div>
               <SearchAppBar />
               <Routes>
-                <Route path="/" element={<MatchManager></MatchManager>} exact/>
+                <Route path="/" element={<MatchManager></MatchManager>} exact />
                 <Route
-                  path="/redcap_omop/match-manager"
+                  path="/match-manager"
                   element={<MatchManager></MatchManager>}
                   exact
                 />
-                <Route
-                  path="/redcap_omop/archived"
-                  element={<Archived></Archived>}
-                  exact
-                />
+                <Route path="/archived" element={<Archived></Archived>} exact />
+                <Route path="/signin" element={<SignInPage></SignInPage>} exact />
+                <Route path="/signup" element={<SignUpPage></SignUpPage>} exact />
                 <Route component={Error} />
               </Routes>
             </div>

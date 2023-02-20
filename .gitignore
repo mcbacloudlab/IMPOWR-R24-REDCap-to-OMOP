@@ -5,3 +5,5 @@ work/output
 backend/uploads/
 backend/work/output/
 backend/deleted/
+*.xlsx
+*.json
