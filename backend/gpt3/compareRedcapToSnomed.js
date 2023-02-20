@@ -20,12 +20,12 @@ main().then(async () => {
   //Load MongoDB Collections into memory/arrays
   const redcapCollection = client
     .db("GPT3_Embeddings")
-    .collection("gpt3_redcap_embeddings");
+    .collection("gpt3_redcap_embeddings10");
   const redCapCollectionArray = await loadCollection(redcapCollection);
   console.info("Loaded Redcap Collection into memory");
   const snomedCollection = client
     .db("GPT3_Embeddings")
-    .collection("gpt3_snomed_embeddings");
+    .collection("gpt3_snomed_embeddings30k");
   console.info("Loading SNOMED Collection into memory...");
   // const snomedCollectionArray = await loadCollection(snomedCollection);
   let snomedCollectionArray = []
@@ -68,7 +68,8 @@ const { Worker } = require("worker_threads");
 
 async function startProcessing(redCapCollectionArray, snomedCollectionArray) {
   let numWorkers = require("os").cpus().length; // Get the number of available cores
-  numWorkers = 1
+  numWorkers = 1 //having to set this to 1 to prevent out of memory errors
+  console.log(`Chunking into ${numWorkers} workers`)
   const chunkSize = Math.ceil(redCapCollectionArray.length / numWorkers);
   const workers = [];
   const finalList = [];

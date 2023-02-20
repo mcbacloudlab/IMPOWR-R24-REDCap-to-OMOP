@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -29,13 +30,39 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    // console.log({
+    //   firstName: data.get("firstName"),
+    //   lastName: data.get("lastName"),
+    //   email: data.get("email"),
+    //   password: data.get("password"),
+    // });
+    var formdata = new FormData();
+    formdata.append("firstName", data.get("firstName"));
+    formdata.append("lastName", data.get("lastName"));
+    formdata.append("email", data.get("email"));
+    formdata.append("password", data.get("password"));
+
+    var requestOptions = {
+      method: "POST",
+      body: data,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/signInUser`,
+      requestOptions
+    )
+      .then((response) => {
+        if (response.text() === "Ok") {
+          navigate("/signin"); // navigate to another component
+        } else {
+        }
+      })
+      .catch((error) => console.log("error", error));
   };
 
   return (

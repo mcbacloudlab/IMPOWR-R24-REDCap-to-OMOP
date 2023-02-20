@@ -1,5 +1,6 @@
 // import logo from './logo.svg';
 import "./App.css";
+import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchAppBar from "./components/SearchAppBar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -16,6 +17,9 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
