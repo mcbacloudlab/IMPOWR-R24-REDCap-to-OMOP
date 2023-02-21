@@ -1,9 +1,10 @@
 const db = require("../db/mysqlConnection.cjs");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
 
 async function getUserById(email) {
-  const query = "SELECT * FROM users WHERE email = ?";
+  const query = "SELECT firstName, lastName, email, password FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
     db.execute(query, [email], function (err, results, fields) {
       if (err) {
@@ -92,23 +93,45 @@ async function signInUser(userData) {
   const validatedData = await validateUserData(userData);
   console.log("Req validated!");
 
-  const user = await getUserById(validatedData.email);
-  console.log("user", user);
+  const userInfo = await getUserById(validatedData.email);
+  console.log("user", userInfo);
+  let userInfoToReturn = { firstName: userInfo[0].firstName, lastName: userInfo[0].lastName, email: userInfo[0].email }
 
-  if (user.length == 0) {
-    return "Error!"
+  if (userInfo.length == 0) {
+    return "Error!";
     // throw new Error("Error! User does not exist!");
-
   }
 
-  const result = await bcrypt.compare(userData.password, user[0].password);
+  const result = await bcrypt.compare(userData.password, userInfo[0].password);
   console.log("bcrypt result", result);
+  if (result) {
+    let jwtToken = jwt.sign({}, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
-  return result ? "Ok!" : "Error!";
+    return { jwtToken: jwtToken, userInfo: userInfoToReturn };
+  } else {
+    return null;
+  }
+}
+
+async function validateUser(authData) {
+  console.log("now we validate jwt token");
+  console.log("authData", authData);
+  console.log("jwt key", process.env.JWT_SECRET_KEY);
+  try {
+    let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
+    console.log("jwt verified", jwtVerified);
+    return true;
+  } catch (error) {
+    console.log("jwt verify error");
+    return false;
+  }
 }
 
 module.exports = {
   getUserById,
   createUser,
   signInUser,
+  validateUser,
 };

@@ -4,28 +4,42 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
-import SignIn from "../components/SignIn";
-
+import Cookies from "js-cookie";
+import { useState, useEffect } from "react";
+import { Typography } from "@mui/material";
 
 const theme = createTheme();
-export default function SignIn_Page(props) {
+export default function MyAccountPage() {
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  useEffect(() => {
+    let userCookie = JSON.parse(Cookies.get("user"));
+    console.log(userCookie);
+    setUsername(userCookie.email);
+    setName(userCookie.firstName + " " + userCookie.lastName);
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
+
         <Paper
           sx={{
             minHeight: "90vh",
             paddingLeft: 1,
             paddingRight: 1,
             paddingTop: 1,
-            margin: 'auto',
+            margin: "auto",
             m: 2,
           }}
         >
           <Grid container spacing={1} justifyContent="center">
-            <Grid item md={12} lg={4}>
-            <SignIn props={props}/>
+            <Grid item md={12} lg={4}></Grid>
+            <Grid item xs={12}>
+              <Typography>Name: {name}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>Email: {username}</Typography>
             </Grid>
           </Grid>
         </Paper>

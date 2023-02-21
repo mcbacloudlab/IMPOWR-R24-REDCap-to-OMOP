@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+var jwt = require('jsonwebtoken');
 
 async function getUserById(req, res) {
   const id = req.params.id;
@@ -15,7 +16,9 @@ async function createUser(req, res) {
     const userData = req.body;
     await userService.createUser(userData);
     console.log("success....");
-    res.status(200).send("Ok!");
+    let jwtToken = jwt.sign({
+    }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    res.status(200).send(jwtToken);
   } catch (error) {
     console.error(error);
     res.status(400).send("Error");
@@ -25,10 +28,11 @@ async function createUser(req, res) {
 async function signInUser(req, res) {
   try {
     const userData = req.body;
-    let loginStatus = await userService.signInUser(userData);
-    console.log('loginStat', loginStatus);
-    if(loginStatus == 'Ok!')res.status(200).send("Ok!");
-    else res.status(403).send('Error')
+    let loginData = await userService.signInUser(userData);
+    console.log('loginStat', loginData);
+    if(loginData){
+      res.status(200).send(loginData);
+    }else res.status(403).send('Error')
   } catch (error) {
     console.error(error);
     res.status(400).send("Error");
@@ -36,8 +40,16 @@ async function signInUser(req, res) {
 }
 
 async function validateUser(req, res){
-  const userData = req.body;
-  await userService.validateUser(userData)
+  console.log('validate user')
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1]; // get token from Authorization header
+  let verified = await userService.validateUser(token)
+  console.log('verified?', verified)
+  if(verified){
+    res.status(200).send("Ok!");
+  }else{
+    res.status(403).send("Error");
+  }
 }
 
 

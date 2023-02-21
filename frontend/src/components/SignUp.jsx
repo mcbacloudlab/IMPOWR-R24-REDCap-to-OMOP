@@ -3,8 +3,8 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+// import FormControlLabel from "@mui/material/FormControlLabel";
+// import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -13,20 +13,18 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-
+import Alert from "@mui/material/Alert";
+import { useState } from "react";
+import Cookies from "js-cookie";
 const theme = createTheme();
 
 export default function SignUp() {
+  const [signUpError, setSignUpError] = useState(false);
+
   const navigate = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    // console.log({
-    //   firstName: data.get("firstName"),
-    //   lastName: data.get("lastName"),
-    //   email: data.get("email"),
-    //   password: data.get("password"),
-    // });
     var formdata = new FormData();
     formdata.append("firstName", data.get("firstName"));
     formdata.append("lastName", data.get("lastName"));
@@ -43,13 +41,20 @@ export default function SignUp() {
       `${process.env.REACT_APP_BACKEND_API_URL}/api/users/createUser`,
       requestOptions
     )
-      .then((response) => {
-        if (response.text() === "Ok") {
+    .then((response) => {
+      if (response.status === 200) {
+        response.text().then((token) => {
+          console.log(token);
+          Cookies.set("token", token, { expires: 7, secure: true });
+          Cookies.set("user", data.get("email"), { expires: 7, secure: true });
           navigate("/signin"); // navigate to another component
-        } else {
-        }
-      })
-      .catch((error) => console.log("error", error));
+          setSignUpError(false);
+        });
+      } else {
+        setSignUpError(true);
+      }
+    })
+    .catch((error) => console.log("error", error));
   };
 
   return (
@@ -70,6 +75,9 @@ export default function SignUp() {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
+          {signUpError && (
+            <Alert severity="error">Error</Alert>
+          )}
           <Box
             component="form"
             noValidate

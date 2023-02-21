@@ -97,7 +97,7 @@ export default function Archived() {
     };
 
     fetch(
-      "http://localhost:5000/get_data_dictionary_list?archived=true",
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list?archived=true`,
       requestOptions
     )
       .then((response) => response.json())
@@ -134,7 +134,7 @@ export default function Archived() {
     };
 
     fetch(
-      "http://localhost:5000/get_data_dictionary?archived=true",
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary?archived=true`,
       requestOptions
     )
       .then((response) => response.text())
@@ -204,34 +204,6 @@ export default function Archived() {
     };
   }
 
-  // const uploadDD = (e) => {
-  //   var formdata = new FormData();
-  //   let fileInput = e.target;
-  //   formdata.append("dataFile", fileInput.files[0]);
-
-  //   var requestOptions = {
-  //     method: "POST",
-  //     body: formdata,
-  //     redirect: "follow",
-  //   };
-
-  //   fetch("http://localhost:5000/add_data_dictionary", requestOptions)
-  //     .then((response) => {
-  //       if (response.ok) response.text();
-  //       else throw new Error("Upload Error");
-  //     })
-  //     .then((result) => {
-  //       getFileList();
-  //       setaddSSError("");
-  //       e.target.value = null;
-  //     })
-  //     .catch((error) => {
-  //       setaddSSError("Upload Error");
-  //       setOpen(true);
-  //       console.info("error", error);
-  //       e.target.value = null;
-  //     });
-  // };
 
   function importExcel(e) {
     const file = e.data;
@@ -264,27 +236,6 @@ export default function Archived() {
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
-
-  // function deleteFile(e, value) {
-  //   var formdata = new FormData();
-  //   formdata.append("file", value);
-  //   var requestOptions = {
-  //     method: "POST",
-  //     body: formdata,
-  //     redirect: "follow",
-  //   };
-
-  //   fetch("http://localhost:5000/remove_data_dictionary", requestOptions)
-  //     .then((response) => response.text())
-  //     .then((result) => {
-  //       getFileList();
-  //       resetScreen()
-  //     })
-  //     .catch((error) => {
-  //       resetScreen()
-  //       console.error("error", error)
-  //     });
-  // }
 
   function resetScreen() {
     setData("");

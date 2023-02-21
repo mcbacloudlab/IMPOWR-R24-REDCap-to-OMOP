@@ -840,14 +840,10 @@ export default function MatchManager() {
                             <Grid item></Grid>
                           </Grid>
                         </TabPanel>
-                        {/* <TabPanel value={value} index={2}>
-                          Item Three
-                        </TabPanel> */}
                       </Grid>
                     ) : (
                       <Typography>
-                        Please select a data dictionary to the left or add a new
-                        one
+                        Select or add a data dictionary 
                       </Typography>
                     )}
                   </Box>
