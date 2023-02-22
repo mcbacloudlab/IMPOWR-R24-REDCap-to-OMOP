@@ -17,7 +17,16 @@ import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import Cookies from "js-cookie";
 
-const theme = createTheme();
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#008C95", // your custom primary color
+    },
+    secondary: {
+      main: "#008C95", // your custom secondary color
+    },
+  },
+});
 
 export default function SignIn({ props }) {
   const [loginError, setLoginError] = useState(false);
@@ -78,25 +87,27 @@ export default function SignIn({ props }) {
       requestOptions
     )
       .then((response) => {
-        if(response.status === 200){
-
-        }else{
+        if (response.status === 200) {
+        } else {
           navigate("/signin"); // navigate to another component
           setLoginError(true);
         }
-        response.text().then(result => {
+        response.text().then((result) => {
           if (result !== "Error") {
-            result = JSON.parse(result)
+            result = JSON.parse(result);
             // set the cookie
             Cookies.set("token", result.jwtToken, { expires: 7, secure: true });
-            Cookies.set("user", JSON.stringify(result.userInfo), { expires: 7, secure: true });
+            Cookies.set("user", JSON.stringify(result.userInfo), {
+              expires: 7,
+              secure: true,
+            });
             props.updateUser(data.get("email"));
             navigate("/match-manager");
           } else {
             navigate("/signin"); // navigate to another component
             setLoginError(true);
           }
-        })
+        });
       })
       .catch((error) => console.log("error", error));
   };

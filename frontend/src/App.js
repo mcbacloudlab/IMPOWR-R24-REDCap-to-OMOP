@@ -5,8 +5,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchAppBar from "./components/SearchAppBar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import MatchManager from "./pages/MatchManager";
-import Archived from "./pages/Archived";
+import MatchManager from "./pages/MatchManagerPage";
+import Archived from "./pages/ArchivedPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import MyAccountPage from "./pages/MyAccountPage";
@@ -14,10 +14,21 @@ import Cookies from "js-cookie";
 import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
-
+// 008C95
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+  },
+});
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#008C95', // your custom primary color
+    },
+    secondary: {
+      main: '#008C95', // your custom secondary color
+    },
   },
 });
 
@@ -116,7 +127,7 @@ function App() {
     setUser(newUser);
   };
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="App">
         <header className="App-header">
@@ -168,7 +179,7 @@ function App() {
                       token={token}
                       setToken={setToken}
                     >
-                      <MyAccountPage user={user}></MyAccountPage>
+                      <MyAccountPage user={user} token={token}></MyAccountPage>
                     </ProtectedRoute>
                   }
                   exact
@@ -184,7 +195,7 @@ function App() {
                       setToken={setToken}
                     >
                       <ProjectManagementPage
-                        user={user}
+                        user={user} token={token}
                       ></ProjectManagementPage>
                     </ProtectedRoute>
                   }

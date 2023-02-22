@@ -16,7 +16,16 @@ import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import { useState } from "react";
 import Cookies from "js-cookie";
-const theme = createTheme();
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#008C95', // your custom primary color
+    },
+    secondary: {
+      main: '#008C95', // your custom secondary color
+    },
+  },
+});
 
 export default function SignUp() {
   const [signUpError, setSignUpError] = useState(false);

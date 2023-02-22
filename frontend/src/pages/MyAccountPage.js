@@ -31,7 +31,6 @@ export default function MyAccountPage(props) {
     }
   }, [props.user]);
 
-
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
@@ -58,7 +57,7 @@ export default function MyAccountPage(props) {
               <Typography>Role: {role}</Typography>
             </Grid>
             <Grid item xs={12}>
-              <AdminSection props={props}/>
+              {role === "admin" ? <AdminSection props={props} /> : ""}
             </Grid>
           </Grid>
         </Paper>
