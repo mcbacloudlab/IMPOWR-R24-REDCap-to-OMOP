@@ -39,12 +39,20 @@ export default function TemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-          <ListItem key={'Data Dictionary Mapping Manager'} component={NavLink} to="/match-manager" disablePadding>
+      <ListItem key={'Project Management'} component={NavLink} to="/project-management" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <SearchIcon />
               </ListItemIcon>
-              <ListItemText primary={'Data Dictionary Mapping Manager'} />
+              <ListItemText primary={'Project Management'} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+              <SearchIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Data Dictionary Mapping'} />
             </ListItemButton>
           </ListItem>
           <ListItem key={'Archived'} component={NavLink} to="/archived" disablePadding>

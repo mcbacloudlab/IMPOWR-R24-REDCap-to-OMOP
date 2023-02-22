@@ -36,7 +36,7 @@ var XLSX = require("xlsx");
 
 const theme = createTheme();
 
-export default function MatchManager() {
+export default function MatchManager(props) {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
@@ -76,8 +76,8 @@ export default function MatchManager() {
 
   const handleExportData = () => {
     let _data = data;
-    if(selectedTabIdx) {
-      _data = approvedData //change export data if on approved tab
+    if (selectedTabIdx) {
+      _data = approvedData; //change export data if on approved tab
     }
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
@@ -104,11 +104,17 @@ export default function MatchManager() {
   // const tableData = useMemo(() => data, [data]);
 
   function getFileList() {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
     var requestOptions = {
       method: "GET",
+      headers: myHeaders,
       redirect: "follow",
     };
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`,
+      requestOptions
+    )
       .then((response) => response.json())
       .then((result) => {
         let resultFiles = [];
@@ -130,23 +136,27 @@ export default function MatchManager() {
       });
   }
 
-
   function getFile(e, value, switching, panelIndex) {
     setIsLoading(true);
     setSelectedFile(value);
-    if(!panelIndex) panelIndex = 0
-    setSelectedTabIdx(panelIndex)
+    if (!panelIndex) panelIndex = 0;
+    setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
     var formdata = new FormData();
     formdata.append("file", value);
-
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
     var requestOptions = {
       method: "POST",
+      headers: myHeaders,
       body: formdata,
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
         setIsLoading(false);
@@ -229,13 +239,19 @@ export default function MatchManager() {
     let fileInput = e.target;
     formdata.append("dataFile", fileInput.files[0]);
 
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
     var requestOptions = {
       method: "POST",
+      headers: myHeaders,
       body: formdata,
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/add_data_dictionary`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/add_data_dictionary`,
+      requestOptions
+    )
       .then((response) => {
         if (response.ok) response.text();
         else throw new Error("Upload Error");
@@ -295,7 +311,10 @@ export default function MatchManager() {
     setIsSaving(true);
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-
+    myHeaders.append(
+      "Authorization",
+      "Bearer " + props.token
+    );
     var raw = JSON.stringify({
       data: { fileName: csvFilename, fileData: data },
     });
@@ -307,7 +326,10 @@ export default function MatchManager() {
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/save_data_dictionary`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/save_data_dictionary`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
         setSaveSuccess(true);
@@ -332,13 +354,23 @@ export default function MatchManager() {
   function deleteFile(e, value) {
     var formdata = new FormData();
     formdata.append("file", value);
+    var myHeaders = new Headers();
+    myHeaders.append(
+      "Authorization",
+      "Bearer " + props.token
+    );
+
     var requestOptions = {
       method: "POST",
       body: formdata,
+      headers: myHeaders,
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/file/remove_data_dictionary`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/remove_data_dictionary`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
         getFileList();
@@ -842,9 +874,7 @@ export default function MatchManager() {
                         </TabPanel>
                       </Grid>
                     ) : (
-                      <Typography>
-                        Select or add a data dictionary 
-                      </Typography>
+                      <Typography>Select or add a data dictionary</Typography>
                     )}
                   </Box>
                 </Grid>

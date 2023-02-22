@@ -5,8 +5,10 @@ const cors = require("cors");
 require("dotenv").config();
 const fileUpload = require("express-fileupload");
 const morgan = require("morgan");
-const userRoutes = require('./routes/userRoutes');
-const fileRoutes = require('./routes/fileRoutes');
+const userRoutes = require("./routes/userRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+const keyRoutes = require("./routes/keyRoutes")
+const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 
 let appPort = process.env.EXPRESS_PORT;
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
@@ -21,8 +23,9 @@ app.use(
   })
 );
 
-app.use('/api/users', userRoutes);
-app.use('/api/file', fileRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/file", authenticate, fileRoutes);
+app.use("/api/keys", authenticate, requireAdmin, keyRoutes)
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;

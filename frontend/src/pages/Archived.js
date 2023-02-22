@@ -32,7 +32,7 @@ var XLSX = require("xlsx");
 
 const theme = createTheme();
 
-export default function Archived() {
+export default function Archived(props) {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
@@ -91,8 +91,11 @@ export default function Archived() {
   // const tableData = useMemo(() => data, [data]);
 
   function getFileList() {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
     var requestOptions = {
       method: "GET",
+      headers: myHeaders,
       redirect: "follow",
     };
 
@@ -124,12 +127,16 @@ export default function Archived() {
   function getFile(e, value) {
     setIsLoading(true);
     setSelectedIndex(value);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
     var formdata = new FormData();
     formdata.append("file", value);
 
     var requestOptions = {
       method: "POST",
       body: formdata,
+      headers: myHeaders,
       redirect: "follow",
     };
 
@@ -204,7 +211,6 @@ export default function Archived() {
     };
   }
 
-
   function importExcel(e) {
     const file = e.data;
     setCSVFilename(file.name);
@@ -253,7 +259,7 @@ export default function Archived() {
   function ListItemTextC(fileListMod, index) {
     return (
       <ListItemText
-        primary={fileListMod.substring(24,fileListMod.length)}
+        primary={fileListMod.substring(24, fileListMod.length)}
         primaryTypographyProps={{
           style: { whiteSpace: "normal", wordWrap: "break-word" },
         }}

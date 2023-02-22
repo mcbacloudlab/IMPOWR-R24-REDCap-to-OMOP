@@ -11,8 +11,9 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import Cookies from "js-cookie";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
+import ProjectManagementPage from "./pages/ProjectManagementPage";
 
 const darkTheme = createTheme({
   palette: {
@@ -20,91 +21,100 @@ const darkTheme = createTheme({
   },
 });
 
-function App() {
-  const [user, setUser] = useState(null);
-
-  const validateJwtToken = async (jwtToken) => {
-    try {
-      const decodedToken = jwtDecode(jwtToken);
-      if (!decodedToken) {
-        return null;
-      }
-      const now = Date.now().valueOf() / 1000;
-      if (typeof decodedToken.exp !== "undefined" && decodedToken.exp < now) {
-        return null;
-      } else {
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer " + jwtToken);
-
-        var formdata = new FormData();
-
-        var requestOptions = {
-          method: "POST",
-          headers: myHeaders,
-          body: formdata,
-          redirect: "follow",
-        };
-
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
-          requestOptions
-        );
-
-        if (response.status === 200) {
-          return "loggedIn";
-        } else {
-          Cookies.remove("token");
-          Cookies.remove("user");
-          return null;
-        }
-      }
-    } catch (error) {
+const validateJwtToken = async (jwtToken) => {
+  try {
+    const decodedToken = jwtDecode(jwtToken);
+    if (!decodedToken) {
       return null;
     }
-  };
+    const now = Date.now().valueOf() / 1000;
+    if (typeof decodedToken.exp !== "undefined" && decodedToken.exp < now) {
+      return null;
+    } else {
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Bearer " + jwtToken);
 
-  const ProtectedRoute = ({ user, children }) => {
-    const [isLoading, setIsLoading] = useState(true);
+      var formdata = new FormData();
 
-    useEffect(() => {
-      const jwtToken = Cookies.get("token");
-      const userInfo = Cookies.get("user")
-      if (!jwtToken || !userInfo) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-
-      const validateUser = async () => {
-        const result = await validateJwtToken(jwtToken);
-        setUser(result);
-        setIsLoading(false);
+      var requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+        redirect: "follow",
       };
 
-      validateUser();
-    }, []);
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
+        requestOptions
+      );
 
-    if (isLoading) {
-      return <div>Loading...</div>;
+      if (response.status === 200) {
+        return response.text().then((resp) => {
+          Cookies.set("user", resp, { expires: 7, secure: true });
+          return resp;
+        });
+      } else {
+        Cookies.remove("token");
+        Cookies.remove("user");
+        return null;
+      }
+    }
+  } catch (error) {
+    return null;
+  }
+};
+
+function ProtectedRoute({
+  user,
+  children,
+  validateJwtToken,
+  setUser,
+  setToken,
+}) {
+  const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
+  useEffect(() => {
+    // console.log('use effect ran')
+    setIsLoading(true);
+    const jwtToken = Cookies.get("token");
+    setToken(jwtToken);
+    const userInfo = Cookies.get("user");
+    if (!jwtToken || !userInfo) {
+      setUser(null);
+      setIsLoading(false);
+      return;
     }
 
-    if (!user) {
-      Cookies.remove("token");
-      Cookies.remove("user");
-      return <Navigate to="/signin" replace />;
-    }
+    const validateUser = async () => {
+      const result = await validateJwtToken(jwtToken);
+      // console.log('result', result)
+      setUser(result);
+      setIsLoading(false);
+    };
 
-    return children;
-  };
+    validateUser();
+  }, [location, setUser, validateJwtToken]);
+
+  if (isLoading) {
+    return <div></div>;
+  }
+
+  if (!user) {
+    Cookies.remove("token");
+    Cookies.remove("user");
+    return <Navigate to="/signin" replace />;
+  }
+
+  return children;
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
   const updateUser = (newUser) => {
     setUser(newUser);
   };
-
-  useEffect(() => {
-    // perform additional actions when user is updated here
-  }, [user]);
-
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -122,16 +132,28 @@ function App() {
                 <Route
                   path="/match-manager"
                   element={
-                    <ProtectedRoute user={user}>
-                      <MatchManager></MatchManager>
+                    <ProtectedRoute
+                      user={user}
+                      setUser={setUser}
+                      validateJwtToken={validateJwtToken}
+                      token={token}
+                      setToken={setToken}
+                    >
+                      <MatchManager token={token}></MatchManager>
                     </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/archived"
                   element={
-                    <ProtectedRoute user={user}>
-                      <Archived></Archived>
+                    <ProtectedRoute
+                      user={user}
+                      setUser={setUser}
+                      validateJwtToken={validateJwtToken}
+                      token={token}
+                      setToken={setToken}
+                    >
+                      <Archived token={token}></Archived>
                     </ProtectedRoute>
                   }
                   exact
@@ -139,8 +161,31 @@ function App() {
                 <Route
                   path="/myaccount"
                   element={
-                    <ProtectedRoute user={user}>
-                      <MyAccountPage></MyAccountPage>
+                    <ProtectedRoute
+                      user={user}
+                      setUser={setUser}
+                      validateJwtToken={validateJwtToken}
+                      token={token}
+                      setToken={setToken}
+                    >
+                      <MyAccountPage user={user}></MyAccountPage>
+                    </ProtectedRoute>
+                  }
+                  exact
+                />
+                <Route
+                  path="/project-management"
+                  element={
+                    <ProtectedRoute
+                      user={user}
+                      setUser={setUser}
+                      validateJwtToken={validateJwtToken}
+                      token={token}
+                      setToken={setToken}
+                    >
+                      <ProjectManagementPage
+                        user={user}
+                      ></ProjectManagementPage>
                     </ProtectedRoute>
                   }
                   exact

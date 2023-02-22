@@ -25,7 +25,6 @@ async function getFileDetails(files, readDir) {
 
   try {
     const fileDetails = await Promise.all(filePromises);
-    console.log("fileDetails", fileDetails);
     return fileDetails;
   } catch (error) {
     throw new Error(`Error getting file details: ${error.message}`);
@@ -33,13 +32,10 @@ async function getFileDetails(files, readDir) {
 }
 
 async function getDDList(req, res) {
-  console.log("getDDList");
   let readDir;
   if (req.query.archived) {
-    console.log("get del");
     readDir = path.join(__dirname, "..", "/deleted/");
   } else {
-    console.log("get uploads");
     readDir = path.join(__dirname, "..", "/uploads/");
   }
 
@@ -58,7 +54,6 @@ async function getDDList(req, res) {
 
 async function getDD(req, res) {
   let ssData;
-  console.log("body", req.query);
   let readDir;
   if (req.query.archived) {
     readDir = path.join(__dirname, "..", "/deleted/");
@@ -153,7 +148,6 @@ async function getDD(req, res) {
 
 async function getExtension(file) {
   const extensions = ["xlsx", "xls", "csv"];
-  console.log(typeof file);
   let parts;
   if (typeof file === "string") parts = file.split(".");
   else parts = file.name.split(".");
@@ -162,7 +156,6 @@ async function getExtension(file) {
 }
 
 async function addDD(req, res) {
-  console.log("reqfiles", req.files);
   try {
     if (!req.files) {
       res.send({
@@ -263,7 +256,6 @@ async function addDD(req, res) {
 }
 
 async function removeDD(req, res) {
-  console.log("removeDD");
   try {
     if (!req.body.file) {
       res.send({
@@ -306,13 +298,11 @@ async function saveDD(req, res) {
       );
       if (exists) {
         //overwrite and save file with new contents
-        console.log("File exists now saving...");
         //convert json data to csv/xlsx
         let fileData = req.body.data.fileData;
         var worksheet = XLSX.utils.json_to_sheet(fileData);
         var workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Dates");
-        console.log("Writing file...");
 
         XLSX.writeFile(
           workbook,

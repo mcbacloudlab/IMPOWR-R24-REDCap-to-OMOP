@@ -88,13 +88,13 @@ export default function PrimarySearchAppBar(props) {
 
   const handleSignOut = (event) => {
     Cookies.remove('token');
+    Cookies.remove('user');
     props.updateUser(null);
     navigate('/signin')
     
   };
 
   const handleNavigate = (url) => {
-    console.log('handle nav')
     handleMenuClose();
     handleMobileMenuClose();
     navigate(url)

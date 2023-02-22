@@ -43,10 +43,14 @@ export default function SignUp() {
     )
     .then((response) => {
       if (response.status === 200) {
-        response.text().then((token) => {
-          console.log(token);
+        response.text().then((response) => {
+          console.log('resp,', response)
+          let respJSON = JSON.parse(response)
+          console.log(respJSON.jwtToken);
+          let token = respJSON.jwtToken;
+          let userInfo = JSON.stringify(respJSON.userInfo)
           Cookies.set("token", token, { expires: 7, secure: true });
-          Cookies.set("user", data.get("email"), { expires: 7, secure: true });
+          Cookies.set("user", userInfo, { expires: 7, secure: true });
           navigate("/signin"); // navigate to another component
           setSignUpError(false);
         });

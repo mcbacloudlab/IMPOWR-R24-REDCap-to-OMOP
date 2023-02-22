@@ -4,14 +4,13 @@ const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 
 async function getUserById(email) {
-  const query = "SELECT firstName, lastName, email, password FROM users WHERE email = ?";
+  const query = "SELECT * FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
     db.execute(query, [email], function (err, results, fields) {
       if (err) {
         console.log("error!", err);
         reject("Error");
       }
-      console.log("results", results);
       resolve(results);
     });
   });
@@ -35,10 +34,7 @@ async function createUser(userData) {
   }
 
   return validateUserData(userData).then((userData) => {
-    console.log("Req validated!");
-
     return getUserById(userData.email).then((user) => {
-      console.log("user", user);
       if (user.length > 0) {
         throw new Error("Error! User already exists");
       }
@@ -48,7 +44,6 @@ async function createUser(userData) {
       return bcrypt.genSalt(saltRounds, function (err, salt) {
         bcrypt.hash(myPlaintextPassword, salt, function (err, hash) {
           // Store hash in your password DB.
-          console.log("hash", hash);
           return new Promise((resolve, reject) => {
             const query =
               "INSERT INTO users (firstName, lastName, email, password) VALUES(?,?,?,?)";
@@ -62,7 +57,6 @@ async function createUser(userData) {
                   reject("Error");
                 }
                 resolve(results);
-                console.log(results); // results contains rows returned by server
               }
             );
           }).catch((error) => {
@@ -91,11 +85,9 @@ async function signInUser(userData) {
   }
 
   const validatedData = await validateUserData(userData);
-  console.log("Req validated!");
 
   const userInfo = await getUserById(validatedData.email);
-  console.log("user", userInfo);
-  let userInfoToReturn = { firstName: userInfo[0].firstName, lastName: userInfo[0].lastName, email: userInfo[0].email }
+  let userInfoToReturn = { firstName: userInfo[0].firstName, lastName: userInfo[0].lastName, email: userInfo[0].email, role: userInfo[0].role }
 
   if (userInfo.length == 0) {
     return "Error!";
@@ -103,9 +95,8 @@ async function signInUser(userData) {
   }
 
   const result = await bcrypt.compare(userData.password, userInfo[0].password);
-  console.log("bcrypt result", result);
   if (result) {
-    let jwtToken = jwt.sign({}, process.env.JWT_SECRET_KEY, {
+    let jwtToken = jwt.sign({user: userInfo[0].email }, process.env.JWT_SECRET_KEY, {
       expiresIn: "1h",
     });
 
@@ -116,15 +107,14 @@ async function signInUser(userData) {
 }
 
 async function validateUser(authData) {
-  console.log("now we validate jwt token");
-  console.log("authData", authData);
-  console.log("jwt key", process.env.JWT_SECRET_KEY);
   try {
     let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
-    console.log("jwt verified", jwtVerified);
-    return true;
+    //now get user info again
+    let userInfo = await getUserById(jwtVerified.user);
+    userInfo = userInfo[0]
+    let userInfoToReturn = {firstName: userInfo.firstName, lastName: userInfo.lastName, email: userInfo.email, role: userInfo.role}
+    return userInfoToReturn;
   } catch (error) {
-    console.log("jwt verify error");
     return false;
   }
 }
