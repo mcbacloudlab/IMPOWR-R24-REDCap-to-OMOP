@@ -97,7 +97,7 @@ async function signInUser(userData) {
   const result = await bcrypt.compare(userData.password, userInfo[0].password);
   if (result) {
     let jwtToken = jwt.sign({user: userInfo[0].email }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "72h",
     });
 
     return { jwtToken: jwtToken, userInfo: userInfoToReturn };

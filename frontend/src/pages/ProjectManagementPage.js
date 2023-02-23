@@ -217,9 +217,7 @@ export default function ProjectManagementPage(props) {
   const uploadInputRef = React.useRef(null);
 
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
-        <CssBaseline />
         <Paper
           sx={{
             minHeight: "90vh",
@@ -285,6 +283,5 @@ export default function ProjectManagementPage(props) {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }

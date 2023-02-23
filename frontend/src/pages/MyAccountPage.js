@@ -12,7 +12,7 @@ import { Typography } from "@mui/material";
 // import Button from "@mui/material/Button";
 import AdminSection from "../components/AdminSection";
 
-const theme = createTheme();
+
 export default function MyAccountPage(props) {
   // console.log("props", props);
   const [username, setUsername] = useState("");
@@ -32,7 +32,6 @@ export default function MyAccountPage(props) {
   }, [props.user]);
 
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
         <Paper
@@ -62,6 +61,5 @@ export default function MyAccountPage(props) {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }

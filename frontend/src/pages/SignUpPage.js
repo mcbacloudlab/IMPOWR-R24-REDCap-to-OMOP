@@ -7,11 +7,10 @@ import Paper from "@mui/material/Paper";
 import SignUp from "../components/SignUp";
 
 
-const theme = createTheme();
+
 export default function SignUp_Page() {
 
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
 
@@ -32,6 +31,5 @@ export default function SignUp_Page() {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }

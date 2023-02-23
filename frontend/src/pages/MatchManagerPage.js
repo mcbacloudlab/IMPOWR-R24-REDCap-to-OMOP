@@ -35,8 +35,6 @@ import MatchManagerPendingTable from "../components/MatchManagerPendingTable";
 import MatchManagerApprovedTable from "../components/MatchManagerApprovedTable";
 var XLSX = require("xlsx");
 
-const theme = createTheme();
-
 export default function MatchManager(props) {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
@@ -405,7 +403,6 @@ export default function MatchManager(props) {
 
   const uploadInputRef = React.useRef(null);
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
         <Paper
@@ -416,7 +413,6 @@ export default function MatchManager(props) {
             m: 2,
           }}
         >
-          {/* <h2>Data Dictionary Mapping Manager</h2> */}
 
           <Grid container spacing={1}>
             <Grid item md={12} lg={2}>
@@ -611,6 +607,5 @@ export default function MatchManager(props) {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }

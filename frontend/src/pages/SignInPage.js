@@ -10,7 +10,6 @@ import SignIn from "../components/SignIn";
 const theme = createTheme();
 export default function SignIn_Page(props) {
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
         <Paper
@@ -30,6 +29,5 @@ export default function SignIn_Page(props) {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }

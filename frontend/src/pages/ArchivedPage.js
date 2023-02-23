@@ -30,7 +30,6 @@ import LinearProgress from "@mui/material/LinearProgress";
 
 var XLSX = require("xlsx");
 
-const theme = createTheme();
 
 export default function Archived(props) {
   const [colDefs, setColDefs] = useState([]);
@@ -270,7 +269,6 @@ export default function Archived(props) {
 
   // const uploadInputRef = React.useRef(null);
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="90%">
         <CssBaseline />
         <Paper
@@ -539,6 +537,5 @@ export default function Archived(props) {
           </Grid>
         </Paper>
       </Container>
-    </ThemeProvider>
   );
 }
