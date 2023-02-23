@@ -8,7 +8,9 @@ const morgan = require("morgan");
 const userRoutes = require("./routes/userRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const keyRoutes = require("./routes/keyRoutes")
+const redcapRoutes = require("./routes/redcapRoutes")
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
+const rateLimit = require('express-rate-limit');
 
 let appPort = process.env.EXPRESS_PORT;
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
@@ -23,9 +25,19 @@ app.use(
   })
 );
 
+const apiLimiter = rateLimit({
+  windowMs: 1000, // time window in milliseconds
+  max: 20, // maximum number of requests in the time window
+});
+
+app.use('/api/file', apiLimiter); 
+app.use('/api/users', apiLimiter); 
+app.use('/api/keys', apiLimiter); 
+
 app.use("/api/users", userRoutes);
 app.use("/api/file", authenticate, fileRoutes);
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes)
+app.use("/api/redcap", authenticate, redcapRoutes)
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;
