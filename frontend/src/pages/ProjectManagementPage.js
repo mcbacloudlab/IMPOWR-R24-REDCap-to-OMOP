@@ -9,7 +9,7 @@ import DataDictionaryList from "../components/DataDictionaryList";
 
 export default function ProjectManagementPage(props) {
   console.log("props,", props);
-  const [addSSError, setaddSSError] = useState();
+  const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,17 +26,20 @@ export default function ProjectManagementPage(props) {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/api/redcap/getForms", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/getForms`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         console.log(JSON.parse(result));
         setForms(JSON.parse(result));
         console.log("forms", forms);
+        setIsLoading(false)
       })
       .catch((error) => {
         setIsLoading(false);
+        setAddSSError(true)
         console.log("error", error);
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -5,8 +5,8 @@ import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import CheckIcon from "@mui/icons-material/Check";
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+// import CheckIcon from "@mui/icons-material/Check";
+// import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
 export default function AdminSection(props) {
   const [redcapKey, setRedcapKey] = useState("");
@@ -16,7 +16,7 @@ export default function AdminSection(props) {
   const [editModeRedcapKey, setEditModeRedcapKey] = useState(false);
   const [editModeRedcapURL, setEditModeRedcapURL] = useState(false);
   const [editModeUMLS, setEditModeUMLS] = useState();
-  const [error, setError] = useState(false);
+  // const [error, setError] = useState(false);
   const [redcapAPITest, setRedcapAPITest] = useState(false);
   const [umlsAPITest, setUMLSAPITest] = useState(false);
 
@@ -111,7 +111,7 @@ export default function AdminSection(props) {
             setEditModeUMLS(false);
           }
         } else {
-          setError(true);
+          // setError(true);
         }
       })
       .catch((error) => console.log("error", error));
@@ -178,8 +178,6 @@ export default function AdminSection(props) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
-    var formdata = new FormData();
-
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -212,8 +210,6 @@ export default function AdminSection(props) {
     console.log("test umls api");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
-
-    var formdata = new FormData();
 
     var requestOptions = {
       method: "GET",

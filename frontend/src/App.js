@@ -14,12 +14,12 @@ import Cookies from "js-cookie";
 import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
-// 008C95
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
+
+// const darkTheme = createTheme({
+//   palette: {
+//     mode: "dark",
+//   },
+// });
 
 const theme = createTheme({
   palette: {
@@ -104,7 +104,7 @@ function ProtectedRoute({
     };
 
     validateUser();
-  }, [location, setUser, validateJwtToken]);
+  }, [location, setUser, validateJwtToken, setToken]);
 
   if (isLoading) {
     return <div></div>;

@@ -4,7 +4,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import MaterialReactTable from "material-react-table";
 import PropTypes from "prop-types";
@@ -58,9 +58,9 @@ export default function Archived(props) {
   };
 
   const csvExporter = new ExportToCsv(csvOptions);
-  // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     getFileList();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleExportData = () => {

@@ -2,14 +2,10 @@ import React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
 import { Typography } from "@mui/material";
-// import Box from "@mui/material/Box";
-// import TextField from "@mui/material/TextField";
-// import Button from "@mui/material/Button";
 import AdminSection from "../components/AdminSection";
 
 

@@ -1,38 +1,39 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import Button from "@mui/material/Button";
+// import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 // import MaterialReactTable from "material-react-table";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
+// import List from "@mui/material/List";
+// import ListItem from "@mui/material/ListItem";
 // import SaveIcon from "@mui/icons-material/Save";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import IconButton from "@mui/material/IconButton";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
-import FolderIcon from "@mui/icons-material/Folder";
-import DeleteIcon from "@mui/icons-material/Delete";
+// import ListItemText from "@mui/material/ListItemText";
+// import ListItemButton from "@mui/material/ListItemButton";
+// import ListItemIcon from "@mui/material/ListItemIcon";
+// import IconButton from "@mui/material/IconButton";
+// import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+// import FolderIcon from "@mui/icons-material/Folder";
+// import DeleteIcon from "@mui/icons-material/Delete";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 // import { darken } from "@mui/material";
 // import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { ExportToCsv } from "export-to-csv";
 // import LinearProgress from "@mui/material/LinearProgress";
-import AddIcon from "@mui/icons-material/Add";
+// import AddIcon from "@mui/icons-material/Add";
 // import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 // import CheckIcon from "@mui/icons-material/Check";
 import MatchManagerPendingTable from "../components/MatchManagerPendingTable";
 import MatchManagerApprovedTable from "../components/MatchManagerApprovedTable";
+import DataDictionaryList from "../components/DataDictionaryList";
 var XLSX = require("xlsx");
 
 export default function MatchManager(props) {
@@ -41,9 +42,9 @@ export default function MatchManager(props) {
   const [approvedData, setApprovedData] = useState([]);
   const [csvFilename, setCSVFilename] = useState("");
   const [value, setValue] = useState(0);
-  const [fileList, setFileList] = useState([]);
-  const [fileLastMod, setFileLastMod] = useState([]);
-  const [getListError, setGetListError] = useState();
+  // const [fileList, setFileList] = useState([]);
+  // const [fileLastMod, setFileLastMod] = useState([]);
+  // const [getListError, setGetListError] = useState();
   const [addSSError, setaddSSError] = useState();
   const [open, setOpen] = useState(false);
   const [sorting, setSorting] = useState([]);
@@ -51,7 +52,7 @@ export default function MatchManager(props) {
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingErr, setIsSavingErr] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(1);
+  // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
 
   const csvOptions = {
@@ -67,10 +68,18 @@ export default function MatchManager(props) {
     }),
   };
 
+  const handleDataChange = (newData, colDefs, csvFilename) => {
+    console.log('newdata', newData)
+    setData(newData);
+    setColDefs(colDefs)
+    setCSVFilename(csvFilename)
+  };
+
   const csvExporter = new ExportToCsv(csvOptions);
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-    getFileList();
+    // getFileList();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleExportData = () => {
@@ -102,42 +111,42 @@ export default function MatchManager(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
   // const tableData = useMemo(() => data, [data]);
 
-  function getFileList() {
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
-    var requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`,
-      requestOptions
-    )
-      .then((response) => response.json())
-      .then((result) => {
-        let resultFiles = [];
-        let resultFilesLastMod = [];
-        if (result.length) {
-          result.map((value) => {
-            resultFiles.push(value.fileName);
-            resultFilesLastMod.push(value.lastModified);
-            return result;
-          });
-        }
-        setFileList(resultFiles);
-        setFileLastMod(resultFilesLastMod);
-        setGetListError("");
-      })
-      .catch((error) => {
-        console.error("error", error);
-        setGetListError("Error occurred.");
-      });
-  }
+  // function getFileList() {
+  //   var myHeaders = new Headers();
+  //   myHeaders.append("Authorization", "Bearer " + props.token);
+  //   var requestOptions = {
+  //     method: "GET",
+  //     headers: myHeaders,
+  //     redirect: "follow",
+  //   };
+  //   fetch(
+  //     `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`,
+  //     requestOptions
+  //   )
+  //     .then((response) => response.json())
+  //     .then((result) => {
+  //       let resultFiles = [];
+  //       let resultFilesLastMod = [];
+  //       if (result.length) {
+  //         result.map((value) => {
+  //           resultFiles.push(value.fileName);
+  //           resultFilesLastMod.push(value.lastModified);
+  //           return result;
+  //         });
+  //       }
+  //       // setFileList(resultFiles);
+  //       setFileLastMod(resultFilesLastMod);
+  //       setGetListError("");
+  //     })
+  //     .catch((error) => {
+  //       console.error("error", error);
+  //       setGetListError("Error occurred.");
+  //     });
+  // }
 
   function getFile(e, value, switching, panelIndex) {
     setIsLoading(true);
-    setSelectedFile(value);
+    // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
@@ -233,40 +242,6 @@ export default function MatchManager(props) {
     };
   }
 
-  const uploadDD = (e) => {
-    var formdata = new FormData();
-    let fileInput = e.target;
-    formdata.append("dataFile", fileInput.files[0]);
-
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/add_data_dictionary`,
-      requestOptions
-    )
-      .then((response) => {
-        if (response.ok) response.text();
-        else throw new Error("Upload Error");
-      })
-      .then((result) => {
-        getFileList();
-        setaddSSError("");
-        e.target.value = null;
-      })
-      .catch((error) => {
-        setaddSSError("Upload Error");
-        setOpen(true);
-        console.info("error", error);
-        e.target.value = null;
-      });
-  };
 
   function importExcel(e) {
     const file = e.data;
@@ -347,40 +322,14 @@ export default function MatchManager(props) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-  function deleteFile(e, value) {
-    var formdata = new FormData();
-    formdata.append("file", value);
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
 
-    var requestOptions = {
-      method: "POST",
-      body: formdata,
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/remove_data_dictionary`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        getFileList();
-        resetScreen();
-      })
-      .catch((error) => {
-        resetScreen();
-        console.error("error", error);
-      });
-  }
 
   function resetScreen() {
     setData("");
     setApprovedData("");
     setIsLoading(false);
     setCSVFilename("");
-    setSelectedFile("");
+    // setSelectedFile("");
   }
   //optionally access the underlying virtualizer instance
   const rowVirtualizerInstanceRef = useRef(null);
@@ -389,19 +338,7 @@ export default function MatchManager(props) {
     rowVirtualizerInstanceRef.current?.scrollToIndex(0);
   }, [sorting]);
 
-  function ListItemTextC(fileListMod, index) {
-    return (
-      <ListItemText
-        primary={fileListMod}
-        primaryTypographyProps={{
-          style: { whiteSpace: "normal", wordWrap: "break-word" },
-        }}
-        secondary={"Last Save:" + fileLastMod[index]}
-      />
-    );
-  }
-
-  const uploadInputRef = React.useRef(null);
+  // const uploadInputRef = React.useRef(null);
   return (
       <Container component="main" maxWidth="90%">
         <CssBaseline />
@@ -417,32 +354,7 @@ export default function MatchManager(props) {
           <Grid container spacing={1}>
             <Grid item md={12} lg={2}>
               <Box>
-                <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-                  Data Dictionaries
-                </Typography>
-                {getListError ? (
-                  getListError
-                ) : (
-                  <Button
-                    variant="contained"
-                    component="label"
-                    startIcon={<AddIcon />}
-                    onClick={() =>
-                      uploadInputRef.current && uploadInputRef.current.click()
-                    }
-                  >
-                    Add Data Dictionary
-                    <input
-                      id="fileUpload"
-                      // onChange={(e)=>{importExcel(e)}}
-                      onChange={uploadDD}
-                      type="file"
-                      hidden
-                    />
-                  </Button>
-                )}
-
-                {addSSError ? (
+              {addSSError ? (
                   <Snackbar
                     anchorOrigin={{ vertical: "top", horizontal: "center" }}
                     open={open}
@@ -460,44 +372,10 @@ export default function MatchManager(props) {
                 ) : (
                   ""
                 )}
-
-                <List
-                  dense={true}
-                  sx={{
-                    color: "success.main",
-                    maxHeight: "70vh",
-                    overflow: "auto",
-                  }}
-                >
-                  {getListError
-                    ? ""
-                    : fileList
-                    ? fileList.map((value, index) => {
-                        return (
-                          <ListItem key={value}>
-                            <ListItemButton
-                              selected={selectedFile === value}
-                              onClick={(event) => getFile(event, value)}
-                            >
-                              <ListItemIcon>
-                                <FolderIcon />
-                              </ListItemIcon>
-                              {ListItemTextC(value, index)}
-                            </ListItemButton>
-                            <ListItemSecondaryAction>
-                              <IconButton
-                                edge="end"
-                                aria-label="delete"
-                                onClick={(event) => deleteFile(event, value)}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        );
-                      })
-                    : ""}
-                </List>
+                <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                  Data Dictionaries
+                </Typography>
+                <DataDictionaryList props={props} onDataChange={handleDataChange}/>
               </Box>
             </Grid>
 
