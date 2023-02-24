@@ -5,13 +5,16 @@ import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
 import { Alert } from "@mui/material";
 import FormSelect from "../components/FormSelect";
-import DataDictionaryList from "../components/DataDictionaryList";
+// import DataDictionaryList from "../components/DataDictionaryList";
+
 
 export default function ProjectManagementPage(props) {
   console.log("props,", props);
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  // const [pendingList, setPendingList] = useState([])
+  // const [finishedList, setFinishedList] = useState([])
 
   useEffect(() => {
     //get available forms
@@ -61,14 +64,21 @@ export default function ProjectManagementPage(props) {
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
             <h1>Project Management</h1>
+            <h2>REDCap Forms</h2>
             {addSSError && (
               <Alert severity="error">Error Adding Data Dictionary</Alert>
             )}
             {!isLoading && (
               <FormSelect props={props} forms={forms} isLoading={isLoading} />
             )}
-            <DataDictionaryList props={props}/>
+            {/* <DataDictionaryList props={props}/> */}
           </Grid>
+          <Grid item xs={6}>
+              <h3>Pending</h3>
+            </Grid>
+            <Grid item xs={6}>
+              <h3>Completed</h3>
+            </Grid>
         </Grid>
       </Paper>
     </Container>

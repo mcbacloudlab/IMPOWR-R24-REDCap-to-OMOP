@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function FormSelect(props) {
-  console.log("form select props", props);
   const [selectedForm, setSelectedForm] = useState("");
 
   //   const forms = ["bioinformatics_core_participants", "bioinformatics_core_activity_survey"];
+  function getDataDictionary(event){
+    console.log('getdatadictionary', selectedForm)
+  }  
+
   useEffect(() => {
     console.log("the prop select", props.forms[0]);
     console.log("typeof", typeof props.forms[0]);
@@ -32,6 +37,14 @@ export default function FormSelect(props) {
             </MenuItem>
           ))}
         </Select>
+        <Button
+        variant="contained"
+        component="label"
+        startIcon={<AddIcon />}
+        onClick={(e) => getDataDictionary(e)}
+      >
+        Import Data Dictionary
+      </Button>
       </FormControl>
     );
   }
