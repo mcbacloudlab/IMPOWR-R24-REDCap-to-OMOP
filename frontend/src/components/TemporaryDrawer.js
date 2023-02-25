@@ -9,6 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import SearchIcon from '@mui/icons-material/Search';
+import BackupIcon from '@mui/icons-material/Backup';
 // import MailIcon from '@mui/icons-material/Mail';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -42,7 +43,7 @@ export default function TemporaryDrawer() {
       <ListItem key={'Project Management'} component={NavLink} to="/project-management" disablePadding>
             <ListItemButton>
               <ListItemIcon>
-              <SearchIcon />
+              <BackupIcon />
               </ListItemIcon>
               <ListItemText primary={'Project Management'} />
             </ListItemButton>
