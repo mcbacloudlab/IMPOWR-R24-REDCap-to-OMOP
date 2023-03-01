@@ -43,7 +43,7 @@ async function requireAdmin(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log("jwtVerified", jwtVerified);
+    // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
     const query = "SELECT role FROM users WHERE email = ?";
     //   return new Promise((resolve, reject) => {

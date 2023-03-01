@@ -1,14 +1,9 @@
 import React from "react";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
-import Typography from "@mui/material/Typography";
-import SaveIcon from "@mui/icons-material/Save";
-import { darken } from "@mui/material";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { darken, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CircularProgress from "@mui/material/CircularProgress";
-import CheckIcon from "@mui/icons-material/Check";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 export default function FormSelectTable({
   columns,
@@ -21,11 +16,9 @@ export default function FormSelectTable({
   saveFile,
   value,
   handleExportData,
-  resetScreen,
+  resetScreen
+
 }) {
-  console.log("forms select table");
-  console.log("data!!!", data);
-  // if (data) {
   return (
     <MaterialReactTable
       columns={columns}
@@ -38,7 +31,7 @@ export default function FormSelectTable({
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { maxHeight: "600px" },
+        sx: { maxHeight: "40vh" },
       }}
       onSortingChange={setSorting}
       // state={{ isLoading, sorting }}
@@ -50,9 +43,9 @@ export default function FormSelectTable({
         density: "compact",
         // pagination: { pageSize: 50, pageIndex: 0 },
       }}
-      enableEditing
-      onEditingRowSave={handleSaveRow}
-      editingMode="modal"
+      // enableEditing
+      // onEditingRowSave={handleSaveRow}
+      // editingMode="modal"
       // muiTableBodyCellEditTextFieldProps={({
       //   cell,
       // }) => ({
@@ -113,7 +106,7 @@ export default function FormSelectTable({
             flexWrap: "wrap",
           }}
         >
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             component="label"
@@ -129,24 +122,24 @@ export default function FormSelectTable({
             onClick={(event) => saveFile(event, value)}
           >
             Save
-          </Button>
+          </Button> */}
 
           <Button
             color="success"
             //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
             onClick={handleExportData}
             startIcon={<FileDownloadIcon />}
-            variant="contained"
+            variant="outlined"
           >
             Export
           </Button>
-          <Typography
+          {/* <Typography
             color="textSecondary"
             variant="subtitle2"
             style={{ marginLeft: "auto" }}
-          >
-            Last Saved At:{" "}
-          </Typography>
+          > */}
+            {/* Last Saved At:{" "} */}
+          {/* </Typography> */}
 
           <Box style={{ marginLeft: "auto" }}>
             <Button
@@ -163,5 +156,4 @@ export default function FormSelectTable({
       )}
     />
   );
-  // }
 }

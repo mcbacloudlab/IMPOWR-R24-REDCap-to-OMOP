@@ -78,7 +78,8 @@ async function getForms(req, res) {
         res.status(200).send(JSON.stringify(Array.from(formNames)))
       })
       .catch(function (error) {
-        console.log(error);
+        // console.log(error);
+        res.status(500).send('Error')
       });
   });
 }

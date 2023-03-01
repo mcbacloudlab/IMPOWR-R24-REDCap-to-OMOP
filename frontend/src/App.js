@@ -122,6 +122,8 @@ function ProtectedRoute({
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [pendingList, setPendingList] = useState();
+  const [completedList, setCompletedList] = useState();
 
   const updateUser = (newUser) => {
     setUser(newUser);
@@ -133,7 +135,7 @@ function App() {
         <header className="App-header">
           <BrowserRouter>
             <div>
-              {user && <SearchAppBar updateUser={updateUser} />}
+              {user && <SearchAppBar updateUser={updateUser} pendingList={pendingList} completedList={completedList} setPendingList={setPendingList} setCompletedList={setCompletedList}/>}
               <Routes>
                 <Route
                   path="/"
@@ -193,9 +195,11 @@ function App() {
                       validateJwtToken={validateJwtToken}
                       token={token}
                       setToken={setToken}
+                      setPendingList={setPendingList}
+                      setCompletedList={setCompletedList}
                     >
                       <ProjectManagementPage
-                        user={user} token={token}
+                        user={user} token={token} pendingList={pendingList} completedList={completedList} setPendingList={setPendingList} setCompletedList={setCompletedList}
                       ></ProjectManagementPage>
                     </ProtectedRoute>
                   }

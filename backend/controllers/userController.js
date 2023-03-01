@@ -53,9 +53,15 @@ async function validateUser(req, res) {
   }
 }
 
+async function getUserJobs(req, res) {
+  // const id = req.params.id;
+  await userService.getUserJobs(req, res);
+}
+
 module.exports = {
   getUserById,
   createUser,
   signInUser,
   validateUser,
+  getUserJobs
 };

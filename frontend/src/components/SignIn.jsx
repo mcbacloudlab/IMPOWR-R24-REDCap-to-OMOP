@@ -58,7 +58,7 @@ export default function SignIn({ props }) {
         .then((result) => {
           if (result === 200) {
             props.updateUser("loggedIn");
-            navigate("/match-manager");
+            navigate("/myaccount");
           } else {
             navigate("/signin");
           }
@@ -102,7 +102,7 @@ export default function SignIn({ props }) {
               secure: true,
             });
             props.updateUser(data.get("email"));
-            navigate("/match-manager");
+            navigate("/myaccount");
           } else {
             navigate("/signin"); // navigate to another component
             setLoginError(true);

@@ -9,8 +9,18 @@ const userRoutes = require("./routes/userRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const keyRoutes = require("./routes/keyRoutes")
 const redcapRoutes = require("./routes/redcapRoutes")
+const queueRoutes = require('./routes/queueRoutes')
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require('express-rate-limit');
+const Queue = require('bull')
+const { createBullBoard } = require('bull-board')
+const { BullAdapter } = require('bull-board/bullAdapter')
+
+const someQueue = new Queue('process-queue')
+
+const { router, setQueues, replaceQueues, addQueue, removeQueue } = createBullBoard([
+  new BullAdapter(someQueue),
+])
 
 let appPort = process.env.EXPRESS_PORT;
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
@@ -38,6 +48,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/file", authenticate, fileRoutes);
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes)
 app.use("/api/redcap", authenticate, redcapRoutes)
+
+app.use("/api/queue", authenticate, queueRoutes)
+
+app.use('/admin/queues', router)
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;
