@@ -21,12 +21,13 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 // import ProjectBottomBar from "./ProjectBottomBar";
 import { useState } from "react";
-import CheckIcon from "@mui/icons-material/Check";
+// import CheckIcon from "@mui/icons-material/Check";
 // import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
 import Tooltip from "@mui/material/Tooltip";
+import PlaylistAddCheckSharpIcon from '@mui/icons-material/PlaylistAddCheckSharp';
 
 // const Search = styled("div")(({ theme }) => ({
 //   position: "relative",
@@ -435,7 +436,7 @@ export default function PrimarySearchAppBar(props) {
               onClick={() => handleIconClick(1)}
             >
               <Tooltip title="Completed Jobs">
-                <CheckIcon />
+                <PlaylistAddCheckSharpIcon />
               </Tooltip>
             </IconButton>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>

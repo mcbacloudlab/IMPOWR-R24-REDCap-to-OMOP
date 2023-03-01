@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useMemo } from "react";
 import {
   Box,
@@ -12,8 +13,8 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import FormSelectTable from "./FormSelectTable";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
+// import Snackbar from "@mui/material/Snackbar";
+// import MuiAlert from "@mui/material/Alert";
 import Alert from "@mui/material/Alert";
 // import { ExportToCsv } from "export-to-csv";
 // import Paper from "@mui/material/Paper";
@@ -26,7 +27,7 @@ export default function FormSelect(props) {
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
-  const [open, setOpen] = useState(true);
+  // const [open, setOpen] = useState(true);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
     useState(false);
@@ -169,10 +170,12 @@ export default function FormSelect(props) {
         // console.log('resultobj', resultObj)
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed") return obj;
+          else return null
         });
 
         let _completedList = resultObj.filter((obj) => {
           if (obj.jobStatus === "completed") return obj;
+          else return null
         });
 
         // console.log("pending", _pendingList);
@@ -288,7 +291,7 @@ export default function FormSelect(props) {
                     startIcon={<AddTaskIcon />}
                     onClick={(e) => submitToProcess(e)}
                   >
-                    Submit To Process
+                    Submit To Queue
                   </Button>
                 </Grid>
                 {showSubmittedNotifcation && (
