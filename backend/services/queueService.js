@@ -1,6 +1,8 @@
 const Bull = require("bull");
 const db = require("../db/mysqlConnection.cjs");
 var jwt = require("jsonwebtoken");
+const { getUserByEmail } = require("./userService.js");
+
 
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -28,8 +30,8 @@ myQueue.process(jobOptions.concurrency, async (job) => {
 
 async function myTask(job) {
   // perform some intensive task here
-  console.log(`Processing job with data:`);
-  console.log(job.data);
+  // console.log(`Processing job with data:`);
+  // console.log(job.data);
   console.log("jobid", job.id);
 
   console.log("Starting long running task...");
@@ -58,7 +60,10 @@ async function submit(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
+    let userId = await getUserByEmail(email)
+    userId = userId[0].id
     console.log('email', email)
+    console.log('the user id!!', userId)
     const job = await myQueue.add(data, jobOptions);
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
@@ -68,7 +73,7 @@ async function submit(req, res) {
     try {
       const [rows, fields] = await db
         .promise()
-        .execute(query, [34, job.id, datetimeString]);
+        .execute(query, [userId, job.id, datetimeString]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
     } catch (err) {

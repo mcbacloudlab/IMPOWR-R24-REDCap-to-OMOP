@@ -20,7 +20,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 // import ProjectBottomBar from "./ProjectBottomBar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import CheckIcon from "@mui/icons-material/Check";
 // import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -70,6 +70,7 @@ import PlaylistAddCheckSharpIcon from '@mui/icons-material/PlaylistAddCheckSharp
 // }));
 
 export default function PrimarySearchAppBar(props) {
+  console.log('searchbar props', props)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
@@ -100,6 +101,7 @@ export default function PrimarySearchAppBar(props) {
   const handleSignOut = (event) => {
     Cookies.remove("token");
     Cookies.remove("user");
+    props.setToken(null)
     props.updateUser(null);
     navigate("/signin");
   };
@@ -222,6 +224,61 @@ export default function PrimarySearchAppBar(props) {
     setValue(newValue);
     setOpen(true);
   };
+
+  
+
+  function checkJobs() {
+    console.log('checkjobs!', props.token)
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:5000/api/users/getUserJobs", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log('getUserJobs', result)
+        let resultObj = JSON.parse(result);
+        // console.log('resultobj', resultObj)
+        let _pendingList = resultObj.filter((obj) => {
+          if (obj.jobStatus !== "completed") return obj;
+          else return null
+        });
+
+        let _completedList = resultObj.filter((obj) => {
+          if (obj.jobStatus === "completed") return obj;
+          else return null
+        });
+
+        // console.log("pending", _pendingList);
+        // console.log("completed", _completedList);
+        props.setPendingList(_pendingList);
+        props.setCompletedList(_completedList);
+      })
+      .catch((error) => {
+        handleSignOut()
+        console.log("error", error)
+      });
+  }
+
+  useEffect(() => {
+    // Fetch data initially
+    checkJobs();
+
+    // Fetch data every 15 seconds
+    const intervalId = setInterval(() => {
+      checkJobs();
+    }, 5000);
+
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   function CompletedDrawer(props) {
     // const classes = useStyles();

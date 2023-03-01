@@ -70,20 +70,7 @@ export default function FormSelect(props) {
     setSelectedForm(event.target.value);
   };
 
-  useEffect(() => {
-    // Fetch data initially
-    checkJobs();
 
-    // Fetch data every 15 seconds
-    const intervalId = setInterval(() => {
-      checkJobs();
-    }, 5000);
-
-    // Clean up interval on unmount
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   function importExcel(e) {
     const file = e;
@@ -152,39 +139,7 @@ export default function FormSelect(props) {
       .catch((error) => console.log("error", error));
   }
 
-  function checkJobs() {
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.props.token);
-
-    var requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    fetch("http://localhost:5000/api/users/getUserJobs", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        // console.log('getUserJobs', result)
-        let resultObj = JSON.parse(result);
-        // console.log('resultobj', resultObj)
-        let _pendingList = resultObj.filter((obj) => {
-          if (obj.jobStatus !== "completed") return obj;
-          else return null
-        });
-
-        let _completedList = resultObj.filter((obj) => {
-          if (obj.jobStatus === "completed") return obj;
-          else return null
-        });
-
-        // console.log("pending", _pendingList);
-        // console.log("completed", _completedList);
-        props.setPendingList(_pendingList);
-        props.setCompletedList(_completedList);
-      })
-      .catch((error) => console.log("error", error));
-  }
+ 
 
   const csvOptions = {
     fieldSeparator: ",",

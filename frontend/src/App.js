@@ -24,10 +24,10 @@ import ProjectManagementPage from "./pages/ProjectManagementPage";
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#008C95', // your custom primary color
+      main: "#008C95", // your custom primary color
     },
     secondary: {
-      main: '#008C95', // your custom secondary color
+      main: "#008C95", // your custom secondary color
     },
   },
 });
@@ -79,6 +79,7 @@ function ProtectedRoute({
   user,
   children,
   validateJwtToken,
+  token,
   setUser,
   setToken,
 }) {
@@ -104,7 +105,7 @@ function ProtectedRoute({
     };
 
     validateUser();
-  }, [location, setUser, validateJwtToken, setToken]);
+  }, [location, setUser, validateJwtToken, setToken, token]);
 
   if (isLoading) {
     return <div></div>;
@@ -128,6 +129,7 @@ function App() {
   const updateUser = (newUser) => {
     setUser(newUser);
   };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -135,13 +137,18 @@ function App() {
         <header className="App-header">
           <BrowserRouter>
             <div>
-              {user && <SearchAppBar updateUser={updateUser} pendingList={pendingList} completedList={completedList} setPendingList={setPendingList} setCompletedList={setCompletedList}/>}
-              <Routes>
-                <Route
-                  path="/"
-                  element={<SignInPage updateUser={updateUser}></SignInPage>}
-                  exact
+              {user && (
+                <SearchAppBar
+                  token={token}
+                  setToken={setToken}
+                  updateUser={updateUser}
+                  pendingList={pendingList}
+                  completedList={completedList}
+                  setPendingList={setPendingList}
+                  setCompletedList={setCompletedList}
                 />
+              )}
+              <Routes>
                 <Route
                   path="/match-manager"
                   element={
@@ -199,7 +206,12 @@ function App() {
                       setCompletedList={setCompletedList}
                     >
                       <ProjectManagementPage
-                        user={user} token={token} pendingList={pendingList} completedList={completedList} setPendingList={setPendingList} setCompletedList={setCompletedList}
+                        user={user}
+                        token={token}
+                        pendingList={pendingList}
+                        completedList={completedList}
+                        setPendingList={setPendingList}
+                        setCompletedList={setCompletedList}
                       ></ProjectManagementPage>
                     </ProtectedRoute>
                   }
@@ -207,12 +219,22 @@ function App() {
                 />
                 <Route
                   path="/signin"
-                  element={<SignInPage updateUser={updateUser}></SignInPage>}
+                  element={
+                    <SignInPage
+                      updateUser={updateUser}
+                      token={token}
+                      setToken={setToken}
+                    ></SignInPage>
+                  }
                   exact
                 />
                 <Route
                   path="/signup"
-                  element={<SignUpPage></SignUpPage>}
+                  element={
+                    <SignUpPage updateUser={updateUser}
+                    token={token}
+                    setToken={setToken}></SignUpPage>
+                  }
                   exact
                 />
                 <Route component={Error} />

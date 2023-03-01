@@ -10,7 +10,7 @@ const myQueue = new Bull("process-queue", {
   },
 });
 
-async function getUserById(email) {
+async function getUserByEmail(email) {
   const query = "SELECT * FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
     db.execute(query, [email], function (err, results, fields) {
@@ -41,7 +41,7 @@ async function createUser(userData) {
   }
 
   return validateUserData(userData).then((userData) => {
-    return getUserById(userData.email).then((user) => {
+    return getUserByEmail(userData.email).then((user) => {
       if (user.length > 0) {
         throw new Error("Error! User already exists");
       }
@@ -93,7 +93,7 @@ async function signInUser(userData) {
 
   const validatedData = await validateUserData(userData);
 
-  const userInfo = await getUserById(validatedData.email);
+  const userInfo = await getUserByEmail(validatedData.email);
   let userInfoToReturn = {
     firstName: userInfo[0].firstName,
     lastName: userInfo[0].lastName,
@@ -126,7 +126,7 @@ async function validateUser(authData) {
   try {
     let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
     //now get user info again
-    let userInfo = await getUserById(jwtVerified.user);
+    let userInfo = await getUserByEmail(jwtVerified.user);
     userInfo = userInfo[0];
     let userInfoToReturn = {
       firstName: userInfo.firstName,
@@ -169,6 +169,7 @@ async function getUserJobs(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
+    console.log('get user jobs for', email)
     const query = `SELECT jobId, jobStatus
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
@@ -191,8 +192,8 @@ async function getUserJobs(req, res) {
           const startedAt = foundJob.processedOn; 
           const finishedAt = foundJob.finishedOn;
           const progress = await foundJob.progress();
-          console.log("status", status);
-          console.log("timeadded", timeAdded);
+          // console.log("status", status);
+          // console.log("timeadded", timeAdded);
           job.timeAdded = timeAdded;
           job.startedAt = startedAt;
           job.finishedAt = finishedAt;
@@ -206,7 +207,7 @@ async function getUserJobs(req, res) {
         }
       }
 
-      console.log("send status results", results);
+      // console.log("send status results", results);
       res.status(200).send(results);
     });
     //   });
@@ -229,7 +230,7 @@ async function getUserJobs(req, res) {
 }
 
 module.exports = {
-  getUserById,
+  getUserByEmail,
   createUser,
   signInUser,
   validateUser,

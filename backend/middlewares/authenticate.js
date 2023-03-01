@@ -10,7 +10,7 @@ async function authenticate(req, res, next) {
   }
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    let userInfo = await getUserById(jwtVerified.user);
+    let userInfo = await getUserByEmail(jwtVerified.user);
     if (userInfo.length <= 0) {
       res.status(403).send("Error");
       return;
@@ -23,7 +23,7 @@ async function authenticate(req, res, next) {
   }
 }
 
-async function getUserById(email) {
+async function getUserByEmail(email) {
   const query = "SELECT * FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
     db.execute(query, [email], function (err, results, fields) {
@@ -67,4 +67,4 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-module.exports = { authenticate, getUserById, requireAdmin };
+module.exports = { authenticate, getUserByEmail, requireAdmin };

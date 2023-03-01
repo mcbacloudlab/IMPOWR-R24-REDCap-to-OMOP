@@ -17,18 +17,9 @@ import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import Cookies from "js-cookie";
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#008C95", // your custom primary color
-    },
-    secondary: {
-      main: "#008C95", // your custom secondary color
-    },
-  },
-});
 
 export default function SignIn({ props }) {
+  console.log('sign in props', props)
   const [loginError, setLoginError] = useState(false);
 
   const navigate = useNavigate();
@@ -102,6 +93,7 @@ export default function SignIn({ props }) {
               secure: true,
             });
             props.updateUser(data.get("email"));
+            props.setToken(result.jwtToken)
             navigate("/myaccount");
           } else {
             navigate("/signin"); // navigate to another component
@@ -113,7 +105,6 @@ export default function SignIn({ props }) {
   };
 
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -159,10 +150,6 @@ export default function SignIn({ props }) {
               id="password"
               autoComplete="current-password"
             />
-            {/* <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            /> */}
             <Button
               type="submit"
               fullWidth
@@ -185,8 +172,6 @@ export default function SignIn({ props }) {
             </Grid>
           </Box>
         </Box>
-        {/* <Copyright sx={{ mt: 8, mb: 4 }} /> */}
       </Container>
-    </ThemeProvider>
   );
 }

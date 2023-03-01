@@ -7,8 +7,8 @@ import SignUp from "../components/SignUp";
 
 
 
-export default function SignUp_Page() {
-
+export default function SignUp_Page(props) {
+console.log('sign up page props', props)
   return (
       <Container component="main" maxWidth="90%">
         <CssBaseline />
@@ -25,7 +25,7 @@ export default function SignUp_Page() {
         >
           <Grid container spacing={1} justifyContent="center">
             <Grid item md={12} lg={4}>
-            <SignUp/>
+            <SignUp props={props}/>
             </Grid>
           </Grid>
         </Paper>

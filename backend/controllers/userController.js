@@ -1,9 +1,9 @@
 const userService = require("../services/userService");
 var jwt = require("jsonwebtoken");
 
-async function getUserById(req, res) {
+async function getUserByEmail(req, res) {
   const id = req.params.id;
-  const user = await userService.getUserById(id);
+  const user = await userService.getUserByEmail(id);
   if (user) {
     res.json(user);
   } else {
@@ -59,7 +59,7 @@ async function getUserJobs(req, res) {
 }
 
 module.exports = {
-  getUserById,
+  getUserByEmail,
   createUser,
   signInUser,
   validateUser,

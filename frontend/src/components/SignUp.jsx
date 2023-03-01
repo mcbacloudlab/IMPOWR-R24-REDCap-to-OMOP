@@ -3,31 +3,19 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-// import FormControlLabel from "@mui/material/FormControlLabel";
-// import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import { useState } from "react";
 import Cookies from "js-cookie";
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#008C95', // your custom primary color
-    },
-    secondary: {
-      main: '#008C95', // your custom secondary color
-    },
-  },
-});
 
-export default function SignUp() {
+export default function SignUp({ props }) {
+  console.log('sign up props', props)
   const [signUpError, setSignUpError] = useState(false);
 
   const navigate = useNavigate();
@@ -60,7 +48,8 @@ export default function SignUp() {
           let userInfo = JSON.stringify(respJSON.userInfo)
           Cookies.set("token", token, { expires: 7, secure: true });
           Cookies.set("user", userInfo, { expires: 7, secure: true });
-          navigate("/signin"); // navigate to another component
+          props.setToken(token)
+          navigate("/myaccount"); // navigate to another component
           setSignUpError(false);
         });
       } else {
@@ -71,7 +60,6 @@ export default function SignUp() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -141,10 +129,6 @@ export default function SignUp() {
                 />
               </Grid>
               <Grid item xs={12}>
-                {/* <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                /> */}
               </Grid>
             </Grid>
             <Button
@@ -164,8 +148,6 @@ export default function SignUp() {
             </Grid>
           </Box>
         </Box>
-        {/* <Copyright sx={{ mt: 5 }} /> */}
       </Container>
-    </ThemeProvider>
   );
 }
