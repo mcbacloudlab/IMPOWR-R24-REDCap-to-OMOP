@@ -133,7 +133,7 @@ export default function FormSelect(props) {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/api/queue/submit", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submit`, requestOptions)
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
@@ -268,6 +268,7 @@ export default function FormSelect(props) {
                         position: "absolute",
                         top: "5px",
                         right: "150px",
+                        zIndex: 10000
                       }}
                     >
                       <Typography variant="h6" gutterBottom>

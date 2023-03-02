@@ -37,8 +37,8 @@ async function getUserByEmail(email) {
 }
 
 async function requireAdmin(req, res, next) {
-  console.log("require admin");
-  console.log("req", req.body);
+  // console.log("require admin");
+  // console.log("req", req.body);
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
   try {
@@ -52,10 +52,10 @@ async function requireAdmin(req, res, next) {
         console.log("error!", err);
         res.status(500).send("Error");
       }
-      console.log("results", results);
+      // console.log("results", results);
       if (results[0].role === "admin") {
-        console.log("next", next);
-        console.log("go next");
+        // console.log("next", next);
+        // console.log("go next");
         return next();
       } else res.status(403).send("Error");
     });

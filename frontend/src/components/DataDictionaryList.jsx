@@ -1,42 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-// import { createTheme, ThemeProvider } from "@mui/material/styles";
-// import Paper from "@mui/material/Paper";
-// import Cookies from "js-cookie";
-// import { Typography } from "@mui/material";
-// import Box from "@mui/material/Box";
-// import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
-// import { Alert } from "@mui/material";
-// import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-// import SaveIcon from "@mui/icons-material/Save";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-// import IconButton from "@mui/material/IconButton";
 import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import FolderIcon from "@mui/icons-material/Folder";
-// import DeleteIcon from "@mui/icons-material/Delete";
-// import { Select, MenuItem } from "@mui/material";
 import List from "@mui/material/List";
 var XLSX = require("xlsx");
 
 export default function DataDictionaryList(props) {
-  console.log("ddlistprops", props);
-//   const [colDefs, setColDefs] = useState([]);
-//   const [data, setData] = useState([]);
-//   const [approvedData, setApprovedData] = useState([]);
-//   const [csvFilename, setCSVFilename] = useState("");
-//   const [value, setValue] = useState(0);
   const [fileList, setFileList] = useState([]);
   const [fileLastMod, setFileLastMod] = useState([]);
   const [getListError, setGetListError] = useState();
-//   const [addSSError, setaddSSError] = useState();
-//   const [open, setOpen] = useState(false);
-//   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(1);
-//   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const uploadInputRef = useRef(null);
 
   function getFileList() {
@@ -95,15 +73,9 @@ export default function DataDictionaryList(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        // setIsLoading(false);
-        // setData("");
-        // setApprovedData("");
         importExcel(JSON.parse(result));
       })
       .catch((error) => {
-        // setIsLoading(false);
-        // setaddSSError("Upload Error");
-        // setOpen(true);
         console.error("error", error);
       });
   }
@@ -205,42 +177,6 @@ export default function DataDictionaryList(props) {
     });
     return rows;
   };
-
-//   function deleteFile(e, value) {
-//     var formdata = new FormData();
-//     formdata.append("file", value);
-//     var myHeaders = new Headers();
-//     myHeaders.append("Authorization", "Bearer " + props.token);
-
-//     var requestOptions = {
-//       method: "POST",
-//       body: formdata,
-//       headers: myHeaders,
-//       redirect: "follow",
-//     };
-
-//     fetch(
-//       `${process.env.REACT_APP_BACKEND_API_URL}/api/file/remove_data_dictionary`,
-//       requestOptions
-//     )
-//       .then((response) => response.text())
-//       .then((result) => {
-//         getFileList();
-//         resetScreen();
-//       })
-//       .catch((error) => {
-//         resetScreen();
-//         console.error("error", error);
-//       });
-//   }
-
-//   function resetScreen() {
-//     // setData("");
-//     // setApprovedData("");
-//     // setIsLoading(false);
-//     // setCSVFilename("");
-//     setSelectedFile("");
-//   }
 
   return (
     <>

@@ -1,7 +1,7 @@
 const redcapService = require("../services/redcapService.js");
 
 async function getForms(req, res) {
-  console.log("get redcap forms");
+  // console.log("get redcap forms");
   try {
     await redcapService.getForms(req, res);
     // console.log("keys", keys);
@@ -13,7 +13,7 @@ async function getForms(req, res) {
 }
 
 async function exportMetadata(req, res){
-  console.log("get redcap metadata");
+  // console.log("get redcap metadata");
   try {
     await redcapService.exportMetadata(req, res);
     // console.log("keys", keys);

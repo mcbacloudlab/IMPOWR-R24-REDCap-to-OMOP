@@ -26,7 +26,12 @@ let appPort = process.env.EXPRESS_PORT;
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
-app.use(morgan("dev"));
+
+const skipRoutes = ['/getUserJobs', '/queues'];
+const skip = (req, res) => {
+  return skipRoutes.some(route => req.url.startsWith(route));
+};
+app.use(morgan('dev', { skip }));
 
 // enable files upload
 app.use(

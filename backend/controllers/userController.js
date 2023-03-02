@@ -42,7 +42,7 @@ async function signInUser(req, res) {
 }
 
 async function validateUser(req, res) {
-  console.log('validate user called...')
+  // console.log('validate user called...')
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1]; // get token from Authorization header
   let verified = await userService.validateUser(token);

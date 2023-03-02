@@ -1,76 +1,27 @@
 import * as React from "react";
-// import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-// import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-// import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-// import MailIcon from "@mui/icons-material/Mail";
-// import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import TemporaryDrawer from "./TemporaryDrawer";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-// import ProjectBottomBar from "./ProjectBottomBar";
 import { useState, useEffect } from "react";
-// import CheckIcon from "@mui/icons-material/Check";
-// import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
 import Tooltip from "@mui/material/Tooltip";
-import PlaylistAddCheckSharpIcon from '@mui/icons-material/PlaylistAddCheckSharp';
-
-// const Search = styled("div")(({ theme }) => ({
-//   position: "relative",
-//   borderRadius: theme.shape.borderRadius,
-//   backgroundColor: alpha(theme.palette.common.white, 0.15),
-//   "&:hover": {
-//     backgroundColor: alpha(theme.palette.common.white, 0.25),
-//   },
-//   marginRight: theme.spacing(2),
-//   marginLeft: 0,
-//   width: "100%",
-//   [theme.breakpoints.up("sm")]: {
-//     marginLeft: theme.spacing(3),
-//     width: "auto",
-//   },
-// }));
-
-// const SearchIconWrapper = styled("div")(({ theme }) => ({
-//   padding: theme.spacing(0, 2),
-//   height: "100%",
-//   position: "absolute",
-//   pointerEvents: "none",
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "center",
-// }));
-
-// const StyledInputBase = styled(InputBase)(({ theme }) => ({
-//   color: "inherit",
-//   "& .MuiInputBase-input": {
-//     padding: theme.spacing(1, 1, 1, 0),
-//     // vertical padding + font size from searchIcon
-//     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-//     transition: theme.transitions.create("width"),
-//     width: "100%",
-//     [theme.breakpoints.up("md")]: {
-//       width: "20ch",
-//     },
-//   },
-// }));
+import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 
 export default function PrimarySearchAppBar(props) {
-  console.log('searchbar props', props)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
@@ -101,7 +52,7 @@ export default function PrimarySearchAppBar(props) {
   const handleSignOut = (event) => {
     Cookies.remove("token");
     Cookies.remove("user");
-    props.setToken(null)
+    props.setToken(null);
     props.updateUser(null);
     navigate("/signin");
   };
@@ -173,26 +124,6 @@ export default function PrimarySearchAppBar(props) {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {/* <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem> */}
-      {/* <MenuItem>
-        <IconButton
-          size="large"
-          aria-label="show 17 new notifications"
-          color="inherit"
-        >
-          <Badge badgeContent={17} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem> */}
       <MenuItem onClick={() => handleNavigate("/myaccount")}>
         <IconButton
           size="large"
@@ -225,10 +156,7 @@ export default function PrimarySearchAppBar(props) {
     setOpen(true);
   };
 
-  
-
   function checkJobs() {
-    console.log('checkjobs!', props.token)
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -238,30 +166,25 @@ export default function PrimarySearchAppBar(props) {
       redirect: "follow",
     };
 
-    fetch("http://localhost:5000/api/users/getUserJobs", requestOptions)
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/users/getUserJobs`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        // console.log('getUserJobs', result)
         let resultObj = JSON.parse(result);
-        // console.log('resultobj', resultObj)
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed") return obj;
-          else return null
+          else return null;
         });
 
         let _completedList = resultObj.filter((obj) => {
           if (obj.jobStatus === "completed") return obj;
-          else return null
+          else return null;
         });
-
-        // console.log("pending", _pendingList);
-        // console.log("completed", _completedList);
         props.setPendingList(_pendingList);
         props.setCompletedList(_completedList);
       })
       .catch((error) => {
-        handleSignOut()
-        console.log("error", error)
+        handleSignOut();
+        console.log("error", error);
       });
   }
 
@@ -280,8 +203,29 @@ export default function PrimarySearchAppBar(props) {
     };
   }, []);
 
+  function handleView(jobId) {
+    console.log("event view", jobId);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${jobId}`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((error) => console.log("error", error));
+  }
+
   function CompletedDrawer(props) {
-    // const classes = useStyles();
     const { completedList } = props.props;
 
     const chunkSize = Math.ceil(completedList.length / 3);
@@ -311,7 +255,7 @@ export default function PrimarySearchAppBar(props) {
                       primary={
                         <div>
                           <div>
-                            <b>Job Id:</b> {job.jobId}
+                            <b>Job ID:</b> {job.jobId}
                           </div>
                           <div>
                             <b>Status:</b> {job.jobStatus}
@@ -338,7 +282,7 @@ export default function PrimarySearchAppBar(props) {
                     />
                     <Button
                       variant="contained"
-                      // onClick={(event) => handleView(event)}
+                      onClick={(event) => handleView(job.jobId)}
                       value="redcapAPIKey"
                       sx={{
                         ml: 4,
@@ -359,9 +303,7 @@ export default function PrimarySearchAppBar(props) {
   }
 
   function PendingDrawer(props) {
-    // const classes = useStyles();
     const { pendingList } = props.props;
-    console.log("p1", pendingList);
 
     const sortedJobs = pendingList.sort((a, b) => {
       return a.jobId - b.jobId;
@@ -448,7 +390,10 @@ export default function PrimarySearchAppBar(props) {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar
+          position="sticky"
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
           <Toolbar>
             <TemporaryDrawer />
             <Typography

@@ -141,7 +141,7 @@ async function validateUser(authData) {
 }
 
 async function updateJobStatus(jobId) {
-  console.log("updateJobStatus", jobId);
+  // console.log("updateJobStatus", jobId);
   const now = new Date();
   const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
   try {
@@ -153,7 +153,7 @@ async function updateJobStatus(jobId) {
         if (error) {
           console.error(error);
         } else {
-          console.log(`Updated job ${jobId} status to ${status}`);
+          // console.log(`Updated job ${jobId} status to ${status}`);
         }
       });
     }
@@ -169,12 +169,12 @@ async function getUserJobs(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
-    console.log('get user jobs for', email)
+    // console.log('get user jobs for', email)
     const query = `SELECT jobId, jobStatus
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
-    order by jobId desc
+    order by lastUpdated desc
     limit 10`;
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
@@ -184,6 +184,7 @@ async function getUserJobs(req, res) {
       }
       // console.log("results", results);
       //get status for unknown statuses for jobs....
+
       for (const job of results) {
         try {
           const foundJob = await myQueue.getJob(job.jobId);

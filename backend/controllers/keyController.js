@@ -1,10 +1,10 @@
 const keyService = require("../services/keyService.js");
 
 async function queryAllKeys(req, res) {
-  console.log("query All Keys");
+  // console.log("query All Keys");
   try {
     const keys = await keyService.queryAllKeys(req, res);
-    console.log("keys", keys);
+    // console.log("keys", keys);
     // res.status(200).send(keys);
   } catch (error) {
     console.error(error);
@@ -13,10 +13,10 @@ async function queryAllKeys(req, res) {
 }
 
 async function updateRedcapKey(req, res) {
-  console.log("query All Keys");
+  // console.log("query All Keys");
   try {
     const keys = await keyService.updateRedcapKey(req, res);
-    console.log("keys", keys);
+    // console.log("keys", keys);
     // res.status(200).send(keys);
   } catch (error) {
     console.error(error);
@@ -37,7 +37,7 @@ async function testRedcapAPI(req, res){
 }
 
 async function testUMLSAPI(req, res){
-  console.log("testUMLSAPI");
+  // console.log("testUMLSAPI");
   try {
     const keys = await keyService.testUMLSAPI(req, res);
     // console.log("keys", keys);

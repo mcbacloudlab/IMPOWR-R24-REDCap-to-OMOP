@@ -34,12 +34,12 @@ export default function TemporaryDrawer() {
 
   const list = (anchor) => (
     <Box
-      sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
+      sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250}}
       role="presentation"
       onClick={toggleDrawer(anchor, false)}
       onKeyDown={toggleDrawer(anchor, false)}
     >
-      <List>
+      <List >
       <ListItem key={'Project Management'} component={NavLink} to="/project-management" disablePadding>
             <ListItemButton>
               <ListItemIcon>
@@ -90,6 +90,7 @@ export default function TemporaryDrawer() {
             anchor={'left'}
             open={state[anchor]}
             onClose={toggleDrawer('left', false)}
+            sx={{ zIndex: (theme) => theme.zIndex.appBar + 1000,}}
           >
             {list(anchor)}
           </Drawer>

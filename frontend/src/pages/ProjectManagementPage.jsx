@@ -8,13 +8,14 @@ import FormSelect from "../components/FormSelect";
 // import DataDictionaryList from "../components/DataDictionaryList";
 import CssBaseline from "@mui/material/CssBaseline";
 // import ProjectBottomBar from "../components/ProjectBottomBar";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ProjectManagementPage(props) {
   // console.log("props,", props);
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(true);
+
   // const [pendingList, setPendingList] = useState([])
   // const [finishedList, setFinishedList] = useState([])
 
@@ -51,7 +52,7 @@ export default function ProjectManagementPage(props) {
   }, []);
 
   useEffect(() => {
-    setIsLoading(false);
+    // setIsLoading(false);
   }, [forms]);
 
   return (
@@ -76,7 +77,9 @@ export default function ProjectManagementPage(props) {
                 under My Account.
               </Alert>
             )}
-            {!isLoading && (
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
               <>
                 <FormSelect
                   props={props}

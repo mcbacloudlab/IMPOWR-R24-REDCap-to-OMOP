@@ -2,7 +2,9 @@ const Bull = require("bull");
 const db = require("../db/mysqlConnection.cjs");
 var jwt = require("jsonwebtoken");
 const { getUserByEmail } = require("./userService.js");
-
+const { spawn } = require("child_process");
+const path = require('path');
+const scriptPath = path.resolve(__dirname, '../gpt3/compareRedcapToSnomed.js');
 
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -24,7 +26,9 @@ const jobOptions = {
 };
 
 myQueue.process(jobOptions.concurrency, async (job) => {
-  await myTask(job);
+  let result = await myTask(job);
+  console.log("result to return", result);
+  return result;
   console.log("task complete?");
 });
 
@@ -45,10 +49,30 @@ async function myTask(job) {
   }, 1000);
 
   return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log("Long running task completed.");
-      resolve();
-    }, 15000);
+    const process = spawn("node", [scriptPath]);
+    let capturedData
+    process.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+      if(data.toString().startsWith('[[')){
+        console.log('data to capture')
+        capturedData = data
+      }
+      // console.log('captured data', capturedData)
+    });
+
+    process.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        console.log("compareRedcapToSnomed.js finished successfully");
+        resolve(capturedData);
+      } else {
+        console.error(`compareRedcapToSnomed.js failed with code ${code}`);
+        reject(`compareRedcapToSnomed.js failed with code ${code}`);
+      }
+    });
   });
 }
 
@@ -60,10 +84,10 @@ async function submit(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
-    let userId = await getUserByEmail(email)
-    userId = userId[0].id
-    console.log('email', email)
-    console.log('the user id!!', userId)
+    let userId = await getUserByEmail(email);
+    userId = userId[0].id;
+    console.log("email", email);
+    console.log("the user id!!", userId);
     const job = await myQueue.add(data, jobOptions);
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
@@ -104,7 +128,28 @@ async function getJobStatus(req, res) {
   }
 }
 
+async function getJobReturnData(req, res) {
+  // console.log("get jobstat", req.query.jobID);
+  let jobID = req.query.jobID;
+  if (!jobID) {
+    throw new Error("Error");
+  }
+  // Get the status of the job
+  try {
+    const myJob = await myQueue.getJob(jobID)
+    // console.log('found job')
+    const buffer = Buffer.from(myJob.returnvalue)
+    const result = JSON.parse(buffer.toString())
+    // console.log('job return value',result )
+    res.status(200).send(result);
+  } catch (error) {
+    console.log("error!!!!", error);
+    res.status(500).send("Error");
+  }
+}
+
 module.exports = {
   submit,
   getJobStatus,
+  getJobReturnData
 };

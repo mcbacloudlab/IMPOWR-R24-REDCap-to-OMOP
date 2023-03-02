@@ -1,6 +1,6 @@
 const MongoClient = require("mongodb").MongoClient;
 const cosineSimilarity = require("compute-cosine-similarity");
-var eDistance = require("euclidean-distance");
+// var eDistance = require("euclidean-distance");
 const ProgressBar = require("cli-progress");
 const Excel = require("exceljs");
 var axios = require("axios");
@@ -139,6 +139,7 @@ async function startProcessing(redCapCollectionArray, snomedCollectionArray) {
 }
 
 function writeExcelFile(data) {
+  
   console.info("Writing Excel Report...");
   const workbook = new Excel.stream.xlsx.WorkbookWriter({
     filename: "./gpt3/compareOutput/data.xlsx",
@@ -160,7 +161,7 @@ function writeExcelFile(data) {
           snomedText: obj.snomedText,
           snomedID: `https://athena.ohdsi.org/search-terms/terms/${obj.snomedID}`,
           similarity: obj.similarity,
-          eDistance: obj.eDistance,
+          // eDistance: obj.eDistance,
         })
         .getCell("snomedID").value = {
         text: `https://athena.ohdsi.org/search-terms/terms/${obj.snomedID}`,
@@ -174,6 +175,8 @@ function writeExcelFile(data) {
   worksheet.commit();
   workbook.commit();
   console.info("Excel file wrote");
+  //return this data to the caller
+  process.stdout.write(JSON.stringify(data));
 }
 
 function removeEmptyArray(array) {

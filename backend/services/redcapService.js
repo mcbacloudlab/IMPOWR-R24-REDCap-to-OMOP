@@ -23,7 +23,7 @@ async function getForms(req, res) {
       console.log("error!", err);
       res.status(500).send("Error");
     }
-    console.log("results", results);
+    // console.log("results", results);
 
     const redcapKeyResult = results.find((api) => api.name === "redcapAPIKey");
 
@@ -45,7 +45,7 @@ async function getForms(req, res) {
       "aes-256-cbc",
       process.env.AES_32_BIT_KEY
     );
-    console.log("apiKeyDec", apiKeyDecrypted);
+    // console.log("apiKeyDec", apiKeyDecrypted);
 
     var data = new FormData();
     data.append("token", apiKeyDecrypted);
@@ -72,7 +72,7 @@ async function getForms(req, res) {
             formNames.add(field["form_name"]);
           }
         }
-        console.log(Array.from(formNames));
+        // console.log(Array.from(formNames));
         res.status(200).send(JSON.stringify(Array.from(formNames)))
       })
       .catch(function (error) {
@@ -84,7 +84,7 @@ async function getForms(req, res) {
 
 async function exportMetadata(req,res){
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
-  console.log("test redcap api");
+  // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'redcap%'";
   //   return new Promise((resolve, reject) => {
   db.execute(query, [], function (err, results, fields) {
@@ -92,13 +92,13 @@ async function exportMetadata(req,res){
       console.log("error!", err);
       res.status(500).send("Error");
     }
-    console.log("results", results);
+    // console.log("results", results);
 
     const redcapKeyResult = results.find((api) => api.name === "redcapAPIKey");
 
     const redcapURLResult = results.find((api) => api.name === "redcapAPIURL");
 
-    console.log("redcapKeyResult", redcapKeyResult);
+    // console.log("redcapKeyResult", redcapKeyResult);
     if (!redcapKeyResult || !redcapURLResult) {
       res.status(500).send("Error");
       return;
@@ -116,7 +116,7 @@ async function exportMetadata(req,res){
       process.env.AES_32_BIT_KEY
     );
     // console.log("apiKeyDec", apiKeyDecrypted);
-      console.log('req', req.body)
+      // console.log('req', req.body)
     var data = new FormData();
     data.append("token", apiKeyDecrypted);
     data.append("content", "metadata");

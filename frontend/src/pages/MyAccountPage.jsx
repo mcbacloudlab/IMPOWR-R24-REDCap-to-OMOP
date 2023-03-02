@@ -6,8 +6,8 @@ import Paper from "@mui/material/Paper";
 import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
 import { Typography } from "@mui/material";
-import AdminSection from "../components/AdminSection";
-
+import AdminSection from "../components/MyAccountAdminSection";
+import MyAccountNavBar from "../components/MyAccountNavBar";
 
 export default function MyAccountPage(props) {
   // console.log("props", props);
@@ -30,32 +30,8 @@ export default function MyAccountPage(props) {
   return (
       <Container component="main" maxWidth="90%">
         <CssBaseline />
-        <Paper
-          sx={{
-            minHeight: "90vh",
-            paddingLeft: 1,
-            paddingRight: 1,
-            paddingTop: 1,
-            margin: "auto",
-            m: 2,
-          }}
-        >
-          <Grid container spacing={1} justifyContent="center">
-            <Grid item md={12} lg={4}></Grid>
-            <Grid item xs={12}>
-              <Typography>Name: {name}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>Email: {username}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>Role: {role}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              {role === "admin" ? <AdminSection props={props} /> : ""}
-            </Grid>
-          </Grid>
-        </Paper>
+          <MyAccountNavBar props={props} username={username} name={name} role={role}/>
+        {/* </Paper> */}
       </Container>
   );
 }
