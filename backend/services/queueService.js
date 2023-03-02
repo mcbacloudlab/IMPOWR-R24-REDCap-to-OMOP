@@ -27,7 +27,7 @@ const jobOptions = {
 
 myQueue.process(jobOptions.concurrency, async (job) => {
   let result = await myTask(job);
-  console.log("result to return", result);
+  // console.log("result to return", result);
   return result;
   console.log("task complete?");
 });
@@ -40,19 +40,26 @@ async function myTask(job) {
 
   console.log("Starting long running task...");
   let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    job.progress(progress);
-    if (progress >= 100) {
-      clearInterval(interval);
-    }
-  }, 1000);
+  job.progress(0)
+  // const interval = setInterval(() => {
+  //   progress += 10;
+  //   job.progress(progress);
+  //   if (progress >= 100) {
+  //     clearInterval(interval);
+  //   }
+  // }, 1000);
 
   return new Promise((resolve) => {
     const process = spawn("node", [scriptPath]);
     let capturedData
     process.stdout.on("data", (data) => {
-      console.log(`stdout: ${data}`);
+      if(!data.toString().startsWith('[[')) {
+        console.log(`stdout: ${data}`);
+        if(data.toString().startsWith('Loaded')) job.progress(20)
+        if(data.toString().startsWith('Chunking')) job.progress(50)
+        if(data.toString().startsWith('Total processing')) job.progress(100)
+      }
+
       if(data.toString().startsWith('[[')){
         console.log('data to capture')
         capturedData = data

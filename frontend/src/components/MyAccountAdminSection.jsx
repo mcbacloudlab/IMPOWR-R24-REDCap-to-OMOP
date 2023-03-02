@@ -697,7 +697,7 @@ export default function MyAccountAdminSection(props) {
             </Grid>
             <Grid item xs={12}>
               <Box sx={{ display: "block", marginTop: "10px" }}>
-                <Typography>{umlsAPITest}</Typography>
+                <Typography>{gpt3APITest}</Typography>
               </Box>
             </Grid>
           </Grid>
