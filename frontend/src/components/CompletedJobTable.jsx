@@ -5,7 +5,7 @@ import { darken, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
-export default function FormSelectTable({
+export default function CompletedJobTable({
   columns,
   data,
   isSavingErr,
@@ -16,10 +16,8 @@ export default function FormSelectTable({
   saveFile,
   value,
   handleExportData,
-  resetScreen
-
+  resetScreen,
 }) {
-  // console.log('form seldata', data)
   return (
     <MaterialReactTable
       columns={columns}
@@ -139,7 +137,7 @@ export default function FormSelectTable({
             variant="subtitle2"
             style={{ marginLeft: "auto" }}
           > */}
-            {/* Last Saved At:{" "} */}
+          {/* Last Saved At:{" "} */}
           {/* </Typography> */}
 
           <Box style={{ marginLeft: "auto" }}>

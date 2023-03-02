@@ -13,11 +13,7 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import FormSelectTable from "./FormSelectTable";
-// import Snackbar from "@mui/material/Snackbar";
-// import MuiAlert from "@mui/material/Alert";
 import Alert from "@mui/material/Alert";
-// import { ExportToCsv } from "export-to-csv";
-// import Paper from "@mui/material/Paper";
 import TransferList from "./TransferList";
 import { ExportToCsv } from "export-to-csv";
 
@@ -27,7 +23,6 @@ export default function FormSelect(props) {
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
-  // const [open, setOpen] = useState(true);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
     useState(false);

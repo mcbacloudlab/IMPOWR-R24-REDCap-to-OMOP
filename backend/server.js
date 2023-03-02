@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
 
-const skipRoutes = ['/getUserJobs', '/queues'];
+const skipRoutes = ['/getUserJobs', '/queues', '/validateUser'];
 const skip = (req, res) => {
   return skipRoutes.some(route => req.url.startsWith(route));
 };

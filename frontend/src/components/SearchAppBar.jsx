@@ -220,7 +220,9 @@ export default function PrimarySearchAppBar(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        console.log(result);
+        // console.log(result);
+        setOpen(false)
+        navigate('/completed-jobs', { state: { result: result, jobId: jobId } });
       })
       .catch((error) => console.log("error", error));
   }

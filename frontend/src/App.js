@@ -14,6 +14,7 @@ import Cookies from "js-cookie";
 import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
+import CompletedJobsViewPage from "./pages/CompletedJobsViewPage";
 
 // const darkTheme = createTheme({
 //   palette: {
@@ -149,6 +150,17 @@ function App() {
                 />
               )}
               <Routes>
+              <Route
+                  path="/"
+                  element={
+                    <SignInPage
+                      updateUser={updateUser}
+                      token={token}
+                      setToken={setToken}
+                    ></SignInPage>
+                  }
+                  exact
+                />
                 <Route
                   path="/match-manager"
                   element={
@@ -213,6 +225,30 @@ function App() {
                         setPendingList={setPendingList}
                         setCompletedList={setCompletedList}
                       ></ProjectManagementPage>
+                    </ProtectedRoute>
+                  }
+                  exact
+                />
+                <Route
+                  path="/completed-jobs"
+                  element={
+                    <ProtectedRoute
+                      user={user}
+                      setUser={setUser}
+                      validateJwtToken={validateJwtToken}
+                      token={token}
+                      setToken={setToken}
+                      setPendingList={setPendingList}
+                      setCompletedList={setCompletedList}
+                    >
+                      <CompletedJobsViewPage
+                        user={user}
+                        token={token}
+                        pendingList={pendingList}
+                        completedList={completedList}
+                        setPendingList={setPendingList}
+                        setCompletedList={setCompletedList}
+                      ></CompletedJobsViewPage>
                     </ProtectedRoute>
                   }
                   exact
