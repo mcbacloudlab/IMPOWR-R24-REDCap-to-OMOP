@@ -27,7 +27,7 @@ function decrypt(encryptedData, iv, algorithm, secretKey) {
   return decrypted.toString();
 }
 
-async function updateRedcapKey(req, res) {
+async function updateAPIKey(req, res) {
   // console.log("store key", req.body);
   let name = req.body.name;
   let apiKey = req.body.apiKey;
@@ -213,9 +213,62 @@ async function testUMLSAPI(req, res) {
   });
 }
 
+async function testGPT3API(req, res) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  // console.log("test redcap api");
+  const query = "SELECT * FROM api where name like 'gpt3%'";
+  //   return new Promise((resolve, reject) => {
+  db.execute(query, [], function (err, results, fields) {
+    if (err) {
+      console.log("error!", err);
+      res.status(500).send("Error");
+    }
+    // console.log("results", results);
+
+    const gpt3KeyResult = results.find((api) => api.name === "umlsAPIKey");
+
+    console.log("gpt3KeyResult", gpt3KeyResult);
+    if (!gpt3KeyResult) {
+      res.status(500).send("Error");
+      return;
+    }
+
+    let apiKey = gpt3KeyResult.apiKey;
+    let apiIV = gpt3KeyResult.iv;
+
+    //decrypt api key
+    let apiKeyDecrypted = decrypt(
+      apiKey,
+      apiIV,
+      "aes-256-cbc",
+      process.env.AES_32_BIT_KEY
+    );
+    // console.log("apiKeyDec", apiKeyDecrypted);
+
+    var config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `https://uts-ws.nlm.nih.gov/rest/content/current/CUI/C4283958/atoms?ttys=PT&apiKey=${apiKeyDecrypted}`,
+      headers: {},
+    };
+
+    axios(config)
+      .then(function (response) {
+        // console.log(JSON.stringify(response.data));
+        // console.log('response stat' ,response.status)
+        res.status(response.status).send();
+      })
+      .catch(function (error) {
+        console.log(error);
+        res.status(error.request.res.statusCode).send()
+      });
+  });
+}
+
 module.exports = {
   queryAllKeys,
-  updateRedcapKey,
+  updateAPIKey,
   testRedcapAPI,
   testUMLSAPI,
+  testGPT3API
 };

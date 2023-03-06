@@ -121,7 +121,7 @@ async function exportMetadata(req,res){
     data.append("token", apiKeyDecrypted);
     data.append("content", "metadata");
     data.append("format", "json");
-    data.append('forms', req.body.form);
+    data.append('forms[0]', req.body.form);
 
 
     var config = {

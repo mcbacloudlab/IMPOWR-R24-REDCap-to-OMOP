@@ -125,6 +125,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [pendingList, setPendingList] = useState();
+  const [failedList, setFailedList] = useState();
   const [completedList, setCompletedList] = useState();
 
   const updateUser = (newUser) => {
@@ -144,8 +145,10 @@ function App() {
                   setToken={setToken}
                   updateUser={updateUser}
                   pendingList={pendingList}
+                  failedList={failedList}
                   completedList={completedList}
                   setPendingList={setPendingList}
+                  setFailedList={setFailedList}
                   setCompletedList={setCompletedList}
                 />
               )}
@@ -214,16 +217,10 @@ function App() {
                       validateJwtToken={validateJwtToken}
                       token={token}
                       setToken={setToken}
-                      setPendingList={setPendingList}
-                      setCompletedList={setCompletedList}
                     >
                       <ProjectManagementPage
                         user={user}
                         token={token}
-                        pendingList={pendingList}
-                        completedList={completedList}
-                        setPendingList={setPendingList}
-                        setCompletedList={setCompletedList}
                       ></ProjectManagementPage>
                     </ProtectedRoute>
                   }

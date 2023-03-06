@@ -4,7 +4,7 @@ var jwt = require("jsonwebtoken");
 const { getUserByEmail } = require("./userService.js");
 const { spawn } = require("child_process");
 const path = require('path');
-const scriptPath = path.resolve(__dirname, '../gpt3/compareRedcapToSnomed.js');
+
 
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -50,7 +50,9 @@ async function myTask(job) {
   // }, 1000);
 
   return new Promise((resolve) => {
-    const process = spawn("node", [scriptPath]);
+    const scriptPath = path.resolve(__dirname, '../gpt3/compareRedcapToSnomed.js');
+    const args = '--max-old-space-size=32768';
+    const process = spawn("node", [args, scriptPath]);
     let capturedData
     process.stdout.on("data", (data) => {
       if(!data.toString().startsWith('[[')) {

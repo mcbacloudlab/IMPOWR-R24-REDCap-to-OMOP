@@ -15,6 +15,8 @@ import MyAccountAdminSection from "./MyAccountAdminSection";
 import { useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 const drawerWidth = "240px";
 
@@ -52,16 +54,51 @@ export default function MyAccountNavBar(props) {
                 <ListItemText primary={"My Account"} />
               </ListItemButton>
             </ListItem>
+            <ListItem key={"Completed Jobs"} disablePadding>
+              <ListItemButton onClick={(event) => handleClick(event)}>
+                <ListItemIcon>
+                  <PlaylistAddCheckSharpIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Completed Jobs"} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key={"Pending Jobs"} disablePadding>
+              <ListItemButton onClick={(event) => handleClick(event)}>
+                <ListItemIcon>
+                  <AutorenewIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Pending Jobs"} />
+              </ListItemButton>
+            </ListItem>
           </List>
           <Divider />
           {props.role === "admin" && (
             <List>
+              <Typography variant="h6" gutterBottom>
+                Admin Section
+              </Typography>
               <ListItem key={"API Keys"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
                     <KeyIcon />
                   </ListItemIcon>
                   <ListItemText primary={"API Keys"} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem key={"All Completed Jobs"} disablePadding>
+                <ListItemButton onClick={(event) => handleClick(event)}>
+                  <ListItemIcon>
+                    <PlaylistAddCheckSharpIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"All Completed Jobs"} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem key={"All Pending Jobs"} disablePadding>
+                <ListItemButton onClick={(event) => handleClick(event)}>
+                  <ListItemIcon>
+                    <AutorenewIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"All Pending Jobs"} />
                 </ListItemButton>
               </ListItem>
             </List>
@@ -72,7 +109,7 @@ export default function MyAccountNavBar(props) {
         {/* <Toolbar /> */}
         {view === "My Account" && (
           <>
-            <h1>My Account</h1>
+            <h1 style={{ textAlign: "left" }}>My Account</h1>
             <Typography sx={{ textAlign: "left" }}>
               <b>Name:</b> {props.name}
             </Typography>

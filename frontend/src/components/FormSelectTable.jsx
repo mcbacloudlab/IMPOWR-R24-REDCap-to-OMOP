@@ -90,9 +90,9 @@ export default function FormSelectTable({
         }),
       }}
       defaultColumn={{
-        minSize: 20, //allow columns to get smaller than default
-        maxSize: 9000, //allow columns to get larger than default
-        size: 380, //make columns wider by default
+        minSize: 2, //allow columns to get smaller than default
+        maxSize: 90, //allow columns to get larger than default
+        size: 38, //make columns wider by default
       }}
       // enableStickyFooter
 

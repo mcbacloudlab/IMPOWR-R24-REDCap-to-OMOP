@@ -6,6 +6,6 @@ const router = express.Router();
 router.get('/queryAllKeys', keyController.queryAllKeys);
 router.get('/testRedcapAPI', keyController.testRedcapAPI);
 router.get('/testUMLSAPI', keyController.testUMLSAPI);
-router.post('/updateRedcapKey', keyController.updateRedcapKey);
+router.post('/updateAPIKey', keyController.updateAPIKey);
 
 module.exports = router;

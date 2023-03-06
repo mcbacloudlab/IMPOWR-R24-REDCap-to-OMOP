@@ -11,13 +11,10 @@ import CssBaseline from "@mui/material/CssBaseline";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ProjectManagementPage(props) {
-  // console.log("props,", props);
+  console.log("project management page,", props);
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // const [pendingList, setPendingList] = useState([])
-  // const [finishedList, setFinishedList] = useState([])
 
   useEffect(() => {
     //get available forms
@@ -85,41 +82,11 @@ export default function ProjectManagementPage(props) {
                   props={props}
                   forms={forms}
                   isLoading={isLoading}
-                  setPendingList={props.setPendingList}
-                  setCompletedList={props.setCompletedList}
                 />
               </>
             )}
-            {/* <DataDictionaryList props={props}/> */}
           </Grid>
-
-          {/* <Grid item xs={6}>
-            <h3>Pending</h3>
-            {pendingList && (
-              <List>
-              {pendingList.map((job) => (
-                <ListItem key={job.jobId}>
-                  Job {job.jobId} status: {job.jobStatus}
-                </ListItem>
-              ))}
-            </List>
-            )}
-            
-          </Grid> */}
-          {/* <Grid item xs={6} style={{maxHeight: '500px', overflow: 'auto'}}>
-            <h3>Completed</h3>
-            {completedList && (
-              <List>
-              {completedList.map((job) => (
-                <ListItem key={job.jobId}>
-                  Job {job.jobId} status: {job.jobStatus}
-                </ListItem>
-              ))}
-            </List>
-            )}
-          </Grid> */}
         </Grid>
-        {/* <ProjectBottomBar pendingList={props.pendingList} completedList={completedList}/> */}
       </Paper>
     </Container>
   );

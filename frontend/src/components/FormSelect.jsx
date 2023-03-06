@@ -19,7 +19,7 @@ import { ExportToCsv } from "export-to-csv";
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
-  console.log("formsel", props);
+  console.log('Formselect', props)
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
@@ -31,6 +31,7 @@ export default function FormSelect(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   function getDataDictionary(event) {
+    setIsFormLoaded(false)
     if (!selectedForm) setSelectedForm(props.forms[0]);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.props.token);
@@ -221,7 +222,7 @@ export default function FormSelect(props) {
             )}
           </Grid>
 
-          <Grid item xs={12} lg={8}>
+          <Grid item xs={12} lg={8} sx={{ maxWidth: "100%", overflowX: "auto" }}>
             {isFormLoaded && (
               <>
                 <FormSelectTable
@@ -261,8 +262,8 @@ export default function FormSelect(props) {
                         // backgroundColor: "#008C95",
                         fontSize: "1.2rem",
                         position: "absolute",
-                        top: "5px",
-                        right: "150px",
+                        top: "0px",
+                        right: "200px",
                         zIndex: 10000
                       }}
                     >
@@ -270,7 +271,7 @@ export default function FormSelect(props) {
                         Submitted to Queue
                       </Typography>
                       <Typography variant="subtitle2" color="text.secondary">
-                        Your job has been successfully submitted to the queue. View pending jobs here.
+                        Your job has been successfully submitted to the queue.
                       </Typography>
                     </Alert>
                   </Box>
