@@ -145,7 +145,11 @@ async function updateJobStatus(jobId) {
   const now = new Date();
   const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
   try {
-    const status = await myQueue.getJob(jobId).then((job) => job.getState());
+    // console.log('find job for: ', jobId)
+    const status = await myQueue.getJob(jobId).then((job) => {
+      return job.getState()
+    });
+    // console.log('status!', status)
     if (status) {
       // Update job status in MySQL database
       const query = `UPDATE jobs SET jobStatus = '${status}', lastUpdated = '${datetimeString}' WHERE jobId = '${jobId}'`;
@@ -175,7 +179,7 @@ async function getUserJobs(req, res) {
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
     order by lastUpdated desc
-    limit 10`;
+    limit 100`;
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
       if (err) {
@@ -186,8 +190,15 @@ async function getUserJobs(req, res) {
       //get status for unknown statuses for jobs....
 
       for (const job of results) {
+        // console.log('job', job.jobId)
         try {
           const foundJob = await myQueue.getJob(job.jobId);
+          if(!foundJob){ 
+            // console.log('no found job for:' + job.jobId)
+            continue
+          }else{
+            // console.log('found job for' + job.jobId)
+          }
           const status = await foundJob.getState();
           const timeAdded = foundJob.timestamp;
           const startedAt = foundJob.processedOn; 
@@ -202,8 +213,9 @@ async function getUserJobs(req, res) {
         } catch (error) {
           console.log("error", error);
         }
-
+        // console.log('jobstat', job.jobStatus)
         if (job.jobStatus != "completed") {
+          // console.log('updating')
           await updateJobStatus(job.jobId);
         }
       }

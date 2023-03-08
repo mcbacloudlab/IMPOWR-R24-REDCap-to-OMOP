@@ -3,8 +3,8 @@ const db = require("../db/mysqlConnection.cjs");
 var jwt = require("jsonwebtoken");
 const { getUserByEmail } = require("./userService.js");
 const { spawn } = require("child_process");
-const path = require('path');
-
+const path = require("path");
+const fs = require("fs");
 
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -26,45 +26,51 @@ const jobOptions = {
 };
 
 myQueue.process(jobOptions.concurrency, async (job) => {
-  let result = await myTask(job);
-  // console.log("result to return", result);
+  await importToMongo(job);
+  await embedRedcapText(job)
+  let result = await compareEmbeddings(job)
+  if(result){
+    console.log("result to return", result.toString());
+  }else{
+    console.log('No result')
+  }
+  
   return result;
-  console.log("task complete?");
 });
 
-async function myTask(job) {
-  // perform some intensive task here
-  // console.log(`Processing job with data:`);
-  // console.log(job.data);
+async function importToMongo(job) {
   console.log("jobid", job.id);
 
-  console.log("Starting long running task...");
-  let progress = 0;
-  job.progress(0)
-  // const interval = setInterval(() => {
-  //   progress += 10;
-  //   job.progress(progress);
-  //   if (progress >= 100) {
-  //     clearInterval(interval);
-  //   }
-  // }, 1000);
+  console.log("Starting Import into REDCap MongoDB...");
+  job.progress(0);
+  console.log("job.data");
 
   return new Promise((resolve) => {
-    const scriptPath = path.resolve(__dirname, '../gpt3/compareRedcapToSnomed.js');
-    const args = '--max-old-space-size=32768';
-    const process = spawn("node", [args, scriptPath]);
-    let capturedData
+    const scriptPath = path.resolve(
+      __dirname,
+      "../mongo/importRedcap_To_MongoDB.js"
+    );
+    const args = ["--max-old-space-size=32768"];
+    const data = job.data.csvData;
+    const filename = job.data.filename;
+    const process = spawn("node", args.concat([scriptPath, filename]), {
+      stdio: "pipe",
+    });
+    console.log(`Sending input data with length ${data.length}`);
+    process.stdin.write(JSON.stringify(data));
+    process.stdin.end();
+
+    let capturedData;
     process.stdout.on("data", (data) => {
-      if(!data.toString().startsWith('[[')) {
+      if (!data.toString().startsWith("[[")) {
         console.log(`stdout: ${data}`);
-        if(data.toString().startsWith('Loaded')) job.progress(20)
-        if(data.toString().startsWith('Chunking')) job.progress(50)
-        if(data.toString().startsWith('Total processing')) job.progress(100)
+        if (data.toString().startsWith("Loaded")) job.progress(20);
+        if (data.toString().startsWith("Chunking")) job.progress(50);
       }
 
-      if(data.toString().startsWith('[[')){
-        console.log('data to capture')
-        capturedData = data
+      if (data.toString().startsWith("[[")) {
+        console.log("data to capture");
+        capturedData = data;
       }
       // console.log('captured data', capturedData)
     });
@@ -75,11 +81,108 @@ async function myTask(job) {
 
     process.on("close", (code) => {
       if (code === 0) {
-        console.log("compareRedcapToSnomed.js finished successfully");
+        console.log("Import to mongo finished successfully");
         resolve(capturedData);
       } else {
         console.error(`compareRedcapToSnomed.js failed with code ${code}`);
-        reject(`compareRedcapToSnomed.js failed with code ${code}`);
+        reject(`Import to mongo failed with code ${code}`);
+      }
+    });
+  });
+}
+
+async function embedRedcapText(job) {
+  console.log("jobid", job.id);
+
+  console.log("Starting REDCap GPT3 Embedding...");
+  job.progress(60);
+  console.log("job.data");
+
+  return new Promise((resolve) => {
+    const scriptPath = path.resolve(
+      __dirname,
+      "../gpt3/redcapDDEmbed.js"
+    );
+    const args = ["--max-old-space-size=32768"];
+    const data = job.data.csvData;
+    const filename = job.data.filename;
+    const process = spawn("node", args.concat([scriptPath, filename]), {
+      stdio: "pipe",
+    });
+    console.log(`Sending input data with length ${data.length}`);
+    process.stdin.write(JSON.stringify(data));
+    process.stdin.end();
+
+    let capturedData;
+    process.stdout.on("data", (data) => {
+      console.log('data', data.toString())
+
+      if (data.toString().startsWith("[[")) {
+        console.log("data to capture");
+        capturedData = data;
+      }
+    });
+
+    process.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        console.log("REDCap GPT3 finished successfully");
+        resolve(capturedData);
+      } else {
+        console.error(`compareRedcapToSnomed.js failed with code ${code}`);
+        reject(`REDCap GPT3 failed with code ${code}`);
+      }
+    });
+  });
+}
+
+async function compareEmbeddings(job) {
+  console.log("jobid", job.id);
+
+  console.log("Starting Embedding Comparisons...");
+  job.progress(80);
+  console.log("job.data");
+
+  return new Promise((resolve) => {
+    const scriptPath = path.resolve(
+      __dirname,
+      "../gpt3/compareRedcapToSnomed.js"
+    );
+    const args = ["--max-old-space-size=32768"];
+    const data = job.data.csvData;
+    const filename = job.data.filename;
+    const process = spawn("node", args.concat([scriptPath, filename]), {
+      stdio: "pipe",
+    });
+    console.log(`Sending input data with length ${data.length}`);
+    process.stdin.write(JSON.stringify(data)); //pass data into child process
+    process.stdin.end();
+
+    let capturedData;
+    //capture data returned from child
+    process.stdout.on("data", (data) => {
+      if (data.toString().startsWith("[{")) {
+        console.log("data to capture");
+        capturedData = data;
+      }else{
+        console.log('data', data.toString())
+      }
+    });
+
+    process.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        console.log("Embedding comparisons finished successfully");
+        resolve(capturedData);
+      } else {
+        console.error(`Embedding comparison failed with code ${code}`);
+        reject(`Embedding comparison failed with code ${code}`);
       }
     });
   });
@@ -145,10 +248,10 @@ async function getJobReturnData(req, res) {
   }
   // Get the status of the job
   try {
-    const myJob = await myQueue.getJob(jobID)
+    const myJob = await myQueue.getJob(jobID);
     // console.log('found job')
-    const buffer = Buffer.from(myJob.returnvalue)
-    const result = JSON.parse(buffer.toString())
+    const buffer = Buffer.from(myJob.returnvalue);
+    const result = JSON.parse(buffer.toString());
     // console.log('job return value',result )
     res.status(200).send(result);
   } catch (error) {
@@ -160,5 +263,5 @@ async function getJobReturnData(req, res) {
 module.exports = {
   submit,
   getJobStatus,
-  getJobReturnData
+  getJobReturnData,
 };

@@ -120,7 +120,8 @@ export default function FormSelect(props) {
     myHeaders.append("Authorization", "Bearer " + props.props.token);
 
     var formdata = new FormData();
-    formdata.append("csvData", data);
+    formdata.append("csvData", JSON.stringify(data));
+    formdata.append('filename', selectedForm)
 
     var requestOptions = {
       method: "POST",

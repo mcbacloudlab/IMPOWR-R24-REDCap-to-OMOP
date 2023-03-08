@@ -30,7 +30,7 @@ export default function CompletedJobTable({
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { maxHeight: "40vh" },
+        sx: { maxHeight: "60vh" },
       }}
       onSortingChange={setSorting}
       // state={{ isLoading, sorting }}
