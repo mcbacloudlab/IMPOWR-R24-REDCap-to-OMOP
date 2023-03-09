@@ -32,7 +32,7 @@ export default function FormSelectTable({
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { maxHeight: "40vh" },
+        sx: { maxHeight: "80vh" },
       }}
       onSortingChange={setSorting}
       // state={{ isLoading, sorting }}

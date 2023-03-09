@@ -1,13 +1,7 @@
 import React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
-import Cookies from "js-cookie";
 import { useState, useEffect, useMemo } from "react";
-import { Typography } from "@mui/material";
-import AdminSection from "../components/MyAccountAdminSection";
-import MyAccountNavBar from "../components/MyAccountNavBar";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
@@ -37,82 +31,50 @@ export default function CompletedJobsViewPage(props) {
   }, []);
 
   function importExcel(e) {
-    // console.log('e', [].concat(...e))
-    let joinedArrays = [].concat(...e);
-    console.log("joinedArrays", joinedArrays);
-    const file = joinedArrays;
-    // setCSVFilename(file.name);
-
-    const workSheet = XLSX.utils.json_to_sheet(file);
-    //convert to array
-    const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
-    let headers = fileData[0];
-
-    headers = headers.filter((key) => key !== "redCapKeys");
-    console.log("headers", headers);
-    const heads = headers.map((head) => {
-      return {
-        accessorKey: head.replace(/\./g, ""),
-        header: head.replace(/\./g, ""),
-      };
-    });
-    setColDefs(heads);
     //removing header
 
-    fileData.splice(0, 1);
-    const filteredArr = fileData.map((arr) => arr.filter(Boolean));
-    console.log("fileData", filteredArr);
+    // fileData.splice(0, 1);
+    // const filteredArr = fileData.map((arr) => arr.filter(Boolean));
+    // console.log("fileData", filteredArr);
 
-    setData(convertToJson(headers, filteredArr));
-    // setApprovedData(convertToJson(headers, fileData, true));
-    // setIsLoading(false);
-    setIsFormLoaded(true);
-  }
-
-  const convertToJson = (headers, data, approved) => {
-    const rows = [];
-    let approvedIdx = headers.indexOf("Approved");
-    data.forEach((row) => {
-      let rowData = {};
-      row.forEach((element, index) => {
-        if (approved) {
-          if (row[approvedIdx] === "Y") {
-            rowData[headers[index]] = element;
-          }
-        } else {
-          rowData[headers[index]] = element;
-        }
-      });
-      if (Object.keys(rowData).length !== 0) {
-        rows.push(rowData);
-      }
-    });
-    console.log("rows", rows);
-
+    //group into subRows
     const result = [];
     let currentRedcapFieldLabel = null;
     let currentItem = null;
 
-    rows.forEach((item, index) => {
+    e.forEach((item, index) => {
       if (item.redcapFieldLabel !== currentRedcapFieldLabel) {
         if (currentItem) {
           result.push(currentItem);
         }
+        item.selected = 'true';
         currentItem = { ...item, subRows: [] };
         currentRedcapFieldLabel = item.redcapFieldLabel;
       } else {
-        currentItem.subRows.push(item);
+        currentItem.subRows.push({ ...item, selected: 'false' });
       }
 
-      if (index === rows.length - 1) {
+      if (index === e.length - 1) {
         result.push(currentItem);
       }
     });
 
-    console.log('result', result);
+    console.log("result", result);
 
-    return result;
-  };
+    const headers = Object.keys(result[0]).map((key) => {
+      if (key !== 'subRows') {
+      return {
+        accessorKey: key.replace(/\./g, ""),
+        header: key.replace(/\./g, ""),
+      };
+    }else return null
+    }).filter((header) => header !== null);;
+    setColDefs(headers);
+
+    setData(result);
+    setCSVFilename(`Completed_Job_${_jobId}.csv`);
+    setIsFormLoaded(true);
+  }
 
   const csvOptions = {
     fieldSeparator: ",",
@@ -129,9 +91,6 @@ export default function CompletedJobsViewPage(props) {
   const csvExporter = new ExportToCsv(csvOptions);
   const handleExportData = () => {
     let _data = data;
-    // if (selectedTabIdx) {
-    //   _data = approvedData; //change export data if on approved tab
-    // }
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
         if (!acc.includes(key)) acc.push(key);
@@ -150,12 +109,8 @@ export default function CompletedJobsViewPage(props) {
 
   function resetScreen() {
     setData("");
-    // setApprovedData("");
-    // setIsLoading(false);
-    // setCSVFilename("");
     setIsFormLoaded(false);
     setJobId();
-    // setSelectedFile("");
   }
 
   return (
@@ -171,9 +126,6 @@ export default function CompletedJobsViewPage(props) {
           resetScreen={resetScreen}
         />
       )}
-
-      {/* <MyAccountNavBar props={props} username={username} name={name} role={role}/> */}
-      {/* </Paper> */}
     </Container>
   );
 }

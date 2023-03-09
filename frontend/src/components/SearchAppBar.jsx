@@ -21,7 +21,7 @@ import Drawer from "@mui/material/Drawer";
 import Tooltip from "@mui/material/Tooltip";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 import Paper from "@mui/material/Paper";
-import ErrorIcon from '@mui/icons-material/Error';
+import ErrorIcon from "@mui/icons-material/Error";
 
 export default function PrimarySearchAppBar(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -176,7 +176,8 @@ export default function PrimarySearchAppBar(props) {
       .then((result) => {
         let resultObj = JSON.parse(result);
         let _pendingList = resultObj.filter((obj) => {
-          if (obj.jobStatus !== "completed" && obj.jobStatus !== 'failed' ) return obj;
+          if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
+            return obj;
           else return null;
         });
 
@@ -258,7 +259,7 @@ export default function PrimarySearchAppBar(props) {
             <Grid key={index} item xs={12} md={4}>
               <List dense>
                 {column.map((job) => (
-                  <Paper elevation={3}>
+                  <Paper elevation={3} key={job.jobId}>
                     <ListItem
                       key={job.jobId}
                       sx={{
@@ -268,6 +269,7 @@ export default function PrimarySearchAppBar(props) {
                       }}
                     >
                       <ListItemText
+                        key={job.jobId}
                         primary={
                           <div>
                             <div>
@@ -317,8 +319,7 @@ export default function PrimarySearchAppBar(props) {
         </Grid>
       </div>
     );
-  }
-  )
+  });
 
   function PendingDrawer(props) {
     const { pendingList } = props.props;
