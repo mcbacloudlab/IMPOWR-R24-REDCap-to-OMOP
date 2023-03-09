@@ -225,7 +225,7 @@ async function testGPT3API(req, res) {
     }
     // console.log("results", results);
 
-    const gpt3KeyResult = results.find((api) => api.name === "umlsAPIKey");
+    const gpt3KeyResult = results.find((api) => api.name === "gpt3APIKey");
 
     console.log("gpt3KeyResult", gpt3KeyResult);
     if (!gpt3KeyResult) {
@@ -245,11 +245,20 @@ async function testGPT3API(req, res) {
     );
     // console.log("apiKeyDec", apiKeyDecrypted);
 
+    var data = JSON.stringify({
+      "input": "test",
+      "model": "text-embedding-ada-002"
+    });
+    
     var config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `https://uts-ws.nlm.nih.gov/rest/content/current/CUI/C4283958/atoms?ttys=PT&apiKey=${apiKeyDecrypted}`,
-      headers: {},
+      method: 'post',
+    maxBodyLength: Infinity,
+      url: 'https://api.openai.com/v1/embeddings',
+      headers: { 
+        'Authorization': 'Bearer ' + apiKeyDecrypted, 
+        'Content-Type': 'application/json'
+      },
+      data : data
     };
 
     axios(config)

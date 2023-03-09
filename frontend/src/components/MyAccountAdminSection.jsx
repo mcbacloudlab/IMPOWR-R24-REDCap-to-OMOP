@@ -53,7 +53,6 @@ export default function MyAccountAdminSection(props) {
       .then((result) => {
         // console.log("result", result);
         let resultObj = JSON.parse(result);
-        console.log(resultObj);
         const redcapKeyResult = resultObj.find(
           (api) => api.name === "redcapAPIKey"
         );
@@ -61,7 +60,7 @@ export default function MyAccountAdminSection(props) {
           (api) => api.name === "redcapAPIURL"
         );
         const umlsResult = resultObj.find((api) => api.name === "umlsAPIKey");
-        console.log("umlsresult", umlsResult);
+        const gpt3Result = resultObj.find((api) => api.name === "gpt3APIKey");
         if (redcapKeyResult) {
           setRedcapKey("****************");
           console.log("redcapresult", redcapKeyResult);
@@ -73,6 +72,10 @@ export default function MyAccountAdminSection(props) {
         if (umlsResult) {
           setUMLSKey("****************");
         }
+        if (gpt3Result) {
+          setGPT3Key("****************");
+        }
+
       })
       .catch((error) => console.log("error", error));
   }

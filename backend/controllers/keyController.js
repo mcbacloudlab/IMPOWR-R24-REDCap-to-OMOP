@@ -48,10 +48,23 @@ async function testUMLSAPI(req, res){
   }
 }
 
+async function testGPT3API(req, res){
+  // console.log("testUMLSAPI");
+  try {
+    const keys = await keyService.testGPT3API(req, res);
+    // console.log("keys", keys);
+    // res.status(200).send(keys);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error");
+  }
+}
+
 
 module.exports = {
   queryAllKeys,
   updateAPIKey,
   testRedcapAPI,
-  testUMLSAPI
+  testUMLSAPI,
+  testGPT3API
 };
