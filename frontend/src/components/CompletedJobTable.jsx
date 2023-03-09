@@ -27,6 +27,8 @@ export default function CompletedJobTable({
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
       enablePagination={true}
+      enableExpanding
+      getSubRows={(originalRow) => originalRow.subRows} //default, can customize
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{

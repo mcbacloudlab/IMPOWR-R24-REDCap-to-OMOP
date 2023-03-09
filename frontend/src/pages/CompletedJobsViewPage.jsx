@@ -31,7 +31,7 @@ export default function CompletedJobsViewPage(props) {
 
   useEffect(() => {
     if (_data) {
-      if(_jobId) setJobId(_jobId)
+      if (_jobId) setJobId(_jobId);
       if (_data) importExcel(JSON.parse(_data));
     }
   }, []);
@@ -87,7 +87,31 @@ export default function CompletedJobsViewPage(props) {
         rows.push(rowData);
       }
     });
-    return rows;
+    console.log("rows", rows);
+
+    const result = [];
+    let currentRedcapFieldLabel = null;
+    let currentItem = null;
+
+    rows.forEach((item, index) => {
+      if (item.redcapFieldLabel !== currentRedcapFieldLabel) {
+        if (currentItem) {
+          result.push(currentItem);
+        }
+        currentItem = { ...item, subRows: [] };
+        currentRedcapFieldLabel = item.redcapFieldLabel;
+      } else {
+        currentItem.subRows.push(item);
+      }
+
+      if (index === rows.length - 1) {
+        result.push(currentItem);
+      }
+    });
+
+    console.log('result', result);
+
+    return result;
   };
 
   const csvOptions = {
@@ -130,7 +154,7 @@ export default function CompletedJobsViewPage(props) {
     // setIsLoading(false);
     // setCSVFilename("");
     setIsFormLoaded(false);
-    setJobId()
+    setJobId();
     // setSelectedFile("");
   }
 
