@@ -203,7 +203,7 @@ function App() {
                       token={token}
                       setToken={setToken}
                     >
-                      <MyAccountPage user={user} token={token}></MyAccountPage>
+                      <MyAccountPage user={user} token={token} completedList={completedList} pendingList={pendingList} failedList={failedList}></MyAccountPage>
                     </ProtectedRoute>
                   }
                   exact

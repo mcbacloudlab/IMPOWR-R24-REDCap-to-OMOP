@@ -4,6 +4,7 @@ import MaterialReactTable from "material-react-table";
 import { darken, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import TableRow from "@mui/material/TableRow";
 
 export default function CompletedJobTable({
   columns,
@@ -20,6 +21,8 @@ export default function CompletedJobTable({
 }) {
   return (
     <MaterialReactTable
+      //passing the callback function variant. (You should get type hints for all the callback parameters available)
+     
       columns={columns}
       data={data} //10,000 rows
       enableDensityToggle={false} //density does not work with memoized cells
@@ -28,36 +31,30 @@ export default function CompletedJobTable({
       enableGlobalFilterModes={true}
       enablePagination={true}
       enableExpanding
-      getSubRows={(originalRow) => originalRow.subRows} //default, can customize
+      enableExpandAll
+      getSubRows={(originalRow) => {
+        return originalRow.subRows;
+      }} //default, can customize
+      RowProps={{ sx: { marginBottom: "10px" } }}
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { maxHeight: "80vh" },
+        sx: { maxHeight: "80vh", maxWidth: "100vw" },
       }}
       onSortingChange={setSorting}
-      // state={{ isLoading, sorting }}
-      // rowVirtualizerInstanceRef={
-      //   rowVirtualizerInstanceRef
-      // } //optional
-      // rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
       initialState={{
         density: "compact",
         // pagination: { pageSize: 50, pageIndex: 0 },
       }}
-      // enableEditing
-      // onEditingRowSave={handleSaveRow}
-      // editingMode="modal"
-      // muiTableBodyCellEditTextFieldProps={({
-      //   cell,
-      // }) => ({
-      //   //onBlur is more efficient, but could use onChange instead
-      //   onBlur: (event) => {
-      //     handleSaveCell(cell, event.target.value);
-      //   },
-      // })}
       enableColumnResizing={true}
       enableSorting={true}
       enableStickyHeader
+      muiTableProps={{
+        sx: {
+          borderCollapse: "separate",
+          borderSpacing: "0 10px", // set the desired space between rows
+        },
+      }}
       muiTablePaperProps={{
         elevation: 2, //change the mui box shadow
         //customize paper styles
@@ -67,11 +64,11 @@ export default function CompletedJobTable({
         },
       }}
       muiTableBodyProps={{
-        sx: (theme) => ({
-          "& tr:nth-of-type(odd)": {
-            backgroundColor: darken(theme.palette.background.default, 0.1),
+        sx: {
+          "& .subrow": {
+            backgroundColor: "pink",
           },
-        }),
+        },
       }}
       muiTableHeadProps={{
         sx: (theme) => ({
@@ -89,11 +86,16 @@ export default function CompletedJobTable({
           },
         }),
       }}
-      defaultColumn={{
-        minSize: 20, //allow columns to get smaller than default
-        maxSize: 9000, //allow columns to get larger than default
-        size: 380, //make columns wider by default
-      }}
+      muiTableBodyRowProps={({ row }) => ({
+        color: "yellow",
+        disabled: row.original.isAccountLocked, //access the row data to determine if the checkbox should be disabled
+      })}
+      // defaultColumn={{
+      //   minSize: 20, //allow columns to get smaller than default
+      //   maxSize: 9000, //allow columns to get larger than default
+      //   size: 400, //make columns wider by default
+      // }}
+      autoWidth={true}
       // enableStickyFooter
 
       positionToolbarAlertBanner="bottom"

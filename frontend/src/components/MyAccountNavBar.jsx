@@ -11,16 +11,21 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
+import ErrorIcon from "@mui/icons-material/Error";
 import MyAccountAdminSection from "./MyAccountAdminSection";
 import { useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
+import CompletedJobs from "./CompletedJobs";
+import PendingJobs from "./PendingJobs";
+import FailedJobs from "./FailedJobs";
 
 const drawerWidth = "240px";
 
 export default function MyAccountNavBar(props) {
+  console.log("navbar props", props);
   const [view, setView] = useState("My Account");
 
   const handleClick = (event) => {
@@ -68,6 +73,14 @@ export default function MyAccountNavBar(props) {
                   <AutorenewIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Pending Jobs"} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key={"Failed Jobs"} disablePadding>
+              <ListItemButton onClick={(event) => handleClick(event)}>
+                <ListItemIcon>
+                  <ErrorIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Failed Jobs"} />
               </ListItemButton>
             </ListItem>
           </List>
@@ -118,11 +131,28 @@ export default function MyAccountNavBar(props) {
             </Typography>
             <Typography sx={{ textAlign: "left" }}>
               {props.role && (
-                <div>
+                <>
                   <b>Role:</b> {props.role}
-                </div>
+                </>
               )}
             </Typography>
+          </>
+        )}
+        {view === "Completed Jobs" && (
+          <>
+            <CompletedJobs props={props} />
+          </>
+        )}
+
+        {view === "Pending Jobs" && (
+          <>
+            <PendingJobs props={props} />
+          </>
+        )}
+
+        {view === "Failed Jobs" && (
+          <>
+            <FailedJobs props={props} />
           </>
         )}
 

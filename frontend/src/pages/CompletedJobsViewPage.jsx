@@ -5,6 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
+import { Box, Button, Typography } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 
 var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
@@ -20,75 +22,183 @@ export default function CompletedJobsViewPage(props) {
     _jobId = location.state.jobId;
     _data = location.state.result;
   }
-
+  let _dataObj;
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
     if (_data) {
       if (_jobId) setJobId(_jobId);
-      if (_data) importExcel(JSON.parse(_data));
+      if (_data) buildTable(JSON.parse(_data));
     }
-  }, []);
+  }, [_data, _jobId]);
 
-  function importExcel(e) {
-    //removing header
+  function verifyRow(row) {
+    console.log("rowId", row.snomedID);
+    const updatedData = _dataObj.map((item) => {
+      if (item.redcapFieldLabel === row.redcapFieldLabel) {
+        const updatedSubRows = item.subRows.map((subRow) => ({
+          ...subRow,
+          selected: subRow.snomedID === row.snomedID ? "true" : "false",
+        }));
+        return {
+          ...item,
+          selected: item.snomedID === row.snomedID ? "true" : "false",
+          subRows: updatedSubRows,
+        };
+      }
+      return item;
+    });
 
-    // fileData.splice(0, 1);
-    // const filteredArr = fileData.map((arr) => arr.filter(Boolean));
-    // console.log("fileData", filteredArr);
+    console.log("updatedData", updatedData);
+    _dataObj = updatedData;
+    setData(updatedData);
+    // setData(data)
+  }
 
-    //group into subRows
+  function buildTable(data) {
     const result = [];
     let currentRedcapFieldLabel = null;
     let currentItem = null;
 
-    e.forEach((item, index) => {
+    data.forEach((item, index) => {
       if (item.redcapFieldLabel !== currentRedcapFieldLabel) {
         if (currentItem) {
           result.push(currentItem);
         }
-        item.selected = 'true';
+        item.selected = "true";
         currentItem = { ...item, subRows: [] };
         currentRedcapFieldLabel = item.redcapFieldLabel;
       } else {
-        currentItem.subRows.push({ ...item, selected: 'false' });
+        currentItem.subRows.push({ ...item, selected: "false" });
       }
 
-      if (index === e.length - 1) {
+      if (index === data.length - 1) {
         result.push(currentItem);
       }
     });
-
     console.log("result", result);
+    // const headers = Object.keys(result[0])
+    // .map((key, value) => {
+    //   if (key === "similarity") {
+    //     return {
+    //       accessorKey: key.replace(/\./g, ""),
+    //       header: key.replace(/\./g, ""),
+    //       Cell: ({ cell }) =>
+    //         cell.getValue().toLocaleString("en-US", {
+    //           style: "percent",
+    //           minimumFractionDigits: 2,
+    //         }),
+    //     };
+    //   } else if (key === "selected") {
+    //     return {
+    //       accessorKey: key.replace(/\./g, ""),
+    //       header: key.replace(/\./g, ""),
+    //       Cell: ({ cell }) =>
+    //         cell.getValue() === "false" ? (
+    //           <Box sx={{
+    //             // backgroundColor: "red"
+    //             }}>
+    //             <Button
+    //               variant={"contained"}
+    //               onClick={() => {
+    //                 verifyRow(cell.row.original);
+    //               }}
+    //             >
+    //               Prefer this one
+    //             </Button>
+    //           </Box>
+    //         ) : (
+    //           <Box sx={{
+    //             // color: 'white',
+    //             // backgroundColor: "darkGrey"
+    //             }}>
+    //             <Typography>
+    //               <CheckIcon/>
+    //               {/* <b>Preferred</b> */}
+    //             </Typography>
+    //           </Box>
+    //         ),
+    //     };
+    //   } else if (key !== "subRows") {
+    //     return {
+    //       accessorKey: key.replace(/\./g, ""),
+    //       header: key.replace(/\./g, ""),
+    //     };
+    //   } else return null;
+    // })
+    // .filter((header) => header !== null);
+    const MyCell = ({ cell, row }) => {
+      console.log('row', row)
+      console.log('row depth', row.depth)
+      
+      return cell.getValue() === "false" ? (
+        <Button
+          variant={"contained"}
+          onClick={() => {
+            verifyRow(cell.row.original);
+          }}
+        >
+          Prefer this one
+        </Button>
+      ) : (
+        <Typography>
+          <b>Preferred</b>
+        </Typography>
+      )
+    }
 
-    const headers = Object.keys(result[0]).map((key) => {
-      if (key !== 'subRows') {
-      return {
-        accessorKey: key.replace(/\./g, ""),
-        header: key.replace(/\./g, ""),
-      };
-    }else return null
-    }).filter((header) => header !== null);;
-    setColDefs(headers);
+    const cols = [
+      {
+        header: "Redcap Field Label",
+        accessorKey: "redcapFieldLabel",
+      },
+      {
+        header: "Snomed Text",
+        accessorKey: "snomedText",
+      },
+      {
+        header: "Snomed ID",
+        accessorKey: "snomedID",
+      },
+      {
+        header: "Similarity",
+        accessorKey: "similarity",
+        Cell: ({ cell }) =>
+          cell.getValue().toLocaleString("en-US", {
+            style: "percent",
+            minimumFractionDigits: 2,
+          }),
+      },
+      {
+        header: "Selected",
+        accessorKey: "selected",
+        //you can access a row instance in column definition option callbacks like this
+       
+        Cell: MyCell,
+        sx: {
+          "& .MuiButton-root": {
+            backgroundColor: "blue",
+            color: "white",
+          },
+          "& .MuiTypography-root": {
+            color: "green",
+          },
+          "& .subrow": {
+            backgroundColor: "yellow",
+          },
+        },
+      },
+    ];
 
+    console.log("headers", cols);
+    setColDefs(cols);
+    console.log("set data", result);
+    _dataObj = result;
     setData(result);
     setCSVFilename(`Completed_Job_${_jobId}.csv`);
     setIsFormLoaded(true);
   }
 
-  const csvOptions = {
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    filename: csvFilename.replace(/\.[^/.]+$/, ""),
-    showLabels: true,
-    useBom: false,
-    useKeysAsHeaders: false,
-    headers: colDefs.map((c) => {
-      return c.header;
-    }),
-  };
-  const csvExporter = new ExportToCsv(csvOptions);
   const handleExportData = () => {
     let _data = data;
     let keys = _data.reduce(function (acc, obj) {
@@ -104,6 +214,20 @@ export default function CompletedJobsViewPage(props) {
       });
     });
 
+    const csvOptions = {
+      fieldSeparator: ",",
+      quoteStrings: '"',
+      decimalSeparator: ".",
+      filename: csvFilename.replace(/\.[^/.]+$/, ""),
+      showLabels: true,
+      useBom: false,
+      useKeysAsHeaders: false,
+      headers: colDefs.map((c) => {
+        return c.header;
+      }),
+    };
+    const csvExporter = new ExportToCsv(csvOptions);
+
     csvExporter.generateCsv(_data);
   };
 
@@ -114,8 +238,9 @@ export default function CompletedJobsViewPage(props) {
   }
 
   return (
+    <>
     <Container component="main" maxWidth="90%">
-      <CssBaseline />
+      {/* <CssBaseline /> */}
       <h1>Completed Job {jobId}</h1>
       {isFormLoaded && (
         <CompletedJobTable
@@ -127,5 +252,6 @@ export default function CompletedJobsViewPage(props) {
         />
       )}
     </Container>
+    </>
   );
 }

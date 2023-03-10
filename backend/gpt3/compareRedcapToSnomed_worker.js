@@ -8,7 +8,7 @@ const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
 const snomedCollection = client
   .db("GPT3_Embeddings")
-  .collection("gpt3_snomed_embeddings");
+  .collection("gpt3_snomed_embeddings30k");
 
 let finalList = [];
 async function processChunk(
@@ -19,8 +19,8 @@ async function processChunk(
   progress
 ) {
   console.log("process chunk");
-  console.log("skip", skip);
-  console.log("limit", limit);
+  console.log("Processing Document At:", skip);
+  console.log("Processing Document To:", skip + limit);
   finalList = []; //clear between each chunk
   const snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
   const snomedChunk = await snomedCursor.toArray();
@@ -62,7 +62,8 @@ async function processChunk(
 
 async function processChunks(redCapCollectionArray, chunkSize, progress) {
   const count = await snomedCollection.countDocuments();
-  parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
+  // parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
+  parentPort.postMessage( `Total Documents: ${count}`);
   // console.log(`Loading SNOMED Collection into memory (${count} documents)...`);
 
   let skip = 0;

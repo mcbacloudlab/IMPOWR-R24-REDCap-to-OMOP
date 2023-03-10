@@ -64,8 +64,8 @@ async function importToMongo(job) {
     process.stdout.on("data", (data) => {
       if (!data.toString().startsWith("[[")) {
         console.log(`stdout: ${data}`);
-        if (data.toString().startsWith("Loaded")) job.progress(20);
-        if (data.toString().startsWith("Chunking")) job.progress(50);
+        if (data.toString().startsWith("Loaded")) job.progress(1);
+        // if (data.toString().startsWith("Chunking")) job.progress(50);
       }
 
       if (data.toString().startsWith("[[")) {
@@ -95,7 +95,7 @@ async function embedRedcapText(job) {
   console.log("jobid", job.id);
 
   console.log("Starting REDCap GPT3 Embedding...");
-  job.progress(60);
+  // job.progress(60);
   console.log("job.data");
 
   return new Promise((resolve) => {
@@ -143,7 +143,6 @@ async function compareEmbeddings(job) {
   console.log("jobid", job.id);
 
   console.log("Starting Embedding Comparisons...");
-  job.progress(80);
   console.log("job.data");
 
   return new Promise((resolve) => {
@@ -161,7 +160,7 @@ async function compareEmbeddings(job) {
     process.stdin.write(JSON.stringify(data)); //pass data into child process
     process.stdin.end();
 
-    let capturedData;
+    let capturedData, totalDocuments, currentDocument;
     //capture data returned from child
     process.stdout.on("data", (data) => {
       if (data.toString().startsWith("[{")) {
@@ -169,6 +168,18 @@ async function compareEmbeddings(job) {
         capturedData = data;
       }else{
         console.log('data', data.toString())
+        if(data.toString().startsWith("Total Documents")){
+          totalDocuments = parseInt(data.toString().split(":")[1].trim());
+          console.log(totalDocuments);
+        }
+
+        if(data.toString().startsWith("Processing Document At")){
+          const currentDocument = parseInt(data.toString().split(":")[1].trim());
+          console.log('curdoc', currentDocument);
+          console.log('totaldocs', totalDocuments)
+          console.log('setting job to: ', currentDocument/totalDocuments ? currentDocument/totalDocuments : 0)
+          job.progress(currentDocument/totalDocuments ? Math.round((currentDocument / totalDocuments) * 100) : 1);
+        }
       }
     });
 
@@ -179,6 +190,7 @@ async function compareEmbeddings(job) {
     process.on("close", (code) => {
       if (code === 0) {
         console.log("Embedding comparisons finished successfully");
+        job.progress(100)
         resolve(capturedData);
       } else {
         console.error(`Embedding comparison failed with code ${code}`);

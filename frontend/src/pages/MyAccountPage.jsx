@@ -10,7 +10,7 @@ import AdminSection from "../components/MyAccountAdminSection";
 import MyAccountNavBar from "../components/MyAccountNavBar";
 
 export default function MyAccountPage(props) {
-  // console.log("props", props);
+  console.log("myaccount", props);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
@@ -31,6 +31,7 @@ export default function MyAccountPage(props) {
       <Container component="main" maxWidth="90%">
         <CssBaseline />
           <MyAccountNavBar props={props} username={username} name={name} role={role}/>
+          
         {/* </Paper> */}
       </Container>
   );

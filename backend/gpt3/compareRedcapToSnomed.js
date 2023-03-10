@@ -139,7 +139,7 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
         console.log('endResult. pushing final list')
         finalList.push(...message.endResult);
       }else{
-        console.log('generic', message)
+        console.log(message)
       }
     });
 

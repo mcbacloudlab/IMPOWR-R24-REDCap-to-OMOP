@@ -469,14 +469,14 @@ export default function PrimarySearchAppBar(props) {
                                   style={{ position: "absolute" }}
                                   className="failed-jobs-container"
                                 >
-                                  <AutorenewIcon
+                                  {/* <AutorenewIcon
                                     className="failed-jobs-icon"
                                     style={{
                                       backgroundColor: "white",
                                       color: "green",
                                       marginLeft: "5px",
                                     }}
-                                  />
+                                  /> */}
                                 </span>
                               ) : null}
                             </div>
