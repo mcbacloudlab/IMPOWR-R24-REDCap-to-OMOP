@@ -8,7 +8,7 @@ const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
 const snomedCollection = client
   .db("GPT3_Embeddings")
-  .collection("gpt3_snomed_embeddings30k");
+  .collection("gpt3_snomed_embeddings");
 
 let finalList = [];
 async function processChunk(

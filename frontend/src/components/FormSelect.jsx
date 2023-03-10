@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
   FormControl,
@@ -7,7 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography
+  Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,7 +19,7 @@ import { ExportToCsv } from "export-to-csv";
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
-  console.log('Formselect', props)
+  // console.log("Formselect", props);
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
@@ -27,11 +27,36 @@ export default function FormSelect(props) {
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
     useState(false);
   const [csvFilename, setCSVFilename] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  var tableInstanceRef = useRef(null);
+  useEffect(() => {
+    if (tableInstanceRef.current) {
+      console.log("tableinstance", tableInstanceRef.current.getState());
+      setSelectedRows(tableInstanceRef.current.getState().rowSelection);
+    }
+  }, [tableInstanceRef.current]);
+
+  const handleRowSelection = (selected) => {
+    console.log("typeof", typeof selected);
+    console.log("tableinstance", tableInstanceRef.current.getState());
+    const rowSelection = tableInstanceRef.current.getState().rowSelection;
+    setSelectedRows(rowSelection);
+    console.log("rowselection", rowSelection);
+    // const updatedData = data.map((row) => {
+    //   return {
+    //     ...row,
+    //     selected: selectedRows.includes(row.id) ? true : false,
+    //   };
+    // });
+
+    // setData(updatedData);
+  };
 
   const columns = useMemo(() => colDefs, [colDefs]);
 
   function getDataDictionary(event) {
-    setIsFormLoaded(false)
+    setIsFormLoaded(false);
     if (!selectedForm) setSelectedForm(props.forms[0]);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.props.token);
@@ -64,9 +89,8 @@ export default function FormSelect(props) {
   }, [props.forms]);
   const handleChange = (event) => {
     setSelectedForm(event.target.value);
+    resetScreen();
   };
-
-
 
   function importExcel(e) {
     const file = e;
@@ -121,7 +145,7 @@ export default function FormSelect(props) {
 
     var formdata = new FormData();
     formdata.append("csvData", JSON.stringify(data));
-    formdata.append('filename', selectedForm)
+    formdata.append("filename", selectedForm);
 
     var requestOptions = {
       method: "POST",
@@ -130,13 +154,14 @@ export default function FormSelect(props) {
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submit`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submit`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
   }
-
- 
 
   const csvOptions = {
     fieldSeparator: ",",
@@ -223,7 +248,12 @@ export default function FormSelect(props) {
             )}
           </Grid>
 
-          <Grid item xs={12} lg={8} sx={{ maxWidth: "100%", overflowX: "auto" }}>
+          <Grid
+            item
+            xs={12}
+            lg={8}
+            sx={{ maxWidth: "100%", overflowX: "auto" }}
+          >
             {isFormLoaded && (
               <>
                 <FormSelectTable
@@ -232,6 +262,10 @@ export default function FormSelect(props) {
                   data={data}
                   handleExportData={handleExportData}
                   resetScreen={resetScreen}
+                  handleRowSelection={handleRowSelection}
+                  selectedRows={selectedRows}
+                  setSelectedRows={setSelectedRows}
+                  tableInstanceRef={tableInstanceRef}
                 />
 
                 <Grid item xs={12} padding={1}>
@@ -265,7 +299,7 @@ export default function FormSelect(props) {
                         position: "absolute",
                         top: "0px",
                         right: "200px",
-                        zIndex: 10000
+                        zIndex: 10000,
                       }}
                     >
                       <Typography variant="h6" gutterBottom>

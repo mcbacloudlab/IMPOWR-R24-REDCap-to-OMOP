@@ -45,16 +45,18 @@ export default function MyAccountNavBar(props) {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: "border-box",
+            backgroundColor: '#343541',
+            color: 'white'
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
+        <Box sx={{ overflow: "auto", backgroundColor: '#343541', color: 'white'}}>
           <List>
             <ListItem key={"My Account"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                  <AccountCircleIcon />
+                  <AccountCircleIcon style={{ color: 'white'}}/>
                 </ListItemIcon>
                 <ListItemText primary={"My Account"} />
               </ListItemButton>
@@ -62,7 +64,7 @@ export default function MyAccountNavBar(props) {
             <ListItem key={"Completed Jobs"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                  <PlaylistAddCheckSharpIcon />
+                  <PlaylistAddCheckSharpIcon color="success" />
                 </ListItemIcon>
                 <ListItemText primary={"Completed Jobs"} />
               </ListItemButton>
@@ -70,7 +72,7 @@ export default function MyAccountNavBar(props) {
             <ListItem key={"Pending Jobs"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                  <AutorenewIcon />
+                <AutorenewIcon style={{ color: 'yellow'}} />
                 </ListItemIcon>
                 <ListItemText primary={"Pending Jobs"} />
               </ListItemButton>
@@ -78,22 +80,22 @@ export default function MyAccountNavBar(props) {
             <ListItem key={"Failed Jobs"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                  <ErrorIcon />
+                  <ErrorIcon color="error" />
                 </ListItemIcon>
                 <ListItemText primary={"Failed Jobs"} />
               </ListItemButton>
             </ListItem>
           </List>
-          <Divider />
+          <Divider sx={{bgcolor: 'white'}}/>
           {props.role === "admin" && (
             <List>
-              <Typography variant="h6" gutterBottom>
+              {/* <Typography variant="h6" gutterBottom>
                 Admin Section
-              </Typography>
+              </Typography> */}
               <ListItem key={"API Keys"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <KeyIcon />
+                    <KeyIcon style={{ color: 'white'}}/>
                   </ListItemIcon>
                   <ListItemText primary={"API Keys"} />
                 </ListItemButton>
@@ -101,7 +103,7 @@ export default function MyAccountNavBar(props) {
               <ListItem key={"All Completed Jobs"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <PlaylistAddCheckSharpIcon />
+                    <PlaylistAddCheckSharpIcon style={{ color: 'white'}}/>
                   </ListItemIcon>
                   <ListItemText primary={"All Completed Jobs"} />
                 </ListItemButton>
@@ -109,7 +111,7 @@ export default function MyAccountNavBar(props) {
               <ListItem key={"All Pending Jobs"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <AutorenewIcon />
+                    <AutorenewIcon style={{ color: 'white'}}/>
                   </ListItemIcon>
                   <ListItemText primary={"All Pending Jobs"} />
                 </ListItemButton>

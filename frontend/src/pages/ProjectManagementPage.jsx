@@ -11,14 +11,14 @@ import CssBaseline from "@mui/material/CssBaseline";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export default function ProjectManagementPage(props) {
-  console.log("project management page,", props);
+  // console.log("project management page,", props);
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     //get available forms
-    console.log("use effect formselect ran");
+    // console.log("use effect formselect ran");
     setIsLoading(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);

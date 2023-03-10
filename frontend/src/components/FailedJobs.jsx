@@ -129,6 +129,7 @@ export default function FailedJobs(props) {
                     />
                      <Button
                                   variant="contained"
+                                  color="error"
                                   onClick={(event) => handleRetry(job.jobId)}
                                   value="redcapAPIKey"
                                   sx={{

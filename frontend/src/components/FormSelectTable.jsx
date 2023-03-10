@@ -8,59 +8,61 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 export default function FormSelectTable({
   columns,
   data,
-  isSavingErr,
   setSorting,
-  handleSaveRow,
-  saveSuccess,
-  isSaving,
-  saveFile,
   value,
   handleExportData,
-  resetScreen
-
+  resetScreen,
+  handleRowSelection,
+  selectedRows,
+  setSelectedRows,
+  tableInstanceRef,
 }) {
   // console.log('form seldata', data)
   return (
     <MaterialReactTable
       columns={columns}
-      data={data} //10,000 rows
-      enableDensityToggle={false} //density does not work with memoized cells
-      memoMode="cells" // memoize table cells to improve render performance, but break some features
+      data={data}
+      enableDensityToggle={false}
+      memoMode="cells"
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
       enablePagination={true}
-      // enableRowNumbers
-      // enableRowVirtualization
+      enableRowNumbers
+      enableRowSelection
+      tableInstanceRef={tableInstanceRef}
+      selectAllMode='page'
+      // onRowSelectionChange={handleRowSelection} //connect internal row selection state to your own
+      state={{ selectedRows }} //pass our managed row selection state to the table to use
+      getRowId={(row) => row.field_name} //give each row a more useful id
+      muiTableBodyRowProps={({ row }) => ({
+        //add onClick to row to select upon clicking anywhere in the row
+        // onClick: row.getToggleSelectedHandler(),
+        // sx: { cursor: "pointer" },
+        onClick: () => 
+          setSelectedRows((prev) => ({
+            ...prev,
+            [row.id]: !prev[row.id],
+          })),
+        selected: selectedRows[row.id],
+        sx: {
+          cursor: "pointer",
+        },
+        
+      })}
+      // selectedRows={selectedRows}
       muiTableContainerProps={{
         sx: { maxHeight: "80vh" },
       }}
       onSortingChange={setSorting}
-      // state={{ isLoading, sorting }}
-      // rowVirtualizerInstanceRef={
-      //   rowVirtualizerInstanceRef
-      // } //optional
-      // rowVirtualizerProps={{ overscan: 8 }} //optionally customize the virtualizer
       initialState={{
         density: "compact",
-        // pagination: { pageSize: 50, pageIndex: 0 },
       }}
-      // enableEditing
-      // onEditingRowSave={handleSaveRow}
-      // editingMode="modal"
-      // muiTableBodyCellEditTextFieldProps={({
-      //   cell,
-      // }) => ({
-      //   //onBlur is more efficient, but could use onChange instead
-      //   onBlur: (event) => {
-      //     handleSaveCell(cell, event.target.value);
-      //   },
-      // })}
       enableColumnResizing={true}
       enableSorting={true}
       enableStickyHeader
+      muiSelectCheckboxProps={{ color: "secondary" }}
       muiTablePaperProps={{
-        elevation: 2, //change the mui box shadow
-        //customize paper styles
+        elevation: 2,
         sx: {
           borderRadius: "0",
           border: "1px solid #e0e0e0",
@@ -76,7 +78,7 @@ export default function FormSelectTable({
       muiTableHeadProps={{
         sx: (theme) => ({
           "& tr": {
-            backgroundColor: "#4a4a4a",
+            backgroundColor: "#343541",
             color: "#ffffff",
           },
         }),
@@ -84,18 +86,11 @@ export default function FormSelectTable({
       muiTableHeadCellProps={{
         sx: (theme) => ({
           div: {
-            backgroundColor: "#4a4a4a",
+            backgroundColor: "#343541",
             color: "#ffffff",
           },
         }),
       }}
-      defaultColumn={{
-        minSize: 2, //allow columns to get smaller than default
-        maxSize: 90, //allow columns to get larger than default
-        size: 38, //make columns wider by default
-      }}
-      // enableStickyFooter
-
       positionToolbarAlertBanner="bottom"
       renderTopToolbarCustomActions={({ table }) => (
         <Box
@@ -107,40 +102,21 @@ export default function FormSelectTable({
             flexWrap: "wrap",
           }}
         >
-          {/* <Button
-            variant="contained"
-            color="primary"
-            component="label"
-            startIcon={
-              saveSuccess ? (
-                <CheckIcon />
-              ) : isSaving || isSavingErr ? (
-                <CircularProgress size={20} thickness={4} color="secondary" />
-              ) : (
-                <SaveIcon />
-              )
+          <Button
+            onClick={() =>
+              console.info(tableInstanceRef.current?.getSelectedRowModel().rows)
             }
-            onClick={(event) => saveFile(event, value)}
           >
-            Save
-          </Button> */}
-
+            Log Selected Rows
+          </Button>
           <Button
             color="success"
-            //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
             onClick={handleExportData}
             startIcon={<FileDownloadIcon />}
             variant="outlined"
           >
-            Export
+            Export to Excel
           </Button>
-          {/* <Typography
-            color="textSecondary"
-            variant="subtitle2"
-            style={{ marginLeft: "auto" }}
-          > */}
-            {/* Last Saved At:{" "} */}
-          {/* </Typography> */}
 
           <Box style={{ marginLeft: "auto" }}>
             <Button
@@ -150,7 +126,7 @@ export default function FormSelectTable({
               component="label"
               onClick={(event) => resetScreen(event, value)}
             >
-              Close File
+              Close
             </Button>
           </Box>
         </Box>
