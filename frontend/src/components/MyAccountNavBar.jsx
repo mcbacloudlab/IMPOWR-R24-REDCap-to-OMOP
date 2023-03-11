@@ -1,12 +1,18 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
+import {
+  Box,
+  Link,
+  Divider,
+  Button,
+  Drawer,
+  Typography,
+  Avatar,
+  Stack,
+  ListItem,
+  ListItemButton,
+} from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
@@ -21,8 +27,20 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./CompletedJobs";
 import PendingJobs from "./PendingJobs";
 import FailedJobs from "./FailedJobs";
+import { styled, alpha } from "@mui/material/styles";
+import blank_avatar from "../assets/blank_avatar.jpg";
 
 const drawerWidth = "240px";
+
+const StyledAccount = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(2, 2.5),
+  marginTop: "10px",
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  backgroundColor: alpha(theme.palette.grey[500], 0.12),
+  color: "white",
+}));
 
 export default function MyAccountNavBar(props) {
   console.log("navbar props", props);
@@ -45,18 +63,38 @@ export default function MyAccountNavBar(props) {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: "border-box",
-            backgroundColor: '#343541',
-            color: 'white'
+            backgroundColor: "#343541",
+            color: "white",
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: "auto", backgroundColor: '#343541', color: 'white'}}>
+        <Box
+          sx={{ overflow: "auto", backgroundColor: "#343541", color: "white" }}
+        >
+          <Box sx={{ mb: 1, mx: 2.5 }}>
+            <Link underline="none">
+              <StyledAccount>
+                <Avatar src={blank_avatar} alt="photoURL" />
+
+                <Box sx={{ ml: 2 }}>
+                  <Typography variant="subtitle2" sx={{ color: "white" }}>
+                    <b>{props.name}</b>
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ color: "white" }}>
+                    {props.role}
+                  </Typography>
+                </Box>
+              </StyledAccount>
+            </Link>
+          </Box>
           <List>
+            <Divider sx={{ bgcolor: "white" }} />
             <ListItem key={"My Account"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                  <AccountCircleIcon style={{ color: 'white'}}/>
+                  <AccountCircleIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"My Account"} />
               </ListItemButton>
@@ -72,7 +110,7 @@ export default function MyAccountNavBar(props) {
             <ListItem key={"Pending Jobs"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
-                <AutorenewIcon style={{ color: 'yellow'}} />
+                  <AutorenewIcon style={{ color: "yellow" }} />
                 </ListItemIcon>
                 <ListItemText primary={"Pending Jobs"} />
               </ListItemButton>
@@ -86,7 +124,7 @@ export default function MyAccountNavBar(props) {
               </ListItemButton>
             </ListItem>
           </List>
-          <Divider sx={{bgcolor: 'white'}}/>
+          <Divider sx={{ bgcolor: "white" }} />
           {props.role === "admin" && (
             <List>
               {/* <Typography variant="h6" gutterBottom>
@@ -95,7 +133,7 @@ export default function MyAccountNavBar(props) {
               <ListItem key={"API Keys"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <KeyIcon style={{ color: 'white'}}/>
+                    <KeyIcon style={{ color: "white" }} />
                   </ListItemIcon>
                   <ListItemText primary={"API Keys"} />
                 </ListItemButton>
@@ -103,7 +141,7 @@ export default function MyAccountNavBar(props) {
               <ListItem key={"All Completed Jobs"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <PlaylistAddCheckSharpIcon style={{ color: 'white'}}/>
+                    <PlaylistAddCheckSharpIcon style={{ color: "white" }} />
                   </ListItemIcon>
                   <ListItemText primary={"All Completed Jobs"} />
                 </ListItemButton>
@@ -111,7 +149,7 @@ export default function MyAccountNavBar(props) {
               <ListItem key={"All Pending Jobs"} disablePadding>
                 <ListItemButton onClick={(event) => handleClick(event)}>
                   <ListItemIcon>
-                    <AutorenewIcon style={{ color: 'white'}}/>
+                    <AutorenewIcon style={{ color: "white" }} />
                   </ListItemIcon>
                   <ListItemText primary={"All Pending Jobs"} />
                 </ListItemButton>

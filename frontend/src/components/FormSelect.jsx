@@ -16,6 +16,8 @@ import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
 import TransferList from "./TransferList";
 import { ExportToCsv } from "export-to-csv";
+import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from '@mui/material/Skeleton';
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
@@ -24,6 +26,7 @@ export default function FormSelect(props) {
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
     useState(false);
   const [csvFilename, setCSVFilename] = useState("");
@@ -57,6 +60,7 @@ export default function FormSelect(props) {
 
   function getDataDictionary(event) {
     setIsFormLoaded(false);
+    setIsFormLoading(true);
     if (!selectedForm) setSelectedForm(props.forms[0]);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.props.token);
@@ -108,10 +112,13 @@ export default function FormSelect(props) {
     setColDefs(heads);
     //removing header
     fileData.splice(0, 1);
+    setSelectedRows(convertToJson(headers, fileData))
     setData(convertToJson(headers, fileData));
+    
     // setApprovedData(convertToJson(headers, fileData, true));
     // setIsLoading(false);
     setIsFormLoaded(true);
+    setIsFormLoading(false);
   }
 
   const convertToJson = (headers, data, approved) => {
@@ -237,6 +244,7 @@ export default function FormSelect(props) {
                 </Button>
               </Grid>
             </FormControl>
+            {isFormLoading && (<Skeleton variant="rounded" sx={{margin: 'auto'}} width={'80%'} height={'30vh'} />)}
             {isFormLoaded && (
               <TransferList
                 props={props}
@@ -254,6 +262,7 @@ export default function FormSelect(props) {
             lg={8}
             sx={{ maxWidth: "100%", overflowX: "auto" }}
           >
+            {isFormLoading && (<Skeleton variant="rounded" width={'100%'} height={'40vh'} />)}
             {isFormLoaded && (
               <>
                 <FormSelectTable

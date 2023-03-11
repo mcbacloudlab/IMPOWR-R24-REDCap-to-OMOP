@@ -1,12 +1,27 @@
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Badge from "@mui/material/Badge";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Link,
+  Divider,
+  Button,
+  Drawer,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  MenuItem,
+  Menu,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import TemporaryDrawer from "./TemporaryDrawer";
@@ -16,23 +31,40 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
-import Drawer from "@mui/material/Drawer";
-import Tooltip from "@mui/material/Tooltip";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 import Paper from "@mui/material/Paper";
 import ErrorIcon from "@mui/icons-material/Error";
+import { styled, alpha } from "@mui/material/styles";
+import blank_avatar from "../assets/blank_avatar.jpg";
+
 
 export default function PrimarySearchAppBar(props) {
+  console.log('search bar', props.user)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
-
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    try {
+      let userCookie = JSON.parse(Cookies.get("user"));
+      setUsername(userCookie.email);
+      setName(userCookie.firstName + " " + userCookie.lastName);
+      let userInfo = JSON.parse(props.user);
+      // console.log("prfewefwefops.", userInfo);
+      setRole(userInfo.role);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }, [props.user]);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -65,6 +97,16 @@ export default function PrimarySearchAppBar(props) {
     navigate(url);
   };
 
+  const StyledAccount = styled("div")(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(2, 2.5),
+    marginTop: "10px",
+    borderRadius: Number(theme.shape.borderRadius) * 1.5,
+    backgroundColor: alpha(theme.palette.grey[500], 0.12),
+    color: "white",
+  }));
+
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -82,6 +124,23 @@ export default function PrimarySearchAppBar(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
+      <Box sx={{ mb: 1, mx: 2.5 }}>
+            <Link underline="none">
+              <StyledAccount>
+                <Avatar src={blank_avatar} alt="photoURL" />
+
+                <Box sx={{ ml: 2 }}>
+                  <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
+                    <b>{name}</b>
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ color: "text.primary" }}>
+                    {role}
+                  </Typography>
+                </Box>
+              </StyledAccount>
+            </Link>
+          </Box>
       <MenuItem onClick={() => handleNavigate("/myaccount")}>
         <IconButton
           size="large"

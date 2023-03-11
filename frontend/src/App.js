@@ -143,6 +143,7 @@ function App() {
                 <SearchAppBar
                   token={token}
                   setToken={setToken}
+                  user={user}
                   updateUser={updateUser}
                   pendingList={pendingList}
                   failedList={failedList}

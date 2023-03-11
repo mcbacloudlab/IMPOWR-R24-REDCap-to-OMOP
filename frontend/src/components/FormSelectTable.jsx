@@ -27,10 +27,24 @@ export default function FormSelectTable({
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
       enablePagination={true}
+      muiTablePaginationProps={{
+        // rowsPerPageOptions: [
+        //   { label: '50', value: 50 },
+        //   { label: '100', value: 100 },
+        //   { label: '150', value: 150 },
+        //   { label: '200', value: 200 },
+        //   { label: '500', value: 500 },
+        //   { label: '1000', value: 1000 }
+        // ],
+      }}
+      // positionPagination='top'
       enableRowNumbers
+      options={{
+        selection: true,
+      }}
       enableRowSelection
       tableInstanceRef={tableInstanceRef}
-      selectAllMode='page'
+      selectAllMode='all'
       // onRowSelectionChange={handleRowSelection} //connect internal row selection state to your own
       state={{ selectedRows }} //pass our managed row selection state to the table to use
       getRowId={(row) => row.field_name} //give each row a more useful id
@@ -51,7 +65,7 @@ export default function FormSelectTable({
       })}
       // selectedRows={selectedRows}
       muiTableContainerProps={{
-        sx: { maxHeight: "80vh" },
+        sx: { maxHeight: "50vh" },
       }}
       onSortingChange={setSorting}
       initialState={{
@@ -60,7 +74,10 @@ export default function FormSelectTable({
       enableColumnResizing={true}
       enableSorting={true}
       enableStickyHeader
-      muiSelectCheckboxProps={{ color: "secondary" }}
+      muiSelectCheckboxProps={{
+        color: 'secondary',
+        defaultChecked: true, // Select all rows by default
+      }}
       muiTablePaperProps={{
         elevation: 2,
         sx: {
