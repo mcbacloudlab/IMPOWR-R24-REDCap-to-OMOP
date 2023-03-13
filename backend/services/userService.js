@@ -10,6 +10,7 @@ const myQueue = new Bull("process-queue", {
   },
 });
 
+
 async function getUserByEmail(email) {
   const query = "SELECT * FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
@@ -190,14 +191,14 @@ async function getUserJobs(req, res) {
       //get status for unknown statuses for jobs....
 
       for (const job of results) {
-        // console.log('job', job.jobId)
         try {
           const foundJob = await myQueue.getJob(job.jobId);
           if(!foundJob){ 
-            // console.log('no found job for:' + job.jobId)
+            console.log('no found job for:' + job.jobId)
             continue
           }else{
             // console.log('found job for' + job.jobId)
+            
           }
           const status = await foundJob.getState();
           const timeAdded = foundJob.timestamp;

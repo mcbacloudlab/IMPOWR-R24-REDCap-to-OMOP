@@ -12,6 +12,18 @@ async function submit(req, res) {
   }
 }
 
+async function retryJob(req, res) {
+  console.log("retry job");
+  try {
+    await queueService.retryJob(req, res);
+    // console.log("after submit", status)
+    // res.status(200).send(keys);
+  } catch (error) {
+    console.error("controller error", error);
+    //   res.status(500).send("Error");
+  }
+}
+
 async function getJobStatus(req, res) {
   const jobID = req.query.jobID;
   console.log("get job status", jobID);
@@ -37,6 +49,7 @@ async function getJobReturnData(req, res) {
 }
 module.exports = {
   submit,
+  retryJob,
   getJobStatus,
   getJobReturnData
 };

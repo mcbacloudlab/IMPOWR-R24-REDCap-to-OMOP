@@ -27,14 +27,14 @@ const jobOptions = {
 
 myQueue.process(jobOptions.concurrency, async (job) => {
   await importToMongo(job);
-  await embedRedcapText(job)
-  let result = await compareEmbeddings(job)
-  if(result){
+  await embedRedcapText(job);
+  let result = await compareEmbeddings(job);
+  if (result) {
     console.log("result to return", result.toString());
-  }else{
-    console.log('No result')
+  } else {
+    console.log("No result");
   }
-  
+
   return result;
 });
 
@@ -99,10 +99,7 @@ async function embedRedcapText(job) {
   console.log("job.data");
 
   return new Promise((resolve) => {
-    const scriptPath = path.resolve(
-      __dirname,
-      "../gpt3/redcapDDEmbed.js"
-    );
+    const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");
     const args = ["--max-old-space-size=32768"];
     const data = job.data.csvData;
     const filename = job.data.filename;
@@ -115,7 +112,7 @@ async function embedRedcapText(job) {
 
     let capturedData;
     process.stdout.on("data", (data) => {
-      console.log('data', data.toString())
+      console.log("data", data.toString());
 
       if (data.toString().startsWith("[[")) {
         console.log("data to capture");
@@ -166,19 +163,30 @@ async function compareEmbeddings(job) {
       if (data.toString().startsWith("[{")) {
         console.log("data to capture");
         capturedData = data;
-      }else{
-        console.log('data', data.toString())
-        if(data.toString().startsWith("Total Documents")){
+      } else {
+        console.log("data", data.toString());
+        if (data.toString().startsWith("Total Documents")) {
           totalDocuments = parseInt(data.toString().split(":")[1].trim());
           console.log(totalDocuments);
         }
 
-        if(data.toString().startsWith("Processing Document At")){
-          const currentDocument = parseInt(data.toString().split(":")[1].trim());
-          console.log('curdoc', currentDocument);
-          console.log('totaldocs', totalDocuments)
-          console.log('setting job to: ', currentDocument/totalDocuments ? currentDocument/totalDocuments : 0)
-          job.progress(currentDocument/totalDocuments ? Math.round((currentDocument / totalDocuments) * 100) : 1);
+        if (data.toString().startsWith("Processing Document At")) {
+          const currentDocument = parseInt(
+            data.toString().split(":")[1].trim()
+          );
+          console.log("curdoc", currentDocument);
+          console.log("totaldocs", totalDocuments);
+          console.log(
+            "setting job to: ",
+            currentDocument / totalDocuments
+              ? currentDocument / totalDocuments
+              : 0
+          );
+          job.progress(
+            currentDocument / totalDocuments
+              ? Math.round((currentDocument / totalDocuments) * 100)
+              : 1
+          );
         }
       }
     });
@@ -190,7 +198,7 @@ async function compareEmbeddings(job) {
     process.on("close", (code) => {
       if (code === 0) {
         console.log("Embedding comparisons finished successfully");
-        job.progress(100)
+        job.progress(100);
         resolve(capturedData);
       } else {
         console.error(`Embedding comparison failed with code ${code}`);
@@ -224,6 +232,56 @@ async function submit(req, res) {
         .execute(query, [userId, job.id, datetimeString]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
+    } catch (err) {
+      console.log("error!", err);
+      throw new Error("Error");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding job to queue");
+  }
+}
+
+async function retryJob(req, res) {
+  try {
+    const jobId = req.body.jobId;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // console.log("jwtVerified", jwtVerified);
+    let email = jwtVerified.user;
+    let userId = await getUserByEmail(email);
+    userId = userId[0].id;
+    console.log("email", email);
+    console.log("the user id!!", userId);
+
+    // retry a failed job by ID
+    myQueue
+      .getJob(jobId)
+      .then((job) => {
+        if (!job) {
+          console.error("Job not found");
+        } else if (job.failedReason) {
+          console.log('job.failedReason', job.failedReason)
+          job.retry();
+        } else {
+          console.error("Job has not failed");
+        }
+      })
+      .catch((err) => {
+        console.error("Error getting job:", err);
+      });
+
+    const now = new Date();
+    const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
+    const query = "INSERT INTO jobs (userId, jobId, lastUpdated) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastUpdated = VALUES(lastUpdated), jobStatus = 'retrying' ";
+
+    try {
+      const [rows, fields] = await db
+        .promise()
+        .execute(query, [userId, jobId, datetimeString]);
+      console.log("Job inserted into DB");
+      res.send(`Job ${jobId} added to queue`);
     } catch (err) {
       console.log("error!", err);
       throw new Error("Error");
@@ -276,4 +334,5 @@ module.exports = {
   submit,
   getJobStatus,
   getJobReturnData,
+  retryJob
 };

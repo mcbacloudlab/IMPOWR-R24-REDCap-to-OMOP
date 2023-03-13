@@ -43,30 +43,25 @@ export default function FailedJobs(props) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.props.props.token);
 
+    var formdata = new FormData();
+    formdata.append("jobId", jobId);
+
     var requestOptions = {
-      method: "GET",
+      method: "POST",
       headers: myHeaders,
+      body: formdata,
       redirect: "follow",
     };
 
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${jobId}`,
-      requestOptions
-    )
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/queue/retryJob`, requestOptions)
       .then((response) => response.text())
-      .then((result) => {
-        // console.log(result);
-        setOpen(false);
-        navigate("/completed-jobs", {
-          state: { result: result, jobId: jobId },
-        });
-      })
+      .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
   }
 
   return (
     <div>
-      <h2 style={{ padding: "10px", textAlign: "center" }}>Pending Jobs</h2>
+      <h2 style={{ padding: "10px", textAlign: "center" }}>Failed Jobs</h2>
 
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
@@ -119,7 +114,6 @@ export default function FailedJobs(props) {
                                   marginLeft: "5px",
                                 }}
                               /> */}
-                               
                               </span>
                             ) : null}
                           </div>
@@ -127,19 +121,19 @@ export default function FailedJobs(props) {
                       }
                       style={{ whiteSpace: "pre-wrap" }}
                     />
-                     <Button
-                                  variant="contained"
-                                  color="error"
-                                  onClick={(event) => handleRetry(job.jobId)}
-                                  value="redcapAPIKey"
-                                  sx={{
-                                    ml: 4,
-                                    padding: "10px 30px 10px 30px",
-                                    maxHeight: "60px",
-                                  }}
-                                >
-                                  Retry
-                                </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={(event) => handleRetry(job.jobId)}
+                      value="redcapAPIKey"
+                      sx={{
+                        ml: 4,
+                        padding: "10px 30px 10px 30px",
+                        maxHeight: "60px",
+                      }}
+                    >
+                      Retry
+                    </Button>
                   </ListItem>
                 </Paper>
               ))}
