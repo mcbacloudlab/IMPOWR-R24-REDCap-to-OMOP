@@ -13,9 +13,9 @@ import * as React from "react";
 // import SettingsIcon from "@mui/icons-material/Settings";
 // import LogoutIcon from "@mui/icons-material/Logout";
 // import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
+// import { useNavigate } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
 // import Drawer from "@mui/material/Drawer";
 // import Tooltip from "@mui/material/Tooltip";
@@ -27,10 +27,10 @@ export default function FailedJobs(props) {
   console.log("pending", props.props.props.token);
   const { failedList } = props.props.props;
 
-  const [value, setValue] = useState(0);
-  const [open, setOpen] = useState(false);
+  // const [value, setValue] = useState(0);
+  // const [open, setOpen] = useState(false);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const chunkSize = Math.ceil(failedList.length / 3);
   const columns = [];
 
@@ -60,7 +60,7 @@ export default function FailedJobs(props) {
   }
 
   return (
-    <div>
+    <div style={{}}>
       <h2 style={{ padding: "10px", textAlign: "center" }}>Failed Jobs</h2>
 
       <Grid container spacing={2} justifyContent="center">

@@ -13,10 +13,10 @@ import * as React from "react";
 // import SettingsIcon from "@mui/icons-material/Settings";
 // import LogoutIcon from "@mui/icons-material/Logout";
 // import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { useState } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
+import { Grid, List, ListItem, ListItemText } from "@mui/material";
 // import Drawer from "@mui/material/Drawer";
 // import Tooltip from "@mui/material/Tooltip";
 // import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
@@ -26,9 +26,6 @@ export default function PendingJobs(props) {
   // console.log("pending", props);
   // console.log("pending", props.props.props.token);
   const { pendingList } = props.props.props;
-
-  const [value, setValue] = useState(0);
-  const [open, setOpen] = useState(false);
 
   const chunkSize = Math.ceil(pendingList.length / 3);
   const columns = [];

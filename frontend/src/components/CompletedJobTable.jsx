@@ -1,10 +1,10 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
-import { darken, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import TableRow from "@mui/material/TableRow";
+// import TableRow from "@mui/material/TableRow";
 
 export default function CompletedJobTable({
   columns,

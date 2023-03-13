@@ -6,18 +6,18 @@ import {
   Box,
   Link,
   Divider,
-  Button,
+  // Button,
   Drawer,
   Typography,
   Avatar,
-  Stack,
+  // Stack,
   ListItem,
   ListItemButton,
 } from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+// import InboxIcon from "@mui/icons-material/MoveToInbox";
+// import MailIcon from "@mui/icons-material/Mail";
 import ErrorIcon from "@mui/icons-material/Error";
 import MyAccountAdminSection from "./MyAccountAdminSection";
 import { useState } from "react";
@@ -58,6 +58,7 @@ export default function MyAccountNavBar(props) {
         }))
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.completedList]);
 
   const handleClick = (event) => {

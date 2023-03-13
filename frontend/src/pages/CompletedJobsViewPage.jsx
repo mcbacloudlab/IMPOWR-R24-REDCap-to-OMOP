@@ -1,14 +1,14 @@
 import React from "react";
-import CssBaseline from "@mui/material/CssBaseline";
+// import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
-import { Box, Button, Typography } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
+import { Button, Typography } from "@mui/material";
+// import CheckIcon from "@mui/icons-material/Check";
 
-var XLSX = require("xlsx");
+// var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
   // console.log("complete view page", props);
   const [data, setData] = useState("");
@@ -34,6 +34,7 @@ export default function CompletedJobsViewPage(props) {
       if (_jobId) setJobId(_jobId);
       if (_data) buildTable(JSON.parse(_data));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
 
   function verifyRow(row) {

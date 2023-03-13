@@ -5,19 +5,19 @@ import {
   Badge,
   Box,
   Link,
-  Divider,
-  Button,
+  // Divider,
+  // Button,
   Drawer,
   Grid,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  ListItemButton,
+  // ListItemButton,
   MenuItem,
   Menu,
-  Stack,
-  TextField,
+  // Stack,
+  // TextField,
   Toolbar,
   Tooltip,
   Typography,
@@ -38,7 +38,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
 import CompletedJobs from "./CompletedJobs";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function SearchAppBar(props) {
   // console.log('search bar', props.user)
@@ -46,21 +46,20 @@ export default function SearchAppBar(props) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
-  const [username, setUsername] = useState("");
+  // const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
-  const [jobs, setJobs] = useState();
+  // const [jobs, setJobs] = useState();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  
 
   const navigate = useNavigate();
 
   useEffect(() => {
     try {
       let userCookie = JSON.parse(Cookies.get("user"));
-      setUsername(userCookie.email);
+      // setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
       let userInfo = JSON.parse(props.user);
       // console.log("prfewefwefops.", userInfo);
@@ -276,44 +275,8 @@ export default function SearchAppBar(props) {
     return () => {
       clearInterval(intervalId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  function handleView(job) {
-    // console.log("event view", jobId);
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
-
-    var requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${job.jobId}`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        // console.log(result);
-        setOpen(false);
-        navigate("/completed-jobs", {
-          state: {
-            result: result,
-            jobId: job.jobId,
-            submittedBy: job.submittedBy,
-            jobName: job.jobName,
-          },
-        });
-      })
-      .catch((error) => console.log("error", error));
-  }
-
-
-  const CompletedDrawer = React.memo((props) => {
-    return(<CompletedJobs props={props}/>)
-
-  })
 
   // const CompletedDrawer = React.memo((props) => {
   //   const { completedList } = props.props;
@@ -724,25 +687,27 @@ export default function SearchAppBar(props) {
         completedList={props.completedList}
       /> */}
       <Drawer
-        sx={{ maxHeight: "400px" }}
+        sx={{ height: "400px", overflow: "auto", border: "1px solid red" }}
         anchor="bottom"
         open={open}
         onClose={() => setOpen(false)}
-        
       >
-         <span  style={{ position: "absolute", top: 0, right: 0, padding: "10px" }}>
-          <IconButton onClick={ () => setOpen(false)}>
+        <span
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            padding: "10px",
+            // marginTop: "50px",
+          }}
+        >
+          <IconButton onClick={() => setOpen(false)}>
             <CloseIcon />
           </IconButton>
         </span>
         {value === 0 && <PendingDrawer props={props} />}
-        {value === 1 && (
-          <CompletedJobs props={props}/>
-          // <CompletedDrawer sx={{ maxHeight: "400px" }} props={props} />
-        )}
-        {value === 2 && (
-          <FailedDrawer sx={{ maxHeight: "400px" }} props={props} />
-        )}
+        {value === 1 && <CompletedJobs props={props} setOpen={setOpen} />}
+        {value === 2 && <FailedDrawer props={props} />}
       </Drawer>
     </>
   );
