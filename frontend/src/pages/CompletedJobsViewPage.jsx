@@ -10,6 +10,7 @@ import CheckIcon from "@mui/icons-material/Check";
 
 var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
+  // console.log("complete view page", props);
   const [data, setData] = useState("");
   const [colDefs, setColDefs] = useState([]);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
@@ -17,10 +18,13 @@ export default function CompletedJobsViewPage(props) {
   const [csvFilename, setCSVFilename] = useState("");
 
   const location = useLocation();
-  let _jobId, _data;
+  let _jobId, _data, _jobName, _submittedBy;
+  // console.log("location", location.state);
   if (location.state.jobId) {
     _jobId = location.state.jobId;
     _data = location.state.result;
+    _jobName = location.state.jobName;
+    _submittedBy = location.state.submittedBy;
   }
   let _dataObj;
   const columns = useMemo(() => colDefs, [colDefs]);
@@ -33,7 +37,7 @@ export default function CompletedJobsViewPage(props) {
   }, [_data, _jobId]);
 
   function verifyRow(row) {
-    console.log("rowId", row.snomedID);
+    // console.log("rowId", row.snomedID);
     const updatedData = _dataObj.map((item) => {
       if (item.redcapFieldLabel === row.redcapFieldLabel) {
         const updatedSubRows = item.subRows.map((subRow) => ({
@@ -49,7 +53,7 @@ export default function CompletedJobsViewPage(props) {
       return item;
     });
 
-    console.log("updatedData", updatedData);
+    // console.log("updatedData", updatedData);
     _dataObj = updatedData;
     setData(updatedData);
     // setData(data)
@@ -76,7 +80,7 @@ export default function CompletedJobsViewPage(props) {
         result.push(currentItem);
       }
     });
-    console.log("result", result);
+    // console.log("result", result);
     // const headers = Object.keys(result[0])
     // .map((key, value) => {
     //   if (key === "similarity") {
@@ -128,9 +132,9 @@ export default function CompletedJobsViewPage(props) {
     // })
     // .filter((header) => header !== null);
     const MyCell = ({ cell, row }) => {
-      console.log('row', row)
-      console.log('row depth', row.depth)
-      
+      // console.log('row', row)
+      // console.log('row depth', row.depth)
+
       return cell.getValue() === "false" ? (
         <Button
           variant={"contained"}
@@ -144,8 +148,8 @@ export default function CompletedJobsViewPage(props) {
         <Typography>
           <b>Preferred</b>
         </Typography>
-      )
-    }
+      );
+    };
 
     const cols = [
       {
@@ -173,7 +177,7 @@ export default function CompletedJobsViewPage(props) {
         header: "Selected",
         accessorKey: "selected",
         //you can access a row instance in column definition option callbacks like this
-       
+
         Cell: MyCell,
         sx: {
           "& .MuiButton-root": {
@@ -190,9 +194,9 @@ export default function CompletedJobsViewPage(props) {
       },
     ];
 
-    console.log("headers", cols);
+    // console.log("headers", cols);
     setColDefs(cols);
-    console.log("set data", result);
+    // console.log("set data", result);
     _dataObj = result;
     setData(result);
     setCSVFilename(`Completed_Job_${_jobId}.csv`);
@@ -239,19 +243,33 @@ export default function CompletedJobsViewPage(props) {
 
   return (
     <>
-    <Container component="main" maxWidth="90%">
-      {/* <CssBaseline /> */}
-      <h1>Completed Job {jobId}</h1>
-      {isFormLoaded && (
-        <CompletedJobTable
-          props={props}
-          columns={columns}
-          data={data}
-          handleExportData={handleExportData}
-          resetScreen={resetScreen}
-        />
-      )}
-    </Container>
+      <Container component="main" maxWidth="90%">
+        {/* <CssBaseline /> */}
+        <div style={{ textAlign: "left" }}>
+          <span
+            style={{ display: "flex", alignItems: "center", padding: "10px" }}
+          >
+            <span style={{ marginRight: "10px" }}>
+              <b>Job Name:</b> {_jobName}
+            </span>
+            <span style={{ marginRight: "10px" }}>
+              <b>Completed Job ID:</b> {jobId}
+            </span>
+            <span style={{ marginRight: "10px" }}>
+              <b>Submitted By:</b> {_submittedBy}
+            </span>
+          </span>
+        </div>
+        {isFormLoaded && (
+          <CompletedJobTable
+            props={props}
+            columns={columns}
+            data={data}
+            handleExportData={handleExportData}
+            resetScreen={resetScreen}
+          />
+        )}
+      </Container>
     </>
   );
 }

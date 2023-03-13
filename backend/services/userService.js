@@ -10,7 +10,6 @@ const myQueue = new Bull("process-queue", {
   },
 });
 
-
 async function getUserByEmail(email) {
   const query = "SELECT * FROM users WHERE email = ?";
   return new Promise((resolve, reject) => {
@@ -148,7 +147,7 @@ async function updateJobStatus(jobId) {
   try {
     // console.log('find job for: ', jobId)
     const status = await myQueue.getJob(jobId).then((job) => {
-      return job.getState()
+      return job.getState();
     });
     // console.log('status!', status)
     if (status) {
@@ -172,10 +171,9 @@ async function getUserJobs(req, res) {
   const token = authHeader && authHeader.split(" ")[1];
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
     // console.log('get user jobs for', email)
-    const query = `SELECT jobId, jobStatus
+    const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
@@ -193,24 +191,24 @@ async function getUserJobs(req, res) {
       for (const job of results) {
         try {
           const foundJob = await myQueue.getJob(job.jobId);
-          if(!foundJob){ 
-            console.log('no found job for:' + job.jobId)
-            continue
-          }else{
-            // console.log('found job for' + job.jobId)
-            
+          if (!foundJob) {
+            console.log("no found job for:" + job.jobId);
+            continue;
+          } else {
+            // console.log(job)
+
+            const status = await foundJob.getState();
+            const timeAdded = foundJob.timestamp;
+            const startedAt = foundJob.processedOn;
+            const finishedAt = foundJob.finishedOn;
+            const progress = await foundJob.progress();
+            // console.log("status", status);
+            // console.log("timeadded", timeAdded);
+            job.timeAdded = timeAdded;
+            job.startedAt = startedAt;
+            job.finishedAt = finishedAt;
+            job.progress = progress;
           }
-          const status = await foundJob.getState();
-          const timeAdded = foundJob.timestamp;
-          const startedAt = foundJob.processedOn; 
-          const finishedAt = foundJob.finishedOn;
-          const progress = await foundJob.progress();
-          // console.log("status", status);
-          // console.log("timeadded", timeAdded);
-          job.timeAdded = timeAdded;
-          job.startedAt = startedAt;
-          job.finishedAt = finishedAt;
-          job.progress = progress
         } catch (error) {
           console.log("error", error);
         }

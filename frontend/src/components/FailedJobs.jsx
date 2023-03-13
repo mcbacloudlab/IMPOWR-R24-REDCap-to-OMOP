@@ -68,7 +68,7 @@ export default function FailedJobs(props) {
           <Grid key={index} item xs={12} md={4}>
             <List dense>
               {column.map((job) => (
-                <Paper elevation={3}>
+                <Paper elevation={3} key={job.jobId}>
                   <ListItem
                     key={job.jobId}
                     sx={{

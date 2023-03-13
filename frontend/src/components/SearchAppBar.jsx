@@ -17,6 +17,7 @@ import {
   MenuItem,
   Menu,
   Stack,
+  TextField,
   Toolbar,
   Tooltip,
   Typography,
@@ -36,10 +37,11 @@ import Paper from "@mui/material/Paper";
 import ErrorIcon from "@mui/icons-material/Error";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
+import CompletedJobs from "./CompletedJobs";
+import CloseIcon from '@mui/icons-material/Close';
 
-
-export default function PrimarySearchAppBar(props) {
-  console.log('search bar', props.user)
+export default function SearchAppBar(props) {
+  // console.log('search bar', props.user)
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
@@ -47,11 +49,13 @@ export default function PrimarySearchAppBar(props) {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
+  const [jobs, setJobs] = useState();
+
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  
 
   const navigate = useNavigate();
-
 
   useEffect(() => {
     try {
@@ -125,22 +129,22 @@ export default function PrimarySearchAppBar(props) {
       onClose={handleMenuClose}
     >
       <Box sx={{ mb: 1, mx: 2.5 }}>
-            <Link underline="none">
-              <StyledAccount>
-                <Avatar src={blank_avatar} alt="photoURL" />
+        <Link underline="none">
+          <StyledAccount>
+            <Avatar src={blank_avatar} alt="photoURL" />
 
-                <Box sx={{ ml: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
-                    <b>{name}</b>
-                  </Typography>
+            <Box sx={{ ml: 2 }}>
+              <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
+                <b>{name}</b>
+              </Typography>
 
-                  <Typography variant="body2" sx={{ color: "text.primary" }}>
-                    {role}
-                  </Typography>
-                </Box>
-              </StyledAccount>
-            </Link>
-          </Box>
+              <Typography variant="body2" sx={{ color: "text.primary" }}>
+                {role}
+              </Typography>
+            </Box>
+          </StyledAccount>
+        </Link>
+      </Box>
       <MenuItem onClick={() => handleNavigate("/myaccount")}>
         <IconButton
           size="large"
@@ -274,8 +278,8 @@ export default function PrimarySearchAppBar(props) {
     };
   }, []);
 
-  function handleView(jobId) {
-    console.log("event view", jobId);
+  function handleView(job) {
+    // console.log("event view", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -286,7 +290,7 @@ export default function PrimarySearchAppBar(props) {
     };
 
     fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${jobId}`,
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${job.jobId}`,
       requestOptions
     )
       .then((response) => response.text())
@@ -294,91 +298,140 @@ export default function PrimarySearchAppBar(props) {
         // console.log(result);
         setOpen(false);
         navigate("/completed-jobs", {
-          state: { result: result, jobId: jobId },
+          state: {
+            result: result,
+            jobId: job.jobId,
+            submittedBy: job.submittedBy,
+            jobName: job.jobName,
+          },
         });
       })
       .catch((error) => console.log("error", error));
   }
 
+
   const CompletedDrawer = React.memo((props) => {
-    const { completedList } = props.props;
+    return(<CompletedJobs props={props}/>)
 
-    const chunkSize = Math.ceil(completedList.length / 3);
-    const columns = [];
+  })
 
-    for (let i = 0; i < 3; i++) {
-      columns.push(completedList.slice(i * chunkSize, (i + 1) * chunkSize));
-    }
+  // const CompletedDrawer = React.memo((props) => {
+  //   const { completedList } = props.props;
 
-    return (
-      <div>
-        <h2 style={{ padding: "10px", textAlign: "center" }}>Completed Jobs</h2>
-        <Grid container spacing={1} justifyContent="center">
-          {columns.map((column, index) => (
-            <Grid key={index} item xs={12} md={4}>
-              <List dense>
-                {column.map((job) => (
-                  <Paper elevation={3} key={job.jobId}>
-                    <ListItem
-                      key={job.jobId}
-                      sx={{
-                        // borderWidth: "1px",
-                        // borderStyle: "solid",
-                        margin: "10px",
-                      }}
-                    >
-                      <ListItemText
-                        key={job.jobId}
-                        primary={
-                          <div>
-                            <div>
-                              <b>Job ID:</b> {job.jobId}
-                            </div>
-                            <div>
-                              <b>Status:</b> {job.jobStatus}
-                            </div>
-                            <div>
-                              <b>Added:</b>{" "}
-                              {new Date(job.timeAdded).toLocaleString()}
-                            </div>
-                            <div>
-                              <b>Started at:</b>{" "}
-                              {job.startedAt
-                                ? new Date(job.startedAt).toLocaleString()
-                                : "Not Started Yet"}
-                            </div>
-                            <div>
-                              <b>Completed At:</b>{" "}
-                              {job.finishedAt
-                                ? new Date(job.finishedAt).toLocaleString()
-                                : "Not Completed Yet"}
-                            </div>
-                          </div>
-                        }
-                        style={{ whiteSpace: "pre-wrap" }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={(event) => handleView(job.jobId)}
-                        value="redcapAPIKey"
-                        sx={{
-                          ml: 4,
-                          padding: "10px 30px 10px 30px",
-                          maxHeight: "60px",
-                        }}
-                      >
-                        View
-                      </Button>
-                    </ListItem>
-                  </Paper>
-                ))}
-              </List>
-            </Grid>
-          ))}
-        </Grid>
-      </div>
-    );
-  });
+  //   const chunkSize = Math.ceil(completedList.length / 3);
+  //   const columns = [];
+
+  //   for (let i = 0; i < 3; i++) {
+  //     columns.push(completedList.slice(i * chunkSize, (i + 1) * chunkSize));
+  //   }
+
+  //   return (
+  //     <div>
+  //       <h2 style={{ padding: "10px", textAlign: "center" }}>Completed Jobs</h2>
+  //       <Grid container spacing={1} justifyContent="center">
+  //         {columns.map((column, index) => (
+  //           <Grid key={index} item xs={12} md={4}>
+  //             <List dense>
+  //               {column.map((job) => (
+  //                 <Paper elevation={3} key={job.jobId}>
+  //                   <ListItem
+  //                     key={job.jobId}
+  //                     sx={{
+  //                       // borderWidth: "1px",
+  //                       // borderStyle: "solid",
+  //                       margin: "10px",
+  //                     }}
+  //                   >
+  //                     <ListItemText
+  //                       key={job.jobId}
+  //                       primary={
+  //                         <div>
+  //                           <div>
+  //                             <b>Submitted By:</b> {job.submittedBy}
+  //                           </div>
+  //                           <div
+  //                           style={{ display: "flex", alignItems: "center" }}
+  //                         >
+  //                           <span style={{ flex: 1 }}>
+  //                             <b>Job Name:</b>
+  //                             {job.editMode ? (
+  //                               <TextField
+  //                                 sx={{ width: "150px" }}
+  //                                 label="Job Name"
+  //                                 value={job.newJobName}
+  //                                 onChange={(e) =>
+  //                                   handleJobNameChange(
+  //                                     job.jobId,
+  //                                     e.target.value
+  //                                   )
+  //                                 }
+  //                               />
+  //                             ) : (
+  //                               <>{job.jobName}</>
+  //                             )}
+
+  //                             <Button
+  //                               onClick={() => handleToggleEditMode(job.jobId)}
+  //                             >
+  //                               {job.editMode ? "Cancel" : "Edit"}
+  //                             </Button>
+  //                             {job.editMode && (
+  //                               <Button
+  //                                 onClick={() => handleUpdateName(job.jobId)}
+  //                               >
+  //                                 Submit
+  //                               </Button>
+  //                             )}
+  //                           </span>
+  //                         </div>
+  //                           <div>
+  //                             <b>Job ID:</b> {job.jobId}
+  //                           </div>
+  //                           <div>
+  //                             <b>Status:</b> {job.jobStatus}
+  //                           </div>
+  //                           <div>
+  //                             <b>Added:</b>{" "}
+  //                             {new Date(job.timeAdded).toLocaleString()}
+  //                           </div>
+  //                           <div>
+  //                             <b>Started at:</b>{" "}
+  //                             {job.startedAt
+  //                               ? new Date(job.startedAt).toLocaleString()
+  //                               : "Not Started Yet"}
+  //                           </div>
+  //                           <div>
+  //                             <b>Completed At:</b>{" "}
+  //                             {job.finishedAt
+  //                               ? new Date(job.finishedAt).toLocaleString()
+  //                               : "Not Completed Yet"}
+  //                           </div>
+  //                         </div>
+  //                       }
+  //                       style={{ whiteSpace: "pre-wrap" }}
+  //                     />
+  //                     <Button
+  //                       variant="contained"
+  //                       onClick={(event) => handleView(job)}
+  //                       value="redcapAPIKey"
+  //                       sx={{
+  //                         ml: 4,
+  //                         padding: "10px 30px 10px 30px",
+  //                         maxHeight: "60px",
+  //                       }}
+  //                     >
+  //                       View
+  //                     </Button>
+  //                   </ListItem>
+  //                 </Paper>
+  //               ))}
+  //             </List>
+  //           </Grid>
+  //         ))}
+  //       </Grid>
+  //     </div>
+  //   );
+  // });
 
   function PendingDrawer(props) {
     const { pendingList } = props.props;
@@ -675,10 +728,17 @@ export default function PrimarySearchAppBar(props) {
         anchor="bottom"
         open={open}
         onClose={() => setOpen(false)}
+        
       >
+         <span  style={{ position: "absolute", top: 0, right: 0, padding: "10px" }}>
+          <IconButton onClick={ () => setOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </span>
         {value === 0 && <PendingDrawer props={props} />}
         {value === 1 && (
-          <CompletedDrawer sx={{ maxHeight: "400px" }} props={props} />
+          <CompletedJobs props={props}/>
+          // <CompletedDrawer sx={{ maxHeight: "400px" }} props={props} />
         )}
         {value === 2 && (
           <FailedDrawer sx={{ maxHeight: "400px" }} props={props} />

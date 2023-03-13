@@ -262,7 +262,7 @@ async function retryJob(req, res) {
         if (!job) {
           console.error("Job not found");
         } else if (job.failedReason) {
-          console.log('job.failedReason', job.failedReason)
+          console.log("job.failedReason", job.failedReason);
           job.retry();
         } else {
           console.error("Job has not failed");
@@ -274,7 +274,8 @@ async function retryJob(req, res) {
 
     const now = new Date();
     const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
-    const query = "INSERT INTO jobs (userId, jobId, lastUpdated) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastUpdated = VALUES(lastUpdated), jobStatus = 'retrying' ";
+    const query =
+      "INSERT INTO jobs (userId, jobId, lastUpdated) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastUpdated = VALUES(lastUpdated), jobStatus = 'retrying' ";
 
     try {
       const [rows, fields] = await db
@@ -289,6 +290,56 @@ async function retryJob(req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error adding job to queue");
+  }
+}
+
+async function updateJobName(req, res) {
+  try {
+    const jobId = req.body.jobId;
+    const jobName = req.body.jobName;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // console.log("jwtVerified", jwtVerified);
+    let email = jwtVerified.user;
+    let userId = await getUserByEmail(email);
+    userId = userId[0].id;
+    console.log("email", email);
+    console.log("the user id!!", userId);
+
+    
+    myQueue
+      .getJob(jobId)
+      .then(async (job) => {
+        if (!job) {
+          console.error("Job not found");
+        } else {
+          const now = new Date();
+          const datetimeString = now
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " ");
+          const query =
+            "UPDATE jobs SET jobName = ? WHERE jobId = ?";
+
+          try {
+            const [rows, fields] = await db
+              .promise()
+              .execute(query, [jobName, jobId]);
+            console.log("Job name updated");
+            res.send(`Job ${jobId} name updated`);
+          } catch (err) {
+            console.log("error!", err);
+            throw new Error("Error");
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Error getting job:", err);
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating job name");
   }
 }
 
@@ -322,7 +373,7 @@ async function getJobReturnData(req, res) {
     // console.log('found job')
     const buffer = Buffer.from(myJob.returnvalue);
     const result = JSON.parse(buffer.toString());
-    // console.log('job return value',result )
+    console.log("job return value", result);
     res.status(200).send(result);
   } catch (error) {
     console.log("error!!!!", error);
@@ -334,5 +385,6 @@ module.exports = {
   submit,
   getJobStatus,
   getJobReturnData,
-  retryJob
+  retryJob,
+  updateJobName,
 };

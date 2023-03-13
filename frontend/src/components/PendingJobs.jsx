@@ -23,8 +23,8 @@ import { Grid, List, ListItem, ListItemText, Button } from "@mui/material";
 import Paper from "@mui/material/Paper";
 // import ErrorIcon from "@mui/icons-material/Error";
 export default function PendingJobs(props) {
-  console.log("pending", props);
-  console.log("pending", props.props.props.token);
+  // console.log("pending", props);
+  // console.log("pending", props.props.props.token);
   const { pendingList } = props.props.props;
 
   const [value, setValue] = useState(0);

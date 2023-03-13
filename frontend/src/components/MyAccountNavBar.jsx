@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import {
@@ -45,11 +46,24 @@ const StyledAccount = styled("div")(({ theme }) => ({
 export default function MyAccountNavBar(props) {
   console.log("navbar props", props);
   const [view, setView] = useState("My Account");
+  const [jobs, setJobs] = useState();
+
+  useEffect(() => {
+    if (props.props.completedList) {
+      setJobs(
+        props.props.completedList.map((job) => ({
+          ...job,
+          editMode: false,
+          newJobName: job.jobName,
+        }))
+      );
+    }
+  }, [props.completedList]);
 
   const handleClick = (event) => {
     // do something with the icon name
-    console.log("handle click");
-    console.log("event", event.target.textContent);
+    // console.log("handle click");
+    // console.log("event", event.target.textContent);
     setView(event.target.textContent);
   };
 
@@ -180,7 +194,7 @@ export default function MyAccountNavBar(props) {
         )}
         {view === "Completed Jobs" && (
           <>
-            <CompletedJobs props={props} />
+            <CompletedJobs props={props} jobs={jobs} setJobs={setJobs} />
           </>
         )}
 

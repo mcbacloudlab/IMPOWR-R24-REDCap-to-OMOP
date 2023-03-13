@@ -22,7 +22,6 @@ export default function CompletedJobTable({
   return (
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)
-     
       columns={columns}
       data={data} //10,000 rows
       enableDensityToggle={false} //density does not work with memoized cells

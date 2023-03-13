@@ -10,7 +10,7 @@ import AdminSection from "../components/MyAccountAdminSection";
 import MyAccountNavBar from "../components/MyAccountNavBar";
 
 export default function MyAccountPage(props) {
-  console.log("myaccount", props);
+  // console.log("myaccount", props);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
