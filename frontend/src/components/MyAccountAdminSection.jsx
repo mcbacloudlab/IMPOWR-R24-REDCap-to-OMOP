@@ -309,7 +309,7 @@ export default function MyAccountAdminSection(props) {
     return (
       <>
         <Grid>
-          <h1>Admin API Keys</h1>
+          <h1 style={{textAlign: 'left'}}>Admin API Keys</h1>
         </Grid>
 
         <Grid container spacing={1} sx={{ margin: "30px" }}>

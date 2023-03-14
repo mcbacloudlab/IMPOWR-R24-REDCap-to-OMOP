@@ -32,7 +32,7 @@ export default function TransferList(props) {
   const [origData, setOrigData] = useState();
   const leftChecked = intersection(checked, left);
   const rightChecked = intersection(checked, right);
-
+  let keepList = ["field_name", "form_name", "field_label"]
   useEffect(() => {
     setOrigData(props.data);
     setDefaultHeaders(props.colDefs);
@@ -42,7 +42,6 @@ export default function TransferList(props) {
     });
 
     console.log('headerList', headerList)
-    let keepList = ["field_name", "form_name", "field_label"];
     let leftArray = headerList.filter((header) => keepList.includes(header));
     let rightArray = headerList.filter((header) => !keepList.includes(header));
     console.log(leftArray); // ["field_name", "form_name", "field_label"]
@@ -81,6 +80,12 @@ export default function TransferList(props) {
   }, [left, right, defaultHeaders]);
 
   const handleToggle = (value) => () => {
+    console.log('handle toggle', value)
+    console.log('keeplist', keepList)
+    if(keepList.includes(value)){
+      console.log('in keep list')
+      return
+    }
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
 
@@ -141,7 +146,7 @@ export default function TransferList(props) {
       <Divider />
       <List
         sx={{
-          width: "200px",
+          width: "220px",
           height: "340px",
           bgcolor: "background.paper",
           overflow: "auto",

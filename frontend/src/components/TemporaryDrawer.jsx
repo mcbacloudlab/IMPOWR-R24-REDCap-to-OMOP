@@ -48,14 +48,14 @@ export default function TemporaryDrawer() {
               <ListItemText primary={'Project Management'} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
+          {/* <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <SearchIcon />
               </ListItemIcon>
               <ListItemText primary={'Data Dictionary Mapping'} />
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
           <ListItem key={'Archived'} component={NavLink} to="/archived" disablePadding>
             <ListItemButton>
               <ListItemIcon>

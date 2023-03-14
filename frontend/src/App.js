@@ -28,7 +28,7 @@ const theme = createTheme({
       main: "#008C95", // your custom primary color
     },
     secondary: {
-      main: "#343541", // your custom secondary color
+      main: "#aad9dc", // your custom secondary color
     },
   },
 });

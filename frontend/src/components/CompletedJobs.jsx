@@ -1,36 +1,24 @@
 import * as React from "react";
-// import AppBar from "@mui/material/AppBar";
-// import Box from "@mui/material/Box";
-// import Toolbar from "@mui/material/Toolbar";
-// import IconButton from "@mui/material/IconButton";
-// import Typography from "@mui/material/Typography";
-// import Badge from "@mui/material/Badge";
-// import MenuItem from "@mui/material/MenuItem";
-// import Menu from "@mui/material/Menu";
-// import AccountCircle from "@mui/icons-material/AccountCircle";
-// import MoreIcon from "@mui/icons-material/MoreVert";
-// import TemporaryDrawer from "./TemporaryDrawer";
-// import SettingsIcon from "@mui/icons-material/Settings";
-// import LogoutIcon from "@mui/icons-material/Logout";
-// import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-// import AutorenewIcon from "@mui/icons-material/Autorenew";
 import {
   Grid,
   List,
   ListItem,
   ListItemText,
+  IconButton,
   Button,
   TextField,
   Input,
   Divider,
+  Tooltip,
 } from "@mui/material";
-// import Drawer from "@mui/material/Drawer";
-// import Tooltip from "@mui/material/Tooltip";
-// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 import Paper from "@mui/material/Paper";
-// import ErrorIcon from "@mui/icons-material/Error";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import CheckIcon from "@mui/icons-material/Check";
+
 export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
   const { completedList } = props.props.props ?? props.props;
@@ -72,11 +60,6 @@ export default function CompletedJobs(props) {
   const handleUpdateName = (jobId) => {
     // Find the job with the specified jobId
     const job = jobs.find((job) => job.jobId === jobId);
-
-    // Call your backend API to update the job name
-    // ...
-    // console.log("update job name with", job.jobId);
-    // console.log("job name", job.newJobName);
 
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
@@ -152,7 +135,7 @@ export default function CompletedJobs(props) {
 
   return (
     <div style={{ maxHeight: "400px" }}>
-      <h2 style={{ padding: "10px", textAlign: "center" }}>Completed Jobs</h2>
+      <h2 style={{ padding: "10px", textAlign: "left" }}>Completed Jobs</h2>
       <Grid container spacing={1} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
@@ -174,80 +157,76 @@ export default function CompletedJobs(props) {
                     <ListItemText
                       key={job.jobId}
                       primary={
-                        // <div>
                         <Grid key={index} item xs={12} md={12}>
-                          {/* <div
-                            // style={{ display: "flex", alignItems: "center" }}
-                            > */}
+                          <div style={{ textAlign: "right" }}>
+                            <Tooltip title="View Report">
+                              <IconButton
+                                onClick={(event) => handleView(job)}
+                                value="redcapAPIKey"
+                                sx={{
+                                  color: "white",
+                                }}
+                              >
+                                <SummarizeIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </div>
 
-                          <span
-                          // style={{ flex: 1 }}
-                          >
+                          <span>
                             <div>
                               <b>Job ID:</b> {job.jobId}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
                               <Input
-                              variant="standard"
-                                sx={{ width: "200px", input: { color: 'black', backgroundColor: 'white'} }}
+                                variant="standard"
+                                sx={{
+                                  marginLeft: "10px",
+                                  width: "200px",
+                                  input: {
+                                    color: "black",
+                                    backgroundColor: "white",
+                                  },
+                                }}
                                 label="Job Name"
                                 value={job.newJobName ? job.newJobName : ""}
                                 onChange={(e) =>
                                   handleJobNameChange(job.jobId, e.target.value)
                                 }
-                 
                               />
                             ) : (
                               <> {job.jobName}</>
                             )}
 
-                            <Button
+                            <IconButton
                               variant="outlined"
-                              color="secondary"
                               onClick={() => handleToggleEditMode(job.jobId)}
-                              sx={{ ml: 2 }}
+                              sx={{ ml: 2, color: "white" }}
                             >
-                              {job.editMode ? "Cancel" : "Edit"}
-                            </Button>
+                              {job.editMode ? (
+                                <Tooltip title="Cancel">
+                                  <CloseIcon />
+                                </Tooltip>
+                              ) : (
+                                <Tooltip title="Edit">
+                                  <EditIcon />
+                                </Tooltip>
+                              )}
+                            </IconButton>
                             {job.editMode && (
-                              <Button
+                              <IconButton
                                 variant="contained"
-                                color="secondary"
+                                sx={{ color: "white" }}
                                 onClick={() => handleUpdateName(job.jobId)}
                               >
-                                Submit
-                              </Button>
+                                <Tooltip title="Submit">
+                                  <CheckIcon />
+                                </Tooltip>
+                              </IconButton>
                             )}
                           </span>
-                          {/* </div> */}
 
-                          {/* <div>
-                            <b>Status:</b> {job.jobStatus}
-                          </div> */}
-                          <Divider sx={{mt: 2}}/>
-                          <div style={{textAlign: 'center'}}>
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={(event) => handleView(job)}
-                            value="redcapAPIKey"
-                            sx={{
-                              mt: 2,
-                              mb: 2,
-                              padding: "10px 30px 10px 30px",
-                              maxHeight: "60px",
-                            }}
-                          >
-                            View Job Results
-                          </Button>
-                          </div>
-
-                          {/* <Divider style={{ padding: "10px" }} /> */}
                           <div style={{ textAlign: "right" }}>
-                            
-                            
-
                             <div>
                               <b>Added:</b>{" "}
                               {new Date(job.timeAdded).toLocaleString()}
@@ -264,7 +243,7 @@ export default function CompletedJobs(props) {
                                 ? new Date(job.finishedAt).toLocaleString()
                                 : "Not Completed Yet"}
                             </div>
-                            
+
                             <Divider style={{ marginBottom: "10px" }} />
                             <div>
                               <b>Submitted By:</b> {job.submittedBy}

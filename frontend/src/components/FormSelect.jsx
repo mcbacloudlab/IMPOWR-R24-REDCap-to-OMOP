@@ -18,6 +18,7 @@ import TransferList from "./TransferList";
 import { ExportToCsv } from "export-to-csv";
 import CircularProgress from "@mui/material/CircularProgress";
 import Skeleton from '@mui/material/Skeleton';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
@@ -237,7 +238,7 @@ export default function FormSelect(props) {
                 <Button
                   variant="contained"
                   component="label"
-                  startIcon={<AddIcon />}
+                  startIcon={<ImportExportIcon />}
                   onClick={(e) => getDataDictionary(e)}
                 >
                   Import Data Dictionary
@@ -281,7 +282,7 @@ export default function FormSelect(props) {
                   <Button
                     sx={{ float: "right" }}
                     variant="contained"
-                    color="success"
+                    color="primary"
                     component="label"
                     startIcon={<AddTaskIcon />}
                     onClick={(e) => submitToProcess(e)}

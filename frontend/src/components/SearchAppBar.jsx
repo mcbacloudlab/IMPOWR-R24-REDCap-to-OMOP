@@ -38,6 +38,8 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
 import CompletedJobs from "./CompletedJobs";
+import FailedJobs from "./FailedJobs";
+import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function SearchAppBar(props) {
@@ -278,298 +280,6 @@ export default function SearchAppBar(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // const CompletedDrawer = React.memo((props) => {
-  //   const { completedList } = props.props;
-
-  //   const chunkSize = Math.ceil(completedList.length / 3);
-  //   const columns = [];
-
-  //   for (let i = 0; i < 3; i++) {
-  //     columns.push(completedList.slice(i * chunkSize, (i + 1) * chunkSize));
-  //   }
-
-  //   return (
-  //     <div>
-  //       <h2 style={{ padding: "10px", textAlign: "center" }}>Completed Jobs</h2>
-  //       <Grid container spacing={1} justifyContent="center">
-  //         {columns.map((column, index) => (
-  //           <Grid key={index} item xs={12} md={4}>
-  //             <List dense>
-  //               {column.map((job) => (
-  //                 <Paper elevation={3} key={job.jobId}>
-  //                   <ListItem
-  //                     key={job.jobId}
-  //                     sx={{
-  //                       // borderWidth: "1px",
-  //                       // borderStyle: "solid",
-  //                       margin: "10px",
-  //                     }}
-  //                   >
-  //                     <ListItemText
-  //                       key={job.jobId}
-  //                       primary={
-  //                         <div>
-  //                           <div>
-  //                             <b>Submitted By:</b> {job.submittedBy}
-  //                           </div>
-  //                           <div
-  //                           style={{ display: "flex", alignItems: "center" }}
-  //                         >
-  //                           <span style={{ flex: 1 }}>
-  //                             <b>Job Name:</b>
-  //                             {job.editMode ? (
-  //                               <TextField
-  //                                 sx={{ width: "150px" }}
-  //                                 label="Job Name"
-  //                                 value={job.newJobName}
-  //                                 onChange={(e) =>
-  //                                   handleJobNameChange(
-  //                                     job.jobId,
-  //                                     e.target.value
-  //                                   )
-  //                                 }
-  //                               />
-  //                             ) : (
-  //                               <>{job.jobName}</>
-  //                             )}
-
-  //                             <Button
-  //                               onClick={() => handleToggleEditMode(job.jobId)}
-  //                             >
-  //                               {job.editMode ? "Cancel" : "Edit"}
-  //                             </Button>
-  //                             {job.editMode && (
-  //                               <Button
-  //                                 onClick={() => handleUpdateName(job.jobId)}
-  //                               >
-  //                                 Submit
-  //                               </Button>
-  //                             )}
-  //                           </span>
-  //                         </div>
-  //                           <div>
-  //                             <b>Job ID:</b> {job.jobId}
-  //                           </div>
-  //                           <div>
-  //                             <b>Status:</b> {job.jobStatus}
-  //                           </div>
-  //                           <div>
-  //                             <b>Added:</b>{" "}
-  //                             {new Date(job.timeAdded).toLocaleString()}
-  //                           </div>
-  //                           <div>
-  //                             <b>Started at:</b>{" "}
-  //                             {job.startedAt
-  //                               ? new Date(job.startedAt).toLocaleString()
-  //                               : "Not Started Yet"}
-  //                           </div>
-  //                           <div>
-  //                             <b>Completed At:</b>{" "}
-  //                             {job.finishedAt
-  //                               ? new Date(job.finishedAt).toLocaleString()
-  //                               : "Not Completed Yet"}
-  //                           </div>
-  //                         </div>
-  //                       }
-  //                       style={{ whiteSpace: "pre-wrap" }}
-  //                     />
-  //                     <Button
-  //                       variant="contained"
-  //                       onClick={(event) => handleView(job)}
-  //                       value="redcapAPIKey"
-  //                       sx={{
-  //                         ml: 4,
-  //                         padding: "10px 30px 10px 30px",
-  //                         maxHeight: "60px",
-  //                       }}
-  //                     >
-  //                       View
-  //                     </Button>
-  //                   </ListItem>
-  //                 </Paper>
-  //               ))}
-  //             </List>
-  //           </Grid>
-  //         ))}
-  //       </Grid>
-  //     </div>
-  //   );
-  // });
-
-  function PendingDrawer(props) {
-    const { pendingList } = props.props;
-
-    const sortedJobs = pendingList.sort((a, b) => {
-      return a.jobId - b.jobId;
-    });
-
-    const chunkSize = Math.ceil(sortedJobs.length / 3);
-    const columns = [];
-
-    for (let i = 0; i < 3; i++) {
-      columns.push(sortedJobs.slice(i * chunkSize, (i + 1) * chunkSize));
-    }
-
-    return (
-      <div>
-        <h2 style={{ padding: "10px", textAlign: "center" }}>Pending Jobs</h2>
-
-        <Grid container spacing={2} justifyContent="center">
-          {columns.map((column, index) => (
-            <Grid key={index} item xs={12} md={4}>
-              <List dense>
-                {column.map((job) => (
-                  <Paper elevation={3}>
-                    <ListItem
-                      key={job.jobId}
-                      sx={{
-                        // borderWidth: "1px",
-                        // borderStyle: "solid",
-                        margin: "10px",
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <div className="primary-text-container">
-                            <div className="job-id-text">
-                              <b>Job Id:</b> {job.jobId}
-                            </div>
-                            <div className="job-status-text">
-                              <b>Status:</b> {job.jobStatus}
-                            </div>
-                            <div className="job-added-text">
-                              <b>Added:</b>{" "}
-                              {new Date(job.timeAdded).toLocaleString()}
-                            </div>
-                            <div className="job-started-at-text">
-                              <b>Started at:</b>{" "}
-                              {job.startedAt
-                                ? new Date(job.startedAt).toLocaleString()
-                                : "Not Started Yet"}
-                            </div>
-                            <div className="job-started-at-text">
-                              <b>Progress:</b>{" "}
-                              {job.progress
-                                ? job.progress + "%"
-                                : "Not Started Yet"}
-                              {job.startedAt ? (
-                                <span
-                                  style={{ position: "absolute" }}
-                                  className="pending-jobs-container"
-                                >
-                                  <AutorenewIcon
-                                    className="pending-jobs-icon"
-                                    style={{
-                                      backgroundColor: "white",
-                                      color: "green",
-                                      marginLeft: "5px",
-                                    }}
-                                  />
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        }
-                        style={{ whiteSpace: "pre-wrap" }}
-                      />
-                    </ListItem>
-                  </Paper>
-                ))}
-              </List>
-            </Grid>
-          ))}
-        </Grid>
-      </div>
-    );
-  }
-
-  function FailedDrawer(props) {
-    const { failedList } = props.props;
-
-    const sortedJobs = failedList.sort((a, b) => {
-      return a.jobId - b.jobId;
-    });
-
-    const chunkSize = Math.ceil(sortedJobs.length / 3);
-    const columns = [];
-
-    for (let i = 0; i < 3; i++) {
-      columns.push(sortedJobs.slice(i * chunkSize, (i + 1) * chunkSize));
-    }
-
-    return (
-      <div>
-        <h2 style={{ padding: "10px", textAlign: "center" }}>Failed Jobs</h2>
-
-        <Grid container spacing={2} justifyContent="center">
-          {columns.map((column, index) => (
-            <Grid key={index} item xs={12} md={4}>
-              <List dense>
-                {column.map((job) => (
-                  <Paper elevation={3}>
-                    <ListItem
-                      key={job.jobId}
-                      sx={{
-                        // borderWidth: "1px",
-                        // borderStyle: "solid",
-                        margin: "10px",
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <div className="primary-text-container">
-                            <div className="job-id-text">
-                              <b>Job Id:</b> {job.jobId}
-                            </div>
-                            <div className="job-status-text">
-                              <b>Status:</b> {job.jobStatus}
-                            </div>
-                            <div className="job-added-text">
-                              <b>Added:</b>{" "}
-                              {new Date(job.timeAdded).toLocaleString()}
-                            </div>
-                            <div className="job-started-at-text">
-                              <b>Started at:</b>{" "}
-                              {job.startedAt
-                                ? new Date(job.startedAt).toLocaleString()
-                                : "Not Started Yet"}
-                            </div>
-                            <div className="job-started-at-text">
-                              <b>Progress:</b>{" "}
-                              {job.progress
-                                ? job.progress + "%"
-                                : "Not Started Yet"}
-                              {job.startedAt ? (
-                                <span
-                                  style={{ position: "absolute" }}
-                                  className="failed-jobs-container"
-                                >
-                                  {/* <AutorenewIcon
-                                    className="failed-jobs-icon"
-                                    style={{
-                                      backgroundColor: "white",
-                                      color: "green",
-                                      marginLeft: "5px",
-                                    }}
-                                  /> */}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        }
-                        style={{ whiteSpace: "pre-wrap" }}
-                      />
-                    </ListItem>
-                  </Paper>
-                ))}
-              </List>
-            </Grid>
-          ))}
-        </Grid>
-      </div>
-    );
-  }
-
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -585,17 +295,9 @@ export default function SearchAppBar(props) {
               component="div"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
-              {/* MUI */}
+              REDCap To OMOP
             </Typography>
-            {/* <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search> */}
+
             <Box sx={{ flexGrow: 1 }} />
             {props.pendingList && props.pendingList.length > 0 && (
               <IconButton
@@ -635,24 +337,6 @@ export default function SearchAppBar(props) {
               </Tooltip>
             </IconButton>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              {/* <IconButton
-                size="large"
-                aria-label="show 4 new mails"
-                color="inherit"
-              >
-                <Badge badgeContent={4} color="error">
-                  <MailIcon />
-                </Badge>
-              </IconButton> */}
-              {/* <IconButton
-                size="large"
-                aria-label="show 17 new notifications"
-                color="inherit"
-              >
-                <Badge badgeContent={17} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton> */}
               <IconButton
                 size="large"
                 edge="end"
@@ -682,12 +366,8 @@ export default function SearchAppBar(props) {
         {renderMobileMenu}
         {renderMenu}
       </Box>
-      {/* <ProjectBottomBar
-        pendingList={props.pendingList}
-        completedList={props.completedList}
-      /> */}
       <Drawer
-        sx={{ height: "400px", overflow: "auto", border: "1px solid red" }}
+        sx={{ height: "600px", overflow: "auto" }}
         anchor="bottom"
         open={open}
         onClose={() => setOpen(false)}
@@ -697,7 +377,7 @@ export default function SearchAppBar(props) {
             position: "absolute",
             top: 0,
             right: 0,
-            padding: "10px",
+            padding: "30px",
             // marginTop: "50px",
           }}
         >
@@ -705,9 +385,9 @@ export default function SearchAppBar(props) {
             <CloseIcon />
           </IconButton>
         </span>
-        {value === 0 && <PendingDrawer props={props} />}
+        {value === 0 && <PendingJobs props={props} />}
         {value === 1 && <CompletedJobs props={props} setOpen={setOpen} />}
-        {value === 2 && <FailedDrawer props={props} />}
+        {value === 2 && <FailedJobs props={props} />}
       </Drawer>
     </>
   );
