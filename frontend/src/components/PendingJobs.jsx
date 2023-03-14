@@ -47,6 +47,7 @@ export default function PendingJobs(props) {
         newJobName: job.jobName,
       }))
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {

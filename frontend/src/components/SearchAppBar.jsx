@@ -5,19 +5,10 @@ import {
   Badge,
   Box,
   Link,
-  // Divider,
-  // Button,
   Drawer,
-  Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  // ListItemButton,
   MenuItem,
   Menu,
-  // Stack,
-  // TextField,
   Toolbar,
   Tooltip,
   Typography,
@@ -33,7 +24,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-import Paper from "@mui/material/Paper";
 import ErrorIcon from "@mui/icons-material/Error";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";

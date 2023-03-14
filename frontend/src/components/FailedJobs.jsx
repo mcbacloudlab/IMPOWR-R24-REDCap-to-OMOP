@@ -9,7 +9,6 @@ import {
   Tooltip,
   Divider,
   Input,
-  Button,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import ReplayIcon from "@mui/icons-material/Replay";
@@ -20,13 +19,7 @@ import CheckIcon from "@mui/icons-material/Check";
 export default function FailedJobs(props) {
   const { failedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
-  console.log("failedList", failedList);
-  const chunkSize = Math.ceil(failedList.length / 3);
   const [columns, setColumns] = useState([]);
-
-  // for (let i = 0; i < 3; i++) {
-  //   columns.push(failedList.slice(i * chunkSize, (i + 1) * chunkSize));
-  // }
 
   const [jobs, setJobs] = useState(
     failedList.map((job) => ({

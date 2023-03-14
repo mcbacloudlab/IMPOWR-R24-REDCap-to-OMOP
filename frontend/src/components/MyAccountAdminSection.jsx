@@ -30,6 +30,7 @@ export default function MyAccountAdminSection(props) {
 
   useEffect(() => {
     checkExistingKeys();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propsToken]);
 
   function checkExistingKeys() {
