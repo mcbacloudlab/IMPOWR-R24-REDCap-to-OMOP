@@ -135,14 +135,14 @@ async function embedRedcapText(job) {
     });
   });
 }
-
+let activeJobProcess
 async function compareEmbeddings(job) {
   console.log("jobid", job.id);
 
   console.log("Starting Embedding Comparisons...");
   console.log("job.data");
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(
       __dirname,
       "../gpt3/compareRedcapToSnomed.js"
@@ -153,6 +153,7 @@ async function compareEmbeddings(job) {
     const process = spawn("node", args.concat([scriptPath, filename]), {
       stdio: "pipe",
     });
+    activeJobProcess = process
     console.log(`Sending input data with length ${data.length}`);
     process.stdin.write(JSON.stringify(data)); //pass data into child process
     process.stdin.end();
@@ -326,7 +327,7 @@ async function cancelJob(req, res) {
                       console.log(
                         `Job ${jobId} has been removed from the queue`
                       );
-
+                      activeJobProcess.kill('SIGTERM')
                       dbUpdate(userId, jobId);
                     })
                     .catch((err) => {
@@ -350,7 +351,10 @@ async function cancelJob(req, res) {
                   console.log(err);
                 });
             } else {
-              res.send("Job has already completed");
+              job.remove().then(() =>{
+                res.send("Job has already completed");
+              })
+              
             }
           });
         }

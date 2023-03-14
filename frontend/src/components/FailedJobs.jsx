@@ -34,20 +34,24 @@ export default function FailedJobs(props) {
     }))
   );
   const [open, setOpen] = useState(false);
-
+  const [jobIdSelected, setJobIdSelected] = useState();
   const handleClickOpen = (jobId) => {
+    console.log("jobid", jobId);
+    setJobIdSelected(jobId);
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = (jobId) => {
+    console.log("jobid", jobIdSelected);
     setOpen(false);
   };
 
   const handleConfirm = (jobId) => {
     // Do something when the user confirms
+    console.log("jb", jobIdSelected);
     setOpen(false);
-    console.log("confirm delete", jobId);
-    cancelJob(jobId)
+    console.log("confirm delete", jobIdSelected);
+    cancelJob(jobIdSelected);
   };
 
   useEffect(() => {
@@ -59,12 +63,20 @@ export default function FailedJobs(props) {
       _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
+  }, [jobs, failedList]);
+
+  useEffect(() => {
     setJobs(
-      failedList.map((job) => ({
-        ...job,
-        editMode: false,
-        newJobName: job.jobName,
-      }))
+      failedList.map((pendingJob) => {
+        const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
+        const editMode = jobInJobs ? jobInJobs.editMode : false;
+        const newJobName = jobInJobs ? jobInJobs.newJobName : ''
+        return {
+          ...pendingJob,
+          editMode: editMode,
+          newJobName: newJobName,
+        };
+      })
     );
   }, [failedList]);
 
@@ -173,18 +185,10 @@ export default function FailedJobs(props) {
   return (
     <div style={{}}>
       <h2 style={{ padding: "10px", textAlign: "left" }}>Failed Jobs</h2>
-
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
-            <List dense>
-              {column.map((job) => (
-                <Paper
-                  elevation={3}
-                  key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white" }}
-                >
-                  <Dialog open={open} onClose={handleClose}>
+            <Dialog open={open} onClose={handleClose}>
                     <DialogTitle>Confirm Deletion</DialogTitle>
                     <DialogContent>
                       <DialogContentText>
@@ -196,7 +200,7 @@ export default function FailedJobs(props) {
                         No
                       </Button>
                       <Button
-                        onClick={() => handleConfirm(job.jobId)}
+                        onClick={() => handleConfirm(jobIdSelected)}
                         color="primary"
                         autoFocus
                       >
@@ -204,6 +208,14 @@ export default function FailedJobs(props) {
                       </Button>
                     </DialogActions>
                   </Dialog>
+            <List dense>
+              {column.map((job) => (
+                <Paper
+                  elevation={3}
+                  key={job.jobId}
+                  style={{ backgroundColor: "#008C95", color: "white" }}
+                >
+                  
                   <ListItem
                     key={job.jobId}
                     sx={{
@@ -214,7 +226,7 @@ export default function FailedJobs(props) {
                       primary={
                         <div className="primary-text-container">
                           <div style={{ textAlign: "right" }}>
-                            <Tooltip title="Cancel Job">
+                            <Tooltip title="Delete Job">
                               <IconButton
                                 onClick={() => {
                                   handleClickOpen(job.jobId);

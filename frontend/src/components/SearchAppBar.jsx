@@ -31,6 +31,8 @@ import CompletedJobs from "./CompletedJobs";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
+import OMOPLogo from "../assets/6570077.png";
+import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 
 export default function SearchAppBar(props) {
   // console.log('search bar', props.user)
@@ -261,7 +263,7 @@ export default function SearchAppBar(props) {
     // Fetch data every 15 seconds
     const intervalId = setInterval(() => {
       checkJobs();
-    }, 2500);
+    }, 1000);
 
     // Clean up interval on unmount
     return () => {
@@ -279,14 +281,40 @@ export default function SearchAppBar(props) {
         >
           <Toolbar>
             <TemporaryDrawer />
-            <Typography
+            <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
+              <img
+                src={REDCapLogo}
+                alt="Redcap Logo"
+                style={{
+                  objectFit: "contain",
+                  maxHeight: "100%",
+                  maxWidth: "100%",
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </Avatar>
+            
+            {/* <Typography
               variant="h6"
               noWrap
               component="div"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
               REDCap To OMOP
-            </Typography>
+            </Typography> */}
+            <Avatar alt="Redcap Logo">
+              <img
+                src={OMOPLogo}
+                alt="OMOP Logo"
+                style={{
+                  objectFit: "contain",
+                  maxHeight: "100%",
+                  maxWidth: "100%",
+                }}
+              />
+            </Avatar>
+           
+            
 
             <Box sx={{ flexGrow: 1 }} />
             {props.pendingList && props.pendingList.length > 0 && (

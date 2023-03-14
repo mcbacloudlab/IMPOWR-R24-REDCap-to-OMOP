@@ -2,6 +2,12 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   List,
   ListItem,
@@ -21,6 +27,7 @@ export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
   const { completedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
+  console.log("completeld list", completedList);
 
   // console.log('token?', token)
   // const [open, setOpen] = useState(false);
@@ -35,27 +42,83 @@ export default function CompletedJobs(props) {
 
   const navigate = useNavigate();
 
+  const [open, setOpen] = useState(false);
+  const [jobIdSelected, setJobIdSelected] = useState();
+  const handleClickOpen = (jobId) => {
+    console.log("jobid", jobId);
+    setJobIdSelected(jobId);
+    setOpen(true);
+  };
+
+  const handleClose = (jobId) => {
+    console.log("jobid", jobIdSelected);
+    setOpen(false);
+  };
+
+  const handleConfirm = (jobId) => {
+    // Do something when the user confirms
+    console.log("jb", jobIdSelected);
+    setOpen(false);
+    console.log("confirm delete", jobIdSelected);
+    cancelJob(jobIdSelected);
+  };
+
+  const cancelJob = (jobId) => {
+    console.log("cancel job", jobId);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("jobId", jobId);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/cancelJob`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+  };
+
   useEffect(() => {
     // console.log('jobs changed update columns...use effect')
-    const chunkSize = Math.ceil(jobs.length / 3);
-    const _columns = [];
+    if (jobs) {
+      const chunkSize = Math.ceil(jobs.length / 3);
+      const _columns = [];
 
-    for (let i = 0; i < 3; i++) {
-      _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
+      for (let i = 0; i < 3; i++) {
+        _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
+      }
+      setColumns(_columns);
     }
-    setColumns(_columns);
-    setJobs(
-      completedList.map((job) => ({
-        ...job,
-        editMode: false,
-        newJobName: job.jobName,
-      }))
-    );
+  }, [jobs, completedList]);
 
+  useEffect(() => {
+    setJobs(
+      completedList.map((pendingJob) => {
+        const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
+        const editMode = jobInJobs ? jobInJobs.editMode : false;
+        const newJobName = jobInJobs ? jobInJobs.newJobName : "";
+        return {
+          ...pendingJob,
+          editMode: editMode,
+          newJobName: newJobName,
+        };
+      })
+    );
   }, [completedList]);
 
   const handleToggleEditMode = (jobId) => {
-    // console.log("edit mode for", jobId);
+    console.log("edit mode for", jobId);
+    console.log("jobs", jobs);
+    console.log("columns", columns);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, editMode: !job.editMode } : job
@@ -251,6 +314,16 @@ export default function CompletedJobs(props) {
                             </div>
 
                             <Divider style={{ marginBottom: "10px" }} />
+                            <Tooltip title="Delete Job">
+                              <IconButton
+                                onClick={() => {
+                                  handleClickOpen(job.jobId);
+                                }}
+                                sx={{ color: "white", paddingTop: "10px" }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Tooltip>
                             <div>
                               <b>Submitted By:</b> {job.submittedBy}
                             </div>
@@ -262,6 +335,27 @@ export default function CompletedJobs(props) {
                   </ListItem>
                 </Paper>
               ))}
+
+              <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Are you sure you want to delete this item?
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleClose} color="primary">
+                    No
+                  </Button>
+                  <Button
+                    onClick={() => handleConfirm(jobIdSelected)}
+                    color="primary"
+                    autoFocus
+                  >
+                    Yes
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </List>
           </Grid>
         ))}

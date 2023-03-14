@@ -61,19 +61,29 @@ export default function PendingJobs(props) {
     console.log("jobs changed update columns...use effect");
     const chunkSize = Math.ceil(jobs.length / 3);
     const _columns = [];
+    
 
     for (let i = 0; i < 3; i++) {
       _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
-    setJobs(
-      pendingList.map((job) => ({
-        ...job,
-        editMode: false,
-        newJobName: job.jobName,
-      }))
-    );
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs, pendingList]);
+
+  useEffect(() => {
+    setJobs(
+      pendingList.map((pendingJob) => {
+        const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
+        const editMode = jobInJobs ? jobInJobs.editMode : false;
+        const newJobName = jobInJobs ? jobInJobs.newJobName : ''
+        return {
+          ...pendingJob,
+          editMode: editMode,
+          newJobName: newJobName,
+        };
+      })
+    );
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
@@ -157,10 +167,32 @@ export default function PendingJobs(props) {
   return (
     <div>
       <h2 style={{ padding: "10px", textAlign: "left" }}>Pending Jobs</h2>
-
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
+            <Dialog open={open} onClose={handleClose}>
+                            <DialogTitle>Confirm Cancellation</DialogTitle>
+                            <DialogContent>
+                              <DialogContentText>
+                                Are you sure you want to cancel this job?
+                              </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button
+                                onClick={() => handleClose(jobIdSelected)}
+                                color="primary"
+                              >
+                                No
+                              </Button>
+                              <Button
+                                onClick={() => handleConfirm(jobIdSelected)}
+                                color="primary"
+                                autoFocus
+                              >
+                                Yes
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
             <List dense>
               {column.map((job) => (
                 <Paper
@@ -177,29 +209,7 @@ export default function PendingJobs(props) {
                     <ListItemText
                       primary={
                         <div className="primary-text-container">
-                          <Dialog open={open} onClose={handleClose}>
-                            <DialogTitle>Confirm Deletion</DialogTitle>
-                            <DialogContent>
-                              <DialogContentText>
-                                Are you sure you want to delete this item?
-                              </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                              <Button
-                                onClick={() => handleClose(job.jobId)}
-                                color="primary"
-                              >
-                                No
-                              </Button>
-                              <Button
-                                onClick={() => handleConfirm(job.jobId)}
-                                color="primary"
-                                autoFocus
-                              >
-                                Yes
-                              </Button>
-                            </DialogActions>
-                          </Dialog>
+                          
                           <div style={{ textAlign: "right" }}>
                             <Tooltip title="Cancel Job">
                               <IconButton

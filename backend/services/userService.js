@@ -194,6 +194,15 @@ async function getUserJobs(req, res) {
           const foundJob = await myQueue.getJob(job.jobId);
           if (!foundJob) {
             console.log("no found job for:" + job.jobId);
+            //clean up unfound jobs - likely deleted from redis
+            db.execute(`DELETE FROM jobs WHERE jobId = ?`, [job.jobId], async function (err, results, fields) {
+              if (err) {
+                console.log("error!", err);
+                res.status(500).send("Error");
+              }else{
+                console.log('cleaned up job from db:' + job.jobId)
+              }
+            })
             continue;
           } else {
             // console.log(job)

@@ -67,7 +67,7 @@ export default function ProjectManagementPage(props) {
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
             <h1>Project Management</h1>
-            <h2>REDCap Forms</h2>
+            {/* <h2>REDCap Forms</h2> */}
             {addSSError && (
               <Alert severity="error">
                 Error Loading REDCap Dictionaries. Check REDCap API settings
