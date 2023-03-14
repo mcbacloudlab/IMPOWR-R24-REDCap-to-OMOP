@@ -177,6 +177,7 @@ async function getUserJobs(req, res) {
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
+    and jobStatus != 'cancelled' OR jobStatus IS NULL
     order by lastUpdated desc
     limit 100`;
     //   return new Promise((resolve, reject) => {

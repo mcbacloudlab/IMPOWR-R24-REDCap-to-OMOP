@@ -293,6 +293,95 @@ async function retryJob(req, res) {
   }
 }
 
+async function cancelJob(req, res) {
+  try {
+    const jobId = req.body.jobId;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // console.log("jwtVerified", jwtVerified);
+    let email = jwtVerified.user;
+    let userId = await getUserByEmail(email);
+    userId = userId[0].id;
+    console.log("email", email);
+    console.log("the user id!!", userId);
+    console.log("jobid", jobId);
+    // retry a failed job by ID
+    myQueue
+      .getJob(jobId)
+      .then(async (job) => {
+        if (!job) {
+          console.error("Job not found");
+          res.send(`Job ${jobId} not found`);
+        } else {
+          job.getState().then(async (jobState) => {
+            console.log("is com", jobState);
+            if (jobState == "active") {
+              job
+                .releaseLock()
+                .then(() => {
+                  job
+                    .remove()
+                    .then(() => {
+                      console.log(
+                        `Job ${jobId} has been removed from the queue`
+                      );
+
+                      dbUpdate(userId, jobId);
+                    })
+                    .catch((err) => {
+                      console.log(`Error while removing job ${jobId}: ${err}`);
+                    });
+                })
+                .catch((err) => {
+                  console.log(`Error while pausing job ${jobId}: ${err}`);
+                });
+            } else if (jobState != "completed") {
+              // console.log("job.progress", job.isActive);
+              job
+                .remove()
+                .then(async () => {
+                  console.log(`Job ${jobId} has been removed from the queue`);
+                  dbUpdate(userId, jobId);
+                })
+                .catch((err) => {
+                  console.log(`Error while removing job ${jobId}: ${err}`);
+                  console.log("the err");
+                  console.log(err);
+                });
+            } else {
+              res.send("Job has already completed");
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error getting job:", err);
+      });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding job to queue");
+  }
+
+  async function dbUpdate(userId, jobId) {
+    const now = new Date();
+    const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
+    const query =
+      "INSERT INTO jobs (userId, jobId, lastUpdated) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastUpdated = VALUES(lastUpdated), jobStatus = 'cancelled' ";
+
+    try {
+      const [rows, fields] = await db
+        .promise()
+        .execute(query, [userId, jobId, datetimeString]);
+      console.log("Job inserted into DB");
+      res.send(`Job ${jobId} has been cancelled`);
+    } catch (err) {
+      console.log("error!", err);
+      throw new Error("Error");
+    }
+  }
+}
+
 async function updateJobName(req, res) {
   try {
     const jobId = req.body.jobId;
@@ -307,7 +396,6 @@ async function updateJobName(req, res) {
     console.log("email", email);
     console.log("the user id!!", userId);
 
-    
     myQueue
       .getJob(jobId)
       .then(async (job) => {
@@ -319,8 +407,7 @@ async function updateJobName(req, res) {
             .toISOString()
             .slice(0, 19)
             .replace("T", " ");
-          const query =
-            "UPDATE jobs SET jobName = ? WHERE jobId = ?";
+          const query = "UPDATE jobs SET jobName = ? WHERE jobId = ?";
 
           try {
             const [rows, fields] = await db
@@ -387,4 +474,5 @@ module.exports = {
   getJobReturnData,
   retryJob,
   updateJobName,
+  cancelJob,
 };

@@ -7,6 +7,7 @@ router.post("/submit", queueController.submit);
 router.get('/jobStatus', queueController.getJobStatus)
 router.get('/getJobReturnData', queueController.getJobReturnData)
 router.post('/retryJob', queueController.retryJob)
+router.post('/cancelJob', queueController.cancelJob)
 router.post('/updateJobName', queueController.updateJobName)
 
 module.exports = router;

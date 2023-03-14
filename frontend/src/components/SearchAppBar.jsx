@@ -261,7 +261,7 @@ export default function SearchAppBar(props) {
     // Fetch data every 15 seconds
     const intervalId = setInterval(() => {
       checkJobs();
-    }, 5000);
+    }, 2500);
 
     // Clean up interval on unmount
     return () => {

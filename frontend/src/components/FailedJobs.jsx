@@ -1,7 +1,13 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import {
+  Button,
   Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   List,
   ListItem,
   ListItemText,
@@ -20,7 +26,6 @@ export default function FailedJobs(props) {
   const { failedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
-
   const [jobs, setJobs] = useState(
     failedList.map((job) => ({
       ...job,
@@ -28,6 +33,22 @@ export default function FailedJobs(props) {
       newJobName: job.jobName,
     }))
   );
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = (jobId) => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleConfirm = (jobId) => {
+    // Do something when the user confirms
+    setOpen(false);
+    console.log("confirm delete", jobId);
+    cancelJob(jobId)
+  };
 
   useEffect(() => {
     // console.log('jobs changed update columns...use effect')
@@ -38,7 +59,14 @@ export default function FailedJobs(props) {
       _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
-  }, [jobs]);
+    setJobs(
+      failedList.map((job) => ({
+        ...job,
+        editMode: false,
+        newJobName: job.jobName,
+      }))
+    );
+  }, [failedList]);
 
   function handleRetry(jobId) {
     console.log("event view", jobId);
@@ -118,6 +146,30 @@ export default function FailedJobs(props) {
     );
   };
 
+  const cancelJob = (jobId) => {
+    console.log("cancel job", jobId);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("jobId", jobId);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/cancelJob`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+  };
+
   return (
     <div style={{}}>
       <h2 style={{ padding: "10px", textAlign: "left" }}>Failed Jobs</h2>
@@ -132,6 +184,26 @@ export default function FailedJobs(props) {
                   key={job.jobId}
                   style={{ backgroundColor: "#008C95", color: "white" }}
                 >
+                  <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        Are you sure you want to delete this item?
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleClose} color="primary">
+                        No
+                      </Button>
+                      <Button
+                        onClick={() => handleConfirm(job.jobId)}
+                        color="primary"
+                        autoFocus
+                      >
+                        Yes
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                   <ListItem
                     key={job.jobId}
                     sx={{
@@ -142,6 +214,16 @@ export default function FailedJobs(props) {
                       primary={
                         <div className="primary-text-container">
                           <div style={{ textAlign: "right" }}>
+                            <Tooltip title="Cancel Job">
+                              <IconButton
+                                onClick={() => {
+                                  handleClickOpen(job.jobId);
+                                }}
+                                sx={{ color: "white", paddingTop: "10px" }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Retry Job">
                               <IconButton
                                 onClick={(event) => handleRetry(job.jobId)}
@@ -222,18 +304,31 @@ export default function FailedJobs(props) {
                               ></span>
                             ) : null}
                           </div>
-
-                          <div style={{ textAlign: "right" }}>
-                            <Divider style={{ padding: "10px" }} />
-                            <div className="job-added-text">
-                              <b>Added:</b>{" "}
-                              {new Date(job.timeAdded).toLocaleString()}
-                            </div>
-                            <div className="job-started-at-text">
-                              <b>Started at:</b>{" "}
-                              {job.startedAt
-                                ? new Date(job.startedAt).toLocaleString()
-                                : "Not Started Yet"}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div></div>
+                            <div>
+                              <div
+                                className="job-added-text"
+                                style={{ textAlign: "right" }}
+                              >
+                                <b>Added:</b>{" "}
+                                {new Date(job.timeAdded).toLocaleString()}
+                              </div>
+                              <div
+                                className="job-started-at-text"
+                                style={{ textAlign: "right" }}
+                              >
+                                <b>Started at:</b>{" "}
+                                {job.startedAt
+                                  ? new Date(job.startedAt).toLocaleString()
+                                  : "Not Started Yet"}
+                              </div>
                             </div>
                           </div>
                         </div>

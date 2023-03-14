@@ -44,7 +44,15 @@ export default function CompletedJobs(props) {
       _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
-  }, [jobs]);
+    setJobs(
+      completedList.map((job) => ({
+        ...job,
+        editMode: false,
+        newJobName: job.jobName,
+      }))
+    );
+
+  }, [completedList]);
 
   const handleToggleEditMode = (jobId) => {
     // console.log("edit mode for", jobId);

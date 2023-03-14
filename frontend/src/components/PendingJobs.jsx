@@ -2,8 +2,14 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import {
+  Button,
   Box,
   Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   List,
   ListItem,
   ListItemText,
@@ -30,6 +36,26 @@ export default function PendingJobs(props) {
       newJobName: job.jobName,
     }))
   );
+  const [open, setOpen] = useState(false);
+  const [jobIdSelected, setJobIdSelected] = useState();
+  const handleClickOpen = (jobId) => {
+    console.log("jobid", jobId);
+    setJobIdSelected(jobId);
+    setOpen(true);
+  };
+
+  const handleClose = (jobId) => {
+    console.log("jobid", jobIdSelected);
+    setOpen(false);
+  };
+
+  const handleConfirm = (jobId) => {
+    // Do something when the user confirms
+    console.log("jb", jobIdSelected);
+    setOpen(false);
+    console.log("confirm delete", jobIdSelected);
+    cancelJob(jobIdSelected);
+  };
 
   useEffect(() => {
     console.log("jobs changed update columns...use effect");
@@ -47,7 +73,7 @@ export default function PendingJobs(props) {
         newJobName: job.jobName,
       }))
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
@@ -104,6 +130,30 @@ export default function PendingJobs(props) {
     );
   };
 
+  const cancelJob = (jobId) => {
+    console.log("cancel job", jobId);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("jobId", jobId);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/cancelJob`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
+  };
+
   return (
     <div>
       <h2 style={{ padding: "10px", textAlign: "left" }}>Pending Jobs</h2>
@@ -127,21 +177,52 @@ export default function PendingJobs(props) {
                     <ListItemText
                       primary={
                         <div className="primary-text-container">
-                          {job.startedAt ? (
-                            <div
-                              style={{ textAlign: "right" }}
-                              className="pending-jobs-container"
-                            >
-                              <AutorenewIcon
-                                className="pending-jobs-icon"
-                                style={{
-                                  // backgroundColor: "white",
-                                  color: "white",
-                                  marginLeft: "5px",
+                          <Dialog open={open} onClose={handleClose}>
+                            <DialogTitle>Confirm Deletion</DialogTitle>
+                            <DialogContent>
+                              <DialogContentText>
+                                Are you sure you want to delete this item?
+                              </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button
+                                onClick={() => handleClose(job.jobId)}
+                                color="primary"
+                              >
+                                No
+                              </Button>
+                              <Button
+                                onClick={() => handleConfirm(job.jobId)}
+                                color="primary"
+                                autoFocus
+                              >
+                                Yes
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
+                          <div style={{ textAlign: "right" }}>
+                            <Tooltip title="Cancel Job">
+                              <IconButton
+                                onClick={() => {
+                                  handleClickOpen(job.jobId);
                                 }}
-                              />
-                            </div>
-                          ) : null}
+                                sx={{ color: "white" }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Tooltip>
+                            {job.startedAt ? (
+                              <IconButton>
+                                <AutorenewIcon
+                                  className="pending-jobs-icon"
+                                  style={{
+                                    // backgroundColor: "white",
+                                    color: "white",
+                                  }}
+                                />
+                              </IconButton>
+                            ) : null}
+                          </div>
                           <span>
                             <div>
                               <b>Job ID:</b> {job.jobId}
@@ -232,11 +313,11 @@ export default function PendingJobs(props) {
                             }}
                           >
                             <div>
-                              <Tooltip title="Cancel Job">
+                              {/* <Tooltip title="Cancel Job">
                                 <IconButton sx={{ color: "white" }}>
                                   <CloseIcon />
                                 </IconButton>
-                              </Tooltip>
+                              </Tooltip> */}
                             </div>
                             <div>
                               <div

@@ -24,6 +24,18 @@ async function retryJob(req, res) {
   }
 }
 
+async function cancelJob(req, res) {
+  console.log("retry job");
+  try {
+    await queueService.cancelJob(req, res);
+    // console.log("after submit", status)
+    // res.status(200).send(keys);
+  } catch (error) {
+    console.error("controller error", error);
+    //   res.status(500).send("Error");
+  }
+}
+
 async function updateJobName(req, res) {
   console.log("retry job");
   try {
@@ -64,5 +76,6 @@ module.exports = {
   retryJob,
   getJobStatus,
   getJobReturnData,
-  updateJobName
+  updateJobName,
+  cancelJob
 };
