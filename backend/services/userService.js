@@ -221,6 +221,7 @@ async function getUserJobs(req, res) {
           }
         } catch (error) {
           console.log("error", error);
+          res.status(500).send("Error");
         }
         // console.log('jobstat', job.jobStatus)
         if (job.jobStatus != "completed") {

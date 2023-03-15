@@ -228,6 +228,16 @@ export default function CompletedJobs(props) {
                       primary={
                         <Grid key={index} item xs={12} md={12}>
                           <div style={{ textAlign: "right" }}>
+                          <Tooltip title="Delete Job">
+                              <IconButton
+                                onClick={() => {
+                                  handleClickOpen(job.jobId);
+                                }}
+                                sx={{ color: "white", paddingTop: "10px" }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="View Report">
                               <IconButton
                                 onClick={(event) => handleView(job)}
@@ -296,10 +306,10 @@ export default function CompletedJobs(props) {
                           </span>
 
                           <div style={{ textAlign: "right" }}>
-                            <div>
+                            {/* <div>
                               <b>Added:</b>{" "}
                               {new Date(job.timeAdded).toLocaleString()}
-                            </div>
+                            </div> */}
                             <div>
                               <b>Started at:</b>{" "}
                               {job.startedAt
@@ -314,16 +324,7 @@ export default function CompletedJobs(props) {
                             </div>
 
                             <Divider style={{ marginBottom: "10px" }} />
-                            <Tooltip title="Delete Job">
-                              <IconButton
-                                onClick={() => {
-                                  handleClickOpen(job.jobId);
-                                }}
-                                sx={{ color: "white", paddingTop: "10px" }}
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
+                         
                             <div>
                               <b>Submitted By:</b> {job.submittedBy}
                             </div>

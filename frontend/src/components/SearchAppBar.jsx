@@ -55,7 +55,11 @@ export default function SearchAppBar(props) {
       let userCookie = JSON.parse(Cookies.get("user"));
       // setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
-      let userInfo = JSON.parse(props.user);
+      let userInfo
+      console.log('the props!!!', props)
+      if (props.user) {
+        userInfo = JSON.parse(props.user);
+      }
       // console.log("prfewefwefops.", userInfo);
       setRole(userInfo.role);
     } catch (error) {
@@ -251,7 +255,7 @@ export default function SearchAppBar(props) {
         props.setCompletedList(_completedList);
       })
       .catch((error) => {
-        // handleSignOut();
+        handleSignOut();
         console.log("error", error);
       });
   }
@@ -263,7 +267,7 @@ export default function SearchAppBar(props) {
     // Fetch data every 15 seconds
     const intervalId = setInterval(() => {
       checkJobs();
-    }, 1000);
+    }, 5000);
 
     // Clean up interval on unmount
     return () => {
@@ -281,7 +285,7 @@ export default function SearchAppBar(props) {
         >
           <Toolbar>
             <TemporaryDrawer />
-            <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
+            {/* <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
               <img
                 src={REDCapLogo}
                 alt="Redcap Logo"
@@ -292,17 +296,17 @@ export default function SearchAppBar(props) {
                   backgroundColor: 'transparent'
                 }}
               />
-            </Avatar>
-            
-            {/* <Typography
+            </Avatar> */}
+
+            <Typography
               variant="h6"
               noWrap
               component="div"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
               REDCap To OMOP
-            </Typography> */}
-            <Avatar alt="Redcap Logo">
+            </Typography>
+            {/* <Avatar alt="Redcap Logo">
               <img
                 src={OMOPLogo}
                 alt="OMOP Logo"
@@ -313,8 +317,7 @@ export default function SearchAppBar(props) {
                 }}
               />
             </Avatar>
-           
-            
+            */}
 
             <Box sx={{ flexGrow: 1 }} />
             {props.pendingList && props.pendingList.length > 0 && (
