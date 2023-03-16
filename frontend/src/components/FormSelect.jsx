@@ -34,17 +34,17 @@ export default function FormSelect(props) {
   var tableInstanceRef = useRef(null);
   useEffect(() => {
     if (tableInstanceRef.current) {
-      console.log("tableinstance", tableInstanceRef.current.getState());
+      // console.log("tableinstance", tableInstanceRef.current.getState());
       setSelectedRows(tableInstanceRef.current.getState().rowSelection);
     }
   }, [tableInstanceRef.current]);
 
   const handleRowSelection = (selected) => {
-    console.log("typeof", typeof selected);
-    console.log("tableinstance", tableInstanceRef.current.getState());
+    // console.log("typeof", typeof selected);
+    // console.log("tableinstance", tableInstanceRef.current.getState());
     const rowSelection = tableInstanceRef.current.getState().rowSelection;
     setSelectedRows(rowSelection);
-    console.log("rowselection", rowSelection);
+    // console.log("rowselection", rowSelection);
     // const updatedData = data.map((row) => {
     //   return {
     //     ...row,

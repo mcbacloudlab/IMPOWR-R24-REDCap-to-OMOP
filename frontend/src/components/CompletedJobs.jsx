@@ -27,16 +27,16 @@ export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
   const { completedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
-  console.log("completeld list", completedList);
+  // console.log("completeld list", completedList);
 
   // console.log('token?', token)
   // const [open, setOpen] = useState(false);
   const [jobs, setJobs] = useState(
-    completedList.map((job) => ({
+    completedList?.map((job) => ({
       ...job,
       editMode: false,
       newJobName: job.jobName,
-    }))
+    })) || []
   );
   const [columns, setColumns] = useState([]);
 
@@ -102,7 +102,7 @@ export default function CompletedJobs(props) {
 
   useEffect(() => {
     setJobs(
-      completedList.map((pendingJob) => {
+      completedList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
         const newJobName = jobInJobs ? jobInJobs.newJobName : "";
@@ -205,7 +205,7 @@ export default function CompletedJobs(props) {
   return (
     <div style={{ maxHeight: "400px" }}>
       <h2 style={{ padding: "10px", textAlign: "left" }}>Completed Jobs</h2>
-      <Grid container spacing={1} justifyContent="center">
+      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <List dense>
@@ -213,7 +213,7 @@ export default function CompletedJobs(props) {
                 <Paper
                   elevation={3}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white" }}
+                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
                 >
                   <ListItem
                     key={job.jobId}
@@ -221,6 +221,7 @@ export default function CompletedJobs(props) {
                       // borderWidth: "1px",
                       // borderStyle: "solid",
                       margin: "10px",
+                      
                     }}
                   >
                     <ListItemText

@@ -50,30 +50,29 @@ main().then(async () => {
 
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
+        // console.log("obj", obj);
         const document = await redcapCollection.findOne({
           fieldLabel: obj.field_label,
           formName: obj.form_name,
           variableName: obj.field_name,
         });
-        return document;
+        // Merge the properties of obj into document
+        const mergedDocument = Object.assign({}, document, { obj });
+        return mergedDocument;
       })
     );
 
     const redCapCollectionArray = transformedData;
+    // console.log("redcap array", redCapCollectionArray);
     console.info("Loaded Redcap Collection into memory");
     const snomedCollection = client
       .db("GPT3_Embeddings")
-      .collection("gpt3_snomed_embeddings30k");
+      .collection("gpt3_snomed_embeddings");
 
-    await startProcessing(
-      redCapCollectionArray,
-      snomedCollection
-    );
+    await startProcessing(redCapCollectionArray, snomedCollection);
 
     //close MongoDB conneciton
     client.close();
-
-
   }
 });
 
@@ -132,19 +131,18 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
     workers.push(worker);
 
     worker.on("message", (message) => {
-      
       if (message.log) {
-        console.log('log', ...message.log)
-      } else if(message.endResult){
-        console.log('endResult. pushing final list')
+        console.log("log", ...message.log);
+      } else if (message.endResult) {
+        console.log("endResult. pushing final list");
         finalList.push(...message.endResult);
-      }else{
-        console.log(message)
+      } else {
+        console.log(message);
       }
     });
 
     worker.on("error", (error) => {
-      console.error('Child worker erroreed: ' + error);
+      console.error("Child worker errored: " + error);
     });
 
     worker.on("exit", (code) => {
@@ -154,7 +152,7 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
     });
   }
 
-  console.log('wait for child to exit')
+  console.log("wait for child to exit");
   await Promise.all(
     workers.map((worker) => {
       return new Promise((resolve) => {
@@ -162,7 +160,7 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
           //return this data to the caller
           // console.log('writing to stdout')
           process.stdout.write(JSON.stringify(finalList) + "\n");
-          resolve()
+          resolve();
         });
       });
     })

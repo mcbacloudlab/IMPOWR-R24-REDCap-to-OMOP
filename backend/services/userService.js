@@ -167,6 +167,11 @@ async function updateJobStatus(jobId) {
 }
 
 async function getUserJobs(req, res) {
+  myQueue.client.on('error', (err) => {
+    console.error('Error connecting to Redis:', err);
+    res.status(500).send('Redis server not running')
+    return;
+  });
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
   try {
@@ -193,7 +198,7 @@ async function getUserJobs(req, res) {
         try {
           const foundJob = await myQueue.getJob(job.jobId);
           if (!foundJob) {
-            console.log("no found job for:" + job.jobId);
+            // console.log("no found job for:" + job.jobId);
             //clean up unfound jobs - likely deleted from redis
             db.execute(`DELETE FROM jobs WHERE jobId = ?`, [job.jobId], async function (err, results, fields) {
               if (err) {
@@ -239,17 +244,79 @@ async function getUserJobs(req, res) {
     res.status(500).send("Error");
     return false;
   }
+}
 
-  // const query = "SELECT * FROM users WHERE email = ?";
-  // return new Promise((resolve, reject) => {
-  //   db.execute(query, [email], function (err, results, fields) {
-  //     if (err) {
-  //       console.log("error!", err);
-  //       reject("Error");
-  //     }
-  //     resolve(results);
-  //   });
-  // });
+async function getAllUserJobs(req, res) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+  try {
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    let email = jwtVerified.user;
+    // console.log('get user jobs for', email)
+    const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName
+    FROM redcap.users 
+    INNER JOIN jobs ON users.id = jobs.userId
+    where jobStatus != 'cancelled' OR jobStatus IS NULL
+    order by lastUpdated desc`;
+    //   return new Promise((resolve, reject) => {
+    db.execute(query, [email], async function (err, results, fields) {
+      if (err) {
+        console.log("error!", err);
+        res.status(500).send("Error");
+      }
+      // console.log("results", results);
+      //get status for unknown statuses for jobs....
+
+      for (const job of results) {
+        try {
+          const foundJob = await myQueue.getJob(job.jobId);
+          if (!foundJob) {
+            console.log("no found job for:" + job.jobId);
+            //clean up unfound jobs - likely deleted from redis
+            // db.execute(`DELETE FROM jobs WHERE jobId = ?`, [job.jobId], async function (err, results, fields) {
+            //   if (err) {
+            //     console.log("error!", err);
+            //     res.status(500).send("Error");
+            //   }else{
+            //     console.log('cleaned up job from db:' + job.jobId)
+            //   }
+            // })
+            continue;
+          } else {
+            // console.log(job)
+
+            const status = await foundJob.getState();
+            const timeAdded = foundJob.timestamp;
+            const startedAt = foundJob.processedOn;
+            const finishedAt = foundJob.finishedOn;
+            const progress = await foundJob.progress();
+            // console.log("status", status);
+            // console.log("timeadded", timeAdded);
+            job.timeAdded = timeAdded;
+            job.startedAt = startedAt;
+            job.finishedAt = finishedAt;
+            job.progress = progress;
+          }
+        } catch (error) {
+          console.log("error", error);
+          res.status(500).send("Error");
+        }
+        // console.log('jobstat', job.jobStatus)
+        if (job.jobStatus != "completed") {
+          // console.log('updating')
+          await updateJobStatus(job.jobId);
+        }
+      }
+
+      // console.log("send status results", results);
+      res.status(200).send(results);
+    });
+    //   });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).send("Error");
+    return false;
+  }
 }
 
 module.exports = {

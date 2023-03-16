@@ -76,7 +76,7 @@ export default function FormSelectTable({
       enableStickyHeader
       muiSelectCheckboxProps={{
         color: 'secondary',
-        defaultChecked: true, // Select all rows by default
+        // defaultChecked: true, // Select all rows by default
       }}
       muiTablePaperProps={{
         elevation: 2,

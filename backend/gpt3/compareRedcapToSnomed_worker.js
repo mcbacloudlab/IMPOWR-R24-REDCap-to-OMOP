@@ -18,34 +18,40 @@ async function processChunk(
   limit,
   progress
 ) {
-  console.log("process chunk");
+  //do not add any console.logs here. these are captured in queueService.js and extra logs tend to mess up the progress reporting back
   console.log("Processing Document At:", skip);
   console.log("Processing Document To:", skip + limit);
   finalList = []; //clear between each chunk
-  const snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
-  const snomedChunk = await snomedCursor.toArray();
-
+  let snomedCursor, snomedChunk
+  try {
+    snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
+    snomedChunk = await snomedCursor.toArray();
+    // rest of your code here...
+  } catch (error) {
+    console.error("Error while retrieving data from MongoDB:", error);
+  }
+  
+  // console.log('snomedChunk', snomedChunk)
   for (const redCapDoc of redCapCollectionArray) {
-    if (!redCapDoc) continue;
+    if (!redCapDoc || !redCapDoc.gpt3_data || !redCapDoc.gpt3_data.data || redCapDoc.gpt3_data.data.length === 0) {
+      continue;
+    }
 
     let redcapFieldLabel = redCapDoc.fieldLabel;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
-    let redCapKeys = {
-      redcapFieldLabel: redCapDoc.fieldLabel,
-      redCapFormName: redCapDoc.formName,
-      redCapVariableName: redCapDoc.variableName,
-    };
     let topResults = [];
     for (const snomed of snomedChunk) {
       let snomedEmbedding = snomed.gpt3_data.data[0].embedding;
       let snomedText = snomed.snomed_text;
       let snomedID = snomed.snomed_id;
+      let _redCapDoc = redCapDoc
 
       topResults.push({
         redcapFieldLabel,
         snomedText,
         snomedID,
         similarity: cosineSimilarity(snomedEmbedding, redcapEmbedding),
+        extraData: _redCapDoc.obj
       });
     }
 
@@ -53,8 +59,6 @@ async function processChunk(
       topResults.sort((a, b) => b.similarity - a.similarity).slice(0, 3)
     );
     topResults = []; //clear top results
-
-    // console.log("topresults", topResults);
   }
 
   return finalList;

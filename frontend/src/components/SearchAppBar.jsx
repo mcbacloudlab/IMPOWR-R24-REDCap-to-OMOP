@@ -56,7 +56,7 @@ export default function SearchAppBar(props) {
       // setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
       let userInfo
-      console.log('the props!!!', props)
+      // console.log('the props!!!', props)
       if (props.user) {
         userInfo = JSON.parse(props.user);
       }

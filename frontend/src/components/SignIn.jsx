@@ -21,6 +21,7 @@ import Cookies from "js-cookie";
 export default function SignIn({ props }) {
   console.log('sign in props', props)
   const [loginError, setLoginError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(false);
 
   const navigate = useNavigate();
   const jwtToken = Cookies.get("token");
@@ -57,6 +58,13 @@ export default function SignIn({ props }) {
         .catch((error) => console.log("error", error));
     }
   }, [jwtToken, navigate, props]);
+
+  function ErrorAlert(){
+    if(!errorMessage) return(<Alert severity="error">Incorrect Username/Password</Alert>)
+    else{
+      return(<Alert severity="error">{errorMessage}</Alert>)
+    }
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -101,7 +109,11 @@ export default function SignIn({ props }) {
           }
         });
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => {
+        setLoginError(true);
+        setErrorMessage('Server is down.')
+        console.log("error", error)
+      });
   };
 
   return (
@@ -122,7 +134,7 @@ export default function SignIn({ props }) {
             Sign in
           </Typography>
           {loginError && (
-            <Alert severity="error">Incorrect Username/Password</Alert>
+            <ErrorAlert/>
           )}
           <Box
             component="form"

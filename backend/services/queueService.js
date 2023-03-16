@@ -191,7 +191,6 @@ async function compareEmbeddings(job) {
         }
       }
     });
-
     process.stderr.on("data", (data) => {
       console.error(`stderr: ${data}`);
     });
@@ -212,6 +211,7 @@ async function compareEmbeddings(job) {
 async function submit(req, res) {
   try {
     const data = req.body;
+    console.log('data', data.filename)
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -225,12 +225,12 @@ async function submit(req, res) {
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
     const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
-    const query = "INSERT INTO jobs (userId, jobId, lastUpdated) VALUES(?,?,?)";
+    const query = "INSERT INTO jobs (userId, jobId, jobName, lastUpdated) VALUES(?,?,?,?)";
 
     try {
       const [rows, fields] = await db
         .promise()
-        .execute(query, [userId, job.id, datetimeString]);
+        .execute(query, [userId, job.id, data.filename, datetimeString]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
     } catch (err) {
@@ -328,7 +328,7 @@ async function cancelJob(req, res) {
                         `Job ${jobId} has been removed from the queue`
                       );
                       activeJobProcess.kill('SIGTERM')
-                      dbUpdate(userId, jobId);
+                      dbCancelUpdate(userId, jobId);
                     })
                     .catch((err) => {
                       console.log(`Error while removing job ${jobId}: ${err}`);
@@ -343,7 +343,7 @@ async function cancelJob(req, res) {
                 .remove()
                 .then(async () => {
                   console.log(`Job ${jobId} has been removed from the queue`);
-                  dbUpdate(userId, jobId);
+                  dbCancelUpdate(userId, jobId);
                 })
                 .catch((err) => {
                   console.log(`Error while removing job ${jobId}: ${err}`);
@@ -367,7 +367,7 @@ async function cancelJob(req, res) {
     res.status(500).send("Error adding job to queue");
   }
 
-  async function dbUpdate(userId, jobId) {
+  async function dbCancelUpdate(userId, jobId) {
     const now = new Date();
     const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
     const query =
@@ -464,7 +464,7 @@ async function getJobReturnData(req, res) {
     // console.log('found job')
     const buffer = Buffer.from(myJob.returnvalue);
     const result = JSON.parse(buffer.toString());
-    console.log("job return value", result);
+    // console.log("job return value", result);
     res.status(200).send(result);
   } catch (error) {
     console.log("error!!!!", error);

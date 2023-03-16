@@ -61,7 +61,6 @@ export default function PendingJobs(props) {
     console.log("jobs changed update columns...use effect");
     const chunkSize = Math.ceil(jobs.length / 3);
     const _columns = [];
-    
 
     for (let i = 0; i < 3; i++) {
       _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
@@ -76,7 +75,7 @@ export default function PendingJobs(props) {
       pendingList.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
-        const newJobName = jobInJobs ? jobInJobs.newJobName : ''
+        const newJobName = jobInJobs ? jobInJobs.newJobName : "";
         return {
           ...pendingJob,
           editMode: editMode,
@@ -171,33 +170,33 @@ export default function PendingJobs(props) {
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <Dialog open={open} onClose={handleClose}>
-                            <DialogTitle>Confirm Cancellation</DialogTitle>
-                            <DialogContent>
-                              <DialogContentText>
-                                Are you sure you want to cancel this job?
-                              </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                              <Button
-                                onClick={() => handleClose(jobIdSelected)}
-                                color="primary"
-                              >
-                                No
-                              </Button>
-                              <Button
-                                onClick={() => handleConfirm(jobIdSelected)}
-                                color="primary"
-                                autoFocus
-                              >
-                                Yes
-                              </Button>
-                            </DialogActions>
-                          </Dialog>
+              <DialogTitle>Confirm Cancellation</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to cancel this job?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => handleClose(jobIdSelected)}
+                  color="primary"
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => handleConfirm(jobIdSelected)}
+                  color="primary"
+                  autoFocus
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
             <List dense>
               {column.map((job) => (
                 <Paper
                   elevation={3}
-                  style={{ backgroundColor: "#008C95", color: "white" }}
+                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto' }}
                   key={job.jobId}
                 >
                   <ListItem
@@ -209,7 +208,6 @@ export default function PendingJobs(props) {
                     <ListItemText
                       primary={
                         <div className="primary-text-container">
-                          
                           <div style={{ textAlign: "right" }}>
                             <Tooltip title="Cancel Job">
                               <IconButton
