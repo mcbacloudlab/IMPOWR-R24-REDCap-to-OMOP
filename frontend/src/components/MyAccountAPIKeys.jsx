@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper";
 // import CheckIcon from "@mui/icons-material/Check";
 // import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
-export default function MyAccountAdminSection(props) {
+export default function MyAccountAPIKeys(props) {
   console.log("adminsec", props);
   const [redcapKey, setRedcapKey] = useState("");
   const [redcapURL, setRedcapURL] = useState("");

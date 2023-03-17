@@ -15,6 +15,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { NavLink } from 'react-router-dom';
+import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 
 export default function TemporaryDrawer() {
   const [state, setState] = React.useState({
@@ -43,7 +44,7 @@ export default function TemporaryDrawer() {
       <ListItem key={'Project Management'} component={NavLink} to="/project-management" disablePadding>
             <ListItemButton>
               <ListItemIcon>
-              <BackupIcon />
+              <AddHomeWorkIcon />
               </ListItemIcon>
               <ListItemText primary={'Project Management'} />
             </ListItemButton>

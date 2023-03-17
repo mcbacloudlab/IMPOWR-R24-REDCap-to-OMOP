@@ -16,7 +16,7 @@ import {
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ErrorIcon from "@mui/icons-material/Error";
-import MyAccountAdminSection from "./MyAccountAdminSection";
+import MyAccountAdminSection from "./MyAccountAPIKeys";
 import { useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -27,7 +27,8 @@ import PendingJobs from "./PendingJobs";
 import FailedJobs from "./FailedJobs";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
-import StorageIcon from '@mui/icons-material/Storage';
+import StorageIcon from "@mui/icons-material/Storage";
+import CollectionsView from "./MyAccountCollectionsView";
 
 const drawerWidth = "240px";
 
@@ -56,7 +57,7 @@ export default function MyAccountNavBar(props) {
         }))
       );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.completedList]);
 
   const handleClick = (event) => {
@@ -165,21 +166,21 @@ export default function MyAccountNavBar(props) {
                 </ListItemButton>
               </ListItem>
               <ListItem key={"All Failed Jobs"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <ErrorIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"All Failed Jobs"} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"GPT3 Collections"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <StorageIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"GPT3 Collections"} />
-              </ListItemButton>
-            </ListItem>
+                <ListItemButton onClick={(event) => handleClick(event)}>
+                  <ListItemIcon>
+                    <ErrorIcon style={{ color: "white" }} />
+                  </ListItemIcon>
+                  <ListItemText primary={"All Failed Jobs"} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem key={"Collections"} disablePadding>
+                <ListItemButton onClick={(event) => handleClick(event)}>
+                  <ListItemIcon>
+                    <StorageIcon style={{ color: "white" }} />
+                  </ListItemIcon>
+                  <ListItemText primary={"Collections"} />
+                </ListItemButton>
+              </ListItem>
             </List>
           )}
         </Box>
@@ -224,6 +225,12 @@ export default function MyAccountNavBar(props) {
 
         {view === "API Keys" && props.role === "admin" ? (
           <MyAccountAdminSection props={props} />
+        ) : (
+          ""
+        )}
+
+        {view === "Collections" && props.role === "admin" ? (
+          <CollectionsView props={props} />
         ) : (
           ""
         )}

@@ -9,6 +9,7 @@ import FormSelect from "../components/FormSelect";
 import CssBaseline from "@mui/material/CssBaseline";
 // import ProjectBottomBar from "../components/ProjectBottomBar";
 import CircularProgress from "@mui/material/CircularProgress";
+import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 
 export default function ProjectManagementPage(props) {
   // console.log("project management page,", props);
@@ -66,7 +67,7 @@ export default function ProjectManagementPage(props) {
       >
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
-            <h1>Project Management</h1>
+            <h1><AddHomeWorkIcon/> Project Management</h1>
             {/* <h2>REDCap Forms</h2> */}
             {addSSError && (
               <Alert severity="error">
