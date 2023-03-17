@@ -34,7 +34,7 @@ export default function CompletedJobsViewPage(props) {
       if (_jobId) setJobId(_jobId);
       if (_data) buildTable(JSON.parse(_data));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
 
   function verifyRow(row) {
@@ -164,6 +164,18 @@ export default function CompletedJobsViewPage(props) {
       {
         header: "Snomed ID",
         accessorKey: "snomedID",
+        // Use the Cell option to modify the snomedID data
+        Cell: ({ cell }) => {
+          const snomedID = cell.getValue();
+          // Create the URL with the snomedID value
+          const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
+          // Return an 'a' tag with the URL as the href and the snomedID as the text
+          return (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {snomedID}
+            </a>
+          );
+        },
       },
       {
         header: "Similarity",

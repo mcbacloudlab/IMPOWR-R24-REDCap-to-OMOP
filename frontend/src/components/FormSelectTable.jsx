@@ -38,7 +38,7 @@ export default function FormSelectTable({
         // ],
       }}
       // positionPagination='top'
-      enableRowNumbers
+      // enableRowNumbers
       options={{
         selection: true,
       }}

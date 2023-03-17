@@ -13,7 +13,7 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
-  Divider,
+  // Divider,
   Input,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
@@ -27,7 +27,7 @@ export default function FailedJobs(props) {
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(
-    failedList.map((job) => ({
+    failedList?.map((job) => ({
       ...job,
       editMode: false,
       newJobName: job.jobName,
@@ -56,18 +56,18 @@ export default function FailedJobs(props) {
 
   useEffect(() => {
     // console.log('jobs changed update columns...use effect')
-    const chunkSize = Math.ceil(jobs.length / 3);
+    const chunkSize = Math.ceil(jobs?.length / 3);
     const _columns = [];
 
     for (let i = 0; i < 3; i++) {
-      _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
+      _columns.push(jobs?.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
   }, [jobs, failedList]);
 
   useEffect(() => {
     setJobs(
-      failedList.map((pendingJob) => {
+      failedList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
         const newJobName = jobInJobs ? jobInJobs.newJobName : ''
@@ -78,6 +78,7 @@ export default function FailedJobs(props) {
         };
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [failedList]);
 
   function handleRetry(jobId) {
@@ -184,9 +185,9 @@ export default function FailedJobs(props) {
 
   return (
     <div style={{}}>
-      <h2 style={{ padding: "10px", textAlign: "left" }}>Failed Jobs</h2>
-      <Grid container spacing={2} justifyContent="center">
-        {columns.map((column, index) => (
+      <h1 style={{ padding: "10px", textAlign: "left" }}>Failed Jobs</h1>
+      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
+        {columns?.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <Dialog open={open} onClose={handleClose}>
                     <DialogTitle>Confirm Deletion</DialogTitle>
@@ -209,11 +210,11 @@ export default function FailedJobs(props) {
                     </DialogActions>
                   </Dialog>
             <List dense>
-              {column.map((job) => (
+              {column?.map((job) => (
                 <Paper
                   elevation={3}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white" }}
+                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
                 >
                   
                   <ListItem

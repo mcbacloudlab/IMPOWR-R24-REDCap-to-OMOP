@@ -113,6 +113,7 @@ export default function CompletedJobs(props) {
         };
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completedList]);
 
   const handleToggleEditMode = (jobId) => {
@@ -204,7 +205,7 @@ export default function CompletedJobs(props) {
 
   return (
     <div style={{ maxHeight: "400px" }}>
-      <h2 style={{ padding: "10px", textAlign: "left" }}>Completed Jobs</h2>
+      <h1 style={{ padding: "10px", textAlign: "left" }}>Completed Jobs</h1>
       <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>

@@ -142,6 +142,7 @@ export default function FormSelect(props) {
   };
 
   function submitToProcess(e) {
+    window.scrollTo(0, 0); //scroll to top of page
     setShowSubmittedNotifcation(true);
     setTimeout(() => {
       setShowSubmittedNotifcation(false);

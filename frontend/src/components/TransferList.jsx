@@ -10,6 +10,8 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { useState, useEffect } from "react";
+import Alert from '@mui/material/Alert';
+import { Tooltip } from "@mui/material";
 
 function not(a, b) {
   return a.filter((value) => b.indexOf(value) === -1);
@@ -124,9 +126,11 @@ export default function TransferList(props) {
 
   const customList = (title, items) => (
     <Card>
+      <Tooltip title="Move columns to the left to include their data in the final results. The columns on the right will be excluded from the final results.">
       <CardHeader
         sx={{ px: 2, py: 1 }}
         avatar={
+          
           <Checkbox
             onClick={handleToggleAll(items)}
             checked={
@@ -141,10 +145,12 @@ export default function TransferList(props) {
               "aria-label": "all items selected",
             }}
           />
+         
         }
-        title={title}
+        // title={title}
         subheader={`${numberOfChecked(items)}/${items.length} selected`}
       />
+       </Tooltip>
       <Divider />
       <List
         sx={{
@@ -211,8 +217,12 @@ export default function TransferList(props) {
             &lt;
           </Button>
         </Grid>
+        
       </Grid>
+      
       <Grid item>{customList("Remove", right)}</Grid>
+
+      <Alert style={{marginTop: '10px',maxWidth: '90%'}}severity="info">The <b>field name, field label, and form name</b> are required for the process to function properly. </Alert>
     </Grid>
   );
 }

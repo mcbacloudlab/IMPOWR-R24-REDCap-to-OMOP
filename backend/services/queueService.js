@@ -201,8 +201,8 @@ async function compareEmbeddings(job) {
         job.progress(100);
         resolve(capturedData);
       } else {
-        console.error(`Embedding comparison failed with code ${code}`);
-        reject(`Embedding comparison failed with code ${code}`);
+        console.error(`Embedding comparison failed or was cancelled with code ${code}`);
+        reject(`Embedding comparison failed or was cancelled with code ${code}`);
       }
     });
   });
@@ -315,6 +315,7 @@ async function cancelJob(req, res) {
           console.error("Job not found");
           res.send(`Job ${jobId} not found`);
         } else {
+          activeJobProcess.kill('SIGTERM')
           job.getState().then(async (jobState) => {
             console.log("is com", jobState);
             if (jobState == "active") {

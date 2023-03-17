@@ -169,8 +169,8 @@ async function updateJobStatus(jobId) {
 async function getUserJobs(req, res) {
   myQueue.client.on('error', (err) => {
     console.error('Error connecting to Redis:', err);
-    res.status(500).send('Redis server not running')
-    return;
+    // res.status(500).send('Redis server not running')
+    // return;
   });
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];

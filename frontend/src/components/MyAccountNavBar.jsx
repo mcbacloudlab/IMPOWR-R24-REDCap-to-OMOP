@@ -11,6 +11,7 @@ import {
   Avatar,
   ListItem,
   ListItemButton,
+  // Paper
 } from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -26,6 +27,7 @@ import PendingJobs from "./PendingJobs";
 import FailedJobs from "./FailedJobs";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
+import StorageIcon from '@mui/icons-material/Storage';
 
 const drawerWidth = "240px";
 
@@ -168,6 +170,14 @@ export default function MyAccountNavBar(props) {
                   <ErrorIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"All Failed Jobs"} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key={"GPT3 Collections"} disablePadding>
+              <ListItemButton onClick={(event) => handleClick(event)}>
+                <ListItemIcon>
+                  <StorageIcon style={{ color: "white" }} />
+                </ListItemIcon>
+                <ListItemText primary={"GPT3 Collections"} />
               </ListItemButton>
             </ListItem>
             </List>

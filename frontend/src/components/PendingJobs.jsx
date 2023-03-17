@@ -30,7 +30,7 @@ export default function PendingJobs(props) {
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(
-    pendingList.map((job) => ({
+    pendingList?.map((job) => ({
       ...job,
       editMode: false,
       newJobName: job.jobName,
@@ -59,11 +59,11 @@ export default function PendingJobs(props) {
 
   useEffect(() => {
     console.log("jobs changed update columns...use effect");
-    const chunkSize = Math.ceil(jobs.length / 3);
+    const chunkSize = Math.ceil(jobs?.length / 3);
     const _columns = [];
 
     for (let i = 0; i < 3; i++) {
-      _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
+      _columns.push(jobs?.slice(i * chunkSize, (i + 1) * chunkSize));
     }
     setColumns(_columns);
 
@@ -72,7 +72,7 @@ export default function PendingJobs(props) {
 
   useEffect(() => {
     setJobs(
-      pendingList.map((pendingJob) => {
+      pendingList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
         const newJobName = jobInJobs ? jobInJobs.newJobName : "";
@@ -83,6 +83,7 @@ export default function PendingJobs(props) {
         };
       })
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
@@ -165,7 +166,7 @@ export default function PendingJobs(props) {
 
   return (
     <div>
-      <h2 style={{ padding: "10px", textAlign: "left" }}>Pending Jobs</h2>
+      <h1 style={{ padding: "10px", textAlign: "left" }}>Pending Jobs</h1>
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
@@ -193,7 +194,7 @@ export default function PendingJobs(props) {
               </DialogActions>
             </Dialog>
             <List dense>
-              {column.map((job) => (
+              {column?.map((job) => (
                 <Paper
                   elevation={3}
                   style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto' }}
