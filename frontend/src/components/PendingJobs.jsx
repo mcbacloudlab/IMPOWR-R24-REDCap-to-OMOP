@@ -166,7 +166,7 @@ export default function PendingJobs(props) {
 
   return (
     <div>
-      <h1 style={{ padding: "10px", textAlign: "left" }}>Pending Jobs</h1>
+      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)" }}>Pending Jobs</h1>
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>

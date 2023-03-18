@@ -205,7 +205,7 @@ export default function CompletedJobs(props) {
 
   return (
     <div style={{ maxHeight: "400px" }}>
-      <h1 style={{ padding: "10px", textAlign: "left" }}>Completed Jobs</h1>
+      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)"}}>Completed Jobs</h1>
       <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>

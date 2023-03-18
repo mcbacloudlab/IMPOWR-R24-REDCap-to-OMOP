@@ -31,8 +31,8 @@ import CompletedJobs from "./CompletedJobs";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
-import OMOPLogo from "../assets/6570077.png";
-import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
+// import OMOPLogo from "../assets/6570077.png";
+// import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 
 
 export default function SearchAppBar(props) {
