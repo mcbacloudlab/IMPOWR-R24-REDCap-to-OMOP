@@ -215,12 +215,14 @@ async function getUserJobs(req, res) {
             const startedAt = foundJob.processedOn;
             const finishedAt = foundJob.finishedOn;
             const progress = await foundJob.progress();
+            const dataLength = foundJob.data.dataLength
             // console.log("status", status);
             // console.log("timeadded", timeAdded);
             job.timeAdded = timeAdded;
             job.startedAt = startedAt;
             job.finishedAt = finishedAt;
             job.progress = progress;
+            job.dataLength = dataLength
           }
         } catch (error) {
           console.log("error", error);

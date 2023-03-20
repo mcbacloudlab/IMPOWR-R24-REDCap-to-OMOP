@@ -257,6 +257,9 @@ export default function CompletedJobs(props) {
                             <div>
                               <b>Job ID:</b> {job.jobId}
                             </div>
+                            <div>
+                              <b>REDCap Questions:</b> {job.dataLength}
+                            </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
                               <Input

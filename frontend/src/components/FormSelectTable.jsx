@@ -46,7 +46,7 @@ export default function FormSelectTable({
       }}
       enableRowSelection
       tableInstanceRef={tableInstanceRef}
-      selectAllMode="all"
+      // selectAllMode="all"
       // onRowSelectionChange={handleRowSelection} //connect internal row selection state to your own
       state={{ selectedRows }} //pass our managed row selection state to the table to use
       getRowId={(row) => row.field_name} //give each row a more useful id

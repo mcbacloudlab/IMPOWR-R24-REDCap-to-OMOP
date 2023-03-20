@@ -30,7 +30,8 @@ myQueue.process(jobOptions.concurrency, async (job) => {
   await embedRedcapText(job);
   let result = await compareEmbeddings(job);
   if (result) {
-    console.log("result to return", result.toString());
+    // console.log("result to return", result.toString());
+    console.log('Job finished. Returning results')
   } else {
     console.log("No result");
   }
@@ -51,8 +52,8 @@ async function importToMongo(job) {
       "../mongo/importRedcap_To_MongoDB.js"
     );
     const args = ["--max-old-space-size=32768"];
-    const data = job.data.csvData;
-    const filename = job.data.filename;
+    const data = job.data.data;
+    const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
       stdio: "pipe",
     });
@@ -101,8 +102,8 @@ async function embedRedcapText(job) {
   return new Promise((resolve) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");
     const args = ["--max-old-space-size=32768"];
-    const data = job.data.csvData;
-    const filename = job.data.filename;
+    const data = job.data.data;
+    const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
       stdio: "pipe",
     });
@@ -148,8 +149,8 @@ async function compareEmbeddings(job) {
       "../gpt3/compareRedcapToSnomed.js"
     );
     const args = ["--max-old-space-size=32768"];
-    const data = job.data.csvData;
-    const filename = job.data.filename;
+    const data = job.data.data;
+    const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
       stdio: "pipe",
     });
@@ -230,7 +231,7 @@ async function submit(req, res) {
     try {
       const [rows, fields] = await db
         .promise()
-        .execute(query, [userId, job.id, data.filename, datetimeString]);
+        .execute(query, [userId, job.id, data.selectedForm, datetimeString]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
     } catch (err) {
@@ -315,7 +316,6 @@ async function cancelJob(req, res) {
           console.error("Job not found");
           res.send(`Job ${jobId} not found`);
         } else {
-          activeJobProcess.kill('SIGTERM')
           job.getState().then(async (jobState) => {
             console.log("is com", jobState);
             if (jobState == "active") {

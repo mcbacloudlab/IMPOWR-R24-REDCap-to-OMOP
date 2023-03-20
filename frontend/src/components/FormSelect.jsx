@@ -149,12 +149,16 @@ export default function FormSelect(props) {
     // Reformat the array of objects
     const reformattedArray = selectedRows.map((obj) => obj.original);
     console.log("reformat", reformattedArray);
+    let dataToSendToQueue
     if (!reformattedArray || reformattedArray.length <= 0) {
       console.log("No rows selected");
-      setSelectRowsError(true)
-      return;
+      // setSelectRowsError(true)
+      dataToSendToQueue = data
+      // return;
+    }else{
+      dataToSendToQueue = reformattedArray
     }
-    setSelectRowsError(false)
+    // setSelectRowsError(false)
     window.scrollTo(0, 0); //scroll to top of page
     setShowSubmittedNotifcation(true);
     setTimeout(() => {
@@ -164,8 +168,10 @@ export default function FormSelect(props) {
     myHeaders.append("Authorization", "Bearer " + props.props.token);
     console.log("send data", data);
     var formdata = new FormData();
-    formdata.append("csvData", JSON.stringify(reformattedArray));
-    formdata.append("filename", selectedForm);
+    console.log('object length', dataToSendToQueue.length)
+    formdata.append("data", JSON.stringify(dataToSendToQueue));
+    formdata.append("selectedForm", selectedForm);
+    formdata.append("dataLength", dataToSendToQueue.length);
 
     var requestOptions = {
       method: "POST",
