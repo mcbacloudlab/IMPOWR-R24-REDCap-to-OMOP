@@ -27,16 +27,18 @@ export default function FormSelectTable({
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
       enablePagination={true}
-      muiTablePaginationProps={{
-        // rowsPerPageOptions: [
-        //   { label: '50', value: 50 },
-        //   { label: '100', value: 100 },
-        //   { label: '150', value: 150 },
-        //   { label: '200', value: 200 },
-        //   { label: '500', value: 500 },
-        //   { label: '1000', value: 1000 }
-        // ],
-      }}
+      muiTablePaginationProps={
+        {
+          // rowsPerPageOptions: [
+          //   { label: '50', value: 50 },
+          //   { label: '100', value: 100 },
+          //   { label: '150', value: 150 },
+          //   { label: '200', value: 200 },
+          //   { label: '500', value: 500 },
+          //   { label: '1000', value: 1000 }
+          // ],
+        }
+      }
       // positionPagination='top'
       // enableRowNumbers
       options={{
@@ -44,7 +46,7 @@ export default function FormSelectTable({
       }}
       enableRowSelection
       tableInstanceRef={tableInstanceRef}
-      selectAllMode='all'
+      selectAllMode="all"
       // onRowSelectionChange={handleRowSelection} //connect internal row selection state to your own
       state={{ selectedRows }} //pass our managed row selection state to the table to use
       getRowId={(row) => row.field_name} //give each row a more useful id
@@ -52,7 +54,7 @@ export default function FormSelectTable({
         //add onClick to row to select upon clicking anywhere in the row
         // onClick: row.getToggleSelectedHandler(),
         // sx: { cursor: "pointer" },
-        onClick: () => 
+        onClick: () =>
           setSelectedRows((prev) => ({
             ...prev,
             [row.id]: !prev[row.id],
@@ -61,7 +63,6 @@ export default function FormSelectTable({
         sx: {
           cursor: "pointer",
         },
-        
       })}
       // selectedRows={selectedRows}
       muiTableContainerProps={{
@@ -75,7 +76,7 @@ export default function FormSelectTable({
       enableSorting={true}
       enableStickyHeader
       muiSelectCheckboxProps={{
-        color: 'secondary',
+        color: "secondary",
         // defaultChecked: true, // Select all rows by default
       }}
       muiTablePaperProps={{
@@ -119,13 +120,19 @@ export default function FormSelectTable({
             flexWrap: "wrap",
           }}
         >
-          <Button
-            onClick={() =>
-              console.info(tableInstanceRef.current?.getSelectedRowModel().rows)
-            }
+          {/* <Button
+            onClick={() => {
+              let selectedRows =
+                tableInstanceRef.current?.getSelectedRowModel().rows;
+              console.log("selected rows", selectedRows);
+
+              // Reformat the array of objects
+              const reformattedArray = selectedRows.map((obj) => obj.original);
+              console.log('reformat', reformattedArray)
+            }}
           >
             Log Selected Rows
-          </Button>
+          </Button> */}
           <Button
             color="success"
             onClick={handleExportData}

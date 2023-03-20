@@ -15,8 +15,8 @@ import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
 import TransferList from "./TransferList";
 import { ExportToCsv } from "export-to-csv";
-import Skeleton from '@mui/material/Skeleton';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
+import Skeleton from "@mui/material/Skeleton";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
@@ -30,6 +30,7 @@ export default function FormSelect(props) {
     useState(false);
   const [csvFilename, setCSVFilename] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
+  const [selectRowsError, setSelectRowsError] = useState(false);
 
   var tableInstanceRef = useRef(null);
   useEffect(() => {
@@ -111,9 +112,9 @@ export default function FormSelect(props) {
     setColDefs(heads);
     //removing header
     fileData.splice(0, 1);
-    setSelectedRows(convertToJson(headers, fileData))
+    setSelectedRows(convertToJson(headers, fileData));
     setData(convertToJson(headers, fileData));
-    
+
     // setApprovedData(convertToJson(headers, fileData, true));
     // setIsLoading(false);
     setIsFormLoaded(true);
@@ -142,6 +143,18 @@ export default function FormSelect(props) {
   };
 
   function submitToProcess(e) {
+    let selectedRows = tableInstanceRef.current?.getSelectedRowModel().rows;
+    console.log("selected rows", selectedRows);
+
+    // Reformat the array of objects
+    const reformattedArray = selectedRows.map((obj) => obj.original);
+    console.log("reformat", reformattedArray);
+    if (!reformattedArray || reformattedArray.length <= 0) {
+      console.log("No rows selected");
+      setSelectRowsError(true)
+      return;
+    }
+    setSelectRowsError(false)
     window.scrollTo(0, 0); //scroll to top of page
     setShowSubmittedNotifcation(true);
     setTimeout(() => {
@@ -149,9 +162,9 @@ export default function FormSelect(props) {
     }, 5000);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.props.token);
-
+    console.log("send data", data);
     var formdata = new FormData();
-    formdata.append("csvData", JSON.stringify(data));
+    formdata.append("csvData", JSON.stringify(reformattedArray));
     formdata.append("filename", selectedForm);
 
     var requestOptions = {
@@ -244,7 +257,14 @@ export default function FormSelect(props) {
                 </Button>
               </Grid>
             </FormControl>
-            {isFormLoading && (<Skeleton variant="rounded" sx={{margin: 'auto'}} width={'80%'} height={'30vh'} />)}
+            {isFormLoading && (
+              <Skeleton
+                variant="rounded"
+                sx={{ margin: "auto" }}
+                width={"80%"}
+                height={"30vh"}
+              />
+            )}
             {isFormLoaded && (
               <TransferList
                 props={props}
@@ -262,7 +282,9 @@ export default function FormSelect(props) {
             lg={8}
             sx={{ maxWidth: "100%", overflowX: "auto" }}
           >
-            {isFormLoading && (<Skeleton variant="rounded" width={'100%'} height={'40vh'} />)}
+            {isFormLoading && (
+              <Skeleton variant="rounded" width={"100%"} height={"40vh"} />
+            )}
             {isFormLoaded && (
               <>
                 <FormSelectTable
@@ -288,6 +310,22 @@ export default function FormSelect(props) {
                   >
                     Submit To Queue
                   </Button>
+                  {selectRowsError && (
+                  <Alert
+                    severity="error"
+                    sx={{
+                      fontSize: "1.2rem",
+                      maxWidth: '400px'
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom>
+                      Error
+                    </Typography>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Please select as least 1 row to submit to the queue.
+                    </Typography>
+                  </Alert>
+                )}
                 </Grid>
                 {showSubmittedNotifcation && (
                   <Box
@@ -320,6 +358,7 @@ export default function FormSelect(props) {
                     </Alert>
                   </Box>
                 )}
+               
               </>
             )}
           </Grid>
