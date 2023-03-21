@@ -1,46 +1,76 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 import {
   Button,
+  Box,
+  Grid,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Grid,
   List,
   ListItem,
   ListItemText,
-  IconButton,
-  Input,
   Divider,
+  Input,
+  IconButton,
   Tooltip,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
+import LinearProgress from "@mui/material/LinearProgress";
 
-export default function CompletedJobs(props) {
+export default function MyAccountAllPendingJobs(props) {
   // console.log('completedjobs props', props)
-  const { completedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
-  // console.log("completeld list", completedList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
+  const [pendingList, setPendingList] = useState([]);
   const [jobs, setJobs] = useState(
-    completedList?.map((job) => ({
+    pendingList?.map((job) => ({
       ...job,
       editMode: false,
       newJobName: job.jobName,
     })) || []
   );
+  // console.log("completeld list", pendingList);
+
+  // console.log('token?', token)
+  // const [open, setOpen] = useState(false);
+
   const [columns, setColumns] = useState([]);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+
+  useEffect(() => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("type", "pending");
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/getAllUserJobs`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(JSON.parse(result));
+        setPendingList(JSON.parse(result))
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
+
+
 
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
@@ -83,7 +113,10 @@ export default function CompletedJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        console.log(result);
+        setPendingList(result)
+      })
       .catch((error) => console.log("error", error));
   };
 
@@ -98,12 +131,12 @@ export default function CompletedJobs(props) {
       }
       setColumns(_columns);
     }
-  }, [jobs, completedList]);
+  }, [jobs, pendingList]);
 
   useEffect(() => {
-    // console.log('completedList', completedList)
+    console.log('set')
     setJobs(
-      completedList?.map((pendingJob) => {
+      pendingList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
         const newJobName = jobInJobs ? jobInJobs.newJobName : "";
@@ -115,7 +148,7 @@ export default function CompletedJobs(props) {
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completedList]);
+  }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
     console.log("edit mode for", jobId);
@@ -172,88 +205,75 @@ export default function CompletedJobs(props) {
       )
     );
   };
-  function handleView(job) {
-    if (props.setOpen) props.setOpen(false);
-    // console.log("event view", job);
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + token);
-
-    var requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${job.jobId}`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        // console.log(result);
-        // setOpen(false);
-        navigate("/completed-jobs", {
-          state: {
-            result: result,
-            jobId: job.jobId,
-            submittedBy: job.submittedBy,
-            jobName: job.jobName,
-          },
-        });
-      })
-      .catch((error) => console.log("error", error));
-  }
 
   return (
-    <div style={{ maxHeight: "400px" }}>
-      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)"}}>Completed Jobs</h1>
-      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
+    <div>
+      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)" }}>Pending Jobs</h1>
+      <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
+            <Dialog open={open} onClose={handleClose}>
+              <DialogTitle>Confirm Cancellation</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to cancel this job?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => handleClose(jobIdSelected)}
+                  color="primary"
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => handleConfirm(jobIdSelected)}
+                  color="primary"
+                  autoFocus
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
             <List dense>
-              {column.map((job) => (
+              {column?.map((job) => (
                 <Paper
                   elevation={3}
+                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto' }}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
                 >
                   <ListItem
                     key={job.jobId}
                     sx={{
-                      // borderWidth: "1px",
-                      // borderStyle: "solid",
                       margin: "10px",
-                      
                     }}
                   >
                     <ListItemText
-                      key={job.jobId}
                       primary={
-                        <Grid key={index} item xs={12} md={12}>
+                        <div className="primary-text-container">
                           <div style={{ textAlign: "right" }}>
-                          <Tooltip title="Delete Job">
+                            <Tooltip title="Cancel Job">
                               <IconButton
                                 onClick={() => {
                                   handleClickOpen(job.jobId);
                                 }}
-                                sx={{ color: "white", paddingTop: "10px" }}
+                                sx={{ color: "white" }}
                               >
                                 <CloseIcon />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="View Report">
-                              <IconButton
-                                onClick={(event) => handleView(job)}
-                                value="redcapAPIKey"
-                                sx={{
-                                  color: "white",
-                                }}
-                              >
-                                <SummarizeIcon />
+                            {job.startedAt ? (
+                              <IconButton>
+                                <AutorenewIcon
+                                  className="pending-jobs-icon"
+                                  style={{
+                                    // backgroundColor: "white",
+                                    color: "white",
+                                  }}
+                                />
                               </IconButton>
-                            </Tooltip>
+                            ) : null}
                           </div>
-
                           <span>
                             <div>
                               <b>Job ID:</b> {job.jobId}
@@ -289,9 +309,7 @@ export default function CompletedJobs(props) {
                               sx={{ ml: 2, color: "white" }}
                             >
                               {job.editMode ? (
-                                <Tooltip title="Cancel">
-                                  <CloseIcon />
-                                </Tooltip>
+                                <CloseIcon />
                               ) : (
                                 <Tooltip title="Edit">
                                   <EditIcon />
@@ -310,59 +328,77 @@ export default function CompletedJobs(props) {
                               </IconButton>
                             )}
                           </span>
+                          <div className="job-status-text">
+                            <b>Status:</b> {job.jobStatus}
+                          </div>
 
-                          <div style={{ textAlign: "right" }}>
-                            {/* <div>
-                              <b>Added:</b>{" "}
-                              {new Date(job.timeAdded).toLocaleString()}
-                            </div> */}
+                          <div className="job-started-at-text">
+                            <b>Progress:</b>{" "}
+                            {job.progress ? (
+                              <>
+                                {job.progress}%
+                                <Box
+                                  key={job.jobId}
+                                  sx={{ width: "50%", backgroundColor: "red" }}
+                                >
+                                  <LinearProgress
+                                    key={job.jobId}
+                                    variant="determinate"
+                                    value={job.progress}
+                                    sx={{
+                                      backgroundColor: "white",
+                                      "& .MuiLinearProgress-bar": {
+                                        backgroundColor: "#73fdca",
+                                      },
+                                    }}
+                                  />
+                                </Box>
+                              </>
+                            ) : (
+                              "Not Started Yet"
+                            )}
+                          </div>
+                          <Divider style={{ padding: "10px" }} />
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
                             <div>
-                              <b>Started at:</b>{" "}
-                              {job.startedAt
-                                ? new Date(job.startedAt).toLocaleString()
-                                : "Not Started Yet"}
+                              {/* <Tooltip title="Cancel Job">
+                                <IconButton sx={{ color: "white" }}>
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip> */}
                             </div>
                             <div>
-                              <b>Completed At:</b>{" "}
-                              {job.finishedAt
-                                ? new Date(job.finishedAt).toLocaleString()
-                                : "Not Completed Yet"}
-                            </div>
-
-                            <Divider style={{ marginBottom: "10px" }} />
-                         
-                            <div>
-                              <b>Submitted By:</b> {job.submittedBy}
+                              <div
+                                className="job-added-text"
+                                style={{ textAlign: "right" }}
+                              >
+                                <b>Added:</b>{" "}
+                                {new Date(job.timeAdded).toLocaleString()}
+                              </div>
+                              <div
+                                className="job-started-at-text"
+                                style={{ textAlign: "right" }}
+                              >
+                                <b>Started at:</b>{" "}
+                                {job.startedAt
+                                  ? new Date(job.startedAt).toLocaleString()
+                                  : "Not Started Yet"}
+                              </div>
                             </div>
                           </div>
-                        </Grid>
+                        </div>
                       }
                       style={{ whiteSpace: "pre-wrap" }}
                     />
                   </ListItem>
                 </Paper>
               ))}
-
-              <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Are you sure you want to delete this item?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose} color="primary">
-                    No
-                  </Button>
-                  <Button
-                    onClick={() => handleConfirm(jobIdSelected)}
-                    color="primary"
-                    autoFocus
-                  >
-                    Yes
-                  </Button>
-                </DialogActions>
-              </Dialog>
             </List>
           </Grid>
         ))}

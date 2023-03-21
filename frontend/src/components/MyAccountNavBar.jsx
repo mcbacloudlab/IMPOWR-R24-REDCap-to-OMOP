@@ -28,7 +28,10 @@ import FailedJobs from "./FailedJobs";
 import { styled, alpha } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
 import StorageIcon from "@mui/icons-material/Storage";
-import CollectionsView from "./MyAccountCollectionsView";
+import MyAccountAllCompletedJobs from "./MyAccountAllCompletedJobs";
+import MyAccountCollectionsView from "./MyAccountCollectionsView";
+import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
+import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
 
 const drawerWidth = "240px";
 
@@ -229,8 +232,26 @@ export default function MyAccountNavBar(props) {
           ""
         )}
 
+        {view === "All Completed Jobs" && props.role === "admin" ? (
+          <MyAccountAllCompletedJobs props={props} />
+        ) : (
+          ""
+        )}
+
+        {view === "All Pending Jobs" && props.role === "admin" ? (
+          <MyAccountAllPendingJobs props={props} />
+        ) : (
+          ""
+        )}
+
+        {view === "All Failed Jobs" && props.role === "admin" ? (
+          <MyAccountAllFailedJobs props={props} />
+        ) : (
+          ""
+        )}
+
         {view === "Collections" && props.role === "admin" ? (
-          <CollectionsView props={props} />
+          <MyAccountCollectionsView props={props} />
         ) : (
           ""
         )}

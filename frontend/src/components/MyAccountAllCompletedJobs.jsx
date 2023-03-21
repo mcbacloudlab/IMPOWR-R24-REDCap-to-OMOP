@@ -16,6 +16,7 @@ import {
   Input,
   Divider,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
@@ -23,14 +24,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 
-export default function CompletedJobs(props) {
+export default function MyAccountAllCompletedJobs(props) {
   // console.log('completedjobs props', props)
-  const { completedList } = props.props.props ?? props.props;
   const { token } = props.props.props ?? props.props;
-  // console.log("completeld list", completedList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
+  const [completedList, setCompletedList] = useState([]);
   const [jobs, setJobs] = useState(
     completedList?.map((job) => ({
       ...job,
@@ -38,9 +35,42 @@ export default function CompletedJobs(props) {
       newJobName: job.jobName,
     })) || []
   );
+  // console.log("completeld list", completedList);
+
+  // console.log('token?', token)
+  // const [open, setOpen] = useState(false);
+
   const [columns, setColumns] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("type", "complete");
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/getAllUserJobs`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(JSON.parse(result));
+        setCompletedList(JSON.parse(result))
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
+
+
 
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
@@ -83,7 +113,10 @@ export default function CompletedJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        console.log(result);
+        setCompletedList(result)
+      })
       .catch((error) => console.log("error", error));
   };
 
@@ -101,7 +134,7 @@ export default function CompletedJobs(props) {
   }, [jobs, completedList]);
 
   useEffect(() => {
-    // console.log('completedList', completedList)
+    console.log('set')
     setJobs(
       completedList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
@@ -206,8 +239,21 @@ export default function CompletedJobs(props) {
 
   return (
     <div style={{ maxHeight: "400px" }}>
-      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)"}}>Completed Jobs</h1>
-      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
+      <h1
+        style={{
+          padding: "10px",
+          textAlign: "left",
+          backgroundColor: "rgb(251 251 251)",
+        }}
+      >
+        All Completed Jobs
+      </h1>
+      <Grid
+        container
+        spacing={1}
+        justifyContent="center"
+        style={{ backgroundColor: "rgb(251 251 251)" }}
+      >
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <List dense>
@@ -215,7 +261,12 @@ export default function CompletedJobs(props) {
                 <Paper
                   elevation={3}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
+                  style={{
+                    backgroundColor: "#008C95",
+                    color: "white",
+                    maxWidth: "450px",
+                    margin: "auto",
+                  }}
                 >
                   <ListItem
                     key={job.jobId}
@@ -223,7 +274,6 @@ export default function CompletedJobs(props) {
                       // borderWidth: "1px",
                       // borderStyle: "solid",
                       margin: "10px",
-                      
                     }}
                   >
                     <ListItemText
@@ -231,7 +281,7 @@ export default function CompletedJobs(props) {
                       primary={
                         <Grid key={index} item xs={12} md={12}>
                           <div style={{ textAlign: "right" }}>
-                          <Tooltip title="Delete Job">
+                            <Tooltip title="Delete Job">
                               <IconButton
                                 onClick={() => {
                                   handleClickOpen(job.jobId);
@@ -274,7 +324,7 @@ export default function CompletedJobs(props) {
                                   },
                                 }}
                                 label="Job Name"
-                                value={job.newJobName ? job.newJobName : ""}
+                                value={job.newJobName ? job.newJobName : job.jobName}
                                 onChange={(e) =>
                                   handleJobNameChange(job.jobId, e.target.value)
                                 }
@@ -330,7 +380,7 @@ export default function CompletedJobs(props) {
                             </div>
 
                             <Divider style={{ marginBottom: "10px" }} />
-                         
+
                             <div>
                               <b>Submitted By:</b> {job.submittedBy}
                             </div>

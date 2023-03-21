@@ -24,7 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 
-export default function CollectionsView(props) {
+export default function MyAccountCollectionsView(props) {
   // console.log('completedjobs props', props)
   const { token } = props.props.props ?? props.props;
   // console.log("completeld list", completedList);

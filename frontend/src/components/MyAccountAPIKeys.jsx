@@ -236,7 +236,7 @@ export default function MyAccountAPIKeys(props) {
       })
       .catch((error) => {
         console.log("error", error);
-        setRedcapAPITest("Error");
+        setRedcapAPITest("Error: Unable to connect.");
       });
   };
 

@@ -58,10 +58,16 @@ async function getUserJobs(req, res) {
   await userService.getUserJobs(req, res);
 }
 
+async function getAllUserJobs(req, res) {
+  // const id = req.params.id;
+  await userService.getAllUserJobs(req, res);
+}
+
 module.exports = {
   getUserByEmail,
   createUser,
   signInUser,
   validateUser,
-  getUserJobs
+  getUserJobs,
+  getAllUserJobs
 };
