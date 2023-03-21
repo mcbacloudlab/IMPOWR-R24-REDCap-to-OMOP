@@ -16,7 +16,6 @@ import {
   Input,
   Divider,
   Tooltip,
-  Typography,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
@@ -35,10 +34,6 @@ export default function MyAccountAllCompletedJobs(props) {
       newJobName: job.jobName,
     })) || []
   );
-  // console.log("completeld list", completedList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
 
   const [columns, setColumns] = useState([]);
 
@@ -68,6 +63,7 @@ export default function MyAccountAllCompletedJobs(props) {
         setCompletedList(JSON.parse(result))
       })
       .catch((error) => console.log("error", error));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

@@ -1,47 +1,20 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Input,
-  Divider,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  Typography,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
-import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
-import SummarizeIcon from "@mui/icons-material/Summarize";
-import CheckIcon from "@mui/icons-material/Check";
 
 export default function MyAccountCollectionsView(props) {
   // console.log('completedjobs props', props)
   const [collectionStats, setCollectionStats] = useState([]);
   const { token } = props.props.props ?? props.props;
-  // console.log("completeld list", completedList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
-
-  const [columns, setColumns] = useState([]);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Replace this function with the actual function to fetch collection stats from your server
@@ -70,7 +43,7 @@ export default function MyAccountCollectionsView(props) {
           setCollectionStats((result));
         })
         .catch((error) => console.log("error", error));
-      // const data = await response.json();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

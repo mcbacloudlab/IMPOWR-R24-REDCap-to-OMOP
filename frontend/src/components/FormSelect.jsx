@@ -152,13 +152,13 @@ export default function FormSelect(props) {
     let dataToSendToQueue
     if (!reformattedArray || reformattedArray.length <= 0) {
       console.log("No rows selected");
-      // setSelectRowsError(true)
       dataToSendToQueue = data
+      // setSelectRowsError(true) //uncomment these lines if you want to require rows to be selected, disabled means if no rows selected then all get sent
       // return;
     }else{
       dataToSendToQueue = reformattedArray
     }
-    // setSelectRowsError(false)
+    setSelectRowsError(false)
     window.scrollTo(0, 0); //scroll to top of page
     setShowSubmittedNotifcation(true);
     setTimeout(() => {

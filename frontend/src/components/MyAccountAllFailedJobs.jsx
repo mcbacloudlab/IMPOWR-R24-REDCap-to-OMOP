@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   Button,
@@ -14,19 +13,15 @@ import {
   ListItemText,
   IconButton,
   Input,
-  Divider,
   Tooltip,
-  Typography,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 import ReplayIcon from "@mui/icons-material/Replay";
 
 export default function MyAccountAllFailedJobs(props) {
-  // console.log('completedjobs props', props)
   const { token } = props.props.props ?? props.props;
   const [failedList, setFailedList] = useState([]);
   const [jobs, setJobs] = useState(
@@ -36,14 +31,8 @@ export default function MyAccountAllFailedJobs(props) {
       newJobName: job.jobName,
     })) || []
   );
-  // console.log("completeld list", failedList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
 
   const [columns, setColumns] = useState([]);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     var myHeaders = new Headers();
@@ -69,6 +58,7 @@ export default function MyAccountAllFailedJobs(props) {
         setFailedList(JSON.parse(result))
       })
       .catch((error) => console.log("error", error));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -206,37 +196,6 @@ export default function MyAccountAllFailedJobs(props) {
       )
     );
   };
-  function handleView(job) {
-    if (props.setOpen) props.setOpen(false);
-    // console.log("event view", job);
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + token);
-
-    var requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${job.jobId}`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        // console.log(result);
-        // setOpen(false);
-        navigate("/completed-jobs", {
-          state: {
-            result: result,
-            jobId: job.jobId,
-            submittedBy: job.submittedBy,
-            jobName: job.jobName,
-          },
-        });
-      })
-      .catch((error) => console.log("error", error));
-  }
 
   function handleRetry(jobId) {
     console.log("event view", jobId);

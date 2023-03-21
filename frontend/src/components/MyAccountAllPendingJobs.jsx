@@ -25,7 +25,6 @@ import CheckIcon from "@mui/icons-material/Check";
 import LinearProgress from "@mui/material/LinearProgress";
 
 export default function MyAccountAllPendingJobs(props) {
-  // console.log('completedjobs props', props)
   const { token } = props.props.props ?? props.props;
   const [pendingList, setPendingList] = useState([]);
   const [jobs, setJobs] = useState(
@@ -35,14 +34,8 @@ export default function MyAccountAllPendingJobs(props) {
       newJobName: job.jobName,
     })) || []
   );
-  // console.log("completeld list", pendingList);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
 
   const [columns, setColumns] = useState([]);
-
-  // const navigate = useNavigate();
 
   useEffect(() => {
     var myHeaders = new Headers();
@@ -68,6 +61,7 @@ export default function MyAccountAllPendingJobs(props) {
         setPendingList(JSON.parse(result))
       })
       .catch((error) => console.log("error", error));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
