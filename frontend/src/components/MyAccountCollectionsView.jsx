@@ -65,7 +65,9 @@ export default function MyAccountCollectionsView(props) {
         .then((response) => response.text())
         .then((result) => {
           console.log(JSON.parse(result))
-          setCollectionStats(JSON.parse(result));
+          result = JSON.parse(result)
+          result.sort((a, b) => a.name.localeCompare(b.name));
+          setCollectionStats((result));
         })
         .catch((error) => console.log("error", error));
       // const data = await response.json();
