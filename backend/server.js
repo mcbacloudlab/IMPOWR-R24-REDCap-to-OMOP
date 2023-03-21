@@ -8,6 +8,7 @@ const morgan = require("morgan");
 const userRoutes = require("./routes/userRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const keyRoutes = require("./routes/keyRoutes");
+const collectionRoutes = require("./routes/collectionRoutes")
 const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
@@ -71,18 +72,25 @@ const apiLimiter = rateLimit({
   max: 20, // maximum number of requests in the time window
 });
 
+//api rate limited routes
 app.use("/api/file", apiLimiter);
 app.use("/api/users", apiLimiter);
 app.use("/api/keys", apiLimiter);
 
+//sign in/up routes, no auth necessary
 app.use("/api/users", userRoutes);
-app.use("/api/file", authenticate, fileRoutes);
-app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
-app.use("/api/redcap", authenticate, redcapRoutes);
 
+//authed user routes
+app.use("/api/file", authenticate, fileRoutes);
+app.use("/api/redcap", authenticate, redcapRoutes);
 app.use("/api/queue", authenticate, queueRoutes);
 
-app.use("/admin/queues", router);
+//admin only routes
+app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
+app.use("/api/collections", authenticate, requireAdmin, collectionRoutes);
+
+
+// app.use("/admin/queues", router);
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;
