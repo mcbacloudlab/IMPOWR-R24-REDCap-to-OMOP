@@ -139,7 +139,7 @@ async function embedRedcapText(job) {
 let activeJobProcess
 async function compareEmbeddings(job) {
   console.log("jobid", job.id);
-
+  let storedTotal = false
   console.log("Starting Embedding Comparisons...");
   console.log("job.data");
 
@@ -159,9 +159,9 @@ async function compareEmbeddings(job) {
     process.stdin.write(JSON.stringify(data)); //pass data into child process
     process.stdin.end();
 
-    let capturedData, totalDocuments, currentDocument;
+    let capturedData, totalDocuments, currentDocument, collectionName;
     //capture data returned from child
-    process.stdout.on("data", (data) => {
+    process.stdout.on("data", async (data) => {
       if (data.toString().startsWith("[{")) {
         console.log("data to capture");
         capturedData = data;
@@ -189,6 +189,27 @@ async function compareEmbeddings(job) {
               ? Math.round((currentDocument / totalDocuments) * 100)
               : 1
           );
+        }
+        if (data.toString().startsWith("Collection used")) {
+          collectionName = data.toString().split(":")[1].trim()
+          console.log('captured collection name:', collectionName)
+        }
+
+        if (data.toString().startsWith("Total Documents") ) {
+          console.log('storing total docs in db for job', totalDocuments)
+          console.log('collection used!!', collectionName)
+          console.log('job', job.id)
+          const query = "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+          try {
+            const [rows, fields] = await db
+              .promise()
+              .execute(query, [collectionName, totalDocuments, job.id]);
+            console.log("MongoDB collection info updated in DB for job");
+            // res.send(`Job ${job.id} added to queue`);
+          } catch (err) {
+            console.log("error!", err);
+            throw new Error("Error");
+          }
         }
       }
     });
@@ -226,12 +247,12 @@ async function submit(req, res) {
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
     const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
-    const query = "INSERT INTO jobs (userId, jobId, jobName, lastUpdated) VALUES(?,?,?,?)";
+    const query = "INSERT INTO jobs (userId, jobId, jobName, redcapFormName, lastUpdated) VALUES(?,?,?,?,?)";
 
     try {
       const [rows, fields] = await db
         .promise()
-        .execute(query, [userId, job.id, data.selectedForm, datetimeString]);
+        .execute(query, [userId, job.id, data.selectedForm, data.selectedForm, datetimeString]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
     } catch (err) {
@@ -378,7 +399,7 @@ async function cancelJob(req, res) {
       const [rows, fields] = await db
         .promise()
         .execute(query, [userId, jobId, datetimeString]);
-      console.log("Job inserted into DB");
+      console.log(`Job ${jobId} has been cancelled`);
       res.send(`Job ${jobId} has been cancelled`);
     } catch (err) {
       console.log("error!", err);

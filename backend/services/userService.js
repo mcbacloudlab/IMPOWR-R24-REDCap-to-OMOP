@@ -166,8 +166,8 @@ async function updateJobStatus(jobId) {
 }
 
 async function getUserJobs(req, res) {
-  myQueue.client.on('error', (err) => {
-    console.error('Error connecting to Redis:', err);
+  myQueue.client.on("error", (err) => {
+    console.error("Error connecting to Redis:", err);
   });
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -175,12 +175,12 @@ async function getUserJobs(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
     // console.log('get user jobs for', email)
-    const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName
+    const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
     and jobStatus != 'cancelled' OR jobStatus IS NULL
-    order by lastUpdated desc
+    ORDER BY (jobStatus = 'active') DESC, lastUpdated DESC
     limit 100`;
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
@@ -197,14 +197,18 @@ async function getUserJobs(req, res) {
           if (!foundJob) {
             // console.log("no found job for:" + job.jobId);
             //clean up unfound jobs - likely deleted from redis
-            db.execute(`DELETE FROM jobs WHERE jobId = ?`, [job.jobId], async function (err, results, fields) {
-              if (err) {
-                console.log("error!", err);
-                res.status(500).send("Error");
-              }else{
-                console.log('cleaned up job from db:' + job.jobId)
+            db.execute(
+              `DELETE FROM jobs WHERE jobId = ?`,
+              [job.jobId],
+              async function (err, results, fields) {
+                if (err) {
+                  console.log("error!", err);
+                  res.status(500).send("Error");
+                } else {
+                  console.log("cleaned up job from db:" + job.jobId);
+                }
               }
-            })
+            );
             continue;
           } else {
             // console.log(job)
@@ -214,14 +218,14 @@ async function getUserJobs(req, res) {
             const startedAt = foundJob.processedOn;
             const finishedAt = foundJob.finishedOn;
             const progress = await foundJob.progress();
-            const dataLength = foundJob.data.dataLength
+            const dataLength = foundJob.data.dataLength;
             // console.log("status", status);
             // console.log("timeadded", timeAdded);
             job.timeAdded = timeAdded;
             job.startedAt = startedAt;
             job.finishedAt = finishedAt;
             job.progress = progress;
-            job.dataLength = dataLength
+            job.dataLength = dataLength;
           }
         } catch (error) {
           console.log("error", error);
@@ -251,31 +255,28 @@ async function getAllUserJobs(req, res) {
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    console.log('get user jobs for', req.body.type)
-    let query
-    if(req.body.type == 'complete'){
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email
+    console.log("get user jobs for", req.body.type);
+    let query;
+    if (req.body.type == "complete") {
+      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
       INNER JOIN jobs ON users.id = jobs.userId
       where jobStatus = 'completed'
       order by lastUpdated desc`;
-    }else if(req.body.type == 'pending'){
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email
+    } else if (req.body.type == "pending") {
+      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
       INNER JOIN jobs ON users.id = jobs.userId
       where jobStatus = 'active' or jobStatus = 'waiting'
       order by lastUpdated desc`;
-    }
-    else if(req.body.type == 'failed'){
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email
+    } else if (req.body.type == "failed") {
+      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
       INNER JOIN jobs ON users.id = jobs.userId
       where jobStatus = 'failed'
       order by lastUpdated desc`;
     }
 
-
-    
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
       if (err) {
@@ -308,7 +309,7 @@ async function getAllUserJobs(req, res) {
             const startedAt = foundJob.processedOn;
             const finishedAt = foundJob.finishedOn;
             const progress = await foundJob.progress();
-            const dataLength = foundJob.data.dataLength
+            const dataLength = foundJob.data.dataLength;
             // console.log("status", status);
             // console.log("timeadded", timeAdded);
             job.timeAdded = timeAdded;
@@ -345,5 +346,5 @@ module.exports = {
   signInUser,
   validateUser,
   getUserJobs,
-  getAllUserJobs
+  getAllUserJobs,
 };

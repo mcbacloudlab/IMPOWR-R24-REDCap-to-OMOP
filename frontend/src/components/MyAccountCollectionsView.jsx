@@ -62,7 +62,7 @@ export default function MyAccountCollectionsView(props) {
                 <TableRow>
                   <TableCell><b>Collection Name</b></TableCell>
                   <TableCell align="right"><b>Document Count</b></TableCell>
-                  <TableCell align="right"><b>Storage Size (bytes)</b></TableCell>
+                  <TableCell align="right"><b>Storage Size</b></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -71,8 +71,8 @@ export default function MyAccountCollectionsView(props) {
                     <TableCell component="th" scope="row">
                       {row.name}
                     </TableCell>
-                    <TableCell align="right">{row.documentCount}</TableCell>
-                    <TableCell align="right">{row.storageSize}</TableCell>
+                    <TableCell align="right">{row.documentCount? row.documentCount.toLocaleString(): 'N/A'}</TableCell>
+                    <TableCell align="right">{row.storageSize ? (Number((row.storageSize / 1024 / 1024).toFixed(2))).toLocaleString() + ' MB' : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

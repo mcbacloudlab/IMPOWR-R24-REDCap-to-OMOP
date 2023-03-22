@@ -16,7 +16,9 @@ const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
 const { createBullBoard } = require("bull-board");
 const { BullAdapter } = require("bull-board/bullAdapter");
+const basicAuth = require('express-basic-auth');
 // const _redisServer = require("redis-server");
+
 const someQueue = new Queue("process-queue");
 
 const { router, setQueues, replaceQueues, addQueue, removeQueue } =
@@ -89,8 +91,13 @@ app.use("/api/queue", authenticate, queueRoutes);
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
 app.use("/api/collections", authenticate, requireAdmin, collectionRoutes);
 
+// Exclude all routes under /admin/queues/static from the requireAdmin middleware
+// app.use("/admin/queues/static/*", router);
 
-// app.use("/admin/queues", router);
+// Apply the requireAdmin middleware to all other routes under /admin/queues
+app.use("/admin/queues", router);
+
+
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;

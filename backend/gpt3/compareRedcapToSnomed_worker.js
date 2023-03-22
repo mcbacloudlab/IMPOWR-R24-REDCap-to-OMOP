@@ -6,10 +6,12 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
+const collectionName = "gpt3_snomed_embeddings"
 const snomedCollection = client
   .db("GPT3_Embeddings")
-  .collection("gpt3_snomed_embeddings30k");
+  .collection(collectionName);
 
+  console.log('Collection used: ' + collectionName)
 let finalList = [];
 async function processChunk(
   redCapCollectionArray,
@@ -22,7 +24,7 @@ async function processChunk(
   console.log("Processing Document At:", skip);
   console.log("Processing Document To:", skip + limit);
   finalList = []; //clear between each chunk
-  let snomedCursor, snomedChunk
+  let snomedCursor, snomedChunk;
   try {
     snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
     snomedChunk = await snomedCursor.toArray();
@@ -30,10 +32,15 @@ async function processChunk(
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
   }
-  
+
   // console.log('snomedChunk', snomedChunk)
   for (const redCapDoc of redCapCollectionArray) {
-    if (!redCapDoc || !redCapDoc.gpt3_data || !redCapDoc.gpt3_data.data || redCapDoc.gpt3_data.data.length === 0) {
+    if (
+      !redCapDoc ||
+      !redCapDoc.gpt3_data ||
+      !redCapDoc.gpt3_data.data ||
+      redCapDoc.gpt3_data.data.length === 0
+    ) {
       continue;
     }
 
@@ -44,14 +51,14 @@ async function processChunk(
       let snomedEmbedding = snomed.gpt3_data.data[0].embedding;
       let snomedText = snomed.snomed_text;
       let snomedID = snomed.snomed_id;
-      let _redCapDoc = redCapDoc
+      let _redCapDoc = redCapDoc;
 
       topResults.push({
         redcapFieldLabel,
         snomedText,
         snomedID,
         similarity: cosineSimilarity(snomedEmbedding, redcapEmbedding),
-        extraData: _redCapDoc.obj
+        extraData: _redCapDoc.obj,
       });
     }
 
@@ -67,7 +74,7 @@ async function processChunk(
 async function processChunks(redCapCollectionArray, chunkSize, progress) {
   const count = await snomedCollection.countDocuments();
   // parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
-  parentPort.postMessage( `Total Documents: ${count}`);
+  parentPort.postMessage(`Total Documents: ${count}`);
   // console.log(`Loading SNOMED Collection into memory (${count} documents)...`);
 
   let skip = 0;
@@ -90,11 +97,15 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   //clean up and only return top 3
   // get unique values of redcapFieldLabel
   // parentPort.postMessage( results);
-  const fieldLabels = [...new Set(results.flat().map((item) => item.redcapFieldLabel))];
+  const fieldLabels = [
+    ...new Set(results.flat().map((item) => item.redcapFieldLabel)),
+  ];
   // parentPort.postMessage( fieldLabels);
   // filter the results based on the top 3 similarity values for each redcapFieldLabel
   const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = results.flat().filter((item) => item.redcapFieldLabel === fieldLabel);
+    const items = results
+      .flat()
+      .filter((item) => item.redcapFieldLabel === fieldLabel);
     items.sort((a, b) => b.similarity - a.similarity);
     acc.push(...items.slice(0, 3));
     return acc;

@@ -37,7 +37,7 @@ export default function ProjectBottomBar(props) {
   function PendingDrawer(props) {
     // const classes = useStyles();
     const { pendingList } = props.props;
-    console.log("p1", pendingList);
+    // console.log("p1", pendingList);
 
     const sortedJobs = pendingList.sort((a, b) => {
       return a.jobId - b.jobId;

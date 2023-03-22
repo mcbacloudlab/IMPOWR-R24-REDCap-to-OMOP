@@ -39,8 +39,15 @@ async function getUserByEmail(email) {
 async function requireAdmin(req, res, next) {
   // console.log("require admin");
   // console.log("req", req.body);
+  console.log('query', req.query)
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+  let token
+  if(req.query.token){
+    token = req.query.token
+  }else{
+    token = authHeader && authHeader.split(" ")[1];
+  }
+  
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);

@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
+import Avatar from "@mui/material/Avatar";
 
 export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
@@ -206,8 +207,21 @@ export default function CompletedJobs(props) {
 
   return (
     <div style={{ maxHeight: "400px" }}>
-      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)"}}>Completed Jobs</h1>
-      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
+      <h1
+        style={{
+          padding: "10px",
+          textAlign: "left",
+          backgroundColor: "rgb(251 251 251)",
+        }}
+      >
+        Completed Jobs
+      </h1>
+      <Grid
+        container
+        spacing={1}
+        justifyContent="center"
+        style={{ backgroundColor: "rgb(251 251 251)" }}
+      >
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <List dense>
@@ -215,7 +229,12 @@ export default function CompletedJobs(props) {
                 <Paper
                   elevation={3}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
+                  style={{
+                    backgroundColor: "#008C95",
+                    color: "white",
+                    maxWidth: "450px",
+                    margin: "auto",
+                  }}
                 >
                   <ListItem
                     key={job.jobId}
@@ -223,43 +242,61 @@ export default function CompletedJobs(props) {
                       // borderWidth: "1px",
                       // borderStyle: "solid",
                       margin: "10px",
-                      
                     }}
                   >
                     <ListItemText
                       key={job.jobId}
                       primary={
-                        <Grid key={index} item xs={12} md={12}>
-                          <div style={{ textAlign: "right" }}>
-                          <Tooltip title="Delete Job">
-                              <IconButton
-                                onClick={() => {
-                                  handleClickOpen(job.jobId);
-                                }}
-                                sx={{ color: "white", paddingTop: "10px" }}
+                        <Grid key={index} item xs={12}>
+                          <Grid container alignItems="center">
+                            <Grid item xs={4}>
+                              <Avatar
+                                sx={{ bgcolor: "#aad9dc", color: 'black' }}
+                                aria-label="recipe"
                               >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="View Report">
-                              <IconButton
-                                onClick={(event) => handleView(job)}
-                                value="redcapAPIKey"
-                                sx={{
-                                  color: "white",
-                                }}
-                              >
-                                <SummarizeIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </div>
+                                {job.jobId}
+                              </Avatar>
+                            </Grid>
+                            <Grid item xs={8} style={{ textAlign: "right" }}>
+                              <Tooltip title="Delete Job">
+                                <IconButton
+                                  onClick={() => {
+                                    handleClickOpen(job.jobId);
+                                  }}
+                                  sx={{ color: "white", paddingTop: "10px" }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="View Report">
+                                <IconButton
+                                  onClick={(event) => handleView(job)}
+                                  value="redcapAPIKey"
+                                  sx={{
+                                    color: "white",
+                                  }}
+                                >
+                                  <SummarizeIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Grid>
+                          </Grid>
 
                           <span>
-                            <div>
+                            {/* <div>
                               <b>Job ID:</b> {job.jobId}
+                            </div> */}
+                            <div>
+                              <b>REDCap Form:</b> {job.redcapFormName}
                             </div>
                             <div>
                               <b>REDCap Questions:</b> {job.dataLength}
+                            </div>
+                            <div>
+                              <b>Collection / Doc Size:</b>{" "}
+                              {`${
+                                job.collectionName
+                              } / ${job.totalCollectionDocs.toLocaleString()}`}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
@@ -330,7 +367,7 @@ export default function CompletedJobs(props) {
                             </div>
 
                             <Divider style={{ marginBottom: "10px" }} />
-                         
+
                             <div>
                               <b>Submitted By:</b> {job.submittedBy}
                             </div>
