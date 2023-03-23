@@ -13,7 +13,7 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
-  // Divider,
+  Divider,
   Input,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
@@ -21,6 +21,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import Avatar from "@mui/material/Avatar";
 
 export default function FailedJobs(props) {
   const { failedList } = props.props.props ?? props.props;
@@ -70,7 +71,7 @@ export default function FailedJobs(props) {
       failedList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
         const editMode = jobInJobs ? jobInJobs.editMode : false;
-        const newJobName = jobInJobs ? jobInJobs.newJobName : ''
+        const newJobName = jobInJobs ? jobInJobs.newJobName : "";
         return {
           ...pendingJob,
           editMode: editMode,
@@ -185,38 +186,55 @@ export default function FailedJobs(props) {
 
   return (
     <div style={{}}>
-      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)" }}>Failed Jobs</h1>
-      <Grid container spacing={1} justifyContent="center" style={{ backgroundColor: "rgb(251 251 251)"}}>
+      <h1
+        style={{
+          padding: "10px",
+          textAlign: "left",
+          backgroundColor: "rgb(251 251 251)",
+        }}
+      >
+        Failed Jobs
+      </h1>
+      <Grid
+        container
+        spacing={1}
+        justifyContent="center"
+        style={{ backgroundColor: "rgb(251 251 251)" }}
+      >
         {columns?.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <Dialog open={open} onClose={handleClose}>
-                    <DialogTitle>Confirm Deletion</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText>
-                        Are you sure you want to delete this item?
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={handleClose} color="primary">
-                        No
-                      </Button>
-                      <Button
-                        onClick={() => handleConfirm(jobIdSelected)}
-                        color="primary"
-                        autoFocus
-                      >
-                        Yes
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Are you sure you want to delete this item?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  No
+                </Button>
+                <Button
+                  onClick={() => handleConfirm(jobIdSelected)}
+                  color="primary"
+                  autoFocus
+                >
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
             <List dense>
               {column?.map((job) => (
                 <Paper
                   elevation={3}
                   key={job.jobId}
-                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto'}}
+                  style={{
+                    backgroundColor: "#008C95",
+                    color: "white",
+                    maxWidth: "450px",
+                    margin: "auto",
+                  }}
                 >
-                  
                   <ListItem
                     key={job.jobId}
                     sx={{
@@ -225,82 +243,99 @@ export default function FailedJobs(props) {
                   >
                     <ListItemText
                       primary={
-                        <div className="primary-text-container">
-                          <div style={{ textAlign: "right" }}>
-                            <Tooltip title="Delete Job">
-                              <IconButton
-                                onClick={() => {
-                                  handleClickOpen(job.jobId);
-                                }}
-                                sx={{ color: "white", paddingTop: "10px" }}
+                        <Grid key={index} item xs={12}>
+                          <Grid container alignItems="center">
+                            <Grid item xs={4}>
+                              <Avatar
+                                sx={{ bgcolor: "#aad9dc", color: "black" }}
+                                aria-label="recipe"
                               >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Retry Job">
-                              <IconButton
-                                onClick={(event) => handleRetry(job.jobId)}
-                                sx={{
-                                  color: "white",
-                                }}
-                              >
-                                <ReplayIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </div>
-                          <span
-                          // style={{ flex: 1 }}
-                          >
-                            <div>
-                              <b>Job ID:</b> {job.jobId}
-                            </div>
-                            <b>Job Name:</b>
-                            {job.editMode ? (
-                              <Input
-                                variant="standard"
-                                sx={{
-                                  marginLeft: "10px",
-                                  width: "200px",
-                                  input: {
-                                    color: "black",
-                                    backgroundColor: "white",
-                                  },
-                                }}
-                                label="Job Name"
-                                value={job.newJobName ? job.newJobName : ""}
-                                onChange={(e) =>
-                                  handleJobNameChange(job.jobId, e.target.value)
-                                }
-                              />
-                            ) : (
-                              <> {job.jobName}</>
-                            )}
+                                {job.jobId}
+                              </Avatar>
+                            </Grid>
+                            <Grid item xs={8} style={{ textAlign: "right" }}>
+                              <Tooltip title="Delete Job">
+                                <IconButton
+                                  onClick={() => {
+                                    handleClickOpen(job.jobId);
+                                  }}
+                                  sx={{ color: "white", paddingTop: "10px" }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Retry Job">
+                                <IconButton
+                                  onClick={(event) => handleRetry(job.jobId)}
+                                  sx={{
+                                    color: "white",
+                                  }}
+                                >
+                                  <ReplayIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Grid>
+                          </Grid>
 
-                            <IconButton
-                              variant="outlined"
-                              onClick={() => handleToggleEditMode(job.jobId)}
-                              sx={{ ml: 2, color: "white" }}
-                            >
-                              {job.editMode ? (
-                                <CloseIcon />
-                              ) : (
-                                <Tooltip title="Edit">
-                                  <EditIcon />
-                                </Tooltip>
-                              )}
-                            </IconButton>
-                            {job.editMode && (
-                              <IconButton
-                                variant="contained"
-                                sx={{ color: "white" }}
-                                onClick={() => handleUpdateName(job.jobId)}
-                              >
-                                <Tooltip title="Submit">
-                                  <CheckIcon />
-                                </Tooltip>
-                              </IconButton>
+                          <div>
+                            <b>REDCap Form:</b> {job.redcapFormName}
+                          </div>
+                          <div>
+                            <b>REDCap Questions:</b> {job.dataLength}
+                          </div>
+                          <div>
+                            <b>Collection / Doc Size:</b>{" "}
+                            {`${
+                              job.collectionName
+                            } / ${job.totalCollectionDocs.toLocaleString()}`}
+                          </div>
+                          <b>Job Name:</b>
+                          {job.editMode ? (
+                            <Input
+                              variant="standard"
+                              sx={{
+                                marginLeft: "10px",
+                                width: "200px",
+                                input: {
+                                  color: "black",
+                                  backgroundColor: "white",
+                                },
+                              }}
+                              label="Job Name"
+                              value={job.newJobName ? job.newJobName : ""}
+                              onChange={(e) =>
+                                handleJobNameChange(job.jobId, e.target.value)
+                              }
+                            />
+                          ) : (
+                            <> {job.jobName}</>
+                          )}
+
+                          <IconButton
+                            variant="outlined"
+                            onClick={() => handleToggleEditMode(job.jobId)}
+                            sx={{ ml: 2, color: "white" }}
+                          >
+                            {job.editMode ? (
+                              <CloseIcon />
+                            ) : (
+                              <Tooltip title="Edit">
+                                <EditIcon />
+                              </Tooltip>
                             )}
-                          </span>
+                          </IconButton>
+                          {job.editMode && (
+                            <IconButton
+                              variant="contained"
+                              sx={{ color: "white" }}
+                              onClick={() => handleUpdateName(job.jobId)}
+                            >
+                              <Tooltip title="Submit">
+                                <CheckIcon />
+                              </Tooltip>
+                            </IconButton>
+                          )}
+
                           <div className="job-status-text">
                             <b>Status:</b> {job.jobStatus}
                           </div>
@@ -317,34 +352,32 @@ export default function FailedJobs(props) {
                               ></span>
                             ) : null}
                           </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <div></div>
+
+                          <div style={{ textAlign: "right" }}>
                             <div>
-                              <div
-                                className="job-added-text"
-                                style={{ textAlign: "right" }}
-                              >
-                                <b>Added:</b>{" "}
-                                {new Date(job.timeAdded).toLocaleString()}
-                              </div>
-                              <div
-                                className="job-started-at-text"
-                                style={{ textAlign: "right" }}
-                              >
-                                <b>Started at:</b>{" "}
-                                {job.startedAt
-                                  ? new Date(job.startedAt).toLocaleString()
-                                  : "Not Started Yet"}
-                              </div>
+                              <b>Added:</b>{" "}
+                              {new Date(job.timeAdded).toLocaleString()}
+                            </div>
+                            <div>
+                              <b>Started at:</b>{" "}
+                              {job.startedAt
+                                ? new Date(job.startedAt).toLocaleString()
+                                : "Not Started Yet"}
+                            </div>
+                            <div>
+                              <b>Completed At:</b>{" "}
+                              {job.finishedAt
+                                ? new Date(job.finishedAt).toLocaleString()
+                                : "Not Completed Yet"}
+                            </div>
+
+                            <Divider style={{ marginBottom: "10px" }} />
+
+                            <div>
+                              <b>Submitted By:</b> {job.submittedBy}
                             </div>
                           </div>
-                        </div>
+                        </Grid>
                       }
                       style={{ whiteSpace: "pre-wrap" }}
                     />

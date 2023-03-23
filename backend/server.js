@@ -17,7 +17,11 @@ const Queue = require("bull");
 const { createBullBoard } = require("bull-board");
 const { BullAdapter } = require("bull-board/bullAdapter");
 const basicAuth = require('express-basic-auth');
+const syncRedisAndJobDB = require('./gpt3/syncRedisAndJobDB');
 // const _redisServer = require("redis-server");
+
+// Sync redis and mysql job ids
+setInterval(syncRedisAndJobDB, 60000);
 
 const someQueue = new Queue("process-queue");
 
@@ -105,4 +109,5 @@ var server = app.listen(appPort, function () {
   console.info("Port to use:", port);
   if (host === "::") host = "localhost";
   console.info("Backend Express Server listening at http://%s:%s", host, port);
+  syncRedisAndJobDB()
 });

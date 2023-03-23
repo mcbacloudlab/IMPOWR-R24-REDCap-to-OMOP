@@ -6,12 +6,12 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
-const collectionName = "gpt3_snomed_embeddings"
+const collectionName = "gpt3_snomed_embeddings";
 const snomedCollection = client
   .db("GPT3_Embeddings")
   .collection(collectionName);
 
-  console.log('Collection used: ' + collectionName)
+console.log("Collection used: " + collectionName);
 let finalList = [];
 async function processChunk(
   redCapCollectionArray,
@@ -102,12 +102,16 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   ];
   // parentPort.postMessage( fieldLabels);
   // filter the results based on the top 3 similarity values for each redcapFieldLabel
+  // console.log('field labels', fieldLabels)
+  console.log("results", results);
+  const uniqueResults = removeDuplicateObjects(results);
+  console.log(uniqueResults);
   const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = results
+    const items = uniqueResults
       .flat()
       .filter((item) => item.redcapFieldLabel === fieldLabel);
     items.sort((a, b) => b.similarity - a.similarity);
-    acc.push(...items.slice(0, 3));
+    acc.push(...items.slice(0, 5));
     return acc;
   }, []);
   // parentPort.postMessage('filtering data down done' );
@@ -117,6 +121,27 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   parentPort.close();
   process.exit(0);
 }
+
+const removeDuplicateObjects = (arr) => {
+  // Initialize an empty Set to keep track of unique object keys
+  const uniqueSet = new Set();
+  
+  // Flatten the array of arrays using flatMap
+  const flattenedArray = arr.flatMap(subArray => subArray);
+  
+  // Filter the flattened array to keep only unique objects based on the custom key
+  const uniqueArray = flattenedArray.filter(obj => {
+    // Create a custom key based on specific properties
+    const key = `${obj.redcapFieldLabel}-${obj.snomedText}-${obj.snomedID}`;
+    if (!uniqueSet.has(key)) {
+      uniqueSet.add(key);
+      return true;
+    }
+    return false;
+  });
+  
+  return uniqueArray;
+};
 
 // console.log('start compare child');
 processChunks(workerData.redCapCollectionArray, 30000, workerData.progress);
