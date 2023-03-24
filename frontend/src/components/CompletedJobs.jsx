@@ -23,10 +23,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 import Avatar from "@mui/material/Avatar";
+import { useLists } from "./ListsContext";
 
 export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
-  const { completedList } = props.props.props ?? props.props;
+  // const { completedList } = props.props.props ?? props.props;
+  const {
+    completedList,
+  } = useLists();
   const { token } = props.props.props ?? props.props;
   // console.log("completeld list", completedList);
 

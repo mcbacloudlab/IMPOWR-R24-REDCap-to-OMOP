@@ -31,12 +31,22 @@ import CompletedJobs from "./CompletedJobs";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
+import { useLists } from "./ListsContext";
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 
 
 export default function SearchAppBar(props) {
+
   // console.log('search bar', props.user)
+  const {
+    pendingList,
+    failedList,
+    completedList,
+    setPendingList,
+    setFailedList,
+    setCompletedList,
+  } = useLists();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
@@ -251,9 +261,9 @@ export default function SearchAppBar(props) {
           if (obj.jobStatus === "failed") return obj;
           else return null;
         });
-        props.setPendingList(_pendingList);
-        props.setFailedList(_failedList);
-        props.setCompletedList(_completedList);
+        setPendingList(_pendingList);
+        setFailedList(_failedList);
+        setCompletedList(_completedList);
       })
       .catch((error) => {
         handleSignOut();
@@ -321,14 +331,14 @@ export default function SearchAppBar(props) {
             */}
 
             <Box sx={{ flexGrow: 1 }} />
-            {props.pendingList && props.pendingList.length > 0 && (
+            {pendingList && pendingList.length > 0 && (
               <IconButton
                 size="large"
                 aria-label="show pending jobs"
                 // color="inherit"
                 onClick={() => handleIconClick(0)}
               >
-                <Badge badgeContent={props.pendingList.length} color="error">
+                <Badge badgeContent={pendingList.length} color="error">
                   <Tooltip title="Pending Jobs">
                     <AutorenewIcon
                       className="pending-jobs-icon"

@@ -24,10 +24,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import LinearProgress from "@mui/material/LinearProgress";
 import Avatar from "@mui/material/Avatar";
+import { useLists } from "./ListsContext";
 
 export default function PendingJobs(props) {
   // console.log("pendinglist", props);
-  const { pendingList } = props.props.props ?? props.props;
+  // const { pendingList } = props.props.props ?? props.props;
+  const {
+    pendingList,
+  } = useLists();
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(

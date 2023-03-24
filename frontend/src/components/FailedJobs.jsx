@@ -22,9 +22,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import Avatar from "@mui/material/Avatar";
+import { useLists } from "./ListsContext";
 
 export default function FailedJobs(props) {
-  const { failedList } = props.props.props ?? props.props;
+  // const { failedList } = props.props.props ?? props.props;
+  const {
+    failedList,
+  } = useLists();
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(

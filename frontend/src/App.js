@@ -1,6 +1,6 @@
 // import logo from './logo.svg';
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchAppBar from "./components/SearchAppBar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -15,7 +15,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
 import CompletedJobsViewPage from "./pages/CompletedJobsViewPage";
-
+import { ListsProvider } from "./components/ListsContext";
 // const darkTheme = createTheme({
 //   palette: {
 //     mode: "dark",
@@ -138,6 +138,7 @@ function App() {
       <div className="App">
         <header className="App-header">
           <BrowserRouter>
+          <ListsProvider>
             <div>
               {user && (
                 <SearchAppBar
@@ -236,16 +237,10 @@ function App() {
                       validateJwtToken={validateJwtToken}
                       token={token}
                       setToken={setToken}
-                      setPendingList={setPendingList}
-                      setCompletedList={setCompletedList}
                     >
                       <CompletedJobsViewPage
                         user={user}
                         token={token}
-                        pendingList={pendingList}
-                        completedList={completedList}
-                        setPendingList={setPendingList}
-                        setCompletedList={setCompletedList}
                       ></CompletedJobsViewPage>
                     </ProtectedRoute>
                   }
@@ -274,6 +269,7 @@ function App() {
                 <Route component={Error} />
               </Routes>
             </div>
+            </ListsProvider>
           </BrowserRouter>
         </header>
       </div>
