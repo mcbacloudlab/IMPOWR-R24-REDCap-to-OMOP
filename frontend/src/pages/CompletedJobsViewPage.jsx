@@ -33,12 +33,10 @@ export default function CompletedJobsViewPage(props) {
   const [verifiedRecords, setVerifiedRecords] = useState(0);
   const [allVerified, setAllVerified] = useState(false);
   const [value, setValue] = useState(0);
-  const [addSSError, setaddSSError] = useState();
-  const [open, setOpen] = useState(false);
-  const [sorting, setSorting] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
+  const [finalData, setFinalData] = useState("")
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
@@ -381,6 +379,7 @@ export default function CompletedJobsViewPage(props) {
 
     // Store the dataString in local storage with the key "myData"
     localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
+    setFinalData(JSON.stringify(data, null, 2))
   }
 
   function showTab(e, value, switching, panelIndex) {
@@ -495,7 +494,7 @@ export default function CompletedJobsViewPage(props) {
               saveFile={saveFile}
             />
 
-            {allVerified && (
+            {(allVerified && selectedTabIdx === 0 || selectedTabIdx === 2) && (
               <Button
                 sx={{ float: "right" }}
                 variant="contained"
@@ -506,7 +505,9 @@ export default function CompletedJobsViewPage(props) {
               >
                 Submit
               </Button>
+              
             )}
+            <Typography>{finalData}</Typography>
           </>
         )}
       </Container>
