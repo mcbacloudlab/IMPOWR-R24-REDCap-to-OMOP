@@ -31,19 +31,19 @@ export default function CompletedJobTable({
       memoMode="cells" // memoize table cells to improve render performance, but break some features
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
-      enablePagination={true}
+      enablePagination={false}
       enableExpanding
       enableExpandAll
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize
-      paginateExpandedRows={false} 
+      paginateExpandedRows={true} 
       RowProps={{ sx: { marginBottom: "10px" } }}
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
         sx: { 
-         maxWidth: "100vw" },
+         maxWidth: "100vw", maxHeight: '60vh' },
       }}
       onSortingChange={setSorting}
       initialState={{
@@ -149,7 +149,7 @@ export default function CompletedJobTable({
           {/* </Typography> */}
 
           <Box style={{ marginLeft: "auto" }}>
-            <Button
+            {/* <Button
               variant="outlined"
               color="error"
               startIcon={<CloseIcon />}
@@ -157,7 +157,7 @@ export default function CompletedJobTable({
               onClick={(event) => resetScreen(event, value)}
             >
               Close File
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       )}

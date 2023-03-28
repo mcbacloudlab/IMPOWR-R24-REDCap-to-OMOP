@@ -23,7 +23,7 @@ export default function SignIn_Page(props) {
         >
           <Grid container spacing={1} justifyContent="center">
             <Grid item md={12} lg={4}>
-            <Alert severity="error">Server Error. Check the backend server is up and running as well as the Redis server.</Alert>
+            {/* <Alert severity="error">Server Error. Check the backend server is up and running as well as the Redis server.</Alert> */}
             <SignIn props={props}/>
             </Grid>
           </Grid>

@@ -9,6 +9,9 @@ import { Button, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CheckIcon from "@mui/icons-material/Check";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import UnpublishedIcon from "@mui/icons-material/Unpublished";
+import VerifiedIcon from "@mui/icons-material/Verified";
 // import CheckIcon from "@mui/icons-material/Check";
 
 // var XLSX = require("xlsx");
@@ -27,13 +30,14 @@ export default function CompletedJobsViewPage(props) {
   const [allVerified, setAllVerified] = useState(false);
 
   const location = useLocation();
-  let _jobId, _data, _jobName, _submittedBy;
-  // console.log("location", location.state);
+  let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
+  console.log("location", location.state);
   if (location.state.jobId) {
     _jobId = location.state.jobId;
     _data = location.state.result;
     _jobName = location.state.jobName;
     _submittedBy = location.state.submittedBy;
+    _redcapFormName = location.state.redcapFormName;
   }
   let _dataObj;
   const columns = useMemo(() => colDefs, [colDefs]);
@@ -42,7 +46,7 @@ export default function CompletedJobsViewPage(props) {
     console.log("build table?");
 
     // Retrieve the dataString from local storage using the key "myData"
-    const dataString = localStorage.getItem("myData");
+    const dataString = localStorage.getItem(_redcapFormName + "_" + _jobId);
 
     // If dataString is not null, parse it back into an object
     const localStorageData = dataString ? JSON.parse(dataString) : null;
@@ -63,7 +67,11 @@ export default function CompletedJobsViewPage(props) {
     // console.log("rowId", row.snomedID);
 
     const updatedData = _dataObj.map((item) => {
-      if (item.redcapFieldLabel === row.redcapFieldLabel) {
+      console.log("row", row);
+      if (
+        item.redcapFieldLabel === row.redcapFieldLabel &&
+        item.extraData.field_name === row.extraData.field_name
+      ) {
         console.log("item", item);
         //increment counter only if row has not been verified previously
         if (item.verified === false) {
@@ -101,6 +109,13 @@ export default function CompletedJobsViewPage(props) {
     _dataObj = updatedData;
     console.log("_dataObj", _dataObj);
     setData(updatedData);
+
+    //save the data to local storage
+    setIsSaving(true);
+    const dataString = JSON.stringify(updatedData);
+    // Store the dataString in local storage with the key "myData"
+    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
+    setIsSaving(false);
     // setData(data)
   }
 
@@ -147,15 +162,14 @@ export default function CompletedJobsViewPage(props) {
       console.log("result", result);
       // Calculate the number of objects with "verified" set to true
       const verifiedCount = result.reduce((count, obj) => {
-        console.log(obj.verified === true)
+        console.log(obj.verified === true);
 
-        
         // Check if the "verified" key is true, and increment the count if it is
         return obj.verified === true ? count + 1 : count;
       }, 0); // Initialize the accumulator (count) with 0
       // Update the state with the new verified count
-      if(verifiedCount === result.length){
-        setAllVerified(true)
+      if (verifiedCount === result.length) {
+        setAllVerified(true);
       }
       setVerifiedRecords(verifiedCount);
     }
@@ -171,7 +185,7 @@ export default function CompletedJobsViewPage(props) {
             verifyRow(cell.row.original);
           }}
         >
-          Prefer this one
+          Prefer
         </Button>
       ) : (
         <Typography>
@@ -311,39 +325,10 @@ export default function CompletedJobsViewPage(props) {
 
   function saveFile() {
     setIsSaving(true);
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", "Bearer " + props.token);
-    var raw = JSON.stringify({
-      data: { fileName: csvFilename, fileData: data },
-    });
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/save_data_dictionary`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        setSaveSuccess(true);
-        setTimeout(function () {
-          setSaveSuccess(false);
-        }, 5000);
-
-        setIsSaving(false);
-        setIsSavingErr(false);
-      })
-      .catch((error) => {
-        setIsSaving(false);
-        setIsSavingErr(true);
-        console.info("error", error);
-      });
+    const dataString = JSON.stringify(data);
+    // Store the dataString in local storage with the key "myData"
+    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
+    setIsSaving(false);
   }
 
   function submitToProcess() {
@@ -353,7 +338,7 @@ export default function CompletedJobsViewPage(props) {
     const dataString = JSON.stringify(data);
 
     // Store the dataString in local storage with the key "myData"
-    localStorage.setItem("myData", dataString);
+    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
   }
 
   return (
@@ -378,6 +363,10 @@ export default function CompletedJobsViewPage(props) {
 
         {isFormLoaded && (
           <>
+            {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
+            <Typography>
+              Verified {verifiedRecords}/{totalRecords}
+            </Typography>
             <CompletedJobTable
               props={props}
               columns={columns}
@@ -388,9 +377,7 @@ export default function CompletedJobsViewPage(props) {
               isSaving={isSaving}
               saveFile={saveFile}
             />
-            <Typography>
-              Verified {verifiedRecords}/{totalRecords}
-            </Typography>
+
             {allVerified && (
               <Button
                 sx={{ float: "right" }}

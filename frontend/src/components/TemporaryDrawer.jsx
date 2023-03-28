@@ -8,7 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-// import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search';
 // import BackupIcon from '@mui/icons-material/Backup';
 // import MailIcon from '@mui/icons-material/Mail';
 import IconButton from '@mui/material/IconButton';
@@ -49,14 +49,14 @@ export default function TemporaryDrawer() {
               <ListItemText primary={'Project Management'} />
             </ListItemButton>
           </ListItem>
-          {/* <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
+          <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <SearchIcon />
               </ListItemIcon>
               <ListItemText primary={'Data Dictionary Mapping'} />
             </ListItemButton>
-          </ListItem> */}
+          </ListItem>
           {/* <ListItem key={'Archived'} component={NavLink} to="/archived" disablePadding>
             <ListItemButton>
               <ListItemIcon>

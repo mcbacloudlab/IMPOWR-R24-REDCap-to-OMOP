@@ -179,7 +179,7 @@ export default function CompletedJobs(props) {
   };
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
-    // console.log("event view", job);
+    console.log("event view", job);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -203,6 +203,7 @@ export default function CompletedJobs(props) {
             jobId: job.jobId,
             submittedBy: job.submittedBy,
             jobName: job.jobName,
+            redcapFormName: job.redcapFormName
           },
         });
       })
