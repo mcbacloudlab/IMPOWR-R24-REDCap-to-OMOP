@@ -255,7 +255,7 @@ export default function SearchAppBar(props) {
         const statusCode = response.status
         if(statusCode !== 200){
           console.log('Error!', statusCode)
-          handleSignOut('Server error')
+          // handleSignOut('Server error')
           return;
         }else return response.text()
       })
@@ -326,7 +326,7 @@ export default function SearchAppBar(props) {
         // setCompletedList(_completedList);
       })
       .catch((error) => {
-        handleSignOut();
+        // handleSignOut();
         console.log("error", error);
       });
   }

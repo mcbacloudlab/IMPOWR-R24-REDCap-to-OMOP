@@ -5,19 +5,23 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
-import { Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CheckIcon from "@mui/icons-material/Check";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import UnpublishedIcon from "@mui/icons-material/Unpublished";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 // import CheckIcon from "@mui/icons-material/Check";
 
 // var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
   // console.log("complete view page", props);
   const [data, setData] = useState("");
+  const [tempAllData, setTempAllData] = useState("");
   const [colDefs, setColDefs] = useState([]);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [jobId, setJobId] = useState();
@@ -28,6 +32,13 @@ export default function CompletedJobsViewPage(props) {
   const [totalRecords, setTotalRecords] = useState(0);
   const [verifiedRecords, setVerifiedRecords] = useState(0);
   const [allVerified, setAllVerified] = useState(false);
+  const [value, setValue] = useState(0);
+  const [addSSError, setaddSSError] = useState();
+  const [open, setOpen] = useState(false);
+  const [sorting, setSorting] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [selectedFile, setSelectedFile] = useState(1);
+  const [selectedTabIdx, setSelectedTabIdx] = useState(0);
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
@@ -55,13 +66,44 @@ export default function CompletedJobsViewPage(props) {
       console.log("using local storage data");
       if (_jobId) setJobId(_jobId);
       buildTable(localStorageData, true);
+      setTempAllData(localStorageData);
     } else if (_data) {
       console.log("using default job data");
       if (_jobId) setJobId(_jobId);
       buildTable(JSON.parse(_data), false);
+      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
+
+  function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`full-width-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
+      </div>
+    );
+  }
+
+  TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  };
+
+  function a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      "aria-controls": `simple-tabpanel-${index}`,
+    };
+  }
 
   function verifyRow(row) {
     // console.log("rowId", row.snomedID);
@@ -109,7 +151,7 @@ export default function CompletedJobsViewPage(props) {
     _dataObj = updatedData;
     console.log("_dataObj", _dataObj);
     setData(updatedData);
-
+    setTempAllData(updatedData);
     //save the data to local storage
     setIsSaving(true);
     const dataString = JSON.stringify(updatedData);
@@ -173,7 +215,7 @@ export default function CompletedJobsViewPage(props) {
       }
       setVerifiedRecords(verifiedCount);
     }
-
+    setTempAllData(result);
     console.log("result", result);
     setTotalRecords(result.length);
 
@@ -341,6 +383,59 @@ export default function CompletedJobsViewPage(props) {
     localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
   }
 
+  function showTab(e, value, switching, panelIndex) {
+    setIsLoading(true);
+    // setSelectedFile(value);
+    if (!panelIndex) panelIndex = 0;
+    setSelectedTabIdx(panelIndex);
+    if (!switching) handleChange(e, 0); //reset tab to default tab
+    console.log("panelIndex", panelIndex);
+
+    //set table data based on panelIndex
+    // console.log("data", JSON.parse(data));
+    switch (panelIndex) {
+      case 0: {
+        console.log("selected 0");
+        setData(tempAllData);
+        break;
+      }
+      case 1: {
+        console.log("selected 1");
+        console.log("data", data);
+        // Use the filter() method to get elements where the 'verified' key is false
+        const unverifiedElements = tempAllData.filter((item) => {
+          // Return true for elements where 'verified' is false
+          console.log('unverified item?', item)
+          return item.verified === false;
+        });
+        console.log('unverified', unverifiedElements)
+        setData(unverifiedElements);
+        break;
+      }
+      case 2: {
+        console.log("selected 2");
+         // Use the filter() method to get elements where the 'verified' key is false
+         const verifiedElements = tempAllData.filter((item) => {
+          console.log('verified item?', item)
+          // Return true for elements where 'verified' is false
+          return item.verified === true;
+        });
+        console.log('verified elements', verifiedElements)
+        setData(verifiedElements);
+        break;
+      }
+
+      default: {
+        console.log("default selected");
+        break;
+      }
+    }
+  }
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <>
       <Container component="main" maxWidth="90%">
@@ -367,6 +462,28 @@ export default function CompletedJobsViewPage(props) {
             <Typography>
               Verified {verifiedRecords}/{totalRecords}
             </Typography>
+            <Tabs
+              centered
+              value={value}
+              onChange={handleChange}
+              aria-label="basic tabs example"
+            >
+              <Tab
+                onClick={(event) => showTab(event, csvFilename, true, 0)}
+                label="All"
+                {...a11yProps(0)}
+              />
+              <Tab
+                onClick={(event) => showTab(event, csvFilename, true, 1)}
+                label="Needs Review"
+                {...a11yProps(1)}
+              />
+              <Tab
+                onClick={(event) => showTab(event, csvFilename, true, 2)}
+                label="Verified"
+                {...a11yProps(2)}
+              />
+            </Tabs>
             <CompletedJobTable
               props={props}
               columns={columns}
