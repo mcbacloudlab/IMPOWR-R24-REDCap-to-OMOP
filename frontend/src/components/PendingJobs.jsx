@@ -70,12 +70,14 @@ export default function PendingJobs(props) {
     for (let i = 0; i < 3; i++) {
       _columns.push(jobs?.slice(i * chunkSize, (i + 1) * chunkSize));
     }
+    console.log('before set columns, jobs', _columns)
     setColumns(_columns);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, pendingList]);
 
   useEffect(() => {
+    console.log('pending list changed, update jobs')
     setJobs(
       pendingList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
@@ -92,7 +94,7 @@ export default function PendingJobs(props) {
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
-    // console.log("edit mode for", jobId);
+    console.log("edit mode for", jobId);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, editMode: !job.editMode } : job
@@ -138,6 +140,7 @@ export default function PendingJobs(props) {
   };
 
   const handleJobNameChange = (jobId, newValue) => {
+    console.log('handle job name change', newValue)
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, newJobName: newValue } : job
@@ -284,9 +287,11 @@ export default function PendingJobs(props) {
                                 variant="standard"
                                 sx={{
                                   marginLeft: "10px",
-                                  width: "200px",
+                                  width: "250px",
                                   input: {
                                     color: "black",
+                                    paddingLeft: '20px',
+                                    paddingRight: '30px',
                                     backgroundColor: "white",
                                   },
                                 }}
@@ -297,7 +302,7 @@ export default function PendingJobs(props) {
                                 }
                               />
                             ) : (
-                              <> {job.jobName}</>
+                              <> {job.newJobName ? job.newJobName : ""}</>
                             )}
 
                             <IconButton

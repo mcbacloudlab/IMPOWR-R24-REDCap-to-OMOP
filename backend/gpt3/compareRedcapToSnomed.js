@@ -58,6 +58,7 @@ main().then(async () => {
         });
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
+        console.log('merged doc', mergedDocument)
         return mergedDocument;
       })
     );
@@ -106,15 +107,15 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
   console.info(
     "Calculating top similarities between Redcap Text and SNOMED text..."
   );
-  let barTotal = redCapCollectionArray.length;
-  const bar = new ProgressBar.Bar(
-    {
-      format:
-        "Processing... |{bar}| {percentage}% |  ETA: {eta}s  | {value}/{total}",
-    },
-    ProgressBar.Presets.shades_classic
-  );
-  bar.start(barTotal, 0);
+  // let barTotal = redCapCollectionArray.length;
+  // const bar = new ProgressBar.Bar(
+  //   {
+  //     format:
+  //       "Processing... |{bar}| {percentage}% |  ETA: {eta}s  | {value}/{total}",
+  //   },
+  //   ProgressBar.Presets.shades_classic
+  // );
+  // bar.start(barTotal, 0);
 
   for (let i = 0; i < numWorkers; i++) {
     const start = i * chunkSize;

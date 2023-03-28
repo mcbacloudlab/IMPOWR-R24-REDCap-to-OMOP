@@ -166,8 +166,20 @@ async function updateJobStatus(jobId) {
 }
 
 async function getUserJobs(req, res) {
+  // Define a boolean variable to track whether a response has been sent
+  let responseSent = false;
+
   myQueue.client.on("error", (err) => {
+    // Log the error
     console.error("Error connecting to Redis:", err);
+    // Check if a response has already been sent
+    if (!responseSent) {
+      // Send the response
+      res.status(500).json({ message: "Error. Redis server is down" });
+      // Set the variable to indicate that a response has been sent
+      responseSent = true;
+      return;
+    }
   });
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -229,7 +241,7 @@ async function getUserJobs(req, res) {
           }
         } catch (error) {
           console.log("error", error);
-          res.status(500).send("Error");
+          if(!responseSent) res.status(500).send("Error");
         }
         // console.log('jobstat', job.jobStatus)
         if (job.jobStatus != "completed") {

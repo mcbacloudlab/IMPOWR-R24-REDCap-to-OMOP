@@ -32,12 +32,11 @@ import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
+import _ from "lodash";
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 
-
 export default function SearchAppBar(props) {
-
   // console.log('search bar', props.user)
   const {
     pendingList,
@@ -54,7 +53,7 @@ export default function SearchAppBar(props) {
   // const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
-  // const [jobs, setJobs] = useState();
+  const [redisError, setRedisError] = useState();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -66,10 +65,18 @@ export default function SearchAppBar(props) {
       let userCookie = JSON.parse(Cookies.get("user"));
       // setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
-      let userInfo
+      let userInfo;
       // console.log('the props!!!', props)
       if (props.user) {
-        userInfo = JSON.parse(props.user);
+        try {
+          // Attempt to parse the string as JSON
+          userInfo = JSON.parse(props.user);
+        } catch (error) {
+          // Handle the case where the string is not valid JSON
+          console.info('The provided string is not a valid JSON object:', error.message);
+          return;
+        }
+        
       }
       // console.log("prfewefwefops.", userInfo);
       setRole(userInfo.role);
@@ -100,6 +107,7 @@ export default function SearchAppBar(props) {
     Cookies.remove("user");
     props.setToken(null);
     props.updateUser(null);
+    props.setServerError(true)
     navigate("/signin");
   };
 
@@ -243,9 +251,18 @@ export default function SearchAppBar(props) {
       `${process.env.REACT_APP_BACKEND_API_URL}/api/users/getUserJobs`,
       requestOptions
     )
-      .then((response) => response.text())
+      .then((response) => {
+        const statusCode = response.status
+        if(statusCode !== 200){
+          console.log('Error!', statusCode)
+          handleSignOut('Server error')
+          return;
+        }else return response.text()
+      })
       .then((result) => {
+        
         let resultObj = JSON.parse(result);
+        
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
             return obj;
@@ -261,9 +278,52 @@ export default function SearchAppBar(props) {
           if (obj.jobStatus === "failed") return obj;
           else return null;
         });
-        setPendingList(_pendingList);
-        setFailedList(_failedList);
-        setCompletedList(_completedList);
+        // console.log("pending", pendingList);
+        // console.log("_pending", _pendingList);
+        // if (!_.isEqual(pendingList, _pendingList)) {
+        //   console.log('set the pending, found diff')
+        //   setPendingList(_pendingList);
+        // }
+
+        // Use functional update form of setState
+        setPendingList((prevPendingList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevPendingList, _pendingList)) {
+            console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _pendingList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevPendingList;
+        });
+
+        // Use functional update form of setState
+        setFailedList((prevFailedList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevFailedList, _failedList)) {
+            console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _failedList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevFailedList;
+        });
+
+        // Use functional update form of setState
+        setCompletedList((prevCompletedList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevCompletedList, _completedList)) {
+            console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _completedList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevCompletedList;
+        });
+
+        // setPendingList(_pendingList);
+        // setFailedList(_failedList);
+        // setCompletedList(_completedList);
       })
       .catch((error) => {
         handleSignOut();

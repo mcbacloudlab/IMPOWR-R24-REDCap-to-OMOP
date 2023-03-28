@@ -6,6 +6,9 @@ import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
 import { Button, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import CheckIcon from "@mui/icons-material/Check";
 // import CheckIcon from "@mui/icons-material/Check";
 
 // var XLSX = require("xlsx");
@@ -16,6 +19,12 @@ export default function CompletedJobsViewPage(props) {
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [jobId, setJobId] = useState();
   const [csvFilename, setCSVFilename] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingErr, setIsSavingErr] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [verifiedRecords, setVerifiedRecords] = useState(0);
+  const [allVerified, setAllVerified] = useState(false);
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy;
@@ -30,25 +39,59 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    if (_data) {
+    console.log("build table?");
+
+    // Retrieve the dataString from local storage using the key "myData"
+    const dataString = localStorage.getItem("myData");
+
+    // If dataString is not null, parse it back into an object
+    const localStorageData = dataString ? JSON.parse(dataString) : null;
+    console.log("localStorageData", localStorageData);
+    if (localStorageData) {
+      console.log("using local storage data");
       if (_jobId) setJobId(_jobId);
-      if (_data) buildTable(JSON.parse(_data));
+      buildTable(localStorageData, true);
+    } else if (_data) {
+      console.log("using default job data");
+      if (_jobId) setJobId(_jobId);
+      buildTable(JSON.parse(_data), false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
 
   function verifyRow(row) {
     // console.log("rowId", row.snomedID);
+
     const updatedData = _dataObj.map((item) => {
       if (item.redcapFieldLabel === row.redcapFieldLabel) {
+        console.log("item", item);
+        //increment counter only if row has not been verified previously
+        if (item.verified === false) {
+          // Update both verifiedRecords and totalRecords using functional updates
+          setVerifiedRecords((prevVerifiedRecords) => {
+            const updatedVerifiedRecords = prevVerifiedRecords + 1;
+
+            // Use functional update to access the latest value of totalRecords
+            setTotalRecords((prevTotalRecords) => {
+              if (updatedVerifiedRecords === prevTotalRecords) {
+                setAllVerified(true);
+              }
+              return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
+            });
+
+            return updatedVerifiedRecords;
+          });
+        }
         const updatedSubRows = item.subRows.map((subRow) => ({
           ...subRow,
-          selected: subRow.snomedID === row.snomedID ? "true" : "false",
+          selected: subRow.snomedID === row.snomedID ? true : false,
+          verified: true,
         }));
         return {
           ...item,
-          selected: item.snomedID === row.snomedID ? "true" : "false",
+          selected: item.snomedID === row.snomedID ? true : false,
           subRows: updatedSubRows,
+          verified: true,
         };
       }
       return item;
@@ -56,87 +99,72 @@ export default function CompletedJobsViewPage(props) {
 
     // console.log("updatedData", updatedData);
     _dataObj = updatedData;
+    console.log("_dataObj", _dataObj);
     setData(updatedData);
     // setData(data)
   }
 
-  function buildTable(data) {
-    const result = [];
+  function buildTable(data, localStorageFlag) {
+    console.log("buildTable, dat", data);
+    let result = [];
     let currentRedcapFieldLabel = null;
+    let currentRedcapFieldName = null;
     let currentItem = null;
+    //create verified and selected keys if first time and not using localStorage data
+    if (!localStorageFlag) {
+      data.forEach((item, index) => {
+        // console.log("item", item);
+        // console.log("item.redcapFieldLabel", item.redcapFieldLabel);
+        // console.log("item.extraData.field_name", item.extraData.field_name);
+        if (
+          item.redcapFieldLabel !== currentRedcapFieldLabel ||
+          item.extraData.field_name !== currentRedcapFieldName
+        ) {
+          console.log("create new record");
+          if (currentItem) {
+            result.push(currentItem);
+          }
+          item.selected = false;
+          item.verified = false;
+          currentItem = { ...item, subRows: [] };
+          currentRedcapFieldLabel = item.redcapFieldLabel;
+          currentRedcapFieldName = item.extraData.field_name;
+        } else {
+          currentItem.subRows.push({
+            ...item,
+            selected: false,
+            verified: false,
+          });
+        }
 
-    data.forEach((item, index) => {
-      if (item.redcapFieldLabel !== currentRedcapFieldLabel) {
-        if (currentItem) {
+        if (index === data.length - 1) {
           result.push(currentItem);
         }
-        item.selected = "true";
-        currentItem = { ...item, subRows: [] };
-        currentRedcapFieldLabel = item.redcapFieldLabel;
-      } else {
-        currentItem.subRows.push({ ...item, selected: "false" });
-      }
+      });
+    } else {
+      result = data;
+      //count verified records
+      console.log("result", result);
+      // Calculate the number of objects with "verified" set to true
+      const verifiedCount = result.reduce((count, obj) => {
+        console.log(obj.verified === true)
 
-      if (index === data.length - 1) {
-        result.push(currentItem);
+        
+        // Check if the "verified" key is true, and increment the count if it is
+        return obj.verified === true ? count + 1 : count;
+      }, 0); // Initialize the accumulator (count) with 0
+      // Update the state with the new verified count
+      if(verifiedCount === result.length){
+        setAllVerified(true)
       }
-    });
-    // console.log("result", result);
-    // const headers = Object.keys(result[0])
-    // .map((key, value) => {
-    //   if (key === "similarity") {
-    //     return {
-    //       accessorKey: key.replace(/\./g, ""),
-    //       header: key.replace(/\./g, ""),
-    //       Cell: ({ cell }) =>
-    //         cell.getValue().toLocaleString("en-US", {
-    //           style: "percent",
-    //           minimumFractionDigits: 2,
-    //         }),
-    //     };
-    //   } else if (key === "selected") {
-    //     return {
-    //       accessorKey: key.replace(/\./g, ""),
-    //       header: key.replace(/\./g, ""),
-    //       Cell: ({ cell }) =>
-    //         cell.getValue() === "false" ? (
-    //           <Box sx={{
-    //             // backgroundColor: "red"
-    //             }}>
-    //             <Button
-    //               variant={"contained"}
-    //               onClick={() => {
-    //                 verifyRow(cell.row.original);
-    //               }}
-    //             >
-    //               Prefer this one
-    //             </Button>
-    //           </Box>
-    //         ) : (
-    //           <Box sx={{
-    //             // color: 'white',
-    //             // backgroundColor: "darkGrey"
-    //             }}>
-    //             <Typography>
-    //               <CheckIcon/>
-    //               {/* <b>Preferred</b> */}
-    //             </Typography>
-    //           </Box>
-    //         ),
-    //     };
-    //   } else if (key !== "subRows") {
-    //     return {
-    //       accessorKey: key.replace(/\./g, ""),
-    //       header: key.replace(/\./g, ""),
-    //     };
-    //   } else return null;
-    // })
-    // .filter((header) => header !== null);
-    const MyCell = ({ cell, row }) => {
-      // console.log('row', row)
-      // console.log('row depth', row.depth)
+      setVerifiedRecords(verifiedCount);
+    }
 
-      return cell.getValue() === "false" ? (
+    console.log("result", result);
+    setTotalRecords(result.length);
+
+    const PreferredCell = ({ cell, row }) => {
+      return cell.getValue() === false ? (
         <Button
           variant={"contained"}
           onClick={() => {
@@ -152,10 +180,18 @@ export default function CompletedJobsViewPage(props) {
       );
     };
 
+    const VerifiedCell = ({ cell, row }) => {
+      return cell.getValue() === false ? <CloseIcon /> : <CheckIcon />;
+    };
+
     const cols = [
       {
         header: "Redcap Field Label",
         accessorKey: "redcapFieldLabel",
+      },
+      {
+        header: "REDCap Field Name",
+        accessorKey: "extraData.field_name",
       },
       {
         header: "Snomed Text",
@@ -191,7 +227,26 @@ export default function CompletedJobsViewPage(props) {
         accessorKey: "selected",
         //you can access a row instance in column definition option callbacks like this
 
-        Cell: MyCell,
+        Cell: PreferredCell,
+        sx: {
+          "& .MuiButton-root": {
+            backgroundColor: "blue",
+            color: "white",
+          },
+          "& .MuiTypography-root": {
+            color: "green",
+          },
+          "& .subrow": {
+            backgroundColor: "yellow",
+          },
+        },
+      },
+      {
+        header: "Verified",
+        accessorKey: "verified",
+        //you can access a row instance in column definition option callbacks like this
+
+        Cell: VerifiedCell,
         sx: {
           "& .MuiButton-root": {
             backgroundColor: "blue",
@@ -254,6 +309,53 @@ export default function CompletedJobsViewPage(props) {
     setJobId();
   }
 
+  function saveFile() {
+    setIsSaving(true);
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", "Bearer " + props.token);
+    var raw = JSON.stringify({
+      data: { fileName: csvFilename, fileData: data },
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/file/save_data_dictionary`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setSaveSuccess(true);
+        setTimeout(function () {
+          setSaveSuccess(false);
+        }, 5000);
+
+        setIsSaving(false);
+        setIsSavingErr(false);
+      })
+      .catch((error) => {
+        setIsSaving(false);
+        setIsSavingErr(true);
+        console.info("error", error);
+      });
+  }
+
+  function submitToProcess() {
+    console.log("submit!");
+    console.log("data", data);
+    // Convert the data object to a JSON string before storing it in local storage
+    const dataString = JSON.stringify(data);
+
+    // Store the dataString in local storage with the key "myData"
+    localStorage.setItem("myData", dataString);
+  }
+
   return (
     <>
       <Container component="main" maxWidth="90%">
@@ -273,14 +375,35 @@ export default function CompletedJobsViewPage(props) {
             </span>
           </span>
         </div>
+
         {isFormLoaded && (
-          <CompletedJobTable
-            props={props}
-            columns={columns}
-            data={data}
-            handleExportData={handleExportData}
-            resetScreen={resetScreen}
-          />
+          <>
+            <CompletedJobTable
+              props={props}
+              columns={columns}
+              data={data}
+              handleExportData={handleExportData}
+              resetScreen={resetScreen}
+              saveSuccess={saveSuccess}
+              isSaving={isSaving}
+              saveFile={saveFile}
+            />
+            <Typography>
+              Verified {verifiedRecords}/{totalRecords}
+            </Typography>
+            {allVerified && (
+              <Button
+                sx={{ float: "right" }}
+                variant="contained"
+                color="primary"
+                component="label"
+                startIcon={<AddTaskIcon />}
+                onClick={(e) => submitToProcess(e)}
+              >
+                Submit
+              </Button>
+            )}
+          </>
         )}
       </Container>
     </>

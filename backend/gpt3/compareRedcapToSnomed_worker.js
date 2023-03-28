@@ -97,21 +97,47 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   //clean up and only return top 3
   // get unique values of redcapFieldLabel
   // parentPort.postMessage( results);
+
   const fieldLabels = [
-    ...new Set(results.flat().map((item) => item.redcapFieldLabel)),
+    ...new Set(results.flat().map((item) => (item.redcapFieldLabel + '-' + item.extraData.field_name))),
   ];
+
+  // console.log("Original results:", results);
+
+  // // Flatten the results and map each item to a combined string representation
+  // const combinedLabels = results.flat().map((item) => {
+  //   const combinedLabel = `${item.redcapFieldLabel}-${item.extraData.field_name}`;
+  //   return combinedLabel;
+  // });
+
+  // console.log("Combined labels:", combinedLabels);
+
+  // // Get the unique combined labels using a Set
+  // const uniqueCombinedLabels = [...new Set(combinedLabels)];
+
+  // console.log("Unique combined labels:", uniqueCombinedLabels);
+
+  // // Split each unique combined label back into separate properties
+  // const fieldLabels = uniqueCombinedLabels.map((combinedLabel) => {
+  //   const [redcapFieldLabel, fieldName] = combinedLabel.split("-");
+  //   return { redcapFieldLabel, fieldName };
+  // });
+
+  // console.log("Final field labels:", fieldLabels);
+
   // parentPort.postMessage( fieldLabels);
   // filter the results based on the top 3 similarity values for each redcapFieldLabel
   // console.log('field labels', fieldLabels)
-  console.log("results", results);
-  const uniqueResults = removeDuplicateObjects(results);
-  console.log(uniqueResults);
+  const uniqueResults = await removeDuplicateObjects(results);
+  console.log("unique", uniqueResults);
   const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
     const items = uniqueResults
       .flat()
-      .filter((item) => item.redcapFieldLabel === fieldLabel);
+      .filter((item) => item.redcapFieldLabel + '-' + item.extraData.field_name === fieldLabel);
+
     items.sort((a, b) => b.similarity - a.similarity);
-    acc.push(...items.slice(0, 5));
+    console.log('the items!', items)
+    acc.push(...items.slice(0, 3));
     return acc;
   }, []);
   // parentPort.postMessage('filtering data down done' );
@@ -123,23 +149,25 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
 }
 
 const removeDuplicateObjects = (arr) => {
+  console.log("remove dupes");
   // Initialize an empty Set to keep track of unique object keys
   const uniqueSet = new Set();
-  
+
   // Flatten the array of arrays using flatMap
-  const flattenedArray = arr.flatMap(subArray => subArray);
-  
+  const flattenedArray = arr.flatMap((subArray) => subArray);
+
   // Filter the flattened array to keep only unique objects based on the custom key
-  const uniqueArray = flattenedArray.filter(obj => {
+  const uniqueArray = flattenedArray.filter((obj) => {
     // Create a custom key based on specific properties
-    const key = `${obj.redcapFieldLabel}-${obj.snomedText}-${obj.snomedID}`;
+    console.log("obj", obj);
+    const key = `${obj.redcapFieldLabel}-${obj.snomedText}-${obj.snomedID}-${obj.extraData.field_name}`;
     if (!uniqueSet.has(key)) {
       uniqueSet.add(key);
       return true;
     }
     return false;
   });
-  
+
   return uniqueArray;
 };
 

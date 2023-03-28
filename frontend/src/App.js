@@ -127,6 +127,7 @@ function App() {
   const [pendingList, setPendingList] = useState();
   const [failedList, setFailedList] = useState();
   const [completedList, setCompletedList] = useState();
+  const [serverError, setServerError] = useState(false)
 
   const updateUser = (newUser) => {
     setUser(newUser);
@@ -152,6 +153,7 @@ function App() {
                   setPendingList={setPendingList}
                   setFailedList={setFailedList}
                   setCompletedList={setCompletedList}
+                  setServerError={setServerError}
                 />
               )}
               <Routes>
@@ -253,6 +255,7 @@ function App() {
                       updateUser={updateUser}
                       token={token}
                       setToken={setToken}
+                      serverError={serverError}
                     ></SignInPage>
                   }
                   exact

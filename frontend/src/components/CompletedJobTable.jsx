@@ -4,6 +4,9 @@ import MaterialReactTable from "material-react-table";
 import { Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import SaveIcon from "@mui/icons-material/Save";
+import CircularProgress from "@mui/material/CircularProgress";
+import CheckIcon from "@mui/icons-material/Check";
 // import TableRow from "@mui/material/TableRow";
 
 export default function CompletedJobTable({
@@ -34,11 +37,13 @@ export default function CompletedJobTable({
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize
+      paginateExpandedRows={false} 
       RowProps={{ sx: { marginBottom: "10px" } }}
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { maxHeight: "80vh", maxWidth: "100vw" },
+        sx: { 
+         maxWidth: "100vw" },
       }}
       onSortingChange={setSorting}
       initialState={{
@@ -108,7 +113,7 @@ export default function CompletedJobTable({
             flexWrap: "wrap",
           }}
         >
-          {/* <Button
+          <Button
             variant="contained"
             color="primary"
             component="label"
@@ -124,7 +129,7 @@ export default function CompletedJobTable({
             onClick={(event) => saveFile(event, value)}
           >
             Save
-          </Button> */}
+          </Button>
 
           <Button
             color="success"
