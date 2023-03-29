@@ -26,9 +26,7 @@ import { useLists } from "./ListsContext";
 
 export default function FailedJobs(props) {
   // const { failedList } = props.props.props ?? props.props;
-  const {
-    failedList,
-  } = useLists();
+  const { failedList } = useLists();
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(
@@ -289,9 +287,12 @@ export default function FailedJobs(props) {
                           </div>
                           <div>
                             <b>Collection / Doc Size:</b>{" "}
-                            {`${
-                              job.collectionName
-                            } / ${job.totalCollectionDocs.toLocaleString()}`}
+                            {job.collectionName &&
+                            job.totalCollectionDocs !== null
+                              ? `${
+                                  job.collectionName
+                                } / ${job.totalCollectionDocs.toLocaleString()}`
+                              : "N/A"}
                           </div>
                           <b>Job Name:</b>
                           {job.editMode ? (

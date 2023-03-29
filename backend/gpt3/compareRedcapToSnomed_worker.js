@@ -35,14 +35,15 @@ async function processChunk(
 
   // console.log('snomedChunk', snomedChunk)
   for (const redCapDoc of redCapCollectionArray) {
-    if (
-      !redCapDoc ||
-      !redCapDoc.gpt3_data ||
-      !redCapDoc.gpt3_data.data ||
-      redCapDoc.gpt3_data.data.length === 0
-    ) {
-      continue;
-    }
+    // if (
+    //   !redCapDoc ||
+    //   !redCapDoc.gpt3_data ||
+    //   !redCapDoc.gpt3_data.data ||
+    //   redCapDoc.gpt3_data.data.length === 0
+    // ) {
+    //   continue;
+    // }
+    // console.log('redcapDoc', redCapDoc)
 
     let redcapFieldLabel = redCapDoc.fieldLabel;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
@@ -101,6 +102,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   const fieldLabels = [
     ...new Set(results.flat().map((item) => (item.redcapFieldLabel + '-' + item.extraData.field_name))),
   ];
+  // console.log('fieldLabels', fieldLabels.length)
 
   // console.log("Original results:", results);
 
@@ -128,28 +130,31 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
   // parentPort.postMessage( fieldLabels);
   // filter the results based on the top 3 similarity values for each redcapFieldLabel
   // console.log('field labels', fieldLabels)
-  const uniqueResults = await removeDuplicateObjects(results);
-  console.log("unique", uniqueResults);
+  // const uniqueResults = await removeDuplicateObjects(results);
+  // console.log("results", results.flat());
   const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = uniqueResults
+    const items = results
       .flat()
       .filter((item) => item.redcapFieldLabel + '-' + item.extraData.field_name === fieldLabel);
 
     items.sort((a, b) => b.similarity - a.similarity);
-    console.log('the items!', items)
+    // console.log('the items!', items)
     acc.push(...items.slice(0, 3));
     return acc;
   }, []);
   // parentPort.postMessage('filtering data down done' );
   // parentPort.postMessage({ log: filteredData.flat() });
+  setTimeout(() =>{
+    parentPort.postMessage({ endResult: filteredData.flat() });
+    parentPort.close();
+    process.exit(0);
+  }, 15000)
 
-  parentPort.postMessage({ endResult: filteredData.flat() });
-  parentPort.close();
-  process.exit(0);
+ 
 }
 
 const removeDuplicateObjects = (arr) => {
-  console.log("remove dupes");
+  // console.log("remove dupes");
   // Initialize an empty Set to keep track of unique object keys
   const uniqueSet = new Set();
 

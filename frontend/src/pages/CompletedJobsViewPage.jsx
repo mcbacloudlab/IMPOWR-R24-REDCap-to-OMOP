@@ -15,6 +15,7 @@ import UnpublishedIcon from "@mui/icons-material/Unpublished";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Badge from "@mui/material/Badge";
 // import CheckIcon from "@mui/icons-material/Check";
 
 // var XLSX = require("xlsx");
@@ -36,7 +37,7 @@ export default function CompletedJobsViewPage(props) {
   const [isLoading, setIsLoading] = useState(false);
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
-  const [finalData, setFinalData] = useState("")
+  const [finalData, setFinalData] = useState("");
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
@@ -69,7 +70,6 @@ export default function CompletedJobsViewPage(props) {
       console.log("using default job data");
       if (_jobId) setJobId(_jobId);
       buildTable(JSON.parse(_data), false);
-      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
@@ -379,7 +379,7 @@ export default function CompletedJobsViewPage(props) {
 
     // Store the dataString in local storage with the key "myData"
     localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
-    setFinalData(JSON.stringify(data, null, 2))
+    setFinalData(JSON.stringify(data, null, 2));
   }
 
   function showTab(e, value, switching, panelIndex) {
@@ -404,22 +404,24 @@ export default function CompletedJobsViewPage(props) {
         // Use the filter() method to get elements where the 'verified' key is false
         const unverifiedElements = tempAllData.filter((item) => {
           // Return true for elements where 'verified' is false
-          console.log('unverified item?', item)
+          console.log("unverified item?", item);
           return item.verified === false;
         });
-        console.log('unverified', unverifiedElements)
+        console.log("unverified", unverifiedElements);
+        // setUnverifiedElements(unverifiedElements.length)
         setData(unverifiedElements);
         break;
       }
       case 2: {
         console.log("selected 2");
-         // Use the filter() method to get elements where the 'verified' key is false
-         const verifiedElements = tempAllData.filter((item) => {
-          console.log('verified item?', item)
+        // Use the filter() method to get elements where the 'verified' key is false
+        const verifiedElements = tempAllData.filter((item) => {
+          console.log("verified item?", item);
           // Return true for elements where 'verified' is false
           return item.verified === true;
         });
-        console.log('verified elements', verifiedElements)
+        console.log("verified elements", verifiedElements);
+        // setVerifiedElements(_verifiedElements.length)
         setData(verifiedElements);
         break;
       }
@@ -469,17 +471,56 @@ export default function CompletedJobsViewPage(props) {
             >
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 0)}
-                label="All"
+                label={
+                  <Box sx={{ position: 'relative', margin: '20px' }}>
+                  All
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      right: '-20px', // Adjust the right position of the badge
+                    }}
+                  >
+                    <Badge badgeContent={totalRecords} max={9999} color="secondary" />
+                  </Box>
+                </Box>
+                }
                 {...a11yProps(0)}
               />
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 1)}
-                label="Needs Review"
+                label={
+                  <Box sx={{ position: 'relative', margin: '20px' }}>
+                    Needs Review
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: '-20px', // Adjust the right position of the badge
+                      }}
+                    >
+                      <Badge badgeContent={totalRecords - verifiedRecords} max={9999} color="secondary" />
+                    </Box>
+                  </Box>
+                }
                 {...a11yProps(1)}
               />
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 2)}
-                label="Verified"
+                label={
+                  <Box sx={{ position: 'relative', margin: '20px' }}>
+                  Verified
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      right: '-20px', // Adjust the right position of the badge
+                    }}
+                  >
+                    <Badge badgeContent={verifiedRecords} max={9999} color="secondary" />
+                  </Box>
+                </Box>
+                }
                 {...a11yProps(2)}
               />
             </Tabs>
@@ -494,7 +535,8 @@ export default function CompletedJobsViewPage(props) {
               saveFile={saveFile}
             />
 
-            {(allVerified && selectedTabIdx === 0 || selectedTabIdx === 2) && (
+            {((allVerified && selectedTabIdx === 0) ||
+              selectedTabIdx === 2) && (
               <Button
                 sx={{ float: "right" }}
                 variant="contained"
@@ -505,7 +547,6 @@ export default function CompletedJobsViewPage(props) {
               >
                 Submit
               </Button>
-              
             )}
             <Typography>{finalData}</Typography>
           </>

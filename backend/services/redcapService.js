@@ -2,6 +2,7 @@ const db = require("../db/mysqlConnection.cjs");
 const crypto = require("crypto");
 var axios = require("axios");
 var FormData = require("form-data");
+var cheerio = require('cheerio')
 
 function decrypt(encryptedData, iv, algorithm, secretKey) {
   const decipher = crypto.createDecipheriv(
@@ -139,6 +140,10 @@ async function exportMetadata(req,res){
         // console.log(JSON.stringify(response.data));
         const metadata = response.data;
         // console.log('metadata', metadata)
+        metadata.map((item) =>{
+          // console.log('item', item.field_label)
+          item.field_label = cheerio.load(item.field_label).text()
+        })
         res.status(200).send(JSON.stringify(metadata))
       })
       .catch(function (error) {

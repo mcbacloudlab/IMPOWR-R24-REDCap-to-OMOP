@@ -4,6 +4,7 @@ const cosineSimilarity = require("compute-cosine-similarity");
 const ProgressBar = require("cli-progress");
 const Excel = require("exceljs");
 var axios = require("axios");
+const cheerio = require('cheerio')
 const axiosThrottle = require("axios-request-throttle");
 axiosThrottle.use(axios, { requestsPerSecond: 150 }); //UMLS API limit is 20 requests per second
 require("dotenv").config();
@@ -51,14 +52,15 @@ main().then(async () => {
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
         // console.log("obj", obj);
+        obj.field_label = cheerio.load(obj.field_label).text()
         const document = await redcapCollection.findOne({
-          fieldLabel: obj.field_label,
+          fieldLabel: obj.field_label, //clean HTML out of this column,
           formName: obj.form_name,
           variableName: obj.field_name,
         });
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
-        console.log('merged doc', mergedDocument)
+        // console.log('merged doc', mergedDocument)
         return mergedDocument;
       })
     );
@@ -174,6 +176,8 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
   //   "Average time per REDCap question: ",
   //   totalProcTime / redCapCollectionArray.length / 1000 + " secs"
   // );
+
+  //clear from memory
   redCapCollectionArray = [];
   // snomedCollectionArray = [];
 

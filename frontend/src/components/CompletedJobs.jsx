@@ -28,9 +28,7 @@ import { useLists } from "./ListsContext";
 export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
   // const { completedList } = props.props.props ?? props.props;
-  const {
-    completedList,
-  } = useLists();
+  const { completedList } = useLists();
   const { token } = props.props.props ?? props.props;
   // console.log("completeld list", completedList);
 
@@ -203,7 +201,7 @@ export default function CompletedJobs(props) {
             jobId: job.jobId,
             submittedBy: job.submittedBy,
             jobName: job.jobName,
-            redcapFormName: job.redcapFormName
+            redcapFormName: job.redcapFormName,
           },
         });
       })
@@ -256,7 +254,7 @@ export default function CompletedJobs(props) {
                           <Grid container alignItems="center">
                             <Grid item xs={4}>
                               <Avatar
-                                sx={{ bgcolor: "#aad9dc", color: 'black' }}
+                                sx={{ bgcolor: "#aad9dc", color: "black" }}
                                 aria-label="recipe"
                               >
                                 {job.jobId}
@@ -299,9 +297,12 @@ export default function CompletedJobs(props) {
                             </div>
                             <div>
                               <b>Collection / Doc Size:</b>{" "}
-                              {`${
-                                job.collectionName
-                              } / ${job.totalCollectionDocs.toLocaleString()}`}
+                              {job.collectionName &&
+                              job.totalCollectionDocs !== null
+                                ? `${
+                                    job.collectionName
+                                  } / ${job.totalCollectionDocs.toLocaleString()}`
+                                : "N/A"}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
