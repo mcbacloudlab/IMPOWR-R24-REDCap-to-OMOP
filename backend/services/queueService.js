@@ -521,15 +521,13 @@ async function storeCompleteJobsVerifyinfo(req, res) {
     await collection.updateOne(filter, update, { upsert: true });
 
     // Close the MongoDB client (Consider keeping it open for reuse)
-    await mongoClient.close();
+    // await mongoClient.close();
 
     // Send a successful response
     res.status(200).send("Ok");
-    await mongoClient.close();
   } catch (error) {
     console.error("Error listing collections", error);
     res.status(500).send("Error");
-    await mongoClient.close();
   }
 }
 
@@ -551,7 +549,7 @@ async function getCompleteJobsVerifyinfo(req, res) {
     const document = await collection.findOne(filter);
 
     // Close the MongoDB client (Consider keeping it open for reuse)
-    await mongoClient.close();
+    // await mongoClient.close();
 
     // Check if the document was found
     if (document) {

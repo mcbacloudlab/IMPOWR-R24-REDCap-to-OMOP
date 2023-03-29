@@ -16,6 +16,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Badge from "@mui/material/Badge";
+import Skeleton from "@mui/material/Skeleton";
 // import CheckIcon from "@mui/icons-material/Check";
 
 // var XLSX = require("xlsx");
@@ -28,7 +29,7 @@ export default function CompletedJobsViewPage(props) {
   const [jobId, setJobId] = useState();
   const [csvFilename, setCSVFilename] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isSavingErr, setIsSavingErr] = useState(false);
+  // const [isSavingErr, setIsSavingErr] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [verifiedRecords, setVerifiedRecords] = useState(0);
@@ -54,11 +55,11 @@ export default function CompletedJobsViewPage(props) {
 
   useEffect(() => {
     //get job verification data from db
-    getJobVerificationInfo()
+    getJobVerificationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
 
-  function getJobVerificationInfo(){
+  function getJobVerificationInfo() {
     let jobVerificationData;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
@@ -97,7 +98,7 @@ export default function CompletedJobsViewPage(props) {
       });
   }
 
-  function storeJobVerificationInfo(dataString){
+  function storeJobVerificationInfo(dataString) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -200,7 +201,7 @@ export default function CompletedJobsViewPage(props) {
     //save the data to local storage
     setIsSaving(true);
     const dataString = JSON.stringify(updatedData);
-    storeJobVerificationInfo(dataString)
+    storeJobVerificationInfo(dataString);
   }
 
   function buildTable(data, dbFlag) {
@@ -351,7 +352,6 @@ export default function CompletedJobsViewPage(props) {
       },
     ];
 
-
     setColDefs(cols);
     _dataObj = result;
     setData(result);
@@ -400,16 +400,38 @@ export default function CompletedJobsViewPage(props) {
   function saveFile() {
     setIsSaving(true);
     const dataString = JSON.stringify(data);
-    storeJobVerificationInfo(dataString)
+    storeJobVerificationInfo(dataString);
   }
 
   function submitToProcess() {
     // Convert the data object to a JSON string before storing it in local storage
     const dataString = JSON.stringify(data);
-
+    console.log("data", data);
     // Store the dataString in local storage with the key "myData"
-    storeJobVerificationInfo(dataString)
-    setFinalData(JSON.stringify(data, null, 2));
+    storeJobVerificationInfo(dataString);
+
+
+    const filteredData = data.reduce((acc, obj) => {
+      if (obj.selected && obj.verified) {
+        acc.push({
+          redcapFieldLabel: obj.redcapFieldLabel,
+          snomedID: obj.snomedID
+        });
+      } else {
+        const subRows = obj.subRows.filter(subObj => subObj.selected && subObj.verified)
+                                    .map(subObj => ({
+                                      redcapFieldLabel: subObj.redcapFieldLabel,
+                                      snomedID: subObj.snomedID
+                                    }));
+        if (subRows.length > 0) {
+          acc.push(...subRows);
+        }
+      }
+      return acc;
+    }, []);
+    
+    console.log(filteredData);
+    setFinalData(JSON.stringify(filteredData, null, 2));
   }
 
   function showTab(e, value, switching, panelIndex) {
@@ -419,7 +441,6 @@ export default function CompletedJobsViewPage(props) {
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
 
-
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
@@ -427,7 +448,6 @@ export default function CompletedJobsViewPage(props) {
         break;
       }
       case 1: {
-
         // Use the filter() method to get elements where the 'verified' key is false
         const unverifiedElements = tempAllData.filter((item) => {
           // Return true for elements where 'verified' is false
@@ -478,6 +498,15 @@ export default function CompletedJobsViewPage(props) {
             </span>
           </span>
         </div>
+
+        {!isFormLoaded && (
+          <Skeleton
+            variant="rounded"
+            sx={{ margin: "auto" }}
+            width={"100%"}
+            height={"90vh"}
+          />
+        )}
 
         {isFormLoaded && (
           <>
