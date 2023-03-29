@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CheckIcon from "@mui/icons-material/Check";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
+// import DoneAllIcon from "@mui/icons-material/DoneAll";
 import UnpublishedIcon from "@mui/icons-material/Unpublished";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import Tabs from "@mui/material/Tabs";
@@ -20,7 +20,7 @@ import Badge from "@mui/material/Badge";
 
 // var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
-  console.log("complete view page", props);
+  // console.log("complete view page", props);
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
   const [colDefs, setColDefs] = useState([]);
@@ -41,7 +41,7 @@ export default function CompletedJobsViewPage(props) {
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
-  console.log("location", location.state);
+  // console.log("location", location.state);
   if (location.state.jobId) {
     _jobId = location.state.jobId;
     _data = location.state.result;
@@ -81,21 +81,17 @@ export default function CompletedJobsViewPage(props) {
       .then((response) => response.text())
       .then((result) => {
         jobVerificationData = JSON.parse(result);
-        console.log("jobverify", JSON.parse(jobVerificationData.jobData));
         if (jobVerificationData) {
-          console.log("using local storage data");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(jobVerificationData.jobData), true);
           setTempAllData(JSON.parse(jobVerificationData.jobData));
         } else if (_data) {
-          console.log("using default job data");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(_data), false);
         }
       })
       .catch((error) => {
         console.log("error", error);
-        console.log("using default job data");
         if (_jobId) setJobId(_jobId);
         buildTable(JSON.parse(_data), false);
       });
@@ -123,7 +119,6 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        console.log(result);
         setIsSaving(false);
       })
       .catch((error) => {
@@ -162,15 +157,11 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function verifyRow(row) {
-    // console.log("rowId", row.snomedID);
-
     const updatedData = _dataObj.map((item) => {
-      console.log("row", row);
       if (
         item.redcapFieldLabel === row.redcapFieldLabel &&
         item.extraData.field_name === row.extraData.field_name
       ) {
-        console.log("item", item);
         //increment counter only if row has not been verified previously
         if (item.verified === false) {
           // Update both verifiedRecords and totalRecords using functional updates
@@ -203,9 +194,7 @@ export default function CompletedJobsViewPage(props) {
       return item;
     });
 
-    // console.log("updatedData", updatedData);
     _dataObj = updatedData;
-    console.log("_dataObj", _dataObj);
     setData(updatedData);
     setTempAllData(updatedData);
     //save the data to local storage
@@ -215,7 +204,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function buildTable(data, dbFlag) {
-    console.log("buildTable, dat", data);
     let result = [];
     let currentRedcapFieldLabel = null;
     let currentRedcapFieldName = null;
@@ -223,14 +211,10 @@ export default function CompletedJobsViewPage(props) {
     //create verified and selected keys if first time
     if (!dbFlag) {
       data.forEach((item, index) => {
-        // console.log("item", item);
-        // console.log("item.redcapFieldLabel", item.redcapFieldLabel);
-        // console.log("item.extraData.field_name", item.extraData.field_name);
         if (
           item.redcapFieldLabel !== currentRedcapFieldLabel ||
           item.extraData.field_name !== currentRedcapFieldName
         ) {
-          console.log("create new record");
           if (currentItem) {
             result.push(currentItem);
           }
@@ -254,11 +238,8 @@ export default function CompletedJobsViewPage(props) {
     } else {
       result = data;
       //count verified records
-      console.log("result", result);
       // Calculate the number of objects with "verified" set to true
       const verifiedCount = result.reduce((count, obj) => {
-        console.log(obj.verified === true);
-
         // Check if the "verified" key is true, and increment the count if it is
         return obj.verified === true ? count + 1 : count;
       }, 0); // Initialize the accumulator (count) with 0
@@ -269,7 +250,6 @@ export default function CompletedJobsViewPage(props) {
       setVerifiedRecords(verifiedCount);
     }
     setTempAllData(result);
-    console.log("result", result);
     setTotalRecords(result.length);
 
     const PreferredCell = ({ cell, row }) => {
@@ -371,9 +351,8 @@ export default function CompletedJobsViewPage(props) {
       },
     ];
 
-    // console.log("headers", cols);
+
     setColDefs(cols);
-    // console.log("set data", result);
     _dataObj = result;
     setData(result);
     setCSVFilename(`Completed_Job_${_jobId}.csv`);
@@ -425,8 +404,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function submitToProcess() {
-    console.log("submit!");
-    console.log("data", data);
     // Convert the data object to a JSON string before storing it in local storage
     const dataString = JSON.stringify(data);
 
@@ -441,46 +418,38 @@ export default function CompletedJobsViewPage(props) {
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
-    console.log("panelIndex", panelIndex);
+
 
     //set table data based on panelIndex
-    // console.log("data", JSON.parse(data));
     switch (panelIndex) {
       case 0: {
-        console.log("selected 0");
         setData(tempAllData);
         break;
       }
       case 1: {
-        console.log("selected 1");
-        console.log("data", data);
+
         // Use the filter() method to get elements where the 'verified' key is false
         const unverifiedElements = tempAllData.filter((item) => {
           // Return true for elements where 'verified' is false
-          console.log("unverified item?", item);
           return item.verified === false;
         });
-        console.log("unverified", unverifiedElements);
+
         // setUnverifiedElements(unverifiedElements.length)
         setData(unverifiedElements);
         break;
       }
       case 2: {
-        console.log("selected 2");
         // Use the filter() method to get elements where the 'verified' key is false
         const verifiedElements = tempAllData.filter((item) => {
-          console.log("verified item?", item);
           // Return true for elements where 'verified' is false
           return item.verified === true;
         });
-        console.log("verified elements", verifiedElements);
         // setVerifiedElements(_verifiedElements.length)
         setData(verifiedElements);
         break;
       }
 
       default: {
-        console.log("default selected");
         break;
       }
     }
