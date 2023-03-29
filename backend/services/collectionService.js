@@ -1,19 +1,7 @@
-const Bull = require("bull");
-const db = require("../db/mysqlConnection.cjs");
-var jwt = require("jsonwebtoken");
-const { getUserByEmail } = require("./userService.js");
-const { spawn } = require("child_process");
-const path = require("path");
-const fs = require("fs");
 const { mongoClient, connect } = require("../db/mongoDBConnection"); // Assuming 'db' is the name of the file you created
 
-async function listCollections() {}
-
 async function connectMongo() {
-  // console.log('connect to mongo')
   await connect();
-  //   console.log('connected to mongo')
-  //   await listCollections();
 }
 
 async function getCollectionNames(req, res) {
@@ -34,18 +22,21 @@ async function getCollectionNames(req, res) {
         documentCount: documentCount,
         storageSize: storageSize,
       });
-    //   console.log(
-    //     `Collection: ${collection.name}, Document count: ${documentCount}, Storage size: ${storageSize}`
-    //   );
+      //   console.log(
+      //     `Collection: ${collection.name}, Document count: ${documentCount}, Storage size: ${storageSize}`
+      //   );
     }
     res.status(200).send(collectionStats);
+    await mongoClient.close();
   } catch (error) {
     console.error("Error listing collections", error);
     res.status(500).send("Error");
+    await mongoClient.close();
   }
-  await mongoClient.close();
 }
 
+
+
 module.exports = {
-  getCollectionNames,
+  getCollectionNames
 };

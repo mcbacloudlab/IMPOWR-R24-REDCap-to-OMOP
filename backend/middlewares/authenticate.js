@@ -18,7 +18,7 @@ async function authenticate(req, res, next) {
     return next();
   } catch (error) {
     console.log("error", error);
-    res.status(500).send("Error");
+    res.status(403).send("Error");
     return false;
   }
 }
@@ -37,9 +37,9 @@ async function getUserByEmail(email) {
 }
 
 async function requireAdmin(req, res, next) {
-  // console.log("require admin");
+  console.log("require admin");
   // console.log("req", req.body);
-  console.log('query', req.query)
+  // console.log('query', req.query)
   const authHeader = req.headers.authorization;
   let token
   if(req.query.token){

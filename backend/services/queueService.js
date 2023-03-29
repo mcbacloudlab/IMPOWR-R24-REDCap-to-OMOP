@@ -5,6 +5,11 @@ const { getUserByEmail } = require("./userService.js");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const { mongoClient, connect } = require("../db/mongoDBConnection"); // Assuming 'db' is the name of the file you created
+
+async function connectMongo() {
+  await connect();
+}
 
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -494,6 +499,75 @@ async function getJobReturnData(req, res) {
   }
 }
 
+async function storeCompleteJobsVerifyinfo(req, res) {
+  connectMongo();
+  try {
+    // Get the database and the collection
+    const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
+    const collection = db.collection("jobVerification");
+
+    // Define the filter for identifying the document to update
+    const filter = {
+      jobId: req.body.jobId,
+      formName: req.body.formName,
+    };
+
+    // Define the update operation to be performed
+    const update = {
+      $set: req.body,
+    };
+
+    // Update the document or insert a new one if not found
+    await collection.updateOne(filter, update, { upsert: true });
+
+    // Close the MongoDB client (Consider keeping it open for reuse)
+    await mongoClient.close();
+
+    // Send a successful response
+    res.status(200).send("Ok");
+    await mongoClient.close();
+  } catch (error) {
+    console.error("Error listing collections", error);
+    res.status(500).send("Error");
+    await mongoClient.close();
+  }
+}
+
+async function getCompleteJobsVerifyinfo(req, res) {
+  try {
+    // Connect to MongoDB
+    await mongoClient.connect();
+
+    // Get the database and the collection
+    const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
+    const collection = db.collection("jobVerification");
+
+    // Define the filter for identifying the document to find
+    const filter = {
+      jobId: req.body.jobId,
+      formName: req.body.formName,
+    };
+    // Find the document based on the filter
+    const document = await collection.findOne(filter);
+
+    // Close the MongoDB client (Consider keeping it open for reuse)
+    await mongoClient.close();
+
+    // Check if the document was found
+    if (document) {
+      // Send the found document as a successful response
+      res.status(200).json(document);
+    } else {
+      // Send a not found response
+      res.status(404).send("Document not found");
+    }
+  } catch (error) {
+    console.error("Error connecting to MongoDB", error);
+    // Send an error response
+    res.status(500).send("Error");
+  }
+}
+
 module.exports = {
   submit,
   getJobStatus,
@@ -501,4 +575,6 @@ module.exports = {
   retryJob,
   updateJobName,
   cancelJob,
+  storeCompleteJobsVerifyinfo,
+  getCompleteJobsVerifyinfo
 };

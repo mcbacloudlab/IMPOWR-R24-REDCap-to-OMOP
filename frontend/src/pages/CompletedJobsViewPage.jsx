@@ -20,7 +20,7 @@ import Badge from "@mui/material/Badge";
 
 // var XLSX = require("xlsx");
 export default function CompletedJobsViewPage(props) {
-  // console.log("complete view page", props);
+  console.log("complete view page", props);
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
   const [colDefs, setColDefs] = useState([]);
@@ -53,26 +53,84 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    console.log("build table?");
-
-    // Retrieve the dataString from local storage using the key "myData"
-    const dataString = localStorage.getItem(_redcapFormName + "_" + _jobId);
-
-    // If dataString is not null, parse it back into an object
-    const localStorageData = dataString ? JSON.parse(dataString) : null;
-    console.log("localStorageData", localStorageData);
-    if (localStorageData) {
-      console.log("using local storage data");
-      if (_jobId) setJobId(_jobId);
-      buildTable(localStorageData, true);
-      setTempAllData(localStorageData);
-    } else if (_data) {
-      console.log("using default job data");
-      if (_jobId) setJobId(_jobId);
-      buildTable(JSON.parse(_data), false);
-    }
+    //get job verification data from db
+    getJobVerificationInfo()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
+
+  function getJobVerificationInfo(){
+    let jobVerificationData;
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("jobId", _jobId);
+    formdata.append("formName", _redcapFormName);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getCompleteJobsVerifyinfo`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        jobVerificationData = JSON.parse(result);
+        console.log("jobverify", JSON.parse(jobVerificationData.jobData));
+        if (jobVerificationData) {
+          console.log("using local storage data");
+          if (_jobId) setJobId(_jobId);
+          buildTable(JSON.parse(jobVerificationData.jobData), true);
+          setTempAllData(JSON.parse(jobVerificationData.jobData));
+        } else if (_data) {
+          console.log("using default job data");
+          if (_jobId) setJobId(_jobId);
+          buildTable(JSON.parse(_data), false);
+        }
+      })
+      .catch((error) => {
+        console.log("error", error);
+        console.log("using default job data");
+        if (_jobId) setJobId(_jobId);
+        buildTable(JSON.parse(_data), false);
+      });
+  }
+
+  function storeJobVerificationInfo(dataString){
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("formName", _redcapFormName);
+    formdata.append("jobId", _jobId);
+    formdata.append("jobData", dataString);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/storeCompleteJobsVerifyinfo`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        setIsSaving(false);
+      })
+      .catch((error) => {
+        console.log("error", error);
+        setIsSaving(false);
+      });
+  }
 
   function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -153,20 +211,17 @@ export default function CompletedJobsViewPage(props) {
     //save the data to local storage
     setIsSaving(true);
     const dataString = JSON.stringify(updatedData);
-    // Store the dataString in local storage with the key "myData"
-    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
-    setIsSaving(false);
-    // setData(data)
+    storeJobVerificationInfo(dataString)
   }
 
-  function buildTable(data, localStorageFlag) {
+  function buildTable(data, dbFlag) {
     console.log("buildTable, dat", data);
     let result = [];
     let currentRedcapFieldLabel = null;
     let currentRedcapFieldName = null;
     let currentItem = null;
-    //create verified and selected keys if first time and not using localStorage data
-    if (!localStorageFlag) {
+    //create verified and selected keys if first time
+    if (!dbFlag) {
       data.forEach((item, index) => {
         // console.log("item", item);
         // console.log("item.redcapFieldLabel", item.redcapFieldLabel);
@@ -366,9 +421,7 @@ export default function CompletedJobsViewPage(props) {
   function saveFile() {
     setIsSaving(true);
     const dataString = JSON.stringify(data);
-    // Store the dataString in local storage with the key "myData"
-    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
-    setIsSaving(false);
+    storeJobVerificationInfo(dataString)
   }
 
   function submitToProcess() {
@@ -378,7 +431,7 @@ export default function CompletedJobsViewPage(props) {
     const dataString = JSON.stringify(data);
 
     // Store the dataString in local storage with the key "myData"
-    localStorage.setItem(_redcapFormName + "_" + _jobId, dataString);
+    storeJobVerificationInfo(dataString)
     setFinalData(JSON.stringify(data, null, 2));
   }
 
@@ -472,34 +525,42 @@ export default function CompletedJobsViewPage(props) {
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 0)}
                 label={
-                  <Box sx={{ position: 'relative', margin: '20px' }}>
-                  All
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      right: '-20px', // Adjust the right position of the badge
-                    }}
-                  >
-                    <Badge badgeContent={totalRecords} max={9999} color="secondary" />
+                  <Box sx={{ position: "relative", margin: "20px" }}>
+                    All
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: "-20px", // Adjust the right position of the badge
+                      }}
+                    >
+                      <Badge
+                        badgeContent={totalRecords}
+                        max={9999}
+                        color="secondary"
+                      />
+                    </Box>
                   </Box>
-                </Box>
                 }
                 {...a11yProps(0)}
               />
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 1)}
                 label={
-                  <Box sx={{ position: 'relative', margin: '20px' }}>
+                  <Box sx={{ position: "relative", margin: "20px" }}>
                     Needs Review
                     <Box
                       sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 0,
-                        right: '-20px', // Adjust the right position of the badge
+                        right: "-20px", // Adjust the right position of the badge
                       }}
                     >
-                      <Badge badgeContent={totalRecords - verifiedRecords} max={9999} color="secondary" />
+                      <Badge
+                        badgeContent={totalRecords - verifiedRecords}
+                        max={9999}
+                        color="secondary"
+                      />
                     </Box>
                   </Box>
                 }
@@ -508,18 +569,22 @@ export default function CompletedJobsViewPage(props) {
               <Tab
                 onClick={(event) => showTab(event, csvFilename, true, 2)}
                 label={
-                  <Box sx={{ position: 'relative', margin: '20px' }}>
-                  Verified
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      right: '-20px', // Adjust the right position of the badge
-                    }}
-                  >
-                    <Badge badgeContent={verifiedRecords} max={9999} color="secondary" />
+                  <Box sx={{ position: "relative", margin: "20px" }}>
+                    Verified
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: "-20px", // Adjust the right position of the badge
+                      }}
+                    >
+                      <Badge
+                        badgeContent={verifiedRecords}
+                        max={9999}
+                        color="secondary"
+                      />
+                    </Box>
                   </Box>
-                </Box>
                 }
                 {...a11yProps(2)}
               />
