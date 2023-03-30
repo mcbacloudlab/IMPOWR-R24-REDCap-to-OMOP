@@ -9,7 +9,8 @@ router.get('/getJobReturnData', queueController.getJobReturnData)
 router.post('/retryJob', queueController.retryJob)
 router.post('/cancelJob', queueController.cancelJob)
 router.post('/updateJobName', queueController.updateJobName)
-router.post('/storeCompleteJobsVerifyinfo', queueController.storeCompleteJobsVerifyinfo);
-router.post('/getCompleteJobsVerifyinfo', queueController.getCompleteJobsVerifyinfo);
+router.post('/storeJobVerifyInfo', queueController.storeJobVerifyInfo);
+router.post('/getJobVerifyInfo', queueController.getJobVerifyInfo);
+router.post('/storeJobCompleteInfo', queueController.storeJobCompleteInfo);
 
 module.exports = router;

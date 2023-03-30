@@ -326,7 +326,7 @@ export default function SearchAppBar(props) {
         // setCompletedList(_completedList);
       })
       .catch((error) => {
-        // handleSignOut();
+        handleSignOut();
         console.log("error", error);
       });
   }

@@ -76,7 +76,7 @@ export default function CompletedJobsViewPage(props) {
     };
 
     fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getCompleteJobsVerifyinfo`,
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobVerifyinfo`,
       requestOptions
     )
       .then((response) => response.text())
@@ -115,7 +115,37 @@ export default function CompletedJobsViewPage(props) {
     };
 
     fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/storeCompleteJobsVerifyinfo`,
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/storeJobVerifyInfo`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setIsSaving(false);
+      })
+      .catch((error) => {
+        console.log("error", error);
+        setIsSaving(false);
+      });
+  }
+
+  function storeJobCompleteInfo(dataString) {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("formName", _redcapFormName);
+    formdata.append("jobId", _jobId);
+    formdata.append("jobData", dataString);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/storeJobCompleteInfo`,
       requestOptions
     )
       .then((response) => response.text())
@@ -350,6 +380,25 @@ export default function CompletedJobsViewPage(props) {
           },
         },
       },
+      {
+        header: "User Selected Count",
+        accessorKey: "userMatch",
+        //you can access a row instance in column definition option callbacks like this
+
+        // Cell: VerifiedCell,
+        // sx: {
+        //   "& .MuiButton-root": {
+        //     backgroundColor: "blue",
+        //     color: "white",
+        //   },
+        //   "& .MuiTypography-root": {
+        //     color: "green",
+        //   },
+        //   "& .subrow": {
+        //     backgroundColor: "yellow",
+        //   },
+        // },
+      },
     ];
 
     setColDefs(cols);
@@ -408,7 +457,7 @@ export default function CompletedJobsViewPage(props) {
     const dataString = JSON.stringify(data);
     console.log("data", data);
     // Store the dataString in local storage with the key "myData"
-    storeJobVerificationInfo(dataString);
+    storeJobCompleteInfo(dataString);
 
 
     const filteredData = data.reduce((acc, obj) => {

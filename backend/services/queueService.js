@@ -165,11 +165,18 @@ async function compareEmbeddings(job) {
     process.stdin.end();
 
     let capturedData, totalDocuments, currentDocument, collectionName;
-    //capture data returned from child
+    
+    // ********************
+    // Using startsWith is not very reliable when you start adding console.logs to the process.
+    // It's not reliable due to the standard output occassionally lumping outputs together. Using a delimiter and capturing the entire standard output would likely be more reliable here
+    // ********************
+    // capture data returned from child
     process.stdout.on("data", async (data) => {
-      if (data.toString().startsWith("[{")) {
+      // console.log('data', data.toString())
+      if (data.toString().startsWith('{"endResult":')) {
         console.log("data to capture");
-        capturedData = data;
+        capturedData = JSON.parse(data.toString()).endResult;
+        capturedData = JSON.stringify(capturedData)
       } else {
         console.log("data", data.toString());
         if (data.toString().startsWith("Total Documents")) {
@@ -499,12 +506,12 @@ async function getJobReturnData(req, res) {
   }
 }
 
-async function storeCompleteJobsVerifyinfo(req, res) {
+async function storeJobVerifyInfo(req, res) {
   connectMongo();
   try {
     // Get the database and the collection
     const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
-    const collection = db.collection("jobVerification");
+    const collection = db.collection("jobVerifyInfo");
 
     // Define the filter for identifying the document to update
     const filter = {
@@ -531,14 +538,46 @@ async function storeCompleteJobsVerifyinfo(req, res) {
   }
 }
 
-async function getCompleteJobsVerifyinfo(req, res) {
+async function storeJobCompleteInfo(req, res) {
+  connectMongo();
+  try {
+    // Get the database and the collection
+    const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
+    const collection = db.collection("jobCompleteInfo");
+
+    // Define the filter for identifying the document to update
+    const filter = {
+      jobId: req.body.jobId,
+      formName: req.body.formName,
+    };
+
+    // Define the update operation to be performed
+    const update = {
+      $set: req.body,
+    };
+
+    // Update the document or insert a new one if not found
+    await collection.updateOne(filter, update, { upsert: true });
+
+    // Close the MongoDB client (Consider keeping it open for reuse)
+    // await mongoClient.close();
+
+    // Send a successful response
+    res.status(200).send("Ok");
+  } catch (error) {
+    console.error("Error listing collections", error);
+    res.status(500).send("Error");
+  }
+}
+
+async function getJobVerifyInfo(req, res) {
   try {
     // Connect to MongoDB
     await mongoClient.connect();
 
     // Get the database and the collection
     const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
-    const collection = db.collection("jobVerification");
+    const collection = db.collection("jobVerifyInfo");
 
     // Define the filter for identifying the document to find
     const filter = {
@@ -573,6 +612,7 @@ module.exports = {
   retryJob,
   updateJobName,
   cancelJob,
-  storeCompleteJobsVerifyinfo,
-  getCompleteJobsVerifyinfo
+  storeJobVerifyInfo,
+  getJobVerifyInfo,
+  storeJobCompleteInfo
 };

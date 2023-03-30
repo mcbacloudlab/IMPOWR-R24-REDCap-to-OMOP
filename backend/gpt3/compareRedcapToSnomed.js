@@ -4,7 +4,7 @@ const cosineSimilarity = require("compute-cosine-similarity");
 const ProgressBar = require("cli-progress");
 const Excel = require("exceljs");
 var axios = require("axios");
-const cheerio = require('cheerio')
+const cheerio = require("cheerio");
 const axiosThrottle = require("axios-request-throttle");
 axiosThrottle.use(axios, { requestsPerSecond: 150 }); //UMLS API limit is 20 requests per second
 require("dotenv").config();
@@ -52,7 +52,7 @@ main().then(async () => {
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
         // console.log("obj", obj);
-        obj.field_label = cheerio.load(obj.field_label).text()
+        obj.field_label = cheerio.load(obj.field_label).text();
         const document = await redcapCollection.findOne({
           fieldLabel: obj.field_label, //clean HTML out of this column,
           formName: obj.form_name,
@@ -71,13 +71,63 @@ main().then(async () => {
     const snomedCollection = client
       .db("GPT3_Embeddings")
       .collection("gpt3_snomed_embeddings");
-
-    await startProcessing(redCapCollectionArray, snomedCollection);
+    const jobCompleteInfoResults = await getJobCompleteInfo(
+      redCapCollectionArray
+    );
+    await startProcessing(
+      redCapCollectionArray,
+      snomedCollection,
+      jobCompleteInfoResults
+    );
 
     //close MongoDB conneciton
     client.close();
   }
 });
+
+async function getJobCompleteInfo(redCapCollectionArray) {
+  // Access the jobCompleteInfo collection in the GPT3_Embeddings database
+  const jobCompleteInfoCollection = client
+    .db("GPT3_Embeddings")
+    .collection("jobCompleteInfo");
+
+  // Initialize an empty array to store the matched documents
+  const result = [];
+
+  // Get all documents from the jobCompleteInfo collection
+  const documents = await jobCompleteInfoCollection.find({}).toArray();
+
+  // Loop through the documents
+  for (const doc of documents) {
+    // Access the jobData array of objects
+    const jobDataArray = JSON.parse(doc.jobData);
+
+    // Loop through the jobData array
+    for (const jobData of jobDataArray) {
+      // Loop through the redCapCollectionArray
+      for (const redCapObj of redCapCollectionArray) {
+        // Compare the redcapFieldLabel in jobData with the fieldLabel in redCapObj
+        if (jobData.redcapFieldLabel === redCapObj.fieldLabel) {
+          // Add the document to the result array
+          result.push(jobData);
+
+          // Exit the inner loop and move to the next document
+          break;
+        }
+      }
+
+      // If the document was added to the result array, exit the outer loop and move to the next document
+      if (result.includes(doc)) {
+        break;
+      }
+    }
+  }
+
+  // Do not close the connection here; close it in the calling function or at the end of your script
+
+  // Return the matched documents
+  return result;
+}
 
 async function loadCollection(collection) {
   return new Promise((resolve, reject) => {
@@ -96,7 +146,11 @@ async function loadCollection(collection) {
 
 const { Worker } = require("worker_threads");
 
-async function startProcessing(redCapCollectionArray, snomedCollection) {
+async function startProcessing(
+  redCapCollectionArray,
+  snomedCollection,
+  jobCompleteInfoResults
+) {
   let numWorkers = require("os").cpus().length; // Get the number of available cores
   numWorkers = 1; //forced to set this to 1 to prevent out of memory errors
   console.log(`Chunking into ${numWorkers} workers`);
@@ -162,7 +216,19 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
         worker.on("exit", (code) => {
           //return this data to the caller
           // console.log('writing to stdout')
-          process.stdout.write(JSON.stringify(finalList) + "\n");
+          // console.log("finalList", finalList);
+          // console.log("jobCompleteResults", jobCompleteInfoResults);
+          const mergedAndModifiedList = mergeAndCountMatches(
+            finalList,
+            jobCompleteInfoResults
+          );
+          console.log("Merged and modified list:", mergedAndModifiedList);
+          const outputString = JSON.stringify({ endResult: mergedAndModifiedList }) + "\n";
+          setTimeout(() => {
+            process.stdout.write(outputString);
+          }, 5000);
+
+          // process.stdout.write({ endResult: JSON.stringify(finalList) + "\n" });
           resolve();
         });
       });
@@ -182,4 +248,49 @@ async function startProcessing(redCapCollectionArray, snomedCollection) {
   // snomedCollectionArray = [];
 
   return finalList;
+}
+
+function mergeAndCountMatches(finalList, jobCompleteInfoResults) {
+  // Initialize an empty array to store the merged and modified objects
+  const mergedList = [];
+
+  // Loop through the finalList
+  for (const finalObj of finalList) {
+    // Create a copy of the object to avoid modifying the original
+    const newObj = { ...finalObj, userMatch: 0 };
+
+    // Loop through the jobCompleteInfoResults
+    for (const jobInfoObj of jobCompleteInfoResults) {
+      console.log("newObj,", newObj);
+      console.log("jobInfoObj", jobInfoObj);
+      // Compare the redcapFieldLabel in newObj and jobInfoObj
+      if (
+        newObj.redcapFieldLabel === jobInfoObj.redcapFieldLabel &&
+        newObj.snomedID === jobInfoObj.snomedID &&
+        jobInfoObj.selected === true
+      ) {
+        // Increment the userMatch value
+        newObj.userMatch += 1;
+      } else if (jobInfoObj.subRows && Array.isArray(jobInfoObj.subRows)) {
+        // Loop through the subRows in jobInfoObj
+        for (const subRow of jobInfoObj.subRows) {
+          // Compare the redcapFieldLabel in newObj and subRow
+          if (
+            newObj.redcapFieldLabel === subRow.redcapFieldLabel &&
+            newObj.snomedID === subRow.snomedID &&
+            subRow.selected === true
+          ) {
+            // Increment the userMatch value
+            newObj.userMatch += 1;
+          }
+        }
+      }
+    }
+
+    // Add the newObj to the mergedList
+    mergedList.push(newObj);
+  }
+
+  // Return the merged and modified array of objects
+  return mergedList;
 }

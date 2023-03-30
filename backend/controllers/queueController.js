@@ -72,18 +72,27 @@ async function getJobReturnData(req, res) {
   }
 }
 
-async function storeCompleteJobsVerifyinfo(req, res){
+async function storeJobVerifyInfo(req, res){
   try {
-    await queueService.storeCompleteJobsVerifyinfo(req, res);
+    await queueService.storeJobVerifyInfo(req, res);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error");
   }
 }
 
-async function getCompleteJobsVerifyinfo(req, res){
+async function getJobVerifyInfo(req, res){
   try {
-    await queueService.getCompleteJobsVerifyinfo(req, res);
+    await queueService.getJobVerifyInfo(req, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error");
+  }
+}
+
+async function storeJobCompleteInfo(req, res){
+  try {
+    await queueService.storeJobCompleteInfo(req, res);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error");
@@ -97,6 +106,7 @@ module.exports = {
   getJobReturnData,
   updateJobName,
   cancelJob,
-  storeCompleteJobsVerifyinfo,
-  getCompleteJobsVerifyinfo
+  storeJobVerifyInfo,
+  getJobVerifyInfo,
+  storeJobCompleteInfo
 };
