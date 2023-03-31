@@ -483,7 +483,7 @@ export default function CompletedJobsViewPage(props) {
     setFinalData(JSON.stringify(filteredData, null, 2));
   }
 
-  function showTab(e, value, switching, panelIndex) {
+  async function showTab(e, value, switching, panelIndex) {
     setIsLoading(true);
     // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
@@ -513,8 +513,11 @@ export default function CompletedJobsViewPage(props) {
           // Return true for elements where 'verified' is false
           return item.verified === true;
         });
+        console.log('verified elems', verifiedElements)
+        const selectedAndVerifiedResults = await findSelectedAndVerified(verifiedElements)
+        console.log('selectedveriresults', selectedAndVerifiedResults)
         // setVerifiedElements(_verifiedElements.length)
-        setData(verifiedElements);
+        setData(selectedAndVerifiedResults);
         break;
       }
 
@@ -523,6 +526,35 @@ export default function CompletedJobsViewPage(props) {
       }
     }
   }
+
+  function findSelectedAndVerified(arr) {
+    const result = [];
+  
+    for (const obj of arr) {
+      // Check if the outer object has both selected and verified equal to true
+      if (obj.selected === true && obj.verified === true) {
+        // Remove the subRows property and add the object to the result array
+        const newObj = { ...obj };
+        delete newObj.subRows;
+        result.push(newObj);
+      }
+  
+      // If the object has a subRows property and it is an array
+      if (Array.isArray(obj.subRows)) {
+        // Loop through the subRows array
+        for (const subRow of obj.subRows) {
+          // Check if selected and verified are true for the subRow
+          if (subRow.selected === true && subRow.verified === true) {
+            result.push(subRow);
+          }
+        }
+      }
+    }
+  
+    return result;
+  }
+  
+  
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
