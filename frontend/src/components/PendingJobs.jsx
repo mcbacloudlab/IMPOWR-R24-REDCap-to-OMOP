@@ -176,7 +176,7 @@ export default function PendingJobs(props) {
     <div>
       <h1
         style={{
-          padding: "10px",
+          paddingLeft: "20px",
           textAlign: "left",
           backgroundColor: "rgb(251 251 251)",
         }}
@@ -216,15 +216,16 @@ export default function PendingJobs(props) {
                   style={{
                     backgroundColor: "#008C95",
                     color: "white",
-                    maxWidth: "450px",
-                    margin: "auto",
+                    maxWidth: "550px",
+                    margin: "20px",
+                    padding: '10px'
                   }}
                   key={job.jobId}
                 >
                   <ListItem
                     key={job.jobId}
                     sx={{
-                      margin: "10px",
+                      // margin: "10px",
                     }}
                   >
                     <ListItemText

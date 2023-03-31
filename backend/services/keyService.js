@@ -269,7 +269,7 @@ async function testGPT3API(req, res) {
       })
       .catch(function (error) {
         console.log(error);
-        res.status(error.request.res.statusCode).send()
+        res.status(500).send('Error')
       });
   });
 }

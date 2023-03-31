@@ -33,6 +33,8 @@ import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
 import _ from "lodash";
+import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
+import { NavLink } from 'react-router-dom';
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 
@@ -426,6 +428,16 @@ export default function SearchAppBar(props) {
             >
               <Tooltip title="Failed Jobs">
                 <ErrorIcon />
+              </Tooltip>
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="show project management page"
+              color="inherit"
+              component={NavLink} to="/project-management"
+            >
+              <Tooltip title="Project Mangagement">
+                <AddHomeWorkIcon />
               </Tooltip>
             </IconButton>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>

@@ -23,6 +23,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import LinearProgress from "@mui/material/LinearProgress";
+import Avatar from "@mui/material/Avatar";
 
 export default function MyAccountAllPendingJobs(props) {
   const { token } = props.props.props ?? props.props;
@@ -58,13 +59,11 @@ export default function MyAccountAllPendingJobs(props) {
       .then((response) => response.text())
       .then((result) => {
         console.log(JSON.parse(result));
-        setPendingList(JSON.parse(result))
+        setPendingList(JSON.parse(result));
       })
       .catch((error) => console.log("error", error));
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-
 
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
@@ -109,7 +108,7 @@ export default function MyAccountAllPendingJobs(props) {
       .then((response) => response.text())
       .then((result) => {
         console.log(result);
-        setPendingList(result)
+        setPendingList(result);
       })
       .catch((error) => console.log("error", error));
   };
@@ -128,7 +127,7 @@ export default function MyAccountAllPendingJobs(props) {
   }, [jobs, pendingList]);
 
   useEffect(() => {
-    console.log('set')
+    console.log("set");
     setJobs(
       pendingList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
@@ -202,7 +201,15 @@ export default function MyAccountAllPendingJobs(props) {
 
   return (
     <div>
-      <h1 style={{ padding: "10px", textAlign: "left", backgroundColor: "rgb(251 251 251)" }}>All Pending Jobs</h1>
+      <h1
+        style={{
+          paddingLeft: "20px",
+          textAlign: "left",
+          backgroundColor: "rgb(251 251 251)",
+        }}
+      >
+        All Pending Jobs
+      </h1>
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
@@ -233,47 +240,74 @@ export default function MyAccountAllPendingJobs(props) {
               {column?.map((job) => (
                 <Paper
                   elevation={3}
-                  style={{ backgroundColor: "#008C95", color: "white", maxWidth: '450px', margin: 'auto' }}
+                  style={{
+                    backgroundColor: "#008C95",
+                    color: "white",
+                    maxWidth: "550px",
+                    margin: "20px",
+                    padding: '10px'
+                  }}
                   key={job.jobId}
                 >
                   <ListItem
                     key={job.jobId}
                     sx={{
-                      margin: "10px",
+                      // margin: "10px",
                     }}
                   >
                     <ListItemText
                       primary={
                         <div className="primary-text-container">
-                          <div style={{ textAlign: "right" }}>
-                            <Tooltip title="Cancel Job">
-                              <IconButton
-                                onClick={() => {
-                                  handleClickOpen(job.jobId);
-                                }}
-                                sx={{ color: "white" }}
+                          <Grid container alignItems="center">
+                            <Grid item xs={4}>
+                              <Avatar
+                                sx={{ bgcolor: "#aad9dc", color: "black" }}
+                                aria-label="recipe"
                               >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
-                            {job.startedAt ? (
-                              <IconButton>
-                                <AutorenewIcon
-                                  className="pending-jobs-icon"
-                                  style={{
-                                    // backgroundColor: "white",
-                                    color: "white",
+                                {job.jobId}
+                              </Avatar>
+                            </Grid>
+                            <Grid item xs={8} style={{ textAlign: "right" }}>
+                              <Tooltip title="Cancel Job">
+                                <IconButton
+                                  onClick={() => {
+                                    handleClickOpen(job.jobId);
                                   }}
-                                />
-                              </IconButton>
-                            ) : null}
-                          </div>
+                                  sx={{ color: "white" }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
+                              {job.startedAt ? (
+                                <IconButton>
+                                  <AutorenewIcon
+                                    className="pending-jobs-icon"
+                                    style={{
+                                      // backgroundColor: "white",
+                                      color: "white",
+                                    }}
+                                  />
+                                </IconButton>
+                              ) : null}
+                            </Grid>
+                          </Grid>
+                          <div style={{ textAlign: "right" }}></div>
                           <span>
-                            <div>
-                              <b>Job ID:</b> {job.jobId}
+                            <div>{/* <b>Job ID:</b> {job.jobId} */}</div>
+                            <div sx={{ marginTop: "10px" }}>
+                              <b>REDCap Form:</b> {job.redcapFormName}
                             </div>
                             <div>
                               <b>REDCap Questions:</b> {job.dataLength}
+                            </div>
+                            <div>
+                              <b>Collection / Doc Size:</b>{" "}
+                              {job.collectionName &&
+                              job.totalCollectionDocs !== null
+                                ? `${
+                                    job.collectionName
+                                  } / ${job.totalCollectionDocs.toLocaleString()}`
+                                : "N/A"}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
@@ -281,9 +315,11 @@ export default function MyAccountAllPendingJobs(props) {
                                 variant="standard"
                                 sx={{
                                   marginLeft: "10px",
-                                  width: "200px",
+                                  width: "250px",
                                   input: {
                                     color: "black",
+                                    paddingLeft: '20px',
+                                    paddingRight: '30px',
                                     backgroundColor: "white",
                                   },
                                 }}
@@ -294,7 +330,7 @@ export default function MyAccountAllPendingJobs(props) {
                                 }
                               />
                             ) : (
-                              <> {job.jobName}</>
+                              <> {job.newJobName ? job.newJobName : ""}</>
                             )}
 
                             <IconButton
@@ -379,7 +415,7 @@ export default function MyAccountAllPendingJobs(props) {
                                 className="job-started-at-text"
                                 style={{ textAlign: "right" }}
                               >
-                                <b>Started at:</b>{" "}
+                                <b>Started:</b>{" "}
                                 {job.startedAt
                                   ? new Date(job.startedAt).toLocaleString()
                                   : "Not Started Yet"}

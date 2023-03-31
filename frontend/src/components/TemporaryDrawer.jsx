@@ -49,14 +49,14 @@ export default function TemporaryDrawer() {
               <ListItemText primary={'Project Management'} />
             </ListItemButton>
           </ListItem>
-          <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
+          {/* <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <SearchIcon />
               </ListItemIcon>
               <ListItemText primary={'Data Dictionary Mapping'} />
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
           {/* <ListItem key={'Archived'} component={NavLink} to="/archived" disablePadding>
             <ListItemButton>
               <ListItemIcon>
@@ -73,7 +73,7 @@ export default function TemporaryDrawer() {
   return (
     <div>
       {['left'].map((anchor) => (
-        <React.Fragment key={anchor}>
+        <React.Fragment key={anchor} >
           {/* <Button > */}
           <IconButton
           onClick={toggleDrawer('left', true)}
@@ -91,7 +91,7 @@ export default function TemporaryDrawer() {
             anchor={'left'}
             open={state[anchor]}
             onClose={toggleDrawer('left', false)}
-            sx={{ zIndex: (theme) => theme.zIndex.appBar + 1000,}}
+            sx={{ zIndex: (theme) => theme.zIndex.appBar + 1000, }}
           >
             {list(anchor)}
           </Drawer>

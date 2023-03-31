@@ -223,7 +223,8 @@ async function startProcessing(
             jobCompleteInfoResults
           );
           console.log("Merged and modified list:", mergedAndModifiedList);
-          const outputString = JSON.stringify({ endResult: mergedAndModifiedList }) + "\n";
+          const outputString =
+            JSON.stringify({ endResult: mergedAndModifiedList }) + "\n";
           setTimeout(() => {
             process.stdout.write(outputString);
           }, 5000);
@@ -258,7 +259,6 @@ function mergeAndCountMatches(finalList, jobCompleteInfoResults) {
   for (const finalObj of finalList) {
     // Create a copy of the object to avoid modifying the original
     const newObj = { ...finalObj, userMatch: 0 };
-
     // Loop through the jobCompleteInfoResults
     for (const jobInfoObj of jobCompleteInfoResults) {
       console.log("newObj,", newObj);
@@ -282,6 +282,30 @@ function mergeAndCountMatches(finalList, jobCompleteInfoResults) {
           ) {
             // Increment the userMatch value
             newObj.userMatch += 1;
+          }
+        }
+      } else if (
+        newObj.redcapFieldLabel === jobInfoObj.redcapFieldLabel &&
+        jobInfoObj.selected === true
+      ) {
+        // Merge newObj and jobInfoObj
+        const mergedObj = { ...newObj, ...jobInfoObj };
+        // Add the mergedObj to the mergedList and continue to the next iteration
+        mergedList.push(mergedObj);
+        continue;
+      } else if (jobInfoObj.subRows && Array.isArray(jobInfoObj.subRows)) {
+        // Loop through the subRows in jobInfoObj
+        for (const subRow of jobInfoObj.subRows) {
+          // Compare the redcapFieldLabel in newObj and subRow
+          if (
+            newObj.redcapFieldLabel === subRow.redcapFieldLabel &&
+            subRow.selected === true
+          ) {
+            // Merge newObj and jobInfoObj
+            const mergedObj = { ...newObj, ...subRow };
+            // Add the mergedObj to the mergedList and continue to the next iteration
+            mergedList.push(mergedObj);
+            continue;
           }
         }
       }

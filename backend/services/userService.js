@@ -192,7 +192,7 @@ async function getUserJobs(req, res) {
     INNER JOIN jobs ON users.id = jobs.userId
     where email = ? 
     and jobStatus != 'cancelled' OR jobStatus IS NULL
-    ORDER BY (jobStatus = 'active') DESC, lastUpdated DESC
+    ORDER BY (jobStatus = 'active') DESC, jobId DESC
     limit 100`;
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
