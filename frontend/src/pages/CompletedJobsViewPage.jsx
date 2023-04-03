@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography, Tooltip } from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
@@ -17,9 +17,15 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Badge from "@mui/material/Badge";
 import Skeleton from "@mui/material/Skeleton";
+import SearchIcon from "@mui/icons-material/Search";
+import Modal from "@mui/material/Modal";
+// import CloseIcon from '@mui/icons-material/Close';
 // import CheckIcon from "@mui/icons-material/Check";
+import TextField from "@mui/material/TextField";
+import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
 
 // var XLSX = require("xlsx");
+
 export default function CompletedJobsViewPage(props) {
   // console.log("complete view page", props);
   const [data, setData] = useState("");
@@ -39,10 +45,36 @@ export default function CompletedJobsViewPage(props) {
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [finalData, setFinalData] = useState("");
+  const [lookupModalOpen, setLookupModalOpen] = useState(false);
+  const [searchUMLSValue, setSearchUMLSValue] = useState("");
+  const [umlsResultsData, setUMLSResultsData] = useState([]);
+  const [modalRowData, setModalRowData] = useState([]);
+
+  const umlsModalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "80%",
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+    maxHeight: "80%",
+    overflowY: "auto",
+  };
+
+  const tableContainerStyle = {
+    maxHeight: "calc(80% - 100px)", // Adjust this value based on the total height of other elements
+    overflowY: "auto",
+    marginTop: "15px",
+  };
+
+  const handleLookupModalOpen = () => setLookupModalOpen(true);
+  const handleLookupModalClose = () => setLookupModalOpen(false);
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
-  // console.log("location", location.state);
   if (location.state.jobId) {
     _jobId = location.state.jobId;
     _data = location.state.result;
@@ -54,10 +86,36 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
+    console.log("getJobVerificationInfo");
     //get job verification data from db
     getJobVerificationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
+
+  function searchUMLS(text) {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("searchText", text);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/umls/getUMLSSearchResults`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setUMLSResultsData(result);
+      })
+      .catch((error) => console.log("error", error));
+  }
 
   function getJobVerificationInfo() {
     let jobVerificationData;
@@ -82,11 +140,14 @@ export default function CompletedJobsViewPage(props) {
       .then((response) => response.text())
       .then((result) => {
         jobVerificationData = JSON.parse(result);
+        //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
+          console.log("found saved job");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(jobVerificationData.jobData), true);
           setTempAllData(JSON.parse(jobVerificationData.jobData));
         } else if (_data) {
+          console.log("new job");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(_data), false);
         }
@@ -94,6 +155,8 @@ export default function CompletedJobsViewPage(props) {
       .catch((error) => {
         console.log("error", error);
         if (_jobId) setJobId(_jobId);
+        //on an error reading from the db just load a new blank job
+        console.log("build table with blank", JSON.parse(_data));
         buildTable(JSON.parse(_data), false);
       });
   }
@@ -187,45 +250,87 @@ export default function CompletedJobsViewPage(props) {
     };
   }
 
-  function verifyRow(row) {
+  function verifyRow(row, removePref) {
+    console.log("verifyRow row", row);
     const updatedData = _dataObj.map((item) => {
-      if (
-        item.redcapFieldLabel === row.redcapFieldLabel &&
-        item.extraData.field_name === row.extraData.field_name
-      ) {
-        //increment counter only if row has not been verified previously
-        if (item.verified === false) {
-          // Update both verifiedRecords and totalRecords using functional updates
-          setVerifiedRecords((prevVerifiedRecords) => {
-            const updatedVerifiedRecords = prevVerifiedRecords + 1;
+      console.log("verifyRow item:", item);
 
-            // Use functional update to access the latest value of totalRecords
-            setTotalRecords((prevTotalRecords) => {
-              if (updatedVerifiedRecords === prevTotalRecords) {
-                setAllVerified(true);
-              }
-              return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
+      //removing the pref
+      if (removePref) {
+        if (
+          item.redcapFieldLabel === row.redcapFieldLabel &&
+          item.extraData.field_name === row.extraData.field_name
+        ) {
+          //increment counter only if row has not been verified previously
+          if (item.verified === true) {
+            // Update both verifiedRecords and totalRecords using functional updates
+            setVerifiedRecords((prevVerifiedRecords) => {
+              const updatedVerifiedRecords = prevVerifiedRecords - 1;
+
+              // Use functional update to access the latest value of totalRecords
+              setTotalRecords((prevTotalRecords) => {
+                if (updatedVerifiedRecords === prevTotalRecords) {
+                  setAllVerified(true);
+                }
+                return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
+              });
+
+              return updatedVerifiedRecords;
             });
-
-            return updatedVerifiedRecords;
-          });
+          }
+          const updatedSubRows = item.subRows.map((subRow) => ({
+            ...subRow,
+            selected: subRow.snomedID === row.snomedID ? false : false,
+            verified: false,
+          }));
+          return {
+            ...item,
+            selected: item.snomedID === row.snomedID ? false : false,
+            subRows: updatedSubRows,
+            verified: false,
+          };
         }
-        const updatedSubRows = item.subRows.map((subRow) => ({
-          ...subRow,
-          selected: subRow.snomedID === row.snomedID ? true : false,
-          verified: true,
-        }));
-        return {
-          ...item,
-          selected: item.snomedID === row.snomedID ? true : false,
-          subRows: updatedSubRows,
-          verified: true,
-        };
+      } else { //adding the pref
+        if (
+          item.redcapFieldLabel === row.redcapFieldLabel &&
+          item.extraData.field_name === row.extraData.field_name
+        ) {
+          //increment counter only if row has not been verified previously
+          if (item.verified === false) {
+            // Update both verifiedRecords and totalRecords using functional updates
+            setVerifiedRecords((prevVerifiedRecords) => {
+              const updatedVerifiedRecords = prevVerifiedRecords + 1;
+
+              // Use functional update to access the latest value of totalRecords
+              setTotalRecords((prevTotalRecords) => {
+                if (updatedVerifiedRecords === prevTotalRecords) {
+                  setAllVerified(true);
+                }
+                return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
+              });
+
+              return updatedVerifiedRecords;
+            });
+          }
+          const updatedSubRows = item.subRows.map((subRow) => ({
+            ...subRow,
+            selected: subRow.snomedID === row.snomedID ? true : false,
+            verified: true,
+          }));
+          return {
+            ...item,
+            selected: item.snomedID === row.snomedID ? true : false,
+            subRows: updatedSubRows,
+            verified: true,
+          };
+        }
       }
+
       return item;
     });
 
     _dataObj = updatedData;
+    console.log("set data with", updatedData);
     setData(updatedData);
     setTempAllData(updatedData);
     //save the data to local storage
@@ -234,24 +339,29 @@ export default function CompletedJobsViewPage(props) {
     storeJobVerificationInfo(dataString);
   }
 
-  function buildTable(data, dbFlag) {
+  function buildTable(_data, dbFlag, lookupFlag) {
     let result = [];
     let currentRedcapFieldLabel = null;
     let currentRedcapFieldName = null;
     let currentItem = null;
+    console.log("data passed to buildTable", _data);
+    console.log("look up flag", lookupFlag);
     //create verified and selected keys if first time
     if (!dbFlag) {
-      data.forEach((item, index) => {
+      _data.forEach((item, index) => {
         if (
           item.redcapFieldLabel !== currentRedcapFieldLabel ||
           item.extraData.field_name !== currentRedcapFieldName
         ) {
+          console.log("lookup flag", lookupFlag);
+          console.log("currentitem", currentItem);
           if (currentItem) {
             result.push(currentItem);
           }
           item.selected = false;
           item.verified = false;
           currentItem = { ...item, subRows: [] };
+
           currentRedcapFieldLabel = item.redcapFieldLabel;
           currentRedcapFieldName = item.extraData.field_name;
         } else {
@@ -262,12 +372,23 @@ export default function CompletedJobsViewPage(props) {
           });
         }
 
-        if (index === data.length - 1) {
+        if (index === _data.length - 1) {
           result.push(currentItem);
         }
+
+        // Calculate the number of objects with "verified" set to true
+        const verifiedCount = result.reduce((count, obj) => {
+          // Check if the "verified" key is true, and increment the count if it is
+          return obj.verified === true ? count + 1 : count;
+        }, 0); // Initialize the accumulator (count) with 0
+        // Update the state with the new verified count
+        if (verifiedCount === result.length) {
+          setAllVerified(true);
+        }
+        setVerifiedRecords(verifiedCount);
       });
     } else {
-      result = data;
+      result = _data;
       //count verified records
       // Calculate the number of objects with "verified" set to true
       const verifiedCount = result.reduce((count, obj) => {
@@ -280,90 +401,121 @@ export default function CompletedJobsViewPage(props) {
       }
       setVerifiedRecords(verifiedCount);
     }
+
+    console.log("build table, setTempAllData with", result);
     setTempAllData(result);
     setTotalRecords(result.length);
 
     const PreferredCell = ({ cell, row }) => {
       return cell.getValue() === false ? (
-        <Button
-          variant={"contained"}
-          onClick={() => {
-            verifyRow(cell.row.original);
+        <Tooltip title="Set as preferred" placement="top">
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={() => {
+              verifyRow(cell.row.original);
+            }}
+            sx={{
+              textTransform: "capitalize",
+              padding: "0.25rem 0.5rem",
+              borderRadius: "4px",
+            }}
+          >
+            Prefer
+          </Button>
+        </Tooltip>
+      ) : (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="flex-start"
+          sx={{
+            padding: "0.5rem",
+            borderRadius: "4px",
+            backgroundColor: "#f5f5f5",
           }}
         >
-          Prefer
-        </Button>
-      ) : (
-        <Typography>
-          <b>Preferred</b>
-        </Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: "bold",
+              marginRight: "0.5rem",
+            }}
+          >
+            Preferred
+          </Typography>
+          <Tooltip title="Remove preference" placement="top">
+            <IconButton
+              onClick={(event) => verifyRow(cell.row.original, true)}
+              size="small"
+              edge="end"
+              color="primary"
+              sx={{
+                marginLeft: "10px",
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       );
     };
 
     const VerifiedCell = ({ cell, row }) => {
-      return cell.getValue() === false ? <CloseIcon /> : <CheckIcon />;
+      return cell.getValue() === false ? (
+        <CloseIcon
+          color="primary"
+          sx={{
+            padding: "0.25rem",
+            borderRadius: "4px",
+          }}
+        />
+      ) : (
+        <CheckIcon
+          color="primary"
+          sx={{
+            padding: "0.25rem",
+            borderRadius: "4px",
+          }}
+        />
+      );
+    };
+
+    function LookUpCode(row) {
+      setModalRowData(row.original);
+      setSearchUMLSValue(row.original.redcapFieldLabel);
+      searchUMLS(row.original.redcapFieldLabel);
+      handleLookupModalOpen();
+    }
+    const LookUpCell = ({ cell, row }) => {
+      if (row.original.subRows) {
+        return (
+          <Tooltip title="Lookup">
+            <div
+              onClick={() => LookUpCode(row)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                borderRadius: "50%",
+                padding: "8px",
+                backgroundColor: "rgba(0, 0, 0, 0.08)",
+              }}
+            >
+              <SearchIcon />
+            </div>
+          </Tooltip>
+        );
+      }
     };
 
     const cols = [
       {
-        header: "Redcap Field Label",
-        accessorKey: "redcapFieldLabel",
-      },
-      {
-        header: "REDCap Field Name",
-        accessorKey: "extraData.field_name",
-      },
-      {
-        header: "Snomed Text",
-        accessorKey: "snomedText",
-      },
-      {
-        header: "Snomed ID",
-        accessorKey: "snomedID",
-        // Use the Cell option to modify the snomedID data
-        Cell: ({ cell }) => {
-          const snomedID = cell.getValue();
-          // Create the URL with the snomedID value
-          const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
-          // Return an 'a' tag with the URL as the href and the snomedID as the text
-          return (
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              {snomedID}
-            </a>
-          );
-        },
-      },
-      {
-        header: "Similarity",
-        accessorKey: "similarity",
-        Cell: ({ cell }) =>
-          cell.getValue().toLocaleString("en-US", {
-            style: "percent",
-            minimumFractionDigits: 2,
-          }),
-      },
-      {
-        header: "Selected",
-        accessorKey: "selected",
-        //you can access a row instance in column definition option callbacks like this
-
-        Cell: PreferredCell,
-        sx: {
-          "& .MuiButton-root": {
-            backgroundColor: "blue",
-            color: "white",
-          },
-          "& .MuiTypography-root": {
-            color: "green",
-          },
-          "& .subrow": {
-            backgroundColor: "yellow",
-          },
-        },
-      },
-      {
-        header: "Verified",
+        header: "",
         accessorKey: "verified",
+        maxSize: 50,
         //you can access a row instance in column definition option callbacks like this
 
         Cell: VerifiedCell,
@@ -381,28 +533,84 @@ export default function CompletedJobsViewPage(props) {
         },
       },
       {
-        header: "User Selected Count",
-        accessorKey: "userMatch",
+        header: "REDCap Field Label",
+        accessorKey: "redcapFieldLabel",
+      },
+      {
+        header: "REDCap Field Name",
+        accessorKey: "extraData.field_name",
+      },
+      {
+        header: "SNOMED Text",
+        accessorKey: "snomedText",
+      },
+      {
+        header: "SNOMED ID",
+        accessorKey: "snomedID",
+        maxSize: 120,
+        // Use the Cell option to modify the snomedID data
+        Cell: ({ cell }) => {
+          const snomedID = cell.getValue();
+          // Create the URL with the snomedID value
+          const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
+          // Return an 'a' tag with the URL as the href and the snomedID as the text
+          return (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {snomedID}
+            </a>
+          );
+        },
+      },
+      {
+        header: "Cosine Similarity",
+        accessorKey: "similarity",
+        maxSize: 130,
+        Cell: ({ cell }) => {
+          const value = cell.getValue();
+          if (!value) return "N/A";
+          const formattedValue = value.toLocaleString("en-US", {
+            style: "percent",
+            minimumFractionDigits: 2,
+          });
+
+          return formattedValue;
+        },
+      },
+      {
+        header: "Preferred",
+        accessorKey: "selected",
         //you can access a row instance in column definition option callbacks like this
 
-        // Cell: VerifiedCell,
-        // sx: {
-        //   "& .MuiButton-root": {
-        //     backgroundColor: "blue",
-        //     color: "white",
-        //   },
-        //   "& .MuiTypography-root": {
-        //     color: "green",
-        //   },
-        //   "& .subrow": {
-        //     backgroundColor: "yellow",
-        //   },
-        // },
+        Cell: PreferredCell,
+        sx: {
+          "& .MuiButton-root": {
+            backgroundColor: "blue",
+            color: "white",
+          },
+          "& .MuiTypography-root": {
+            color: "green",
+          },
+          "& .subrow": {
+            backgroundColor: "yellow",
+          },
+        },
+      },
+
+      {
+        header: "User Verified",
+        accessorKey: "userMatch",
+        maxSize: 120,
+      },
+      {
+        header: "Lookup",
+        accessorKey: "lookup",
+        Cell: LookUpCell,
       },
     ];
 
     setColDefs(cols);
     _dataObj = result;
+    console.log("set data with", result);
     setData(result);
     setCSVFilename(`Completed_Job_${_jobId}.csv`);
     setIsFormLoaded(true);
@@ -441,6 +649,7 @@ export default function CompletedJobsViewPage(props) {
   };
 
   function resetScreen() {
+    console.log("clear data");
     setData("");
     setIsFormLoaded(false);
     setJobId();
@@ -459,32 +668,32 @@ export default function CompletedJobsViewPage(props) {
     // Store the dataString in local storage with the key "myData"
     storeJobCompleteInfo(dataString);
 
-
     const filteredData = data.reduce((acc, obj) => {
       if (obj.selected && obj.verified) {
         acc.push({
           redcapFieldLabel: obj.redcapFieldLabel,
-          snomedID: obj.snomedID
+          snomedID: obj.snomedID,
         });
       } else {
-        const subRows = obj.subRows.filter(subObj => subObj.selected && subObj.verified)
-                                    .map(subObj => ({
-                                      redcapFieldLabel: subObj.redcapFieldLabel,
-                                      snomedID: subObj.snomedID
-                                    }));
+        const subRows = obj.subRows
+          .filter((subObj) => subObj.selected && subObj.verified)
+          .map((subObj) => ({
+            redcapFieldLabel: subObj.redcapFieldLabel,
+            snomedID: subObj.snomedID,
+          }));
         if (subRows.length > 0) {
           acc.push(...subRows);
         }
       }
       return acc;
     }, []);
-    
-    console.log(filteredData);
+
     setFinalData(JSON.stringify(filteredData, null, 2));
   }
 
   async function showTab(e, value, switching, panelIndex) {
     setIsLoading(true);
+    console.log("set data with tab views");
     // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
@@ -513,9 +722,9 @@ export default function CompletedJobsViewPage(props) {
           // Return true for elements where 'verified' is false
           return item.verified === true;
         });
-        console.log('verified elems', verifiedElements)
-        const selectedAndVerifiedResults = await findSelectedAndVerified(verifiedElements)
-        console.log('selectedveriresults', selectedAndVerifiedResults)
+        const selectedAndVerifiedResults = await findSelectedAndVerified(
+          verifiedElements
+        );
         // setVerifiedElements(_verifiedElements.length)
         setData(selectedAndVerifiedResults);
         break;
@@ -529,7 +738,7 @@ export default function CompletedJobsViewPage(props) {
 
   function findSelectedAndVerified(arr) {
     const result = [];
-  
+
     for (const obj of arr) {
       // Check if the outer object has both selected and verified equal to true
       if (obj.selected === true && obj.verified === true) {
@@ -538,7 +747,7 @@ export default function CompletedJobsViewPage(props) {
         delete newObj.subRows;
         result.push(newObj);
       }
-  
+
       // If the object has a subRows property and it is an array
       if (Array.isArray(obj.subRows)) {
         // Loop through the subRows array
@@ -550,14 +759,16 @@ export default function CompletedJobsViewPage(props) {
         }
       }
     }
-  
+
     return result;
   }
-  
-  
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleTextFieldChange = (event) => {
+    setSearchUMLSValue(event.target.value);
   };
 
   return (
@@ -591,6 +802,45 @@ export default function CompletedJobsViewPage(props) {
 
         {isFormLoaded && (
           <>
+            {/* Lookup better code modal */}
+            <Modal
+              open={lookupModalOpen}
+              onClose={handleLookupModalClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={umlsModalStyle}>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                  Search UMLS
+                </Typography>
+                <TextField
+                  id="outlined-basic"
+                  label="Text Search"
+                  variant="outlined"
+                  value={searchUMLSValue}
+                  onChange={handleTextFieldChange}
+                  sx={{ marginTop: "10px" }}
+                />
+                <Button
+                  variant="contained"
+                  sx={{ marginLeft: "15px", marginTop: "20px" }}
+                  onClick={() => searchUMLS(searchUMLSValue)}
+                >
+                  Search
+                </Button>
+                {umlsResultsData.length && (
+                  <UMLSSearchBasicTable
+                    umlsResults={umlsResultsData}
+                    modalRowData={modalRowData}
+                    setModalRowData={setModalRowData}
+                    data={data}
+                    setData={setData}
+                    buildTable={buildTable}
+                    storeJobVerificationInfo={storeJobVerificationInfo}
+                  />
+                )}
+              </Box>
+            </Modal>
             {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
             <Typography>
               Verified {verifiedRecords}/{totalRecords}

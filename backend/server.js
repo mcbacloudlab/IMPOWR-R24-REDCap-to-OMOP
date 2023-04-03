@@ -11,6 +11,7 @@ const keyRoutes = require("./routes/keyRoutes");
 const collectionRoutes = require("./routes/collectionRoutes")
 const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
+const umlsRoutes = require("./routes/umlsRoutes");
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
@@ -90,6 +91,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/file", authenticate, fileRoutes);
 app.use("/api/redcap", authenticate, redcapRoutes);
 app.use("/api/queue", authenticate, queueRoutes);
+app.use("/api/umls", authenticate, umlsRoutes);
 
 //admin only routes
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes);

@@ -7,6 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -306,6 +307,7 @@ export default function FormSelect(props) {
                 />
 
                 <Grid item xs={12} padding={1}>
+                  <Tooltip title={'This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label'}>
                   <Button
                     sx={{ float: "right" }}
                     variant="contained"
@@ -314,8 +316,9 @@ export default function FormSelect(props) {
                     startIcon={<AddTaskIcon />}
                     onClick={(e) => submitToProcess(e)}
                   >
-                    Submit To Queue
+                    Submit Job To Queue
                   </Button>
+                  </Tooltip>
                   {selectRowsError && (
                   <Alert
                     severity="error"
