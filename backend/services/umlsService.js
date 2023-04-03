@@ -15,8 +15,11 @@ function decrypt(encryptedData, iv, algorithm, secretKey) {
 
 async function getUMLSSearchResults(req, res) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
-  console.log('req', req.body)
+  if(!req.body.searchText){
+    res.status(500).send("Error");
+  }
   let searchText = req.body.searchText
+
   const query = "SELECT * FROM api where name like 'umls%'";
   //   return new Promise((resolve, reject) => {
   db.execute(query, [], function (err, results, fields) {
@@ -55,15 +58,7 @@ async function getUMLSSearchResults(req, res) {
 
     axios(config)
       .then(function (response) {
-        console.log((response.data.result.results));
         const metadata = response.data.result.results;
-        // const formNames = new Set();
-        // for (const field of metadata) {
-        //   if (field["form_name"]) {
-        //     formNames.add(field["form_name"]);
-        //   }
-        // }
-        // console.log(Array.from(formNames));
         res.status(200).send((metadata));
       })
       .catch(function (error) {

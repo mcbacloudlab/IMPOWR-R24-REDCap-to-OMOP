@@ -12,7 +12,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 
 export default function ProjectManagementPage(props) {
-  console.log("project management page,", props);
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

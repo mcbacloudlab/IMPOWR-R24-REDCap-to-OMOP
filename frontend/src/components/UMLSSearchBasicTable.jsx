@@ -109,10 +109,10 @@ export default function BasicTable(props) {
     console.log("before calling props buildtable data", newArray);
     props.buildTable(newArray, true, true);
     props.storeJobVerificationInfo(JSON.stringify(newArray))
-
+    props.setLookupModalOpen(false)
     //count and update selected and verified records
     newArray.map((item) => {
-      
+
       return null
     })
   }

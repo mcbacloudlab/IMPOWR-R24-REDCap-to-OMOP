@@ -6,7 +6,7 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
-const collectionName = "gpt3_snomed_embeddings";
+const collectionName = "gpt3_snomed_embeddings30k";
 const snomedCollection = client
   .db("GPT3_Embeddings")
   .collection(collectionName);

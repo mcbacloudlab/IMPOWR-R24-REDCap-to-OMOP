@@ -23,6 +23,7 @@ import Modal from "@mui/material/Modal";
 // import CheckIcon from "@mui/icons-material/Check";
 import TextField from "@mui/material/TextField";
 import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
 // var XLSX = require("xlsx");
 
@@ -254,7 +255,6 @@ export default function CompletedJobsViewPage(props) {
     console.log("verifyRow row", row);
     const updatedData = _dataObj.map((item) => {
       console.log("verifyRow item:", item);
-
       //removing the pref
       if (removePref) {
         if (
@@ -337,7 +337,15 @@ export default function CompletedJobsViewPage(props) {
     setIsSaving(true);
     const dataString = JSON.stringify(updatedData);
     storeJobVerificationInfo(dataString);
+    
+    
   }
+
+  useEffect(() => {
+    if (tempAllData) {
+      showTab(null, true, selectedTabIdx);
+    }
+  }, [tempAllData]);
 
   function buildTable(_data, dbFlag, lookupFlag) {
     let result = [];
@@ -535,6 +543,19 @@ export default function CompletedJobsViewPage(props) {
       {
         header: "REDCap Field Label",
         accessorKey: "redcapFieldLabel",
+        Cell: ({ cell, row }) => {
+          const redcapField = cell.getValue();
+          if (row.original.lookup) {
+            return (
+              <>
+                <PersonAddAltIcon />
+                {redcapField}
+              </>
+            );
+          } else {
+            return redcapField;
+          }
+        }
       },
       {
         header: "REDCap Field Name",
@@ -673,6 +694,7 @@ export default function CompletedJobsViewPage(props) {
         acc.push({
           redcapFieldLabel: obj.redcapFieldLabel,
           snomedID: obj.snomedID,
+          lookup: obj.lookup
         });
       } else {
         const subRows = obj.subRows
@@ -680,6 +702,7 @@ export default function CompletedJobsViewPage(props) {
           .map((subObj) => ({
             redcapFieldLabel: subObj.redcapFieldLabel,
             snomedID: subObj.snomedID,
+            lookup: subObj.lookup
           }));
         if (subRows.length > 0) {
           acc.push(...subRows);
@@ -691,7 +714,7 @@ export default function CompletedJobsViewPage(props) {
     setFinalData(JSON.stringify(filteredData, null, 2));
   }
 
-  async function showTab(e, value, switching, panelIndex) {
+  async function showTab(e, switching, panelIndex) {
     setIsLoading(true);
     console.log("set data with tab views");
     // setSelectedFile(value);
@@ -837,6 +860,7 @@ export default function CompletedJobsViewPage(props) {
                     setData={setData}
                     buildTable={buildTable}
                     storeJobVerificationInfo={storeJobVerificationInfo}
+                    setLookupModalOpen={setLookupModalOpen}
                   />
                 )}
               </Box>
@@ -852,7 +876,7 @@ export default function CompletedJobsViewPage(props) {
               aria-label="basic tabs example"
             >
               <Tab
-                onClick={(event) => showTab(event, csvFilename, true, 0)}
+                onClick={(event) => showTab(event, true, 0)}
                 label={
                   <Box sx={{ position: "relative", margin: "20px" }}>
                     All
@@ -874,7 +898,7 @@ export default function CompletedJobsViewPage(props) {
                 {...a11yProps(0)}
               />
               <Tab
-                onClick={(event) => showTab(event, csvFilename, true, 1)}
+                onClick={(event) => showTab(event, true, 1)}
                 label={
                   <Box sx={{ position: "relative", margin: "20px" }}>
                     Needs Review
@@ -896,7 +920,7 @@ export default function CompletedJobsViewPage(props) {
                 {...a11yProps(1)}
               />
               <Tab
-                onClick={(event) => showTab(event, csvFilename, true, 2)}
+                onClick={(event) => showTab(event, true, 2)}
                 label={
                   <Box sx={{ position: "relative", margin: "20px" }}>
                     Verified
