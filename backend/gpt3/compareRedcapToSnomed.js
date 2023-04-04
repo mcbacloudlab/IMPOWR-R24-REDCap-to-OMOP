@@ -49,18 +49,32 @@ main().then(async () => {
       .db("GPT3_Embeddings")
       .collection("gpt3_redcap_embeddings");
 
+    const redcapLookupCollection = client
+      .db("GPT3_Embeddings")
+      .collection("gpt3_redcap_lookup_embeddings");
+
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
         // console.log("obj", obj);
         obj.field_label = cheerio.load(obj.field_label).text();
         const document = await redcapCollection.findOne({
-          fieldLabel: obj.field_label, //clean HTML out of this column,
+          fieldLabel: obj.field_label,
           formName: obj.form_name,
           variableName: obj.field_name,
         });
+
+        const document2 = await redcapLookupCollection.findOne({
+          fieldLabel: obj.field_label,
+        });
+
+        console.log('document1', document)
+
+        console.log('document2', document2)
+
+
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
-        // console.log('merged doc', mergedDocument)
+        console.log('merged doc', mergedDocument)
         return mergedDocument;
       })
     );
@@ -109,7 +123,7 @@ async function getJobCompleteInfo(redCapCollectionArray) {
         // Compare the redcapFieldLabel in jobData with the fieldLabel in redCapObj
         if (jobData.redcapFieldLabel === redCapObj.fieldLabel) {
           // Add the document to the result array
-          result.push(jobData);
+          // result.push(jobData);
 
           // Exit the inner loop and move to the next document
           break;
@@ -209,7 +223,7 @@ async function startProcessing(
     });
   }
 
-  console.log("wait for child to exit");
+  // console.log("wait for child to exit");
   await Promise.all(
     workers.map((worker) => {
       return new Promise((resolve) => {
@@ -222,12 +236,12 @@ async function startProcessing(
             finalList,
             jobCompleteInfoResults
           );
-          console.log("Merged and modified list:", mergedAndModifiedList);
+          // console.log("Merged and modified list:", mergedAndModifiedList);
           const outputString =
             JSON.stringify({ endResult: mergedAndModifiedList }) + "\n";
           setTimeout(() => {
             process.stdout.write(outputString);
-          }, 5000);
+          }, 2000);
 
           // process.stdout.write({ endResult: JSON.stringify(finalList) + "\n" });
           resolve();
@@ -261,8 +275,8 @@ function mergeAndCountMatches(finalList, jobCompleteInfoResults) {
     const newObj = { ...finalObj, userMatch: 0 };
     // Loop through the jobCompleteInfoResults
     for (const jobInfoObj of jobCompleteInfoResults) {
-      console.log("newObj,", newObj);
-      console.log("jobInfoObj", jobInfoObj);
+      // console.log("newObj,", newObj);
+      // console.log("jobInfoObj", jobInfoObj);
       // Compare the redcapFieldLabel in newObj and jobInfoObj
       if (
         newObj.redcapFieldLabel === jobInfoObj.redcapFieldLabel &&

@@ -21,7 +21,10 @@ export default function CompletedJobTable({
   value,
   handleExportData,
   resetScreen,
+  selectedTabIdx
 }) {
+
+  console.log('selectedtabidx', selectedTabIdx)
   return (
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)
@@ -32,8 +35,8 @@ export default function CompletedJobTable({
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
       enablePagination={false}
-      enableExpanding
-      enableExpandAll
+      {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
+      {...(selectedTabIdx === 2 ? {} : { enableExpandAll: true })}
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize

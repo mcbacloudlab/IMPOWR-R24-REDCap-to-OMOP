@@ -23,7 +23,7 @@ import Modal from "@mui/material/Modal";
 // import CheckIcon from "@mui/icons-material/Check";
 import TextField from "@mui/material/TextField";
 import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 // var XLSX = require("xlsx");
 
@@ -290,7 +290,8 @@ export default function CompletedJobsViewPage(props) {
             verified: false,
           };
         }
-      } else { //adding the pref
+      } else {
+        //adding the pref
         if (
           item.redcapFieldLabel === row.redcapFieldLabel &&
           item.extraData.field_name === row.extraData.field_name
@@ -337,8 +338,6 @@ export default function CompletedJobsViewPage(props) {
     setIsSaving(true);
     const dataString = JSON.stringify(updatedData);
     storeJobVerificationInfo(dataString);
-    
-    
   }
 
   useEffect(() => {
@@ -555,7 +554,7 @@ export default function CompletedJobsViewPage(props) {
           } else {
             return redcapField;
           }
-        }
+        },
       },
       {
         header: "REDCap Field Name",
@@ -598,6 +597,11 @@ export default function CompletedJobsViewPage(props) {
         },
       },
       {
+        header: "User Verified",
+        accessorKey: "userMatch",
+        maxSize: 120,
+      },
+      {
         header: "Preferred",
         accessorKey: "selected",
         //you can access a row instance in column definition option callbacks like this
@@ -617,11 +621,6 @@ export default function CompletedJobsViewPage(props) {
         },
       },
 
-      {
-        header: "User Verified",
-        accessorKey: "userMatch",
-        maxSize: 120,
-      },
       {
         header: "Lookup",
         accessorKey: "lookup",
@@ -690,19 +689,24 @@ export default function CompletedJobsViewPage(props) {
     storeJobCompleteInfo(dataString);
 
     const filteredData = data.reduce((acc, obj) => {
+      console.log('obj', obj)
       if (obj.selected && obj.verified) {
         acc.push({
           redcapFieldLabel: obj.redcapFieldLabel,
+          redcapFieldName: obj.extraData.field_name,
           snomedID: obj.snomedID,
-          lookup: obj.lookup
+          snomedText: obj.snomedText,
+          lookup: obj.lookup,
         });
       } else {
         const subRows = obj.subRows
           .filter((subObj) => subObj.selected && subObj.verified)
           .map((subObj) => ({
             redcapFieldLabel: subObj.redcapFieldLabel,
+            redcapFieldName: subObj.extraData.field_name,
             snomedID: subObj.snomedID,
-            lookup: subObj.lookup
+            snomedText: subObj.snomedText,
+            lookup: subObj.lookup,
           }));
         if (subRows.length > 0) {
           acc.push(...subRows);
@@ -712,6 +716,28 @@ export default function CompletedJobsViewPage(props) {
     }, []);
 
     setFinalData(JSON.stringify(filteredData, null, 2));
+
+    //submit to lookup redcap embeddings process
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("data", JSON.stringify(filteredData));
+    formdata.append("selectedForm", "lookupEmbeddings");
+    formdata.append("dataLength", filteredData.length);
+    formdata.append("lookup", true );
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submitJobVerify`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.log("error", error));
   }
 
   async function showTab(e, switching, panelIndex) {
@@ -951,10 +977,10 @@ export default function CompletedJobsViewPage(props) {
               saveSuccess={saveSuccess}
               isSaving={isSaving}
               saveFile={saveFile}
+              selectedTabIdx={selectedTabIdx}
             />
 
-            {((allVerified && selectedTabIdx === 0) ||
-              selectedTabIdx === 2) && (
+            {selectedTabIdx === 2 && (
               <Button
                 sx={{ float: "right" }}
                 variant="contained"

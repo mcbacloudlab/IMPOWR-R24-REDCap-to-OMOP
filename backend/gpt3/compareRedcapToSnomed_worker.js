@@ -6,13 +6,25 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
-const collectionName = "gpt3_snomed_embeddings30k";
+const collectionName = "gpt3_snomed_embeddings10";
 const snomedCollection = client
   .db("GPT3_Embeddings")
   .collection(collectionName);
 
+const redcapLookupCollection = client
+  .db("GPT3_Embeddings")
+  .collection("gpt3_redcap_lookup_embeddings");
+
 console.log("Collection used: " + collectionName);
 let finalList = [];
+
+function isEmptyObject(obj) {
+  if (obj === null || obj === undefined) {
+    return false;
+  }
+  return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
 async function processChunk(
   redCapCollectionArray,
   snomedCollection,
@@ -20,45 +32,39 @@ async function processChunk(
   limit,
   progress
 ) {
-  //do not add any console.logs here. these are captured in queueService.js and extra logs tend to mess up the progress reporting back
   console.log("Processing Document At:", skip);
   console.log("Processing Document To:", skip + limit);
-  finalList = []; //clear between each chunk
-  let snomedCursor, snomedChunk;
+  finalList = [];
+  let snomedCursor, snomedChunk, redcapLookupArray;
   try {
     snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
     snomedChunk = await snomedCursor.toArray();
-    // rest of your code here...
+    redcapLookupArray = await redcapLookupCollection.find({}).toArray();
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
   }
 
-  // console.log('snomedChunk', snomedChunk)
   for (const redCapDoc of redCapCollectionArray) {
-    // if (
-    //   !redCapDoc ||
-    //   !redCapDoc.gpt3_data ||
-    //   !redCapDoc.gpt3_data.data ||
-    //   redCapDoc.gpt3_data.data.length === 0
-    // ) {
-    //   continue;
-    // }
-    // console.log('redcapDoc', redCapDoc)
-
     let redcapFieldLabel = redCapDoc.fieldLabel;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
-    for (const snomed of snomedChunk) {
-      let snomedEmbedding = snomed.gpt3_data.data[0].embedding;
-      let snomedText = snomed.snomed_text;
-      let snomedID = snomed.snomed_id;
+
+    // Combine snomedChunk and redcapLookupArray
+    const combinedData = [...snomedChunk, ...redcapLookupArray];
+    console.log('combineddata', combinedData)
+    for (const data of combinedData) {
+      let dataEmbedding = data.gpt3_data.data[0].embedding;
+      let dataText = data.snomed_text || data.matchingText;
+      let dataID =
+        (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
+        (!isEmptyObject(data.matchingID) && data.matchingID);
       let _redCapDoc = redCapDoc;
 
       topResults.push({
         redcapFieldLabel,
-        snomedText,
-        snomedID,
-        similarity: cosineSimilarity(snomedEmbedding, redcapEmbedding),
+        snomedText: dataText,
+        snomedID: dataID? dataID: '',
+        similarity: cosineSimilarity(dataEmbedding, redcapEmbedding),
         extraData: _redCapDoc.obj,
       });
     }
@@ -66,9 +72,8 @@ async function processChunk(
     finalList.push(
       topResults.sort((a, b) => b.similarity - a.similarity).slice(0, 3)
     );
-    topResults = []; //clear top results
+    topResults = [];
   }
-
   return finalList;
 }
 
@@ -93,88 +98,39 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
     results.push(...finalList);
     skip += limit;
   }
-
-  // console.log("Finished processing SNOMED Collection");
-  //clean up and only return top 3
+  // clean up and only return top 3
   // get unique values of redcapFieldLabel
-  // parentPort.postMessage( results);
+  console.log('results!', results)
 
-  const fieldLabels = [
-    ...new Set(results.flat().map((item) => (item.redcapFieldLabel + '-' + item.extraData.field_name))),
-  ];
-  // console.log('fieldLabels', fieldLabels.length)
+  // const fieldLabels = [
+  //   ...new Set(
+  //     results
+  //       .flat()
+  //       .map((item) => item.redcapFieldLabel + "-" + item.extraData.field_name)
+  //   ),
+  // ];
 
-  // console.log("Original results:", results);
+  // const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
+  //   const items = results
+  //     .flat()
+  //     .filter(
+  //       (item) =>
+  //         item.redcapFieldLabel + "-" + item.extraData.field_name === fieldLabel
+  //     );
 
-  // // Flatten the results and map each item to a combined string representation
-  // const combinedLabels = results.flat().map((item) => {
-  //   const combinedLabel = `${item.redcapFieldLabel}-${item.extraData.field_name}`;
-  //   return combinedLabel;
-  // });
-
-  // console.log("Combined labels:", combinedLabels);
-
-  // // Get the unique combined labels using a Set
-  // const uniqueCombinedLabels = [...new Set(combinedLabels)];
-
-  // console.log("Unique combined labels:", uniqueCombinedLabels);
-
-  // // Split each unique combined label back into separate properties
-  // const fieldLabels = uniqueCombinedLabels.map((combinedLabel) => {
-  //   const [redcapFieldLabel, fieldName] = combinedLabel.split("-");
-  //   return { redcapFieldLabel, fieldName };
-  // });
-
-  // console.log("Final field labels:", fieldLabels);
-
-  // parentPort.postMessage( fieldLabels);
-  // filter the results based on the top 3 similarity values for each redcapFieldLabel
-  // console.log('field labels', fieldLabels)
-  // const uniqueResults = await removeDuplicateObjects(results);
-  // console.log("results", results.flat());
-  const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = results
-      .flat()
-      .filter((item) => item.redcapFieldLabel + '-' + item.extraData.field_name === fieldLabel);
-
-    items.sort((a, b) => b.similarity - a.similarity);
-    // console.log('the items!', items)
-    acc.push(...items.slice(0, 3));
-    return acc;
-  }, []);
+  //   items.sort((a, b) => b.similarity - a.similarity);
+  //   acc.push(...items.slice(0, 3));
+  //   return acc;
+  // }, []);
   // parentPort.postMessage('filtering data down done' );
   // parentPort.postMessage({ log: filteredData.flat() });
-  setTimeout(() =>{
-    parentPort.postMessage({ endResult: filteredData.flat() });
+  console.log('filtered data',  results.flat())
+  setTimeout(() => {
+    parentPort.postMessage({ endResult: results.flat() });
     parentPort.close();
     process.exit(0);
-  }, 15000)
-
- 
+  }, 5000);
 }
 
-const removeDuplicateObjects = (arr) => {
-  // console.log("remove dupes");
-  // Initialize an empty Set to keep track of unique object keys
-  const uniqueSet = new Set();
-
-  // Flatten the array of arrays using flatMap
-  const flattenedArray = arr.flatMap((subArray) => subArray);
-
-  // Filter the flattened array to keep only unique objects based on the custom key
-  const uniqueArray = flattenedArray.filter((obj) => {
-    // Create a custom key based on specific properties
-    console.log("obj", obj);
-    const key = `${obj.redcapFieldLabel}-${obj.snomedText}-${obj.snomedID}-${obj.extraData.field_name}`;
-    if (!uniqueSet.has(key)) {
-      uniqueSet.add(key);
-      return true;
-    }
-    return false;
-  });
-
-  return uniqueArray;
-};
-
-// console.log('start compare child');
+// start processing in chunks, second param is size of chunk, assists in errors from running out of memory
 processChunks(workerData.redCapCollectionArray, 30000, workerData.progress);

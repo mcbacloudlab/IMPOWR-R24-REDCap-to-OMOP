@@ -99,6 +99,18 @@ async function storeJobCompleteInfo(req, res){
   }
 }
 
+async function submitJobVerify(req, res) {
+  console.log("submit to redis queue");
+  try {
+    await queueService.submitJobVerify(req, res);
+    // console.log("after submit", status)
+    // res.status(200).send(keys);
+  } catch (error) {
+    console.error("controller error", error);
+    //   res.status(500).send("Error");
+  }
+}
+
 module.exports = {
   submit,
   retryJob,
@@ -108,5 +120,6 @@ module.exports = {
   cancelJob,
   storeJobVerifyInfo,
   getJobVerifyInfo,
-  storeJobCompleteInfo
+  storeJobCompleteInfo,
+  submitJobVerify
 };

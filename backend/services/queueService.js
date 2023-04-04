@@ -31,14 +31,29 @@ const jobOptions = {
 };
 
 myQueue.process(jobOptions.concurrency, async (job) => {
-  await importToMongo(job);
-  await embedRedcapText(job);
-  let result = await compareEmbeddings(job);
-  if (result) {
-    // console.log("result to return", result.toString());
-    console.log('Job finished. Returning results')
+  console.log("job", job.data);
+  let jobData = JSON.parse(job.data.data)
+  let result
+  const containsLookupTrue = jobData.some(
+    (element) => element.lookup === true
+  );
+  console.log('contains lookup', containsLookupTrue)
+  if (job.data.lookup && containsLookupTrue) {
+    await embedRedcapLookupText(job);
+  } else if (job.data.lookup) {
+    //nothing to lookup, everything was already embedded
+    console.log('No lookups to embed, done')
+    return;
   } else {
-    console.log("No result");
+    await importToMongo(job);
+    await embedRedcapText(job);
+    result = await compareEmbeddings(job);
+    if (result) {
+      // console.log("result to return", result.toString());
+      console.log("Job finished. Returning results");
+    } else {
+      console.log("No result");
+    }
   }
 
   return result;
@@ -141,10 +156,52 @@ async function embedRedcapText(job) {
     });
   });
 }
-let activeJobProcess
+
+async function embedRedcapLookupText(job) {
+  console.log("jobid", job.id);
+  console.log("Starting REDCap Lookup GPT3 Embedding...");
+
+  return new Promise((resolve) => {
+    const scriptPath = path.resolve(__dirname, "../gpt3/redcapLookupEmbed.js");
+    const args = ["--max-old-space-size=32768"];
+    const data = job.data.data;
+    const filename = job.data.selectedForm;
+    const process = spawn("node", args.concat([scriptPath, filename]), {
+      stdio: "pipe",
+    });
+    console.log(`Sending input data with length ${data.length}`);
+    process.stdin.write(JSON.stringify(data));
+    process.stdin.end();
+
+    let capturedData;
+    process.stdout.on("data", (data) => {
+      console.log("data", data.toString());
+
+      if (data.toString().startsWith("[[")) {
+        console.log("data to capture");
+        capturedData = data;
+      }
+    });
+
+    process.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        console.log("REDCap GPT3 finished successfully");
+        resolve(capturedData);
+      } else {
+        console.error(`compareRedcapToSnomed.js failed with code ${code}`);
+        reject(`REDCap GPT3 failed with code ${code}`);
+      }
+    });
+  });
+}
+let activeJobProcess;
 async function compareEmbeddings(job) {
   console.log("jobid", job.id);
-  let storedTotal = false
+  let storedTotal = false;
   console.log("Starting Embedding Comparisons...");
   console.log("job.data");
 
@@ -159,13 +216,13 @@ async function compareEmbeddings(job) {
     const process = spawn("node", args.concat([scriptPath, filename]), {
       stdio: "pipe",
     });
-    activeJobProcess = process
+    activeJobProcess = process;
     console.log(`Sending input data with length ${data.length}`);
     process.stdin.write(JSON.stringify(data)); //pass data into child process
     process.stdin.end();
 
     let capturedData, totalDocuments, currentDocument, collectionName;
-    
+
     // ********************
     // Using startsWith is not very reliable when you start adding console.logs to the process.
     // It's not reliable due to the standard output occassionally lumping outputs together. Using a delimiter and capturing the entire standard output would likely be more reliable here
@@ -176,7 +233,7 @@ async function compareEmbeddings(job) {
       if (data.toString().startsWith('{"endResult":')) {
         console.log("data to capture");
         capturedData = JSON.parse(data.toString()).endResult;
-        capturedData = JSON.stringify(capturedData)
+        capturedData = JSON.stringify(capturedData);
       } else {
         console.log("data", data.toString());
         if (data.toString().startsWith("Total Documents")) {
@@ -203,15 +260,16 @@ async function compareEmbeddings(job) {
           );
         }
         if (data.toString().startsWith("Collection used")) {
-          collectionName = data.toString().split(":")[1].trim()
-          console.log('captured collection name:', collectionName)
+          collectionName = data.toString().split(":")[1].trim();
+          console.log("captured collection name:", collectionName);
         }
 
-        if (data.toString().startsWith("Total Documents") ) {
-          console.log('storing total docs in db for job', totalDocuments)
-          console.log('collection used!!', collectionName)
-          console.log('job', job.id)
-          const query = "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+        if (data.toString().startsWith("Total Documents")) {
+          console.log("storing total docs in db for job", totalDocuments);
+          console.log("collection used!!", collectionName);
+          console.log("job", job.id);
+          const query =
+            "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
           try {
             const [rows, fields] = await db
               .promise()
@@ -235,8 +293,12 @@ async function compareEmbeddings(job) {
         job.progress(100);
         resolve(capturedData);
       } else {
-        console.error(`Embedding comparison failed or was cancelled with code ${code}`);
-        reject(`Embedding comparison failed or was cancelled with code ${code}`);
+        console.error(
+          `Embedding comparison failed or was cancelled with code ${code}`
+        );
+        reject(
+          `Embedding comparison failed or was cancelled with code ${code}`
+        );
       }
     });
   });
@@ -245,7 +307,7 @@ async function compareEmbeddings(job) {
 async function submit(req, res) {
   try {
     const data = req.body;
-    console.log('data', data.filename)
+    console.log("data", data.filename);
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1];
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -259,12 +321,19 @@ async function submit(req, res) {
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
     const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
-    const query = "INSERT INTO jobs (userId, jobId, jobName, redcapFormName, lastUpdated) VALUES(?,?,?,?,?)";
+    const query =
+      "INSERT INTO jobs (userId, jobId, jobName, redcapFormName, lastUpdated) VALUES(?,?,?,?,?)";
 
     try {
       const [rows, fields] = await db
         .promise()
-        .execute(query, [userId, job.id, data.selectedForm, data.selectedForm, datetimeString]);
+        .execute(query, [
+          userId,
+          job.id,
+          data.selectedForm,
+          data.selectedForm,
+          datetimeString,
+        ]);
       console.log("Job inserted into DB");
       res.send(`Job ${job.id} added to queue`);
     } catch (err) {
@@ -361,7 +430,7 @@ async function cancelJob(req, res) {
                       console.log(
                         `Job ${jobId} has been removed from the queue`
                       );
-                      activeJobProcess.kill('SIGTERM')
+                      activeJobProcess.kill("SIGTERM");
                       dbCancelUpdate(userId, jobId);
                     })
                     .catch((err) => {
@@ -385,10 +454,9 @@ async function cancelJob(req, res) {
                   console.log(err);
                 });
             } else {
-              job.remove().then(() =>{
+              job.remove().then(() => {
                 res.send("Job has already completed");
-              })
-              
+              });
             }
           });
         }
@@ -605,6 +673,48 @@ async function getJobVerifyInfo(req, res) {
   }
 }
 
+async function submitJobVerify(req, res) {
+  try {
+    const data = req.body;
+    console.log("data", data.filename);
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // console.log("jwtVerified", jwtVerified);
+    let email = jwtVerified.user;
+    let userId = await getUserByEmail(email);
+    userId = userId[0].id;
+    console.log("email", email);
+    console.log("the user id!!", userId);
+    const job = await myQueue.add(data, jobOptions);
+    console.log(`Job ${job.id} added to queue`);
+    const now = new Date();
+    const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
+    const query =
+      "INSERT INTO jobs (userId, jobId, jobName, redcapFormName, lastUpdated) VALUES(?,?,?,?,?)";
+
+    try {
+      const [rows, fields] = await db
+        .promise()
+        .execute(query, [
+          userId,
+          job.id,
+          "lookupEmbeddings",
+          data.selectedForm,
+          datetimeString,
+        ]);
+      console.log("Job inserted into DB");
+      res.send(`Job ${job.id} added to queue`);
+    } catch (err) {
+      console.log("error!", err);
+      throw new Error("Error");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding job to queue");
+  }
+}
+
 module.exports = {
   submit,
   getJobStatus,
@@ -614,5 +724,6 @@ module.exports = {
   cancelJob,
   storeJobVerifyInfo,
   getJobVerifyInfo,
-  storeJobCompleteInfo
+  storeJobCompleteInfo,
+  submitJobVerify,
 };

@@ -12,5 +12,6 @@ router.post('/updateJobName', queueController.updateJobName)
 router.post('/storeJobVerifyInfo', queueController.storeJobVerifyInfo);
 router.post('/getJobVerifyInfo', queueController.getJobVerifyInfo);
 router.post('/storeJobCompleteInfo', queueController.storeJobCompleteInfo);
+router.post('/submitJobVerify', queueController.submitJobVerify);
 
 module.exports = router;
