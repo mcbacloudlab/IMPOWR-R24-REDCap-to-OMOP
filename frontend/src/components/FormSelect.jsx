@@ -21,7 +21,9 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
-  // console.log("Formselect", props);
+  let token = props.props.props?.props?.token ?? props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
+  console.log('token', token)
+  console.log("Formselect", props);
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
@@ -64,7 +66,7 @@ export default function FormSelect(props) {
     setIsFormLoading(true);
     if (!selectedForm) setSelectedForm(props.forms[0]);
     var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.props.token);
+    myHeaders.append("Authorization", "Bearer " + token);
 
     var FormData = require("form-data");
     var formdata = new FormData();
@@ -166,10 +168,10 @@ export default function FormSelect(props) {
       setShowSubmittedNotifcation(false);
     }, 5000);
     var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.props.token);
-    console.log("send data", data);
+    myHeaders.append("Authorization", "Bearer " + token);
+    // console.log("send data", data);
     var formdata = new FormData();
-    console.log('object length', dataToSendToQueue.length)
+    // console.log('object length', dataToSendToQueue.length)
     formdata.append("data", JSON.stringify(dataToSendToQueue));
     formdata.append("selectedForm", selectedForm);
     formdata.append("dataLength", dataToSendToQueue.length);
@@ -354,7 +356,7 @@ export default function FormSelect(props) {
                         fontSize: "1.2rem",
                         position: "absolute",
                         top: "0px",
-                        right: "200px",
+                        right: "250px",
                         zIndex: 10000,
                       }}
                     >

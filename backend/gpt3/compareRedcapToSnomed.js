@@ -67,14 +67,14 @@ main().then(async () => {
           fieldLabel: obj.field_label,
         });
 
-        console.log('document1', document)
+        // console.log('document1', document)
 
-        console.log('document2', document2)
+        // console.log('document2', document2)
 
 
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
-        console.log('merged doc', mergedDocument)
+        // console.log('merged doc', mergedDocument)
         return mergedDocument;
       })
     );

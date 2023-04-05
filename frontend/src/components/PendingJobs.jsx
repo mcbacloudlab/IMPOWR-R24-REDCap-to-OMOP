@@ -63,17 +63,16 @@ export default function PendingJobs(props) {
   };
 
   useEffect(() => {
-    console.log("jobs changed update columns...use effect");
-    const chunkSize = Math.ceil(jobs?.length / 3);
-    const _columns = [];
+    if (jobs) {
+      const chunkSize = Math.ceil(jobs.length / 3);
+      const _columns = [[], [], []];
 
-    for (let i = 0; i < 3; i++) {
-      _columns.push(jobs?.slice(i * chunkSize, (i + 1) * chunkSize));
+      for (let i = 0; i < jobs.length; i++) {
+        const columnIndex = i % 3;
+        _columns[columnIndex].push(jobs[i]);
+      }
+      setColumns(_columns);
     }
-    console.log('before set columns, jobs', _columns)
-    setColumns(_columns);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, pendingList]);
 
   useEffect(() => {

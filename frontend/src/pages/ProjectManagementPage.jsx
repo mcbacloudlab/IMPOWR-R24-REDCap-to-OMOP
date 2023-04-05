@@ -12,6 +12,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 
 export default function ProjectManagementPage(props) {
+  let token = props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
+  console.log('token', token)
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function ProjectManagementPage(props) {
     // console.log("use effect formselect ran");
     setIsLoading(true);
     var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
+    myHeaders.append("Authorization", "Bearer " + token);
 
     var requestOptions = {
       method: "GET",
@@ -68,12 +70,14 @@ export default function ProjectManagementPage(props) {
           <Grid item xs={12}>
             <h1><AddHomeWorkIcon/> Project Management</h1>
             {/* <h2>REDCap Forms</h2> */}
+            <Grid xs={12} md={4} sx={{margin:'auto'}}>
             {addSSError && (
               <Alert severity="error">
                 Error Loading REDCap Dictionaries. Check REDCap API settings
                 under My Account.
               </Alert>
             )}
+            </Grid>
             {isLoading ? (
               <CircularProgress />
             ) : (

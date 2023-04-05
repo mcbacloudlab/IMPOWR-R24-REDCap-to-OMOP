@@ -147,7 +147,7 @@ export default function SearchAppBar(props) {
       onClose={handleMenuClose}
     >
       <Box sx={{ mb: 1, mx: 2.5 }}>
-        <Link underline="none">
+        {/* <Link underline="none">
           <StyledAccount>
             <Avatar src={blank_avatar} alt="photoURL" />
 
@@ -161,7 +161,7 @@ export default function SearchAppBar(props) {
               </Typography>
             </Box>
           </StyledAccount>
-        </Link>
+        </Link> */}
       </Box>
       <MenuItem onClick={() => handleNavigate("/myaccount")}>
         <IconButton

@@ -192,7 +192,7 @@ export default function TransferList(props) {
   );
 
   return (
-    <Grid container spacing={2} justifyContent="center" alignItems="center">
+    <Grid container spacing={1} justifyContent="center" alignItems="center">
       <Grid item>{customList("Include", left)}</Grid>
       <Grid item>
         <Grid container direction="column" alignItems="center">

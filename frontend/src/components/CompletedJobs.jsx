@@ -93,18 +93,17 @@ export default function CompletedJobs(props) {
   };
 
   useEffect(() => {
-    // console.log('jobs changed update columns...use effect')
     if (jobs) {
       const chunkSize = Math.ceil(jobs.length / 3);
-      const _columns = [];
+      const _columns = [[], [], []];
 
-      for (let i = 0; i < 3; i++) {
-        _columns.push(jobs.slice(i * chunkSize, (i + 1) * chunkSize));
+      for (let i = 0; i < jobs.length; i++) {
+        const columnIndex = i % 3;
+        _columns[columnIndex].push(jobs[i]);
       }
       setColumns(_columns);
     }
   }, [jobs, completedList]);
-
   useEffect(() => {
     // console.log('completedList', completedList)
     setJobs(
@@ -241,16 +240,18 @@ export default function CompletedJobs(props) {
                     color: "white",
                     maxWidth: "550px",
                     margin: "20px",
-                    padding: '10px'
+                    padding: "10px",
                   }}
                 >
                   <ListItem
                     key={job.jobId}
-                    sx={{
-                      // borderWidth: "1px",
-                      // borderStyle: "solid",
-                      // margin: "10px",
-                    }}
+                    sx={
+                      {
+                        // borderWidth: "1px",
+                        // borderStyle: "solid",
+                        // margin: "10px",
+                      }
+                    }
                   >
                     <ListItemText
                       key={job.jobId}
@@ -312,39 +313,36 @@ export default function CompletedJobs(props) {
                                 : "N/A"}
                             </div>
                             {/* <div sx={{marginRight: '200px'}}> */}
-                              <b>Job Name:</b>
-                              {job.editMode ? (
-                                <TextField
-                                  margin="normal"
-                                  required
-                                  fullWidth
-                                  // id="email"
-                                  // name="email"
-                                  // autoComplete="email"
-                                  autoFocus
-                                  variant="standard"
-                                  sx={{
-                                    // marginLeft: "10px",
-                                    // marginRight: '20px',
-                                    //  padding: '30px',
-                                    //  width: "220px",
-                                    input: {
-                                      color: "black",
-                                      backgroundColor: "white",
-                                    },
-                                  }}
-                                  // label="Job Name"
-                                  value={job.newJobName ? job.newJobName : ""}
-                                  onChange={(e) =>
-                                    handleJobNameChange(
-                                      job.jobId,
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              ) : (
-                                <> {job.jobName}</>
-                              )}
+                            <b>Job Name:</b>
+                            {job.editMode ? (
+                              <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                // id="email"
+                                // name="email"
+                                // autoComplete="email"
+                                autoFocus
+                                variant="standard"
+                                sx={{
+                                  // marginLeft: "10px",
+                                  // marginRight: '20px',
+                                  //  padding: '30px',
+                                  //  width: "220px",
+                                  input: {
+                                    color: "black",
+                                    backgroundColor: "white",
+                                  },
+                                }}
+                                // label="Job Name"
+                                value={job.newJobName ? job.newJobName : ""}
+                                onChange={(e) =>
+                                  handleJobNameChange(job.jobId, e.target.value)
+                                }
+                              />
+                            ) : (
+                              <> {job.jobName}</>
+                            )}
                             {/* </div> */}
                             <IconButton
                               variant="outlined"

@@ -6,7 +6,7 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 
-const collectionName = "gpt3_snomed_embeddings10";
+const collectionName = "gpt3_snomed_embeddings";
 const snomedCollection = client
   .db("GPT3_Embeddings")
   .collection(collectionName);
@@ -30,16 +30,15 @@ async function processChunk(
   snomedCollection,
   skip,
   limit,
-  progress
+  redcapLookupArray // Add redcapLookupArray as an argument
 ) {
   console.log("Processing Document At:", skip);
   console.log("Processing Document To:", skip + limit);
   finalList = [];
-  let snomedCursor, snomedChunk, redcapLookupArray;
+  let snomedCursor, snomedChunk;
   try {
     snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
     snomedChunk = await snomedCursor.toArray();
-    redcapLookupArray = await redcapLookupCollection.find({}).toArray();
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
   }
@@ -49,9 +48,9 @@ async function processChunk(
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
 
-    // Combine snomedChunk and redcapLookupArray
-    const combinedData = [...snomedChunk, ...redcapLookupArray];
-    console.log('combineddata', combinedData)
+    // If skip is 0 (first iteration), include redcapLookupArray, otherwise, use snomedChunk only
+    const combinedData = skip === 0 ? [...snomedChunk, ...redcapLookupArray] : snomedChunk;
+
     for (const data of combinedData) {
       let dataEmbedding = data.gpt3_data.data[0].embedding;
       let dataText = data.snomed_text || data.matchingText;
@@ -63,21 +62,22 @@ async function processChunk(
       topResults.push({
         redcapFieldLabel,
         snomedText: dataText,
-        snomedID: dataID? dataID: '',
+        snomedID: dataID ? dataID : "",
         similarity: cosineSimilarity(dataEmbedding, redcapEmbedding),
         extraData: _redCapDoc.obj,
       });
     }
 
     finalList.push(
-      topResults.sort((a, b) => b.similarity - a.similarity).slice(0, 3)
+      topResults.sort((a, b) => b.similarity - a.similarity).slice(0, 5)
     );
     topResults = [];
   }
   return finalList;
 }
 
-async function processChunks(redCapCollectionArray, chunkSize, progress) {
+
+async function processChunks(redCapCollectionArray, chunkSize) {
   const count = await snomedCollection.countDocuments();
   // parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
   parentPort.postMessage(`Total Documents: ${count}`);
@@ -85,7 +85,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
 
   let skip = 0;
   const results = [];
-
+  redcapLookupArray = await redcapLookupCollection.find({}).toArray();
   while (skip < count) {
     const limit = Math.min(chunkSize, count - skip);
     const finalList = await processChunk(
@@ -93,40 +93,41 @@ async function processChunks(redCapCollectionArray, chunkSize, progress) {
       snomedCollection,
       skip,
       limit,
-      progress
+      redcapLookupArray
     );
     results.push(...finalList);
     skip += limit;
   }
   // clean up and only return top 3
   // get unique values of redcapFieldLabel
-  console.log('results!', results)
+  // console.log("results!", results);
 
-  // const fieldLabels = [
-  //   ...new Set(
-  //     results
-  //       .flat()
-  //       .map((item) => item.redcapFieldLabel + "-" + item.extraData.field_name)
-  //   ),
-  // ];
+  //because of the chunks we now need to reduce and flatten and only return the top 3 results for each
+  const fieldLabels = [
+    ...new Set(
+      results
+        .flat()
+        .map((item) => item.redcapFieldLabel + "-" + item.extraData.field_name)
+    ),
+  ];
 
-  // const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-  //   const items = results
-  //     .flat()
-  //     .filter(
-  //       (item) =>
-  //         item.redcapFieldLabel + "-" + item.extraData.field_name === fieldLabel
-  //     );
+  const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
+    const items = results
+      .flat()
+      .filter(
+        (item) =>
+          item.redcapFieldLabel + "-" + item.extraData.field_name === fieldLabel
+      );
 
-  //   items.sort((a, b) => b.similarity - a.similarity);
-  //   acc.push(...items.slice(0, 3));
-  //   return acc;
-  // }, []);
+    items.sort((a, b) => b.similarity - a.similarity);
+    acc.push(...items.slice(0, 5));
+    return acc;
+  }, []);
   // parentPort.postMessage('filtering data down done' );
   // parentPort.postMessage({ log: filteredData.flat() });
-  console.log('filtered data',  results.flat())
+  // console.log("filtered data", filteredData.flat());
   setTimeout(() => {
-    parentPort.postMessage({ endResult: results.flat() });
+    parentPort.postMessage({ endResult: filteredData.flat() });
     parentPort.close();
     process.exit(0);
   }, 5000);

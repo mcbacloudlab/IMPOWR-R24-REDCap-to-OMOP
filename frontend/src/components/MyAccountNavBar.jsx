@@ -32,6 +32,7 @@ import MyAccountAllCompletedJobs from "./MyAccountAllCompletedJobs";
 import MyAccountCollectionsView from "./MyAccountCollectionsView";
 import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
 import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
+import ProjectManagementPage from "../pages/ProjectManagementPage";
 
 const drawerWidth = "240px";
 
@@ -113,6 +114,14 @@ export default function MyAccountNavBar(props) {
                 <ListItemText primary={"My Account"} />
               </ListItemButton>
             </ListItem>
+            {/* <ListItem key={"Project Management"} disablePadding>
+              <ListItemButton onClick={(event) => handleClick(event)}>
+                <ListItemIcon>
+                  <AccountCircleIcon style={{ color: "white" }} />
+                </ListItemIcon>
+                <ListItemText primary={"Project Management"} />
+              </ListItemButton>
+            </ListItem> */}
             <ListItem key={"Completed Jobs"} disablePadding>
               <ListItemButton onClick={(event) => handleClick(event)}>
                 <ListItemIcon>
@@ -206,6 +215,11 @@ export default function MyAccountNavBar(props) {
                 </>
               )}
             </Typography>
+          </>
+        )}
+        {view === "Project Management" && (
+          <>
+            <ProjectManagementPage props={props} jobs={jobs} setJobs={setJobs} />
           </>
         )}
         {view === "Completed Jobs" && (
