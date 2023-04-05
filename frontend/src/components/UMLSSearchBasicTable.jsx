@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -10,10 +10,12 @@ import Link from "@mui/material/Link";
 import { styled } from "@mui/material/styles";
 import { Box, Button, IconButton, Typography, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import Alert from "@mui/material/Alert";
 
 export default function BasicTable(props) {
-  console.log("basictable props", props);
-  console.log('table data props', props.data)
+  const [lookUpDupe, setLookUpDupe] = useState(false);
+  // console.log("basictable props", props);
+  // console.log("table data props", props.data);
   let tableData = JSON.parse(props.umlsResults);
 
   const tableContainerStyle = {
@@ -43,7 +45,7 @@ export default function BasicTable(props) {
   }));
 
   const PreferredCell = ({ row }) => {
-    console.log("row", row);
+    // console.log("row", row);
     return (
       <StyledTableCell>
         <Tooltip title="Set as preferred" placement="top">
@@ -71,84 +73,118 @@ export default function BasicTable(props) {
   };
 
   function verifyRow(row, removePref) {
-    console.log("verifyRow", row);
-    console.log('modal row data', props.modalRowData);
+    let newModalRowData = props.modalRowData;
     let newModalSubRowData = props.modalRowData.subRows;
-    const modifiedSubRows = newModalSubRowData.filter((object) => !object.lookup); //remove existing lookups from
+    // const modifiedSubRows = newModalSubRowData;
+    const modifiedSubRows = newModalSubRowData.filter(
+      (object) => !object.lookup
+    ); //remove existing lookups from
+    setLookUpDupe(false);
 
+    for (const obj of modifiedSubRows) {
+      if (obj.snomedID === row.ui || newModalRowData.snomedID === row.ui) {
+        console.log("Found a matching object:", obj);
+        setLookUpDupe(true);
+        return;
+      }
+    }
+    setLookUpDupe(false);
     modifiedSubRows.push({
       redcapFieldLabel: props.modalRowData.redcapFieldLabel,
-      extraData: {field_name: props.modalRowData.extraData.field_name},
+      extraData: { field_name: props.modalRowData.extraData.field_name },
       snomedText: row.name,
       snomedID: row.ui,
       selected: true,
       verified: true,
       lookup: true,
     });
-    console.log("mod subrows", modifiedSubRows);
+    // console.log("mod subrows", modifiedSubRows);
 
     // props.modalRowData.subRows = modifiedSubRows;
-    console.log('props modalrowsdata', props.modalRowData);
+    // console.log("props modalrowsdata", props.modalRowData);
     const updatedModalRowData = {
       ...props.modalRowData,
-      subRows: modifiedSubRows
-    }
-    console.log('update modal row data', updatedModalRowData)
-    props.setModalRowData(updatedModalRowData)
+      subRows: modifiedSubRows,
+    };
+    // console.log("update modal row data", updatedModalRowData);
+    props.setModalRowData(updatedModalRowData);
     let tableData = props.data;
 
-    const newArray = tableData.map(item => {
+    const newArray = tableData.map((item) => {
       if (item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel) {
         return updatedModalRowData;
       }
       return item;
     });
 
-    console.log('new array', newArray)
+    // console.log("new array", newArray);
 
-    console.log("before calling props buildtable data", newArray);
+    // console.log("before calling props buildtable data", newArray);
     props.buildTable(newArray, true, true);
-    props.storeJobVerificationInfo(JSON.stringify(newArray))
-    props.setLookupModalOpen(false)
+    props.storeJobVerificationInfo(JSON.stringify(newArray));
+    props.setLookupModalOpen(false);
     //count and update selected and verified records
     newArray.map((item) => {
-
-      return null
-    })
+      return null;
+    });
   }
 
   return (
-    <TableContainer component={Paper} sx={tableContainerStyle}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Name</StyledTableCell>
-            <StyledTableCell align="right">Code</StyledTableCell>
-            <StyledTableCell align="right">Root Source</StyledTableCell>
-            <StyledTableCell align="right">Preferred</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {tableData.map((row) => (
-            <StyledTableRow
-              key={row.name}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <StyledTableCell component="th" scope="row">
-                {row.name}
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                {" "}
-                <Link href={row.uri} target="_blank" rel="noopener noreferrer">
-                  {row.ui}
-                </Link>
-              </StyledTableCell>
-              <StyledTableCell align="right">{row.rootSource}</StyledTableCell>
-              <PreferredCell align="right" row={row} />
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      {lookUpDupe && (
+        <Alert
+          severity="error"
+          sx={{
+            fontSize: "1.2rem",
+            maxWidth: "400px",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Error
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            This code already exists in the results.
+          </Typography>
+        </Alert>
+      )}
+      <TableContainer component={Paper} sx={tableContainerStyle}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Name</StyledTableCell>
+              <StyledTableCell align="right">Code</StyledTableCell>
+              <StyledTableCell align="right">Root Source</StyledTableCell>
+              <StyledTableCell align="right">Preferred</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tableData.map((row) => (
+              <StyledTableRow
+                key={row.name}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <StyledTableCell component="th" scope="row">
+                  {row.name}
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {" "}
+                  <Link
+                    href={`https://uts.nlm.nih.gov/uts/umls/concept/${row.ui}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row.ui}
+                  </Link>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {row.rootSource}
+                </StyledTableCell>
+                <PreferredCell align="right" row={row} />
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }

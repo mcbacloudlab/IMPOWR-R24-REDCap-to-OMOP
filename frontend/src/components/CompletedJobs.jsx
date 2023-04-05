@@ -94,7 +94,7 @@ export default function CompletedJobs(props) {
 
   useEffect(() => {
     if (jobs) {
-      const chunkSize = Math.ceil(jobs.length / 3);
+      // const chunkSize = Math.ceil(jobs.length / 3);
       const _columns = [[], [], []];
 
       for (let i = 0; i < jobs.length; i++) {

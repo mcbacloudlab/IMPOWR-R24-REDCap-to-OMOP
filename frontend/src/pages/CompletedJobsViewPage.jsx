@@ -540,6 +540,10 @@ export default function CompletedJobsViewPage(props) {
         },
       },
       {
+        header: "REDCap Field Name",
+        accessorKey: "extraData.field_name",
+      },
+      {
         header: "REDCap Field Label",
         accessorKey: "redcapFieldLabel",
         Cell: ({ cell, row }) => {
@@ -556,13 +560,25 @@ export default function CompletedJobsViewPage(props) {
           }
         },
       },
-      {
-        header: "REDCap Field Name",
-        accessorKey: "extraData.field_name",
-      },
+     
       {
         header: "SNOMED Text",
         accessorKey: "snomedText",
+      },
+      {
+        header: "Cosine Similarity",
+        accessorKey: "similarity",
+        maxSize: 130,
+        Cell: ({ cell }) => {
+          const value = cell.getValue();
+          if (!value) return "N/A";
+          const formattedValue = value.toLocaleString("en-US", {
+            style: "percent",
+            minimumFractionDigits: 2,
+          });
+
+          return formattedValue;
+        },
       },
       {
         header: "SNOMED ID",
@@ -581,26 +597,12 @@ export default function CompletedJobsViewPage(props) {
           );
         },
       },
-      {
-        header: "Cosine Similarity",
-        accessorKey: "similarity",
-        maxSize: 130,
-        Cell: ({ cell }) => {
-          const value = cell.getValue();
-          if (!value) return "N/A";
-          const formattedValue = value.toLocaleString("en-US", {
-            style: "percent",
-            minimumFractionDigits: 2,
-          });
-
-          return formattedValue;
-        },
-      },
-      {
-        header: "User Verified",
-        accessorKey: "userMatch",
-        maxSize: 120,
-      },
+      
+      // {
+      //   header: "User Verified",
+      //   accessorKey: "userMatch",
+      //   maxSize: 120,
+      // },
       {
         header: "Preferred",
         accessorKey: "selected",
