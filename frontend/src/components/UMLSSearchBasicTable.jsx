@@ -89,7 +89,7 @@ export default function BasicTable(props) {
       }
     }
     setLookUpDupe(false);
-    modifiedSubRows.push({
+    let newSubRow = {
       redcapFieldLabel: props.modalRowData.redcapFieldLabel,
       extraData: { field_name: props.modalRowData.extraData.field_name },
       snomedText: row.name,
@@ -97,7 +97,8 @@ export default function BasicTable(props) {
       selected: true,
       verified: true,
       lookup: true,
-    });
+    }
+    modifiedSubRows.push(newSubRow);
     // console.log("mod subrows", modifiedSubRows);
 
     // props.modalRowData.subRows = modifiedSubRows;
@@ -126,7 +127,7 @@ export default function BasicTable(props) {
     props.handleSetTempAllData(newArray)
     // props.showTab(null,true,props.selectedTabIdx)
 
-    props.verifyRow(updatedModalRowData, false, true)
+    props.verifyRow(newSubRow, false, true)
     //count and update selected and verified records
     newArray.map((item) => {
       return null;
