@@ -106,9 +106,9 @@ export default function BasicTable(props) {
       ...props.modalRowData,
       subRows: modifiedSubRows,
     };
-    // console.log("update modal row data", updatedModalRowData);
+    console.log("update modal row data", updatedModalRowData);
     props.setModalRowData(updatedModalRowData);
-    let tableData = props.data;
+    let tableData = props.tempAllData;
 
     const newArray = tableData.map((item) => {
       if (item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel) {
@@ -119,10 +119,14 @@ export default function BasicTable(props) {
 
     // console.log("new array", newArray);
 
-    // console.log("before calling props buildtable data", newArray);
+    console.log("before calling props buildtable data", newArray);
     props.buildTable(newArray, true, true);
     props.storeJobVerificationInfo(JSON.stringify(newArray));
     props.setLookupModalOpen(false);
+    props.handleSetTempAllData(newArray)
+    // props.showTab(null,true,props.selectedTabIdx)
+
+    props.verifyRow(updatedModalRowData, false, true)
     //count and update selected and verified records
     newArray.map((item) => {
       return null;

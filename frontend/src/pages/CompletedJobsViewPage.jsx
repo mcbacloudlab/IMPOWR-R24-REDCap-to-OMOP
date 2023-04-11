@@ -163,6 +163,8 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function storeJobVerificationInfo(dataString) {
+    console.log('store job')
+    // console.log("datastring", dataString);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -251,10 +253,11 @@ export default function CompletedJobsViewPage(props) {
     };
   }
 
-  function verifyRow(row, removePref) {
+  function verifyRow(row, removePref, fromModal) {
     console.log("verifyRow row", row);
+    // console.log('temp', tempAllData)
     const updatedData = _dataObj.map((item) => {
-      console.log("verifyRow item:", item);
+      // console.log("verifyRow item:", item);
       //removing the pref
       if (removePref) {
         if (
@@ -262,7 +265,7 @@ export default function CompletedJobsViewPage(props) {
           item.extraData.field_name === row.extraData.field_name
         ) {
           //increment counter only if row has not been verified previously
-          if (item.verified === true) {
+          if (item.verified === true && !fromModal) {
             // Update both verifiedRecords and totalRecords using functional updates
             setVerifiedRecords((prevVerifiedRecords) => {
               const updatedVerifiedRecords = prevVerifiedRecords - 1;
@@ -297,7 +300,7 @@ export default function CompletedJobsViewPage(props) {
           item.extraData.field_name === row.extraData.field_name
         ) {
           //increment counter only if row has not been verified previously
-          if (item.verified === false) {
+          if (item.verified === false && !fromModal) {
             // Update both verifiedRecords and totalRecords using functional updates
             setVerifiedRecords((prevVerifiedRecords) => {
               const updatedVerifiedRecords = prevVerifiedRecords + 1;
@@ -336,7 +339,7 @@ export default function CompletedJobsViewPage(props) {
     setTempAllData(updatedData);
     //save the data to local storage
     setIsSaving(true);
-    const dataString = JSON.stringify(updatedData);
+    const dataString = JSON.stringify(_dataObj);
     storeJobVerificationInfo(dataString);
   }
 
@@ -382,7 +385,7 @@ export default function CompletedJobsViewPage(props) {
         if (index === _data.length - 1) {
           result.push(currentItem);
         }
-
+        console.log("result", result);
         // Calculate the number of objects with "verified" set to true
         const verifiedCount = result.reduce((count, obj) => {
           // Check if the "verified" key is true, and increment the count if it is
@@ -397,11 +400,30 @@ export default function CompletedJobsViewPage(props) {
     } else {
       result = _data;
       //count verified records
-      // Calculate the number of objects with "verified" set to true
-      const verifiedCount = result.reduce((count, obj) => {
-        // Check if the "verified" key is true, and increment the count if it is
-        return obj.verified === true ? count + 1 : count;
-      }, 0); // Initialize the accumulator (count) with 0
+      console.log("result", result);
+      let verifiedCount = 0;
+
+      // Loop through each item in the outer array
+      result.forEach((item) => {
+        // Check if the "verified" key is true for the top-level item
+        if (item.verified === true && item.selected === true) {
+          console.log('increment for', item)
+          verifiedCount += 1;
+        }
+
+        // Check if the "subRows" key exists and is an array
+        if (Array.isArray(item.subRows)) {
+          // Loop through each sub-item within "subRows"
+          item.subRows.forEach((subItem) => {
+            // Check if the "verified" key is true for the sub-item
+            if (subItem.verified === true && subItem.selected === true) {
+              console.log('increment for sub', subItem)
+              verifiedCount += 1;
+            }
+          });
+        }
+      });
+      console.log('verified count', verifiedCount)
       // Update the state with the new verified count
       if (verifiedCount === result.length) {
         setAllVerified(true);
@@ -560,7 +582,7 @@ export default function CompletedJobsViewPage(props) {
           }
         },
       },
-     
+
       {
         header: "SNOMED Text",
         accessorKey: "snomedText",
@@ -597,7 +619,7 @@ export default function CompletedJobsViewPage(props) {
           );
         },
       },
-      
+
       // {
       //   header: "User Verified",
       //   accessorKey: "userMatch",
@@ -678,8 +700,9 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function saveFile() {
+    console.log("tempAllData", tempAllData);
     setIsSaving(true);
-    const dataString = JSON.stringify(data);
+    const dataString = JSON.stringify(tempAllData);
     storeJobVerificationInfo(dataString);
   }
 
@@ -691,7 +714,7 @@ export default function CompletedJobsViewPage(props) {
     storeJobCompleteInfo(dataString);
 
     const filteredData = data.reduce((acc, obj) => {
-      console.log('obj', obj)
+      console.log("obj", obj);
       if (obj.selected && obj.verified) {
         acc.push({
           redcapFieldLabel: obj.redcapFieldLabel,
@@ -727,7 +750,7 @@ export default function CompletedJobsViewPage(props) {
     formdata.append("data", JSON.stringify(filteredData));
     formdata.append("selectedForm", "lookupEmbeddings");
     formdata.append("dataLength", filteredData.length);
-    formdata.append("lookup", true );
+    formdata.append("lookup", true);
 
     var requestOptions = {
       method: "POST",
@@ -736,7 +759,10 @@ export default function CompletedJobsViewPage(props) {
       redirect: "follow",
     };
 
-    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submitJobVerify`, requestOptions)
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submitJobVerify`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => console.log(result))
       .catch((error) => console.log("error", error));
@@ -744,12 +770,12 @@ export default function CompletedJobsViewPage(props) {
 
   async function showTab(e, switching, panelIndex) {
     setIsLoading(true);
-    console.log("set data with tab views");
+    console.log("set data with tab views", panelIndex);
     // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
-
+    console.log('showtab temp', tempAllData)
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
@@ -769,6 +795,7 @@ export default function CompletedJobsViewPage(props) {
       }
       case 2: {
         // Use the filter() method to get elements where the 'verified' key is false
+        console.log("tempAllData", tempAllData);
         const verifiedElements = tempAllData.filter((item) => {
           // Return true for elements where 'verified' is false
           return item.verified === true;
@@ -813,6 +840,11 @@ export default function CompletedJobsViewPage(props) {
 
     return result;
   }
+
+  const handleSetTempAllData = (data) => {
+    console.log("handleSetTempAllData", data);
+    setTempAllData(data);
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -885,6 +917,12 @@ export default function CompletedJobsViewPage(props) {
                     modalRowData={modalRowData}
                     setModalRowData={setModalRowData}
                     data={data}
+                    tempAllData={tempAllData}
+                    setTempAllData={setTempAllData}
+                    handleSetTempAllData={handleSetTempAllData}
+                    verifyRow={verifyRow}
+                    showTab={showTab}
+                    selectedTabIdx={selectedTabIdx}
                     setData={setData}
                     buildTable={buildTable}
                     storeJobVerificationInfo={storeJobVerificationInfo}
