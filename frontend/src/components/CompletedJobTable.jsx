@@ -2,7 +2,7 @@ import React from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
 import { Button } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+// import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import SaveIcon from "@mui/icons-material/Save";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -36,7 +36,6 @@ export default function CompletedJobTable({
       enableGlobalFilterModes={true}
       enablePagination={false}
       {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
-      {...(selectedTabIdx === 2 ? {} : { enableExpandAll: true })}
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize

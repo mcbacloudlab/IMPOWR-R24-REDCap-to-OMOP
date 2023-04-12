@@ -1,10 +1,8 @@
 import * as React from "react";
 import {
   AppBar,
-  Avatar,
   Badge,
   Box,
-  Link,
   Drawer,
   IconButton,
   MenuItem,
@@ -25,8 +23,8 @@ import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 import ErrorIcon from "@mui/icons-material/Error";
-import { styled, alpha } from "@mui/material/styles";
-import blank_avatar from "../assets/blank_avatar.jpg";
+// import { styled, alpha } from "@mui/material/styles";
+// import blank_avatar from "../assets/blank_avatar.jpg";
 import CompletedJobs from "./CompletedJobs";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
@@ -42,8 +40,8 @@ export default function SearchAppBar(props) {
   // console.log('search bar', props.user)
   const {
     pendingList,
-    failedList,
-    completedList,
+    // failedList,
+    // completedList,
     setPendingList,
     setFailedList,
     setCompletedList,
@@ -53,9 +51,9 @@ export default function SearchAppBar(props) {
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
   // const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState(null);
-  const [redisError, setRedisError] = useState();
+  // const [name, setName] = useState("");
+  // const [role, setRole] = useState(null);
+  // const [redisError, setRedisError] = useState();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -64,15 +62,15 @@ export default function SearchAppBar(props) {
 
   useEffect(() => {
     try {
-      let userCookie = JSON.parse(Cookies.get("user"));
+      // let userCookie = JSON.parse(Cookies.get("user"));
       // setUsername(userCookie.email);
-      setName(userCookie.firstName + " " + userCookie.lastName);
-      let userInfo;
+      // setName(userCookie.firstName + " " + userCookie.lastName);
+      // let userInfo;
       // console.log('the props!!!', props)
       if (props.user) {
         try {
           // Attempt to parse the string as JSON
-          userInfo = JSON.parse(props.user);
+          // userInfo = JSON.parse(props.user);
         } catch (error) {
           // Handle the case where the string is not valid JSON
           console.info('The provided string is not a valid JSON object:', error.message);
@@ -81,7 +79,7 @@ export default function SearchAppBar(props) {
         
       }
       // console.log("prfewefwefops.", userInfo);
-      setRole(userInfo.role);
+      // setRole(userInfo.role);
     } catch (error) {
       console.log("error", error);
     }
@@ -119,15 +117,15 @@ export default function SearchAppBar(props) {
     navigate(url);
   };
 
-  const StyledAccount = styled("div")(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(2, 2.5),
-    marginTop: "10px",
-    borderRadius: Number(theme.shape.borderRadius) * 1.5,
-    backgroundColor: alpha(theme.palette.grey[500], 0.12),
-    color: "white",
-  }));
+  // const StyledAccount = styled("div")(({ theme }) => ({
+  //   display: "flex",
+  //   alignItems: "center",
+  //   padding: theme.spacing(2, 2.5),
+  //   marginTop: "10px",
+  //   borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  //   backgroundColor: alpha(theme.palette.grey[500], 0.12),
+  //   color: "white",
+  // }));
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (

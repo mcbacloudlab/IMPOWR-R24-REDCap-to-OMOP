@@ -37,12 +37,12 @@ export default function CompletedJobsViewPage(props) {
   const [csvFilename, setCSVFilename] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   // const [isSavingErr, setIsSavingErr] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  // const [saveSuccess, setSaveSuccess] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [verifiedRecords, setVerifiedRecords] = useState(0);
   const [allVerified, setAllVerified] = useState(false);
   const [value, setValue] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [finalData, setFinalData] = useState("");
@@ -65,11 +65,11 @@ export default function CompletedJobsViewPage(props) {
     overflowY: "auto",
   };
 
-  const tableContainerStyle = {
-    maxHeight: "calc(80% - 100px)", // Adjust this value based on the total height of other elements
-    overflowY: "auto",
-    marginTop: "15px",
-  };
+  // const tableContainerStyle = {
+  //   maxHeight: "calc(80% - 100px)", // Adjust this value based on the total height of other elements
+  //   overflowY: "auto",
+  //   marginTop: "15px",
+  // };
 
   const handleLookupModalOpen = () => setLookupModalOpen(true);
   const handleLookupModalClose = () => setLookupModalOpen(false);
@@ -347,6 +347,7 @@ export default function CompletedJobsViewPage(props) {
     if (tempAllData) {
       showTab(null, true, selectedTabIdx);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempAllData]);
 
   function buildTable(_data, dbFlag, lookupFlag) {
@@ -769,7 +770,7 @@ export default function CompletedJobsViewPage(props) {
   }
 
   async function showTab(e, switching, panelIndex) {
-    setIsLoading(true);
+    // setIsLoading(true);
     console.log("set data with tab views", panelIndex);
     // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
@@ -1014,7 +1015,7 @@ export default function CompletedJobsViewPage(props) {
               data={data}
               handleExportData={handleExportData}
               resetScreen={resetScreen}
-              saveSuccess={saveSuccess}
+              // saveSuccess={saveSuccess}
               isSaving={isSaving}
               saveFile={saveFile}
               selectedTabIdx={selectedTabIdx}

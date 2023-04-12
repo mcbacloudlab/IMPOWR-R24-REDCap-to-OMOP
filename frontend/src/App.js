@@ -1,6 +1,6 @@
 // import logo from './logo.svg';
 import "./App.css";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchAppBar from "./components/SearchAppBar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
