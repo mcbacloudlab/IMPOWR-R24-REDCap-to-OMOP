@@ -87,7 +87,6 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    console.log("getJobVerificationInfo");
     //get job verification data from db
     getJobVerificationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,12 +142,10 @@ export default function CompletedJobsViewPage(props) {
         jobVerificationData = JSON.parse(result);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
-          console.log("found saved job");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(jobVerificationData.jobData), true);
           setTempAllData(JSON.parse(jobVerificationData.jobData));
         } else if (_data) {
-          console.log("new job");
           if (_jobId) setJobId(_jobId);
           buildTable(JSON.parse(_data), false);
         }
@@ -157,13 +154,11 @@ export default function CompletedJobsViewPage(props) {
         console.log("error", error);
         if (_jobId) setJobId(_jobId);
         //on an error reading from the db just load a new blank job
-        console.log("build table with blank", JSON.parse(_data));
         buildTable(JSON.parse(_data), false);
       });
   }
 
   function storeJobVerificationInfo(dataString) {
-    console.log('store job')
     // console.log("datastring", dataString);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
@@ -254,7 +249,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function verifyRow(row, removePref, fromModal) {
-    console.log("verifyRow row", row);
     // console.log('temp', tempAllData)
     const updatedData = _dataObj.map((item) => {
       // console.log("verifyRow item:", item);
@@ -334,7 +328,6 @@ export default function CompletedJobsViewPage(props) {
     });
 
     _dataObj = updatedData;
-    console.log("set data with", updatedData);
     setData(updatedData);
     setTempAllData(updatedData);
     //save the data to local storage
@@ -355,8 +348,6 @@ export default function CompletedJobsViewPage(props) {
     let currentRedcapFieldLabel = null;
     let currentRedcapFieldName = null;
     let currentItem = null;
-    console.log("data passed to buildTable", _data);
-    console.log("look up flag", lookupFlag);
     //create verified and selected keys if first time
     if (!dbFlag) {
       _data.forEach((item, index) => {
@@ -364,8 +355,6 @@ export default function CompletedJobsViewPage(props) {
           item.redcapFieldLabel !== currentRedcapFieldLabel ||
           item.extraData.field_name !== currentRedcapFieldName
         ) {
-          console.log("lookup flag", lookupFlag);
-          console.log("currentitem", currentItem);
           if (currentItem) {
             result.push(currentItem);
           }
@@ -386,7 +375,6 @@ export default function CompletedJobsViewPage(props) {
         if (index === _data.length - 1) {
           result.push(currentItem);
         }
-        console.log("result", result);
         // Calculate the number of objects with "verified" set to true
         const verifiedCount = result.reduce((count, obj) => {
           // Check if the "verified" key is true, and increment the count if it is
@@ -401,14 +389,13 @@ export default function CompletedJobsViewPage(props) {
     } else {
       result = _data;
       //count verified records
-      console.log("result", result);
+      // console.log("result", result);
       let verifiedCount = 0;
 
       // Loop through each item in the outer array
       result.forEach((item) => {
         // Check if the "verified" key is true for the top-level item
         if (item.verified === true && item.selected === true) {
-          console.log('increment for', item)
           verifiedCount += 1;
         }
 
@@ -418,13 +405,11 @@ export default function CompletedJobsViewPage(props) {
           item.subRows.forEach((subItem) => {
             // Check if the "verified" key is true for the sub-item
             if (subItem.verified === true && subItem.selected === true) {
-              console.log('increment for sub', subItem)
               verifiedCount += 1;
             }
           });
         }
       });
-      console.log('verified count', verifiedCount)
       // Update the state with the new verified count
       if (verifiedCount === result.length) {
         setAllVerified(true);
@@ -432,7 +417,7 @@ export default function CompletedJobsViewPage(props) {
       setVerifiedRecords(verifiedCount);
     }
 
-    console.log("build table, setTempAllData with", result);
+    // console.log("build table, setTempAllData with", result);
     setTempAllData(result);
     setTotalRecords(result.length);
 
@@ -546,8 +531,6 @@ export default function CompletedJobsViewPage(props) {
         header: "",
         accessorKey: "verified",
         maxSize: 50,
-        //you can access a row instance in column definition option callbacks like this
-
         Cell: VerifiedCell,
         sx: {
           "& .MuiButton-root": {
@@ -645,17 +628,18 @@ export default function CompletedJobsViewPage(props) {
           },
         },
       },
-
+      ...(selectedTabIdx !== 2
+        ? [
       {
         header: "Lookup",
         accessorKey: "lookup",
         Cell: LookUpCell,
       },
+    ] : [] )
     ];
-
+    console.log('selectedTab', selectedTabIdx)
     setColDefs(cols);
     _dataObj = result;
-    console.log("set data with", result);
     setData(result);
     setCSVFilename(`Completed_Job_${_jobId}.csv`);
     setIsFormLoaded(true);
@@ -694,14 +678,12 @@ export default function CompletedJobsViewPage(props) {
   };
 
   function resetScreen() {
-    console.log("clear data");
     setData("");
     setIsFormLoaded(false);
     setJobId();
   }
 
   function saveFile() {
-    console.log("tempAllData", tempAllData);
     setIsSaving(true);
     const dataString = JSON.stringify(tempAllData);
     storeJobVerificationInfo(dataString);
@@ -710,12 +692,10 @@ export default function CompletedJobsViewPage(props) {
   function submitToProcess() {
     // Convert the data object to a JSON string before storing it in local storage
     const dataString = JSON.stringify(data);
-    console.log("data", data);
     // Store the dataString in local storage with the key "myData"
     storeJobCompleteInfo(dataString);
 
     const filteredData = data.reduce((acc, obj) => {
-      console.log("obj", obj);
       if (obj.selected && obj.verified) {
         acc.push({
           redcapFieldLabel: obj.redcapFieldLabel,
@@ -765,18 +745,18 @@ export default function CompletedJobsViewPage(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        // console.log(result)
+      })
       .catch((error) => console.log("error", error));
   }
 
   async function showTab(e, switching, panelIndex) {
     // setIsLoading(true);
-    console.log("set data with tab views", panelIndex);
     // setSelectedFile(value);
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
-    console.log('showtab temp', tempAllData)
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
@@ -796,7 +776,6 @@ export default function CompletedJobsViewPage(props) {
       }
       case 2: {
         // Use the filter() method to get elements where the 'verified' key is false
-        console.log("tempAllData", tempAllData);
         const verifiedElements = tempAllData.filter((item) => {
           // Return true for elements where 'verified' is false
           return item.verified === true;
@@ -843,7 +822,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   const handleSetTempAllData = (data) => {
-    console.log("handleSetTempAllData", data);
     setTempAllData(data);
   };
 

@@ -22,8 +22,6 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
   let token = props.props.props?.props?.token ?? props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
-  console.log('token', token)
-  console.log("Formselect", props);
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
@@ -147,14 +145,11 @@ export default function FormSelect(props) {
 
   function submitToProcess(e) {
     let selectedRows = tableInstanceRef.current?.getSelectedRowModel().rows;
-    console.log("selected rows", selectedRows);
 
     // Reformat the array of objects
     const reformattedArray = selectedRows.map((obj) => obj.original);
-    console.log("reformat", reformattedArray);
     let dataToSendToQueue
     if (!reformattedArray || reformattedArray.length <= 0) {
-      console.log("No rows selected");
       dataToSendToQueue = data
       // setSelectRowsError(true) //uncomment these lines if you want to require rows to be selected, disabled means if no rows selected then all get sent
       // return;
