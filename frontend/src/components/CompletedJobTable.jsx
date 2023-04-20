@@ -21,9 +21,8 @@ export default function CompletedJobTable({
   value,
   handleExportData,
   resetScreen,
-  selectedTabIdx
+  selectedTabIdx,
 }) {
-
   // console.log('selectedtabidx', selectedTabIdx)
   return (
     <MaterialReactTable
@@ -39,13 +38,15 @@ export default function CompletedJobTable({
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize
-      paginateExpandedRows={true} 
+      paginateExpandedRows={true}
       RowProps={{ sx: { marginBottom: "10px" } }}
       // enableRowNumbers
       // enableRowVirtualization
       muiTableContainerProps={{
-        sx: { 
-         maxWidth: "100vw", maxHeight: '60vh' },
+        sx: {
+          maxWidth: "100vw",
+          maxHeight: "60vh",
+        },
       }}
       onSortingChange={setSorting}
       initialState={{
@@ -115,7 +116,7 @@ export default function CompletedJobTable({
             flexWrap: "wrap",
           }}
         >
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             component="label"
@@ -131,17 +132,19 @@ export default function CompletedJobTable({
             onClick={(event) => saveFile(event, value)}
           >
             Save
-          </Button>
+          </Button> */}
+          {selectedTabIdx === 2 && (
+            <Button
+              color="success"
+              //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
+              onClick={handleExportData}
+              startIcon={<FileDownloadIcon />}
+              variant="outlined"
+            >
+              Export Data Dictionary
+            </Button>
+          )}
 
-          <Button
-            color="success"
-            //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-            onClick={handleExportData}
-            startIcon={<FileDownloadIcon />}
-            variant="outlined"
-          >
-            Export
-          </Button>
           {/* <Typography
             color="textSecondary"
             variant="subtitle2"

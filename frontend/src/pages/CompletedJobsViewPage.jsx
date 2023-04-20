@@ -24,6 +24,8 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 // var XLSX = require("xlsx");
 
@@ -50,6 +52,9 @@ export default function CompletedJobsViewPage(props) {
   const [searchUMLSValue, setSearchUMLSValue] = useState("");
   const [umlsResultsData, setUMLSResultsData] = useState([]);
   const [modalRowData, setModalRowData] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState("success");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const umlsModalStyle = {
     position: "absolute",
@@ -73,6 +78,13 @@ export default function CompletedJobsViewPage(props) {
 
   const handleLookupModalOpen = () => setLookupModalOpen(true);
   const handleLookupModalClose = () => setLookupModalOpen(false);
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
@@ -340,7 +352,7 @@ export default function CompletedJobsViewPage(props) {
     if (tempAllData) {
       showTab(null, true, selectedTabIdx);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempAllData]);
 
   function buildTable(_data, dbFlag, lookupFlag) {
@@ -630,14 +642,15 @@ export default function CompletedJobsViewPage(props) {
       },
       ...(selectedTabIdx !== 2
         ? [
-      {
-        header: "Lookup",
-        accessorKey: "lookup",
-        Cell: LookUpCell,
-      },
-    ] : [] )
+            {
+              header: "Lookup",
+              accessorKey: "lookup",
+              Cell: LookUpCell,
+            },
+          ]
+        : []),
     ];
-    console.log('selectedTab', selectedTabIdx)
+    console.log("selectedTab", selectedTabIdx);
     setColDefs(cols);
     _dataObj = result;
     setData(result);
@@ -646,19 +659,27 @@ export default function CompletedJobsViewPage(props) {
   }
 
   const handleExportData = () => {
+    console.log("handle export data");
     let _data = data;
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
+        console.log("key", key);
+        if (key === "extraData" || key === "selected") return null;
         if (!acc.includes(key)) acc.push(key);
       });
       return acc;
     }, []);
+    console.log("_data", _data);
+    const transformedData = transformData(_data);
+    console.log(transformedData);
+    console.log("keys", keys);
 
-    _data.forEach(function (obj) {
-      keys.forEach(function (key) {
-        if (!obj[key]) obj[key] = "";
-      });
-    });
+    //remove zeroes from csv
+    // _data.forEach(function (obj) {
+    //   keys.forEach(function (key) {
+    //     if (!obj[key]) obj[key] = "";
+    //   });
+    // });
 
     const csvOptions = {
       fieldSeparator: ",",
@@ -667,15 +688,30 @@ export default function CompletedJobsViewPage(props) {
       filename: csvFilename.replace(/\.[^/.]+$/, ""),
       showLabels: true,
       useBom: false,
-      useKeysAsHeaders: false,
-      headers: colDefs.map((c) => {
-        return c.header;
-      }),
+      useKeysAsHeaders: true,
+      // headers: colDefs.map((c) => {
+      //   return c.header;
+      // }),
     };
     const csvExporter = new ExportToCsv(csvOptions);
 
-    csvExporter.generateCsv(_data);
+    csvExporter.generateCsv(transformedData);
   };
+
+  function transformData(data) {
+    return data.map((item) => {
+      const { redcapFieldLabel, snomedID, snomedText, extraData, ...rest } = item;
+  
+      return {
+        // ...rest,
+        "Form Name": _redcapFormName,
+        "Field Label": redcapFieldLabel,
+        "Field Annotations": snomedID,
+        "SNOMED Name": snomedText 
+        // ...extraData,
+      };
+    });
+  }
 
   function resetScreen() {
     setData("");
@@ -747,8 +783,22 @@ export default function CompletedJobsViewPage(props) {
       .then((response) => response.text())
       .then((result) => {
         // console.log(result)
+        setSnackbarOpen(true);
+        setAlertSeverity("success");
+        setAlertMessage("Success! You have submitted these mappings. These will be used to improve future job processing.")
+        setTimeout(() => {
+          setSnackbarOpen(false);
+        }, 5000);
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => {
+        console.log("error", error);
+        setAlertSeverity("error");
+        setAlertMessage("Error occurred during submission. Please try again later.");
+        setSnackbarOpen(true);
+        setTimeout(() => {
+          setSnackbarOpen(false);
+        }, 5000);
+      });
   }
 
   async function showTab(e, switching, panelIndex) {
@@ -1011,7 +1061,21 @@ export default function CompletedJobsViewPage(props) {
                 Submit
               </Button>
             )}
-            <Typography>{finalData}</Typography>
+            <Snackbar
+              open={snackbarOpen}
+              autoHideDuration={5000}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <Alert
+                onClose={handleClose}
+                severity={alertSeverity}
+                variant="filled"
+              >
+                {alertMessage}
+              </Alert>
+            </Snackbar>
+            {/* <Typography>{finalData}</Typography> */}
           </>
         )}
       </Container>

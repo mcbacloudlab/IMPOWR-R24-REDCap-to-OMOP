@@ -256,7 +256,7 @@ async function getUserJobs(req, res) {
     });
     //   });
   } catch (error) {
-    console.log("error", error);
+    console.log("getUserJobs error", error);
     res.status(500).send("Error");
     return false;
   }
