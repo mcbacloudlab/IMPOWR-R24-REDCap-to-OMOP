@@ -355,7 +355,7 @@ export default function SearchAppBar(props) {
           sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         >
           <Toolbar>
-            <TemporaryDrawer />
+            {/* <TemporaryDrawer /> */}
             {/* <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
               <img
                 src={REDCapLogo}
@@ -408,7 +408,7 @@ export default function SearchAppBar(props) {
                 </Badge>
               </IconButton>
             )}
-            <IconButton
+            {/* <IconButton
               size="large"
               aria-label="show completed jobs"
               color="inherit"
@@ -417,8 +417,8 @@ export default function SearchAppBar(props) {
               <Tooltip title="Completed Jobs">
                 <PlaylistAddCheckSharpIcon />
               </Tooltip>
-            </IconButton>
-            <IconButton
+            </IconButton> */}
+            {/* <IconButton
               size="large"
               aria-label="show failed jobs"
               color="inherit"
@@ -427,8 +427,8 @@ export default function SearchAppBar(props) {
               <Tooltip title="Failed Jobs">
                 <ErrorIcon />
               </Tooltip>
-            </IconButton>
-            <IconButton
+            </IconButton> */}
+            {/* <IconButton
               size="large"
               aria-label="show project management page"
               color="inherit"
@@ -437,7 +437,7 @@ export default function SearchAppBar(props) {
               <Tooltip title="Project Mangagement">
                 <AddHomeWorkIcon />
               </Tooltip>
-            </IconButton>
+            </IconButton> */}
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               <IconButton
                 size="large"

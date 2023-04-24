@@ -139,11 +139,11 @@ export default function FormSelectTable({
             startIcon={<FileDownloadIcon />}
             variant="outlined"
           >
-            Export to Excel
+            Export
           </Button>
 
           <Box style={{ marginLeft: "auto" }}>
-            <Button
+            {/* <Button
               variant="outlined"
               color="error"
               startIcon={<CloseIcon />}
@@ -151,7 +151,7 @@ export default function FormSelectTable({
               onClick={(event) => resetScreen(event, value)}
             >
               Close
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       )}

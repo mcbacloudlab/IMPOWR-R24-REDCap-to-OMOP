@@ -233,8 +233,8 @@ export default function FormSelect(props) {
   if (props.forms.length > 0) {
     return (
       <>
-        <Grid container spacing={1}>
-          <Grid item md={12} lg={4}>
+        <Grid container>
+          <Grid item lg={12} xl={4}>
             <FormControl>
               <InputLabel id="select-form-label">REDCap Forms</InputLabel>
               <Select
@@ -250,7 +250,7 @@ export default function FormSelect(props) {
                   </MenuItem>
                 ))}
               </Select>
-              <Grid padding={1}>
+              <Grid>
                 <Button
                   variant="contained"
                   component="label"
@@ -303,7 +303,7 @@ export default function FormSelect(props) {
                   tableInstanceRef={tableInstanceRef}
                 />
 
-                <Grid item xs={12} padding={1}>
+                <Grid item xs={12} >
                   <Tooltip title={'This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label'}>
                   <Button
                     sx={{ float: "right" }}

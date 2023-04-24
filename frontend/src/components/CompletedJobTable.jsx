@@ -23,7 +23,7 @@ export default function CompletedJobTable({
   resetScreen,
   selectedTabIdx,
 }) {
-  // console.log('selectedtabidx', selectedTabIdx)
+  console.log('completed job table', selectedTabIdx)
   return (
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)

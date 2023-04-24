@@ -15,10 +15,13 @@ function decrypt(encryptedData, iv, algorithm, secretKey) {
 
 async function getUMLSSearchResults(req, res) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  console.log('reqbody', req.body.searchText)
   if(!req.body.searchText){
     res.status(500).send("Error");
   }
   let searchText = req.body.searchText
+  // URL-encode the searchText string
+  const encodedSearchText = encodeURIComponent(searchText);
 
   const query = "SELECT * FROM api where name like 'umls%'";
   //   return new Promise((resolve, reject) => {
@@ -51,7 +54,7 @@ async function getUMLSSearchResults(req, res) {
     var config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://uts-ws.nlm.nih.gov/rest/search/current?string=${searchText}&sabs=SNOMEDCT_US&apiKey=${apiKeyDecrypted}&pageSize=1000&returnIdType=code`,
+      url: `https://uts-ws.nlm.nih.gov/rest/search/current?string=${encodedSearchText}&sabs=SNOMEDCT_US&apiKey=${apiKeyDecrypted}&pageSize=1000&returnIdType=code`,
       headers: {
       },
     };
@@ -62,7 +65,7 @@ async function getUMLSSearchResults(req, res) {
         res.status(200).send((metadata));
       })
       .catch(function (error) {
-        // console.log(error);
+        console.log('Error with UMLS API search', error);
         res.status(500).send("Error");
       });
   });

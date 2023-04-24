@@ -11,6 +11,8 @@ import {
   Avatar,
   ListItem,
   ListItemButton,
+  IconButton,
+  Tooltip,
   // Paper
 } from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -25,7 +27,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./CompletedJobs";
 import PendingJobs from "./PendingJobs";
 import FailedJobs from "./FailedJobs";
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, useTheme } from "@mui/material/styles";
 import blank_avatar from "../assets/blank_avatar.jpg";
 import StorageIcon from "@mui/icons-material/Storage";
 import MyAccountAllCompletedJobs from "./MyAccountAllCompletedJobs";
@@ -33,8 +35,12 @@ import MyAccountCollectionsView from "./MyAccountCollectionsView";
 import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
 import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
 import ProjectManagementPage from "../pages/ProjectManagementPage";
+import AddHomeWorkIcon from "@mui/icons-material/AddHomeWork";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const drawerWidth = "240px";
+const miniDrawerWidth = 56;
 
 const StyledAccount = styled("div")(({ theme }) => ({
   display: "flex",
@@ -47,9 +53,15 @@ const StyledAccount = styled("div")(({ theme }) => ({
 }));
 
 export default function MyAccountNavBar(props) {
+  const theme = useTheme();
   // console.log("navbar props", props);
   const [view, setView] = useState("My Account");
   const [jobs, setJobs] = useState();
+  const [drawerOpen, setDrawerOpen] = useState(true);
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
 
   useEffect(() => {
     if (props.props.completedList) {
@@ -64,35 +76,60 @@ export default function MyAccountNavBar(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.completedList]);
 
-  const handleClick = (event) => {
-    setView(event.target.textContent);
+  const handleClick = (viewName) => {
+    setView(viewName);
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", overflow: "hidden" }}>
       <Drawer
         variant="permanent"
         sx={{
-          width: drawerWidth,
+          width: drawerOpen ? drawerWidth : miniDrawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
+            width: drawerOpen ? drawerWidth : miniDrawerWidth,
             boxSizing: "border-box",
             backgroundColor: "#343541",
             color: "white",
+            transition: "width 225ms cubic-bezier(0, 0, 0.2, 1)",
           },
         }}
       >
-        <Toolbar />
+        <Toolbar>
+          {/* <IconButton
+            color="inherit"
+            aria-label="open/close drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, minWidth: 0 }}
+          >
+            {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton> */}
+        </Toolbar>
         <Box
-          sx={{ overflow: "auto", backgroundColor: "#343541", color: "white" }}
+          sx={{
+            overflowX: "hidden",
+            overflowY: "auto",
+            backgroundColor: "#343541",
+            color: "white",
+          }}
         >
           <Box sx={{ mb: 1, mx: 2.5 }}>
             <Link underline="none">
-              <StyledAccount>
-                <Avatar src={blank_avatar} alt="photoURL" />
+              <IconButton
+                color="inherit"
+                aria-label="open/close drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              </IconButton>
+              {/* <StyledAccount>
+                <Avatar src={blank_avatar} alt="photoURL" /> */}
 
-                <Box sx={{ ml: 2 }}>
+              {/* <Box sx={{ ml: 2 }}>
                   <Typography variant="subtitle2" sx={{ color: "white" }}>
                     <b>{props.name}</b>
                   </Typography>
@@ -100,99 +137,290 @@ export default function MyAccountNavBar(props) {
                   <Typography variant="body2" sx={{ color: "white" }}>
                     {props.role}
                   </Typography>
-                </Box>
-              </StyledAccount>
+                </Box> */}
+              {/* </StyledAccount> */}
             </Link>
           </Box>
-          <List>
-            <Divider sx={{ bgcolor: "white" }} />
-            <ListItem key={"My Account"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <AccountCircleIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"My Account"} />
-              </ListItemButton>
-            </ListItem>
-            {/* <ListItem key={"Project Management"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <AccountCircleIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Project Management"} />
-              </ListItemButton>
-            </ListItem> */}
-            <ListItem key={"Completed Jobs"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <PlaylistAddCheckSharpIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Completed Jobs"} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Pending Jobs"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <AutorenewIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Pending Jobs"} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem key={"Failed Jobs"} disablePadding>
-              <ListItemButton onClick={(event) => handleClick(event)}>
-                <ListItemIcon>
-                  <ErrorIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Failed Jobs"} />
-              </ListItemButton>
-            </ListItem>
-          </List>
+          <Box
+            sx={{
+              overflowY: "auto",
+              backgroundColor: "#343541",
+              color: "white",
+            }}
+          >
+            <List
+              sx={{
+                width: "100%",
+                overflowX: "hidden",
+              }}
+            >
+              <Divider sx={{ bgcolor: "white" }} />
+              <Tooltip title="My Account" placement="right">
+                <ListItem key={"My Account"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("My Account")}
+                  >
+                    <ListItemIcon>
+                      <AccountCircleIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"My Account"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+              <Tooltip title="Project Management" placement="right">
+                <ListItem key={"Project Management"} disablePadding>
+                  <ListItemButton
+                    onClick={() => handleClick("Project Management")}
+                  >
+                    <ListItemIcon>
+                      <AddHomeWorkIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Project Management"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="Completed Jobs" placement="right">
+                <ListItem key={"Completed Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("Completed Jobs")}
+                  >
+                    <ListItemIcon>
+                      <PlaylistAddCheckSharpIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Completed Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="Pending Jobs" placement="right">
+                <ListItem key={"Pending Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("Pending Jobs")}
+                  >
+                    <ListItemIcon>
+                      <AutorenewIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Pending Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="Failed Jobs" placement="right">
+                <ListItem key={"Failed Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("Failed Jobs")}
+                  >
+                    <ListItemIcon>
+                      <ErrorIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Failed Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            </List>
+          </Box>
           <Divider sx={{ bgcolor: "white" }} />
           {props.role === "admin" && (
-            <List>
+            <List
+              sx={{
+                width: "100%",
+                overflowX: "hidden",
+              }}
+            >
               {/* <Typography variant="h6" gutterBottom>
                 Admin Section
               </Typography> */}
-              <ListItem key={"API Keys"} disablePadding>
-                <ListItemButton onClick={(event) => handleClick(event)}>
-                  <ListItemIcon>
-                    <KeyIcon style={{ color: "white" }} />
-                  </ListItemIcon>
-                  <ListItemText primary={"API Keys"} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem key={"All Completed Jobs"} disablePadding>
-                <ListItemButton onClick={(event) => handleClick(event)}>
-                  <ListItemIcon>
-                    <PlaylistAddCheckSharpIcon style={{ color: "white" }} />
-                  </ListItemIcon>
-                  <ListItemText primary={"All Completed Jobs"} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem key={"All Pending Jobs"} disablePadding>
-                <ListItemButton onClick={(event) => handleClick(event)}>
-                  <ListItemIcon>
-                    <AutorenewIcon style={{ color: "white" }} />
-                  </ListItemIcon>
-                  <ListItemText primary={"All Pending Jobs"} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem key={"All Failed Jobs"} disablePadding>
-                <ListItemButton onClick={(event) => handleClick(event)}>
-                  <ListItemIcon>
-                    <ErrorIcon style={{ color: "white" }} />
-                  </ListItemIcon>
-                  <ListItemText primary={"All Failed Jobs"} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem key={"Collections"} disablePadding>
-                <ListItemButton onClick={(event) => handleClick(event)}>
-                  <ListItemIcon>
-                    <StorageIcon style={{ color: "white" }} />
-                  </ListItemIcon>
-                  <ListItemText primary={"Collections"} />
-                </ListItemButton>
-              </ListItem>
+              <Tooltip title="API Keys" placement="right">
+                <ListItem
+                  key={"API Keys"}
+                  disablePadding
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    overflow: "hidden",
+                  }}
+                >
+                  <ListItemButton onClick={(event) => handleClick("API Keys")}>
+                    <ListItemIcon>
+                      <KeyIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"API Keys"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="All Completed Jobs" placement="right">
+                <ListItem key={"All Completed Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("All Completed Jobs")}
+                  >
+                    <ListItemIcon>
+                      <PlaylistAddCheckSharpIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"All Completed Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="All Pending Jobs" placement="right">
+                <ListItem key={"All Pending Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("All Pending Jobs")}
+                  >
+                    <ListItemIcon>
+                      <AutorenewIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"All Pending Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="All Failed Jobs" placement="right">
+                <ListItem key={"All Failed Jobs"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("All Failed Jobs")}
+                  >
+                    <ListItemIcon>
+                      <ErrorIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"All Failed Jobs"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+
+              <Tooltip title="Collections" placement="right">
+                <ListItem key={"Collections"} disablePadding>
+                  <ListItemButton
+                    onClick={(event) => handleClick("Collections")}
+                  >
+                    <ListItemIcon>
+                      <StorageIcon style={{ color: "white" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={"Collections"}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        transition: theme.transitions.create("opacity", {
+                          easing: theme.transitions.easing.sharp,
+                          duration: theme.transitions.duration.leavingScreen,
+                        }),
+                        opacity: drawerOpen ? 1 : 0,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
             </List>
           )}
         </Box>
@@ -219,7 +447,11 @@ export default function MyAccountNavBar(props) {
         )}
         {view === "Project Management" && (
           <>
-            <ProjectManagementPage props={props} jobs={jobs} setJobs={setJobs} />
+            <ProjectManagementPage
+              props={props}
+              jobs={jobs}
+              setJobs={setJobs}
+            />
           </>
         )}
         {view === "Completed Jobs" && (

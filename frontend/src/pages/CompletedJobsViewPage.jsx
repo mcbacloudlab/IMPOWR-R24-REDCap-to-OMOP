@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 // import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import { useState, useEffect, useMemo } from "react";
@@ -26,7 +26,8 @@ import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-
+import InputAdornment from "@mui/material/InputAdornment";
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 // var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
@@ -55,7 +56,6 @@ export default function CompletedJobsViewPage(props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
-
 
   const umlsModalStyle = {
     position: "absolute",
@@ -106,6 +106,7 @@ export default function CompletedJobsViewPage(props) {
   }, [_data, _jobId]);
 
   function searchUMLS(text) {
+    console.log("search UMLS clicked");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -511,6 +512,7 @@ export default function CompletedJobsViewPage(props) {
     };
 
     function LookUpCode(row) {
+      console.log("look up code called");
       setModalRowData(row.original);
       setSearchUMLSValue(row.original.redcapFieldLabel);
       searchUMLS(row.original.redcapFieldLabel);
@@ -695,8 +697,8 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        // console.log("the result");
-        // console.log(JSON.parse(result));
+        console.log("the result");
+        console.log(JSON.parse(result));
         //update field_annotation with the preferred value id
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
@@ -709,7 +711,7 @@ export default function CompletedJobsViewPage(props) {
               transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
             ) {
               // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-              // console.log('match!', transformedData[i])
+              console.log("match!", transformedData[i]);
               jsonResult[j]["field_annotation"] =
                 transformedData[i]["Field Annotations"];
             }
@@ -731,15 +733,17 @@ export default function CompletedJobsViewPage(props) {
           // }),
         };
         const csvExporter = new ExportToCsv(csvOptions);
-    
+        console.log("jsonresult");
+        console.log(jsonResult);
         csvExporter.generateCsv(jsonResult);
-
       })
       .catch((error) => {
-        console.log("error", error)
-        setAlertSeverity('error')
-        setAlertMessage('Error during export. Make sure connection to REDCap is working.')
-        setSnackbarOpen(true)
+        console.log("error", error);
+        setAlertSeverity("error");
+        setAlertMessage(
+          "Error during export. Make sure connection to REDCap is working."
+        );
+        setSnackbarOpen(true);
         setTimeout(() => {
           setSnackbarOpen(false);
         }, 5000);
@@ -751,8 +755,6 @@ export default function CompletedJobsViewPage(props) {
     //     if (!obj[key]) obj[key] = "";
     //   });
     // });
-
-   
   };
 
   function transformData(data) {
@@ -945,6 +947,10 @@ export default function CompletedJobsViewPage(props) {
     setSearchUMLSValue(event.target.value);
   };
 
+  // console.log('umlsResultsData', umlsResultsData.length)
+  // console.log(umlsResultsData)
+  // console.log('typeof', typeof umlsResultsData)
+
   return (
     <>
       <Container component="main" maxWidth="90%">
@@ -994,14 +1000,23 @@ export default function CompletedJobsViewPage(props) {
                   value={searchUMLSValue}
                   onChange={handleTextFieldChange}
                   sx={{ marginTop: "10px" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => searchUMLS(searchUMLSValue)}>
+                          <ArrowRightAltIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
-                <Button
+                {/* <Button
                   variant="contained"
                   sx={{ marginLeft: "15px", marginTop: "20px" }}
                   onClick={() => searchUMLS(searchUMLSValue)}
                 >
                   Search
-                </Button>
+                </Button> */}
                 {umlsResultsData.length && (
                   <UMLSSearchBasicTable
                     umlsResults={umlsResultsData}

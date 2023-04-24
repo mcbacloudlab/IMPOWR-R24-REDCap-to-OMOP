@@ -10,7 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { useState, useEffect } from "react";
-import Alert from '@mui/material/Alert';
+import Alert from "@mui/material/Alert";
 import { Tooltip } from "@mui/material";
 
 function not(a, b) {
@@ -34,16 +34,16 @@ export default function TransferList(props) {
   const [origData, setOrigData] = useState();
   const leftChecked = intersection(checked, left);
   const rightChecked = intersection(checked, right);
-  let keepList = ["field_name", "form_name", "field_label"]
+  let keepList = ["field_name", "form_name", "field_label"];
   useEffect(() => {
     setOrigData(props.data);
     setDefaultHeaders(props.colDefs);
-    console.log('propscoldefs', props.colDefs)
+    console.log("propscoldefs", props.colDefs);
     let headerList = props.colDefs.map((obj) => {
       return obj.header;
     });
 
-    console.log('headerList', headerList)
+    console.log("headerList", headerList);
     let leftArray = headerList.filter((header) => keepList.includes(header));
     let rightArray = headerList.filter((header) => !keepList.includes(header));
     console.log(leftArray); // ["field_name", "form_name", "field_label"]
@@ -82,11 +82,11 @@ export default function TransferList(props) {
   }, [left, right, defaultHeaders]);
 
   const handleToggle = (value) => () => {
-    console.log('handle toggle', value)
-    console.log('keeplist', keepList)
-    if(keepList.includes(value)){
-      console.log('in keep list')
-      return
+    console.log("handle toggle", value);
+    console.log("keeplist", keepList);
+    if (keepList.includes(value)) {
+      console.log("in keep list");
+      return;
     }
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
@@ -103,7 +103,7 @@ export default function TransferList(props) {
   const numberOfChecked = (items) => intersection(checked, items).length;
 
   const handleToggleAll = (items) => () => {
-    console.log('items', items)
+    console.log("items", items);
     items = items.filter((value) => !keepList.includes(value));
     if (numberOfChecked(items) === items.length) {
       setChecked(not(checked, items));
@@ -127,34 +127,32 @@ export default function TransferList(props) {
   const customList = (title, items) => (
     <Card>
       <Tooltip title="Move columns to the left to include their data in the final results. The columns on the right will be excluded from the final results.">
-      <CardHeader
-        sx={{ px: 2, py: 1 }}
-        avatar={
-          
-          <Checkbox
-            onClick={handleToggleAll(items)}
-            checked={
-              numberOfChecked(items) === items.length && items.length !== 0
-            }
-            indeterminate={
-              numberOfChecked(items) !== items.length &&
-              numberOfChecked(items) !== 0
-            }
-            disabled={items.length === 0}
-            inputProps={{
-              "aria-label": "all items selected",
-            }}
-          />
-         
-        }
-        // title={title}
-        subheader={`${numberOfChecked(items)}/${items.length} selected`}
-      />
-       </Tooltip>
+        <CardHeader
+          sx={{ px: 2, py: 1 }}
+          avatar={
+            <Checkbox
+              onClick={handleToggleAll(items)}
+              checked={
+                numberOfChecked(items) === items.length && items.length !== 0
+              }
+              indeterminate={
+                numberOfChecked(items) !== items.length &&
+                numberOfChecked(items) !== 0
+              }
+              disabled={items.length === 0}
+              inputProps={{
+                "aria-label": "all items selected",
+              }}
+            />
+          }
+          // title={title}
+          subheader={`${numberOfChecked(items)}/${items.length} selected`}
+        />
+      </Tooltip>
       <Divider />
       <List
         sx={{
-          width: "220px",
+          width: "200px",
           height: "340px",
           bgcolor: "background.paper",
           overflow: "auto",
@@ -217,12 +215,16 @@ export default function TransferList(props) {
             &lt;
           </Button>
         </Grid>
-        
       </Grid>
-      
+
       <Grid item>{customList("Remove", right)}</Grid>
 
-      <Alert style={{marginTop: '10px',maxWidth: '90%'}}severity="info">The <b>field name, field label, and form name</b> are required for the process to function properly. </Alert>
+      <Grid xs={12}>
+        <Alert style={{ marginTop: "10px", maxWidth: "90%" }} severity="info">
+          The <b>field name, field label, and form name</b> are required for the
+          process to function properly.{" "}
+        </Alert>
+      </Grid>
     </Grid>
   );
 }

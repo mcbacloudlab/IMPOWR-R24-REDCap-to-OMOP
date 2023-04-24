@@ -55,15 +55,15 @@ export default function ProjectManagementPage(props) {
   }, [forms]);
 
   return (
-    <Container component="main" maxWidth="90%">
+    <Container component="main" maxWidth="95%">
       <CssBaseline />
       <Paper
         sx={{
           minHeight: "90vh",
-          maxWidth: "90vw",
-          paddingLeft: 1,
-          paddingRight: 1,
-          m: 2,
+          maxWidth: "95vw",
+          // paddingLeft: 1,
+          // paddingRight: 1,
+          // m: 2,
         }}
       >
         <Grid container spacing={1} justifyContent="center">

@@ -16,7 +16,12 @@ export default function BasicTable(props) {
   const [lookUpDupe, setLookUpDupe] = useState(false);
   // console.log("basictable props", props);
   // console.log("table data props", props.data);
-  let tableData = JSON.parse(props.umlsResults);
+  let tableData;
+  try {
+    tableData = JSON.parse(props.umlsResults);
+  } catch (error) {
+    console.log("error", error);
+  }
 
   const tableContainerStyle = {
     maxHeight: "calc(80% - 100px)", // Adjust this value based on the total height of other elements
@@ -97,7 +102,7 @@ export default function BasicTable(props) {
       selected: true,
       verified: true,
       lookup: true,
-    }
+    };
     modifiedSubRows.push(newSubRow);
     // console.log("mod subrows", modifiedSubRows);
 
@@ -110,9 +115,13 @@ export default function BasicTable(props) {
     console.log("update modal row data", updatedModalRowData);
     props.setModalRowData(updatedModalRowData);
     let tableData = props.tempAllData;
-
+    // console.log('tableData', tableData)
+    // console.log('updatedModalRowData', updatedModalRowData)
     const newArray = tableData.map((item) => {
-      if (item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel) {
+      if (
+        item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel &&
+        item.extraData.field_name === updatedModalRowData.extraData.field_name
+      ) {
         return updatedModalRowData;
       }
       return item;
@@ -120,20 +129,20 @@ export default function BasicTable(props) {
 
     // console.log("new array", newArray);
 
-    console.log("before calling props buildtable data", newArray);
+    // console.log("before calling props buildtable data", newArray);
     props.buildTable(newArray, true, true);
     props.storeJobVerificationInfo(JSON.stringify(newArray));
     props.setLookupModalOpen(false);
-    props.handleSetTempAllData(newArray)
+    props.handleSetTempAllData(newArray);
     // props.showTab(null,true,props.selectedTabIdx)
-
-    props.verifyRow(newSubRow, false, true)
+    console.log("newSubRow", newSubRow);
+    props.verifyRow(newSubRow, false, true);
     //count and update selected and verified records
     newArray.map((item) => {
       return null;
     });
   }
-
+  console.log('tableDta', tableData)
   return (
     <>
       {lookUpDupe && (
@@ -162,32 +171,41 @@ export default function BasicTable(props) {
               <StyledTableCell align="right">Preferred</StyledTableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {tableData.map((row) => (
-              <StyledTableRow
-                key={row.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <StyledTableCell component="th" scope="row">
-                  {row.name}
-                </StyledTableCell>
-                <StyledTableCell align="right">
-                  {" "}
-                  <Link
-                    href={`https://uts.nlm.nih.gov/uts/umls/concept/${row.ui}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {row.ui}
-                  </Link>
-                </StyledTableCell>
-                <StyledTableCell align="right">
-                  {row.rootSource}
-                </StyledTableCell>
-                <PreferredCell align="right" row={row} />
+          {tableData.length ? (
+            <TableBody>
+              {tableData.map((row) => (
+                <StyledTableRow
+                  key={row.name}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <StyledTableCell component="th" scope="row">
+                    {row.name}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {" "}
+                    <Link
+                      href={`https://uts.nlm.nih.gov/uts/umls/concept/${row.ui}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {row.ui}
+                    </Link>
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    {row.rootSource}
+                  </StyledTableCell>
+                  <PreferredCell align="right" row={row} />
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          ) : (
+            <TableBody>
+              <StyledTableRow>
+                <StyledTableCell>No Results</StyledTableCell>
               </StyledTableRow>
-            ))}
-          </TableBody>
+            </TableBody>
+            
+          )}
         </Table>
       </TableContainer>
     </>
