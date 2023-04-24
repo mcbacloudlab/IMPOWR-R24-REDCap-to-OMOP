@@ -84,6 +84,10 @@ async function getForms(req, res) {
 }
 
 async function exportMetadata(req,res){
+  if(!req.body.form) {
+    res.status(500).send('Error')
+    return;
+  }
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'redcap%'";

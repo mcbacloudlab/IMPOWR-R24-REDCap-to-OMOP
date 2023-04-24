@@ -47,7 +47,7 @@ export default function CompletedJobsViewPage(props) {
   // const [isLoading, setIsLoading] = useState(false);
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
-  const [finalData, setFinalData] = useState("");
+  // const [finalData, setFinalData] = useState("");
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
   const [searchUMLSValue, setSearchUMLSValue] = useState("");
   const [umlsResultsData, setUMLSResultsData] = useState([]);
@@ -55,6 +55,7 @@ export default function CompletedJobsViewPage(props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
+
 
   const umlsModalStyle = {
     position: "absolute",
@@ -650,7 +651,7 @@ export default function CompletedJobsViewPage(props) {
           ]
         : []),
     ];
-    console.log("selectedTab", selectedTabIdx);
+    // console.log("selectedTab", selectedTabIdx);
     setColDefs(cols);
     _dataObj = result;
     setData(result);
@@ -659,20 +660,90 @@ export default function CompletedJobsViewPage(props) {
   }
 
   const handleExportData = () => {
-    console.log("handle export data");
+    // console.log("handle export data");
     let _data = data;
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
-        console.log("key", key);
+        // console.log("key", key);
         if (key === "extraData" || key === "selected") return null;
         if (!acc.includes(key)) acc.push(key);
       });
       return acc;
     }, []);
-    console.log("_data", _data);
+    // console.log("_data", _data);
     const transformedData = transformData(_data);
-    console.log(transformedData);
-    console.log("keys", keys);
+    // console.log(transformedData);
+    // console.log("keys", keys);
+
+    //get original redcap data dictionary data and update it
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("form", _redcapFormName);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/exportMetadata`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log("the result");
+        // console.log(JSON.parse(result));
+        //update field_annotation with the preferred value id
+        let jsonResult = JSON.parse(result);
+        // Loop through the first array of objects
+        for (let i = 0; i < transformedData.length; i++) {
+          // Loop through the second array of objects
+          for (let j = 0; j < jsonResult.length; j++) {
+            // Compare "Form Name" and "Field Name" with "form_name" and "field_name"
+            if (
+              transformedData[i]["Form Name"] === jsonResult[j]["form_name"] &&
+              transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
+            ) {
+              // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
+              // console.log('match!', transformedData[i])
+              jsonResult[j]["field_annotation"] =
+                transformedData[i]["Field Annotations"];
+            }
+          }
+        }
+
+        // console.log('jsonResult', jsonResult)
+
+        const csvOptions = {
+          fieldSeparator: ",",
+          quoteStrings: '"',
+          decimalSeparator: ".",
+          filename: csvFilename.replace(/\.[^/.]+$/, ""),
+          showLabels: true,
+          useBom: false,
+          useKeysAsHeaders: true,
+          // headers: colDefs.map((c) => {
+          //   return c.header;
+          // }),
+        };
+        const csvExporter = new ExportToCsv(csvOptions);
+    
+        csvExporter.generateCsv(jsonResult);
+
+      })
+      .catch((error) => {
+        console.log("error", error)
+        setAlertSeverity('error')
+        setAlertMessage('Error during export. Make sure connection to REDCap is working.')
+        setSnackbarOpen(true)
+        setTimeout(() => {
+          setSnackbarOpen(false);
+        }, 5000);
+      });
 
     //remove zeroes from csv
     // _data.forEach(function (obj) {
@@ -681,33 +752,20 @@ export default function CompletedJobsViewPage(props) {
     //   });
     // });
 
-    const csvOptions = {
-      fieldSeparator: ",",
-      quoteStrings: '"',
-      decimalSeparator: ".",
-      filename: csvFilename.replace(/\.[^/.]+$/, ""),
-      showLabels: true,
-      useBom: false,
-      useKeysAsHeaders: true,
-      // headers: colDefs.map((c) => {
-      //   return c.header;
-      // }),
-    };
-    const csvExporter = new ExportToCsv(csvOptions);
-
-    csvExporter.generateCsv(transformedData);
+   
   };
 
   function transformData(data) {
     return data.map((item) => {
-      const { redcapFieldLabel, snomedID, snomedText, extraData, ...rest } = item;
-  
+      const { redcapFieldLabel, snomedID, snomedText, extraData } = item;
+
       return {
         // ...rest,
         "Form Name": _redcapFormName,
+        "Field Name": extraData.field_name,
         "Field Label": redcapFieldLabel,
         "Field Annotations": snomedID,
-        "SNOMED Name": snomedText 
+        "SNOMED Name": snomedText,
         // ...extraData,
       };
     });
@@ -757,7 +815,7 @@ export default function CompletedJobsViewPage(props) {
       return acc;
     }, []);
 
-    setFinalData(JSON.stringify(filteredData, null, 2));
+    // setFinalData(JSON.stringify(filteredData, null, 2));
 
     //submit to lookup redcap embeddings process
     var myHeaders = new Headers();
@@ -785,7 +843,9 @@ export default function CompletedJobsViewPage(props) {
         // console.log(result)
         setSnackbarOpen(true);
         setAlertSeverity("success");
-        setAlertMessage("Success! You have submitted these mappings. These will be used to improve future job processing.")
+        setAlertMessage(
+          "Success! You have submitted these mappings. These will be used to improve future job processing."
+        );
         setTimeout(() => {
           setSnackbarOpen(false);
         }, 5000);
@@ -793,7 +853,9 @@ export default function CompletedJobsViewPage(props) {
       .catch((error) => {
         console.log("error", error);
         setAlertSeverity("error");
-        setAlertMessage("Error occurred during submission. Please try again later.");
+        setAlertMessage(
+          "Error occurred during submission. Please try again later."
+        );
         setSnackbarOpen(true);
         setTimeout(() => {
           setSnackbarOpen(false);
