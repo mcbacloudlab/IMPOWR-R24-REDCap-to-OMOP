@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
-import { Box, Button, IconButton, Typography, Tooltip } from "@mui/material";
+import { Box, Button, Divider, IconButton, Typography, Tooltip } from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
@@ -28,10 +28,13 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import InputAdornment from "@mui/material/InputAdornment";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import MyAccountNavBar from "../components/MyAccountNavBar";
+import Cookies from "js-cookie";
+import CssBaseline from "@mui/material/CssBaseline";
 // var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
-  // console.log("complete view page", props);
+  console.log("complete view page", props);
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
   const [colDefs, setColDefs] = useState([]);
@@ -56,6 +59,9 @@ export default function CompletedJobsViewPage(props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
+  const [view, setView] = useState("");
+
+  
 
   const umlsModalStyle = {
     position: "absolute",
@@ -104,6 +110,22 @@ export default function CompletedJobsViewPage(props) {
     getJobVerificationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
+
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState(null);
+  useEffect(() => {
+    try {
+      let userCookie = JSON.parse(Cookies.get("user"));
+      setUsername(userCookie.email);
+      setName(userCookie.firstName + " " + userCookie.lastName);
+      let userInfo = JSON.parse(props.user);
+      // console.log("prfewefwefops.", userInfo);
+      setRole(userInfo.role);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }, [props.user]);
 
   function searchUMLS(text) {
     console.log("search UMLS clicked");
@@ -950,210 +972,237 @@ export default function CompletedJobsViewPage(props) {
   // console.log('umlsResultsData', umlsResultsData.length)
   // console.log(umlsResultsData)
   // console.log('typeof', typeof umlsResultsData)
-
+  console.log("view", view);
   return (
     <>
-      <Container component="main" maxWidth="90%">
-        {/* <CssBaseline /> */}
-        <div style={{ textAlign: "left" }}>
-          <span
-            style={{ display: "flex", alignItems: "center", padding: "10px" }}
-          >
-            <span style={{ marginRight: "10px" }}>
-              <b>Job Name:</b> {_jobName}
-            </span>
-            <span style={{ marginRight: "10px" }}>
-              <b>Completed Job ID:</b> {jobId}
-            </span>
-            <span style={{ marginRight: "10px" }}>
-              <b>Submitted By:</b> {_submittedBy}
-            </span>
-          </span>
-        </div>
-
-        {!isFormLoaded && (
-          <Skeleton
-            variant="rounded"
-            sx={{ margin: "auto" }}
-            width={"100%"}
-            height={"90vh"}
-          />
-        )}
-
-        {isFormLoaded && (
-          <>
-            {/* Lookup better code modal */}
-            <Modal
-              open={lookupModalOpen}
-              onClose={handleLookupModalClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Box sx={umlsModalStyle}>
-                <Typography id="modal-modal-title" variant="h6" component="h2">
-                  Search UMLS
-                </Typography>
-                <TextField
-                  id="outlined-basic"
-                  label="Text Search"
-                  variant="outlined"
-                  value={searchUMLSValue}
-                  onChange={handleTextFieldChange}
-                  sx={{ marginTop: "10px" }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => searchUMLS(searchUMLSValue)}>
-                          <ArrowRightAltIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {/* <Button
-                  variant="contained"
-                  sx={{ marginLeft: "15px", marginTop: "20px" }}
-                  onClick={() => searchUMLS(searchUMLSValue)}
-                >
-                  Search
-                </Button> */}
-                {umlsResultsData.length && (
-                  <UMLSSearchBasicTable
-                    umlsResults={umlsResultsData}
-                    modalRowData={modalRowData}
-                    setModalRowData={setModalRowData}
-                    data={data}
-                    tempAllData={tempAllData}
-                    setTempAllData={setTempAllData}
-                    handleSetTempAllData={handleSetTempAllData}
-                    verifyRow={verifyRow}
-                    showTab={showTab}
-                    selectedTabIdx={selectedTabIdx}
-                    setData={setData}
-                    buildTable={buildTable}
-                    storeJobVerificationInfo={storeJobVerificationInfo}
-                    setLookupModalOpen={setLookupModalOpen}
-                  />
-                )}
-              </Box>
-            </Modal>
-            {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
-            <Typography>
-              Verified {verifiedRecords}/{totalRecords}
-            </Typography>
-            <Tabs
-              centered
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab
-                onClick={(event) => showTab(event, true, 0)}
-                label={
-                  <Box sx={{ position: "relative", margin: "20px" }}>
-                    All
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        right: "-20px", // Adjust the right position of the badge
-                      }}
-                    >
-                      <Badge
-                        badgeContent={totalRecords}
-                        max={9999}
-                        color="secondary"
-                      />
-                    </Box>
-                  </Box>
-                }
-                {...a11yProps(0)}
-              />
-              <Tab
-                onClick={(event) => showTab(event, true, 1)}
-                label={
-                  <Box sx={{ position: "relative", margin: "20px" }}>
-                    Needs Review
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        right: "-20px", // Adjust the right position of the badge
-                      }}
-                    >
-                      <Badge
-                        badgeContent={totalRecords - verifiedRecords}
-                        max={9999}
-                        color="secondary"
-                      />
-                    </Box>
-                  </Box>
-                }
-                {...a11yProps(1)}
-              />
-              <Tab
-                onClick={(event) => showTab(event, true, 2)}
-                label={
-                  <Box sx={{ position: "relative", margin: "20px" }}>
-                    Verified
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        right: "-20px", // Adjust the right position of the badge
-                      }}
-                    >
-                      <Badge
-                        badgeContent={verifiedRecords}
-                        max={9999}
-                        color="secondary"
-                      />
-                    </Box>
-                  </Box>
-                }
-                {...a11yProps(2)}
-              />
-            </Tabs>
-            <CompletedJobTable
-              props={props}
-              columns={columns}
-              data={data}
-              handleExportData={handleExportData}
-              resetScreen={resetScreen}
-              // saveSuccess={saveSuccess}
-              isSaving={isSaving}
-              saveFile={saveFile}
-              selectedTabIdx={selectedTabIdx}
-            />
-
-            {selectedTabIdx === 2 && (
-              <Button
-                sx={{ float: "right" }}
-                variant="contained"
-                color="primary"
-                component="label"
-                startIcon={<AddTaskIcon />}
-                onClick={(e) => submitToProcess(e)}
+      <CssBaseline />
+      <Container sx={{margin:'auto', minWidth: '80%', maxWidth: '1400px'}}>
+        <MyAccountNavBar
+          props={props}
+          username={username}
+          name={name}
+          role={role}
+          view={view}
+          setView={setView}
+        />
+        {!view && (
+          <Container className='whatthe' component="main" maxWidth='100vw' sx={{margin:'0px' , padding: '0px'}}>
+            <div style={{ textAlign: "left" }}>
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "10px",
+                }}
               >
-                Submit
-              </Button>
+                <span style={{ marginRight: "10px" }}>
+                  <b>Job Name:</b> {_jobName}
+                </span>
+                <span style={{ marginRight: "10px" }}>
+                  <b>Completed Job ID:</b> {jobId}
+                </span>
+                <span style={{ marginRight: "10px" }}>
+                  <b>Submitted By:</b> {_submittedBy}
+                </span>
+              </span>
+            </div>
+
+            {!isFormLoaded && (
+              <Skeleton
+                variant="rounded"
+                sx={{ margin: "auto" }}
+                width={"100%"}
+                height={"90vh"}
+              />
             )}
-            <Snackbar
-              open={snackbarOpen}
-              autoHideDuration={5000}
-              onClose={handleClose}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <Alert
-                onClose={handleClose}
-                severity={alertSeverity}
-                variant="filled"
-              >
-                {alertMessage}
-              </Alert>
-            </Snackbar>
-            {/* <Typography>{finalData}</Typography> */}
-          </>
+
+            {isFormLoaded && (
+              <>
+                {/* Lookup better code modal */}
+                <Modal
+                  open={lookupModalOpen}
+                  onClose={handleLookupModalClose}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <Box sx={umlsModalStyle}>
+                    <Typography
+                      id="modal-modal-title"
+                      variant="h6"
+                      component="h2"
+                    >
+                      Search UMLS
+                    </Typography>
+                    <TextField
+                      id="outlined-basic"
+                      label="Text Search"
+                      variant="outlined"
+                      value={searchUMLSValue}
+                      onChange={handleTextFieldChange}
+                      sx={{ marginTop: "10px" }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => searchUMLS(searchUMLSValue)}
+                            >
+                              <ArrowRightAltIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    {/* <Button
+             variant="contained"
+             sx={{ marginLeft: "15px", marginTop: "20px" }}
+             onClick={() => searchUMLS(searchUMLSValue)}
+           >
+             Search
+           </Button> */}
+                    {umlsResultsData.length && (
+                      <UMLSSearchBasicTable
+                        umlsResults={umlsResultsData}
+                        modalRowData={modalRowData}
+                        setModalRowData={setModalRowData}
+                        data={data}
+                        tempAllData={tempAllData}
+                        setTempAllData={setTempAllData}
+                        handleSetTempAllData={handleSetTempAllData}
+                        verifyRow={verifyRow}
+                        showTab={showTab}
+                        selectedTabIdx={selectedTabIdx}
+                        setData={setData}
+                        buildTable={buildTable}
+                        storeJobVerificationInfo={storeJobVerificationInfo}
+                        setLookupModalOpen={setLookupModalOpen}
+                      />
+                    )}
+                  </Box>
+                </Modal>
+                
+                {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
+                <Typography>
+                  Verified {verifiedRecords}/{totalRecords}
+                </Typography>
+                
+                {selectedTabIdx === 2 && (
+                  <Button
+                    sx={{  }}
+                    variant="contained"
+                    color="primary"
+                    component="label"
+                    startIcon={<AddTaskIcon />}
+                    onClick={(e) => submitToProcess(e)}
+                  >
+                    Submit
+                  </Button>
+                )}
+                <Divider sx={{margin: '30px'}}/>
+                <Tabs
+                  centered
+                  value={value}
+                  onChange={handleChange}
+                  aria-label="basic tabs example"
+                >
+                  <Tab
+                    onClick={(event) => showTab(event, true, 0)}
+                    label={
+                      <Box sx={{ position: "relative", margin: "20px" }}>
+                        All
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: "-20px", // Adjust the right position of the badge
+                          }}
+                        >
+                          <Badge
+                            badgeContent={totalRecords}
+                            max={9999}
+                            color="secondary"
+                          />
+                        </Box>
+                      </Box>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    onClick={(event) => showTab(event, true, 1)}
+                    label={
+                      <Box sx={{ position: "relative", margin: "20px" }}>
+                        Needs Review
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: "-20px", // Adjust the right position of the badge
+                          }}
+                        >
+                          <Badge
+                            badgeContent={totalRecords - verifiedRecords}
+                            max={9999}
+                            color="secondary"
+                          />
+                        </Box>
+                      </Box>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <Tab
+                    onClick={(event) => showTab(event, true, 2)}
+                    label={
+                      <Box sx={{ position: "relative", margin: "20px" }}>
+                        Verified
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: "-20px", // Adjust the right position of the badge
+                          }}
+                        >
+                          <Badge
+                            badgeContent={verifiedRecords}
+                            max={9999}
+                            color="secondary"
+                          />
+                        </Box>
+                      </Box>
+                    }
+                    {...a11yProps(2)}
+                  />
+                </Tabs>
+
+                <CompletedJobTable
+                  props={props}
+                  columns={columns}
+                  data={data}
+                  handleExportData={handleExportData}
+                  resetScreen={resetScreen}
+                  // saveSuccess={saveSuccess}
+                  isSaving={isSaving}
+                  saveFile={saveFile}
+                  selectedTabIdx={selectedTabIdx}
+                />
+
+                
+                <Snackbar
+                  open={snackbarOpen}
+                  autoHideDuration={5000}
+                  onClose={handleClose}
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <Alert
+                    onClose={handleClose}
+                    severity={alertSeverity}
+                    variant="filled"
+                  >
+                    {alertMessage}
+                  </Alert>
+                </Snackbar>
+                {/* <Typography>{finalData}</Typography> */}
+              </>
+            )}
+          </Container>
         )}
       </Container>
     </>

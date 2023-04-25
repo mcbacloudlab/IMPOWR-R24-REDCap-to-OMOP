@@ -33,7 +33,7 @@ export default function CompletedJobTable({
       memoMode="cells" // memoize table cells to improve render performance, but break some features
       enableBottomToolbar={true}
       enableGlobalFilterModes={true}
-      enablePagination={false}
+      enablePagination={true}
       {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
       getSubRows={(originalRow) => {
         return originalRow.subRows;
@@ -45,7 +45,7 @@ export default function CompletedJobTable({
       muiTableContainerProps={{
         sx: {
           maxWidth: "100vw",
-          maxHeight: "60vh",
+          maxHeight: "50vh",
         },
       }}
       onSortingChange={setSorting}

@@ -16,6 +16,7 @@ import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
 import CompletedJobsViewPage from "./pages/CompletedJobsViewPage";
 import { ListsProvider } from "./components/ListsContext";
+import { ViewProvider } from "./components/ViewContext";
 // const darkTheme = createTheme({
 //   palette: {
 //     mode: "dark",
@@ -127,7 +128,7 @@ function App() {
   const [pendingList, setPendingList] = useState();
   const [failedList, setFailedList] = useState();
   const [completedList, setCompletedList] = useState();
-  const [serverError, setServerError] = useState(false)
+  const [serverError, setServerError] = useState(false);
 
   const updateUser = (newUser) => {
     setUser(newUser);
@@ -139,140 +140,150 @@ function App() {
       <div className="App">
         <header className="App-header">
           <BrowserRouter>
-          <ListsProvider>
-            <div>
-              {user && (
-                <SearchAppBar
-                  token={token}
-                  setToken={setToken}
-                  user={user}
-                  updateUser={updateUser}
-                  pendingList={pendingList}
-                  failedList={failedList}
-                  completedList={completedList}
-                  setPendingList={setPendingList}
-                  setFailedList={setFailedList}
-                  setCompletedList={setCompletedList}
-                  setServerError={setServerError}
-                />
-              )}
-              <Routes>
-              <Route
-                  path="/"
-                  element={
-                    <SignInPage
+            <ViewProvider>
+              <ListsProvider>
+                <div>
+                  {user && (
+                    <SearchAppBar
+                      token={token}
+                      setToken={setToken}
+                      user={user}
                       updateUser={updateUser}
-                      token={token}
-                      setToken={setToken}
-                    ></SignInPage>
-                  }
-                  exact
-                />
-                <Route
-                  path="/match-manager"
-                  element={
-                    <ProtectedRoute
-                      user={user}
-                      setUser={setUser}
-                      validateJwtToken={validateJwtToken}
-                      token={token}
-                      setToken={setToken}
-                    >
-                      <MatchManager token={token}></MatchManager>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/archived"
-                  element={
-                    <ProtectedRoute
-                      user={user}
-                      setUser={setUser}
-                      validateJwtToken={validateJwtToken}
-                      token={token}
-                      setToken={setToken}
-                    >
-                      <Archived token={token}></Archived>
-                    </ProtectedRoute>
-                  }
-                  exact
-                />
-                <Route
-                  path="/myaccount"
-                  element={
-                    <ProtectedRoute
-                      user={user}
-                      setUser={setUser}
-                      validateJwtToken={validateJwtToken}
-                      token={token}
-                      setToken={setToken}
-                    >
-                      <MyAccountPage user={user} token={token} completedList={completedList} pendingList={pendingList} failedList={failedList}></MyAccountPage>
-                    </ProtectedRoute>
-                  }
-                  exact
-                />
-                <Route
-                  path="/project-management"
-                  element={
-                    <ProtectedRoute
-                      user={user}
-                      setUser={setUser}
-                      validateJwtToken={validateJwtToken}
-                      token={token}
-                      setToken={setToken}
-                    >
-                      <ProjectManagementPage
-                        user={user}
-                        token={token}
-                      ></ProjectManagementPage>
-                    </ProtectedRoute>
-                  }
-                  exact
-                />
-                <Route
-                  path="/completed-jobs"
-                  element={
-                    <ProtectedRoute
-                      user={user}
-                      setUser={setUser}
-                      validateJwtToken={validateJwtToken}
-                      token={token}
-                      setToken={setToken}
-                    >
-                      <CompletedJobsViewPage
-                        user={user}
-                        token={token}
-                      ></CompletedJobsViewPage>
-                    </ProtectedRoute>
-                  }
-                  exact
-                />
-                <Route
-                  path="/signin"
-                  element={
-                    <SignInPage
-                      updateUser={updateUser}
-                      token={token}
-                      setToken={setToken}
-                      serverError={serverError}
-                    ></SignInPage>
-                  }
-                  exact
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    <SignUpPage updateUser={updateUser}
-                    token={token}
-                    setToken={setToken}></SignUpPage>
-                  }
-                  exact
-                />
-                <Route component={Error} />
-              </Routes>
-            </div>
-            </ListsProvider>
+                      pendingList={pendingList}
+                      failedList={failedList}
+                      completedList={completedList}
+                      setPendingList={setPendingList}
+                      setFailedList={setFailedList}
+                      setCompletedList={setCompletedList}
+                      setServerError={setServerError}
+                    />
+                  )}
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <SignInPage
+                          updateUser={updateUser}
+                          token={token}
+                          setToken={setToken}
+                        ></SignInPage>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/match-manager"
+                      element={
+                        <ProtectedRoute
+                          user={user}
+                          setUser={setUser}
+                          validateJwtToken={validateJwtToken}
+                          token={token}
+                          setToken={setToken}
+                        >
+                          <MatchManager token={token}></MatchManager>
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/archived"
+                      element={
+                        <ProtectedRoute
+                          user={user}
+                          setUser={setUser}
+                          validateJwtToken={validateJwtToken}
+                          token={token}
+                          setToken={setToken}
+                        >
+                          <Archived token={token}></Archived>
+                        </ProtectedRoute>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/myaccount"
+                      element={
+                        <ProtectedRoute
+                          user={user}
+                          setUser={setUser}
+                          validateJwtToken={validateJwtToken}
+                          token={token}
+                          setToken={setToken}
+                        >
+                          <MyAccountPage
+                            user={user}
+                            token={token}
+                            completedList={completedList}
+                            pendingList={pendingList}
+                            failedList={failedList}
+                          ></MyAccountPage>
+                        </ProtectedRoute>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/project-management"
+                      element={
+                        <ProtectedRoute
+                          user={user}
+                          setUser={setUser}
+                          validateJwtToken={validateJwtToken}
+                          token={token}
+                          setToken={setToken}
+                        >
+                          <ProjectManagementPage
+                            user={user}
+                            token={token}
+                          ></ProjectManagementPage>
+                        </ProtectedRoute>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/completed-jobs"
+                      element={
+                        <ProtectedRoute
+                          user={user}
+                          setUser={setUser}
+                          validateJwtToken={validateJwtToken}
+                          token={token}
+                          setToken={setToken}
+                        >
+                          <CompletedJobsViewPage
+                            user={user}
+                            token={token}
+                          ></CompletedJobsViewPage>
+                        </ProtectedRoute>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/signin"
+                      element={
+                        <SignInPage
+                          updateUser={updateUser}
+                          token={token}
+                          setToken={setToken}
+                          serverError={serverError}
+                        ></SignInPage>
+                      }
+                      exact
+                    />
+                    <Route
+                      path="/signup"
+                      element={
+                        <SignUpPage
+                          updateUser={updateUser}
+                          token={token}
+                          setToken={setToken}
+                        ></SignUpPage>
+                      }
+                      exact
+                    />
+                    <Route component={Error} />
+                  </Routes>
+                </div>
+              </ListsProvider>
+            </ViewProvider>
           </BrowserRouter>
         </header>
       </div>

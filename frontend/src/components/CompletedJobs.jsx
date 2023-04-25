@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Button,
   Dialog,
@@ -26,12 +26,14 @@ import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 import Avatar from "@mui/material/Avatar";
 import { useLists } from "./ListsContext";
+import { ViewContext } from './ViewContext';
 
 export default function CompletedJobs(props) {
   // console.log('completedjobs props', props)
   // const { completedList } = props.props.props ?? props.props;
   const { completedList } = useLists();
   const { token } = props.props.props ?? props.props;
+  const { setView } = useContext(ViewContext);
   // console.log("completeld list", completedList);
 
   // console.log('token?', token)
@@ -198,6 +200,7 @@ export default function CompletedJobs(props) {
       .then((result) => {
         // console.log(result);
         // setOpen(false);
+        setView("")
         navigate("/completed-jobs", {
           state: {
             result: result,
