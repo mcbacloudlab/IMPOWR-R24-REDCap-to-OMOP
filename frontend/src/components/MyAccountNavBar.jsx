@@ -60,7 +60,7 @@ export default function MyAccountNavBar(props) {
   };
 
   useEffect(() => {
-    console.log("get drawer perf");
+    // console.log("get drawer perf");
 
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {

@@ -278,18 +278,13 @@ export default function SearchAppBar(props) {
           if (obj.jobStatus === "failed") return obj;
           else return null;
         });
-        // console.log("pending", pendingList);
-        // console.log("_pending", _pendingList);
-        // if (!_.isEqual(pendingList, _pendingList)) {
-        //   console.log('set the pending, found diff')
-        //   setPendingList(_pendingList);
-        // }
+
 
         // Use functional update form of setState
         setPendingList((prevPendingList) => {
           // Compare the previous state with the new value
           if (!_.isEqual(prevPendingList, _pendingList)) {
-            console.log("set the pending, found diff");
+            // console.log("set the pending, found diff");
             // Return the new value to update the state
             return _pendingList;
           }
@@ -301,7 +296,7 @@ export default function SearchAppBar(props) {
         setFailedList((prevFailedList) => {
           // Compare the previous state with the new value
           if (!_.isEqual(prevFailedList, _failedList)) {
-            console.log("set the pending, found diff");
+            // console.log("set the pending, found diff");
             // Return the new value to update the state
             return _failedList;
           }
@@ -313,7 +308,7 @@ export default function SearchAppBar(props) {
         setCompletedList((prevCompletedList) => {
           // Compare the previous state with the new value
           if (!_.isEqual(prevCompletedList, _completedList)) {
-            console.log("set the pending, found diff");
+            // console.log("set the pending, found diff");
             // Return the new value to update the state
             return _completedList;
           }

@@ -76,7 +76,7 @@ export default function PendingJobs(props) {
   }, [jobs, pendingList]);
 
   useEffect(() => {
-    console.log('pending list changed, update jobs')
+    // console.log('pending list changed, update jobs')
     setJobs(
       pendingList?.map((pendingJob) => {
         const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
