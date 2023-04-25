@@ -310,7 +310,13 @@ export default function MyAccountAPIKeys(props) {
     return (
       <>
         <Grid>
-          <h1 style={{textAlign: 'left'}}>Admin API Keys</h1>
+        <h1
+        style={{
+          paddingLeft: "20px",
+          textAlign: "center",
+          backgroundColor: "rgb(251 251 251)",
+        }}
+      >Admin API Keys</h1>
         </Grid>
 
         <Grid container spacing={1} sx={{ margin: "30px" }}>
@@ -331,6 +337,7 @@ export default function MyAccountAPIKeys(props) {
             }}
           >
             <Paper elevation={3} sx={{ padding: "10px" }}>
+              <h3>REDCap Credentials</h3>
               <Box
                 component="form"
                 onSubmit={(event) => handleAPIKeySubmit(event, "redcapAPIKey")}
@@ -512,6 +519,7 @@ export default function MyAccountAPIKeys(props) {
             }}
           >
             <Paper elevation={3}>
+            <h3>UMLS Credentials</h3>
               <Box
                 component="form"
                 onSubmit={(event) => handleAPIKeySubmit(event, "umlsAPIKey")}
@@ -625,6 +633,7 @@ export default function MyAccountAPIKeys(props) {
             }}
           >
             <Paper elevation={3}>
+            <h3>GPT3 Credentials</h3>
               <Box
                 component="form"
                 onSubmit={(event) => handleAPIKeySubmit(event, "gpt3APIKey")}

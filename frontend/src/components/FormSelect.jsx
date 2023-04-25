@@ -250,7 +250,7 @@ export default function FormSelect(props) {
                   </MenuItem>
                 ))}
               </Select>
-              <Grid>
+              <Grid sx={{mt:1, mb:1}}>
                 <Button
                   variant="contained"
                   component="label"
@@ -303,10 +303,10 @@ export default function FormSelect(props) {
                   tableInstanceRef={tableInstanceRef}
                 />
 
-                <Grid item xs={12} >
+                <Grid item xs={12} sx={{mt:2}} >
                   <Tooltip title={'This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label'}>
                   <Button
-                    sx={{ float: "right" }}
+                    // sx={{ float: "right" }}
                     variant="contained"
                     color="primary"
                     component="label"

@@ -219,7 +219,7 @@ export default function CompletedJobs(props) {
       <h1
         style={{
           paddingLeft: "20px",
-          textAlign: "left",
+          textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
       >

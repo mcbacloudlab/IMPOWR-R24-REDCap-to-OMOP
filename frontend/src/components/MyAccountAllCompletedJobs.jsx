@@ -236,12 +236,13 @@ export default function MyAccountAllCompletedJobs(props) {
       .catch((error) => console.log("error", error));
   }
 
+  console.log('columns', columns)
   return (
     <div style={{ maxHeight: "400px" }}>
       <h1
         style={{
           paddingLeft: "20px",
-          textAlign: "left",
+          textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
       >

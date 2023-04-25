@@ -29,9 +29,7 @@ import { useLists } from "./ListsContext";
 export default function PendingJobs(props) {
   // console.log("pendinglist", props);
   // const { pendingList } = props.props.props ?? props.props;
-  const {
-    pendingList,
-  } = useLists();
+  const { pendingList } = useLists();
   const { token } = props.props.props ?? props.props;
   const [columns, setColumns] = useState([]);
   const [jobs, setJobs] = useState(
@@ -139,7 +137,7 @@ export default function PendingJobs(props) {
   };
 
   const handleJobNameChange = (jobId, newValue) => {
-    console.log('handle job name change', newValue)
+    console.log("handle job name change", newValue);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, newJobName: newValue } : job
@@ -176,12 +174,13 @@ export default function PendingJobs(props) {
       <h1
         style={{
           paddingLeft: "20px",
-          textAlign: "left",
+          textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
       >
         Pending Jobs
       </h1>
+      {!pendingList.length && <h3>There are currently no pending jobs.</h3>}
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
@@ -217,15 +216,17 @@ export default function PendingJobs(props) {
                     color: "white",
                     maxWidth: "550px",
                     margin: "20px",
-                    padding: '10px'
+                    padding: "10px",
                   }}
                   key={job.jobId}
                 >
                   <ListItem
                     key={job.jobId}
-                    sx={{
-                      // margin: "10px",
-                    }}
+                    sx={
+                      {
+                        // margin: "10px",
+                      }
+                    }
                   >
                     <ListItemText
                       primary={
@@ -290,8 +291,8 @@ export default function PendingJobs(props) {
                                   width: "250px",
                                   input: {
                                     color: "black",
-                                    paddingLeft: '20px',
-                                    paddingRight: '30px',
+                                    paddingLeft: "20px",
+                                    paddingRight: "30px",
                                     backgroundColor: "white",
                                   },
                                 }}

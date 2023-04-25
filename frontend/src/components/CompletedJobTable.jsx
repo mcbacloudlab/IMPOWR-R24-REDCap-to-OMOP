@@ -139,7 +139,7 @@ export default function CompletedJobTable({
               //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
               onClick={handleExportData}
               startIcon={<FileDownloadIcon />}
-              variant="outlined"
+              variant="contained"
             >
               Export Data Dictionary
             </Button>

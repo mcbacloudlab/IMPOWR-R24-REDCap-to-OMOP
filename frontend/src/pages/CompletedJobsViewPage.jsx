@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 // import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import { ExportToCsv } from "export-to-csv";
@@ -31,6 +31,7 @@ import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import MyAccountNavBar from "../components/MyAccountNavBar";
 import Cookies from "js-cookie";
 import CssBaseline from "@mui/material/CssBaseline";
+import { ViewContext } from "../components/ViewContext";
 // var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
@@ -59,7 +60,7 @@ export default function CompletedJobsViewPage(props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
-  const [view, setView] = useState("");
+  const { view, setView } = useContext(ViewContext);
 
   
 
@@ -976,7 +977,7 @@ export default function CompletedJobsViewPage(props) {
   return (
     <>
       <CssBaseline />
-      <Container sx={{margin:'auto', minWidth: '80%', maxWidth: '1400px'}}>
+      <Container sx={{margin:'auto', minWidth: '75%', maxWidth: '1400px'}}>
         <MyAccountNavBar
           props={props}
           username={username}

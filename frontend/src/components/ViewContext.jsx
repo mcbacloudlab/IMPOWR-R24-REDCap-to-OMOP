@@ -8,10 +8,12 @@ export const ViewProvider = ({ children }) => {
   useEffect(() => {
     // Store the initial view in the browser history state
     window.history.replaceState({ view: 'My Account' }, '');
+    console.log('Initial view set:', 'My Account');
 
     const handlePopState = (e) => {
       // Update the view based on the browser history state
       if (e.state && e.state.view) {
+        console.log('handlePopState: updating view to', e.state.view);
         setView(e.state.view);
       }
     };
@@ -25,6 +27,7 @@ export const ViewProvider = ({ children }) => {
 
   const changeView = (newView) => {
     // Update the view state and push the new view to the browser history state
+    console.log('changeView: changing view to', newView);
     setView(newView);
     window.history.pushState({ view: newView }, '');
   };

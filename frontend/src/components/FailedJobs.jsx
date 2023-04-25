@@ -193,21 +193,16 @@ export default function FailedJobs(props) {
       <h1
         style={{
           paddingLeft: "20px",
-          textAlign: "left",
+          textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
       >
         Failed Jobs
       </h1>
-      <Grid
-        container
-        spacing={1}
-        justifyContent="center"
-        style={{ backgroundColor: "rgb(251 251 251)" }}
-      >
-        {columns?.map((column, index) => (
+      {!failedList.length && <h3>There are currently no failed jobs.</h3>}
+      <Grid container spacing={2} justifyContent="center">
+        {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
-
             <Dialog open={open} onClose={handleClose}>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogContent>
@@ -239,14 +234,16 @@ export default function FailedJobs(props) {
                     color: "white",
                     maxWidth: "550px",
                     margin: "20px",
-                    padding: '10px'
+                    padding: "10px",
                   }}
                 >
                   <ListItem
                     key={job.jobId}
-                    sx={{
-                      // margin: "10px",
-                    }}
+                    sx={
+                      {
+                        // margin: "10px",
+                      }
+                    }
                   >
                     <ListItemText
                       primary={
@@ -364,7 +361,6 @@ export default function FailedJobs(props) {
                           </div>
 
                           <div style={{ textAlign: "right" }}>
-                            
                             <Divider style={{ marginBottom: "10px" }} />
                             <div>
                               <b>Added:</b>{" "}

@@ -41,7 +41,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useNavigate } from "react-router-dom";
 import { ViewContext } from "./ViewContext";
 
-const drawerWidth = "240px";
+const drawerWidth = "270px";
 const miniDrawerWidth = 56;
 
 export default function MyAccountNavBar(props) {
@@ -85,6 +85,64 @@ export default function MyAccountNavBar(props) {
     setView(viewName);
     navigate("/myaccount");
   };
+  const menuItems = [
+    {
+      title: "My Account",
+      icon: <AccountCircleIcon style={{ color: "white" }} />,
+      tooltip: "My Account",
+    },
+    {
+      title: "Project Management",
+      icon: <AddHomeWorkIcon style={{ color: "white" }} />,
+      tooltip: "Project Management",
+    },
+    {
+      title: "Completed Jobs",
+      icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
+      tooltip: "Completed Jobs",
+    },
+    {
+      title: "Pending Jobs",
+      icon: <AutorenewIcon style={{ color: "white" }} />,
+      tooltip: "Pending Jobs",
+    },
+    {
+      title: "Failed Jobs",
+      icon: <ErrorIcon style={{ color: "white" }} />,
+      tooltip: "Failed Jobs",
+    },
+    // Add more menu items here...
+  ];
+
+  const adminMenuItems = [
+  
+    {
+      title: "All Completed Jobs",
+      icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
+      tooltip: "All Completed Jobs",
+    },
+    {
+      title: "All Pending Jobs",
+      icon: <AutorenewIcon style={{ color: "white" }} />,
+      tooltip: "All Pending Jobs",
+    },
+    {
+      title: "All Failed Jobs",
+      icon: <ErrorIcon style={{ color: "white" }} />,
+      tooltip: "All Failed Jobs",
+    },
+    {
+      title: "Collections",
+      icon: <StorageIcon style={{ color: "white" }} />,
+      tooltip: "Collections",
+    },
+    {
+      title: "API Keys",
+      icon: <KeyIcon style={{ color: "white" }} />,
+      tooltip: "API Keys",
+    },
+    // Add more menu items here...
+  ];
 
   return (
     <>
@@ -98,32 +156,23 @@ export default function MyAccountNavBar(props) {
               [`& .MuiDrawer-paper`]: {
                 width: drawerOpen ? drawerWidth : miniDrawerWidth,
                 boxSizing: "border-box",
-                backgroundColor: "#343541",
+                backgroundColor: theme.palette.primary.main,
                 color: "white",
                 transition: "width 225ms cubic-bezier(0, 0, 0.2, 1)",
+                boxShadow: "4px 0px 10px rgba(0, 0, 0, 0.1)",
               },
             }}
           >
-            <Toolbar>
-              {/* <IconButton
-            color="inherit"
-            aria-label="open/close drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, minWidth: 0 }}
-          >
-            {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton> */}
-            </Toolbar>
+            <Toolbar></Toolbar>
             <Box
               sx={{
                 overflowX: "hidden",
                 overflowY: "auto",
-                backgroundColor: "#343541",
+                backgroundColor: theme.palette.primary.main,
                 color: "white",
               }}
             >
-              <Box sx={{ mb: 1, mx: 2.5 }}>
+              <Box sx={{ mb: 0, mx: 2.5, mt: 1 }}>
                 <Link underline="none">
                   <IconButton
                     color="inherit"
@@ -134,25 +183,12 @@ export default function MyAccountNavBar(props) {
                   >
                     {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                   </IconButton>
-                  {/* <StyledAccount>
-                <Avatar src={blank_avatar} alt="photoURL" /> */}
-
-                  {/* <Box sx={{ ml: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "white" }}>
-                    <b>{props.name}</b>
-                  </Typography>
-
-                  <Typography variant="body2" sx={{ color: "white" }}>
-                    {props.role}
-                  </Typography>
-                </Box> */}
-                  {/* </StyledAccount> */}
                 </Link>
               </Box>
               <Box
                 sx={{
                   overflowY: "auto",
-                  backgroundColor: "#343541",
+                  backgroundColor: theme.palette.primary.main,
                   color: "white",
                 }}
               >
@@ -163,136 +199,54 @@ export default function MyAccountNavBar(props) {
                   }}
                 >
                   <Divider sx={{ bgcolor: "white" }} />
-                  <Tooltip title="My Account" placement="right">
-                    <ListItem key={"My Account"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("My Account")}
-                      >
-                        <ListItemIcon>
-                          <AccountCircleIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"My Account"}
+                  {/* show the regular nav menu items here */}
+                  {menuItems.map((item) => (
+                    <Tooltip
+                      key={item.title}
+                      title={item.tooltip}
+                      placement="right"
+                    >
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => handleClick(item.title)}
                           sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
+                            backgroundColor:
+                              view === item.title
+                                ? "rgba(255, 255, 255, 0.1)"
+                                : "transparent",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 0.2)",
+                            },
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-                  <Tooltip title="Project Management" placement="right">
-                    <ListItem key={"Project Management"} disablePadding>
-                      <ListItemButton
-                        onClick={() => handleClick("Project Management")}
-                      >
-                        <ListItemIcon>
-                          <AddHomeWorkIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"Project Management"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="Completed Jobs" placement="right">
-                    <ListItem key={"Completed Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("Completed Jobs")}
-                      >
-                        <ListItemIcon>
-                          <PlaylistAddCheckSharpIcon
-                            style={{ color: "white" }}
+                        >
+                          <ListItemIcon>{item.icon}</ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography
+                                variant="subtitle1"
+                                fontWeight={
+                                  view === item.title ? "bold" : "normal"
+                                }
+                              >
+                                {item.title}
+                              </Typography>
+                            }
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              transition: theme.transitions.create("opacity", {
+                                easing: theme.transitions.easing.sharp,
+                                duration:
+                                  theme.transitions.duration.leavingScreen,
+                              }),
+                              opacity: drawerOpen ? 1 : 0,
+                            }}
                           />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"Completed Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="Pending Jobs" placement="right">
-                    <ListItem key={"Pending Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("Pending Jobs")}
-                      >
-                        <ListItemIcon>
-                          <AutorenewIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"Pending Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="Failed Jobs" placement="right">
-                    <ListItem key={"Failed Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("Failed Jobs")}
-                      >
-                        <ListItemIcon>
-                          <ErrorIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"Failed Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
+                        </ListItemButton>
+                      </ListItem>
+                    </Tooltip>
+                  ))}
                 </List>
               </Box>
               <Divider sx={{ bgcolor: "white" }} />
@@ -303,153 +257,59 @@ export default function MyAccountNavBar(props) {
                     overflowX: "hidden",
                   }}
                 >
-                  {/* <Typography variant="h6" gutterBottom>
-                Admin Section
-              </Typography> */}
-                  <Tooltip title="API Keys" placement="right">
-                    <ListItem
-                      key={"API Keys"}
-                      disablePadding
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        overflow: "hidden",
-                      }}
+                  {/* show the admin nav menu items here */}
+                  {adminMenuItems.map((item) => (
+                    <Tooltip
+                      key={item.title}
+                      title={item.tooltip}
+                      placement="right"
                     >
-                      <ListItemButton
-                        onClick={(event) => handleClick("API Keys")}
-                      >
-                        <ListItemIcon>
-                          <KeyIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"API Keys"}
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => handleClick(item.title)}
                           sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
+                            backgroundColor:
+                              view === item.title
+                                ? "rgba(255, 255, 255, 0.1)"
+                                : "transparent",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 0.2)",
+                            },
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="All Completed Jobs" placement="right">
-                    <ListItem key={"All Completed Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("All Completed Jobs")}
-                      >
-                        <ListItemIcon>
-                          <PlaylistAddCheckSharpIcon
-                            style={{ color: "white" }}
+                        >
+                          <ListItemIcon>{item.icon}</ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography
+                                variant="subtitle1"
+                                fontWeight={
+                                  view === item.title ? "bold" : "normal"
+                                }
+                              >
+                                {item.title}
+                              </Typography>
+                            }
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              transition: theme.transitions.create("opacity", {
+                                easing: theme.transitions.easing.sharp,
+                                duration:
+                                  theme.transitions.duration.leavingScreen,
+                              }),
+                              opacity: drawerOpen ? 1 : 0,
+                            }}
                           />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"All Completed Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="All Pending Jobs" placement="right">
-                    <ListItem key={"All Pending Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("All Pending Jobs")}
-                      >
-                        <ListItemIcon>
-                          <AutorenewIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"All Pending Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="All Failed Jobs" placement="right">
-                    <ListItem key={"All Failed Jobs"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("All Failed Jobs")}
-                      >
-                        <ListItemIcon>
-                          <ErrorIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"All Failed Jobs"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
-
-                  <Tooltip title="Collections" placement="right">
-                    <ListItem key={"Collections"} disablePadding>
-                      <ListItemButton
-                        onClick={(event) => handleClick("Collections")}
-                      >
-                        <ListItemIcon>
-                          <StorageIcon style={{ color: "white" }} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={"Collections"}
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            transition: theme.transitions.create("opacity", {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.leavingScreen,
-                            }),
-                            opacity: drawerOpen ? 1 : 0,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Tooltip>
+                        </ListItemButton>
+                      </ListItem>
+                    </Tooltip>
+                  ))}
                 </List>
               )}
             </Box>
           </Drawer>
-          <Box component="main" sx={{ flexGrow: 1, p: 1, maxWidth: '90%' }}>
+          <Box component="main" sx={{ flexGrow: 1, p: 1, maxWidth: "90%" }}>
             {/* <Toolbar /> */}
             {view === "My Account" && (
               <>

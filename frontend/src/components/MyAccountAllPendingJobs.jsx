@@ -195,17 +195,19 @@ export default function MyAccountAllPendingJobs(props) {
     );
   };
 
+  console.log('columns', columns)
   return (
     <div>
       <h1
         style={{
           paddingLeft: "20px",
-          textAlign: "left",
+          textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
       >
         All Pending Jobs
       </h1>
+      {!pendingList.length && <h3>There are currently no pending jobs.</h3>}
       <Grid container spacing={2} justifyContent="center">
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>

@@ -31,7 +31,6 @@ export default function MyAccountPage(props) {
       <Container component="main" maxWidth="90%">
         <CssBaseline />
           <MyAccountNavBar props={props} username={username} name={name} role={role}/>
-          
         {/* </Paper> */}
       </Container>
   );
