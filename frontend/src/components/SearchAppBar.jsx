@@ -14,15 +14,15 @@ import {
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import TemporaryDrawer from "./TemporaryDrawer";
+// import TemporaryDrawer from "./TemporaryDrawer";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-import ErrorIcon from "@mui/icons-material/Error";
+// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
+// import ErrorIcon from "@mui/icons-material/Error";
 // import { styled, alpha } from "@mui/material/styles";
 // import blank_avatar from "../assets/blank_avatar.jpg";
 import CompletedJobs from "./CompletedJobs";
@@ -31,8 +31,8 @@ import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
 import _ from "lodash";
-import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
-import { NavLink } from 'react-router-dom';
+// import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
+// import { NavLink } from 'react-router-dom';
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 

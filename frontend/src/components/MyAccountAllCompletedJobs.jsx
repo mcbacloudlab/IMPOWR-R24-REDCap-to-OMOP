@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Button,
   Dialog,
@@ -25,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import CheckIcon from "@mui/icons-material/Check";
 import Avatar from "@mui/material/Avatar";
+import { ViewContext } from './ViewContext';
 
 export default function MyAccountAllCompletedJobs(props) {
   // console.log('completedjobs props', props)
@@ -37,6 +38,7 @@ export default function MyAccountAllCompletedJobs(props) {
       newJobName: job.jobName,
     })) || []
   );
+  const { setView } = useContext(ViewContext);
 
   const [columns, setColumns] = useState([]);
 
@@ -224,12 +226,14 @@ export default function MyAccountAllCompletedJobs(props) {
       .then((result) => {
         // console.log(result);
         // setOpen(false);
+        setView("")
         navigate("/completed-jobs", {
           state: {
             result: result,
             jobId: job.jobId,
             submittedBy: job.submittedBy,
             jobName: job.jobName,
+            redcapFormName: job.redcapFormName,
           },
         });
       })

@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 // import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import { useState, useEffect, useMemo, useContext } from "react";
@@ -687,14 +687,14 @@ export default function CompletedJobsViewPage(props) {
   const handleExportData = () => {
     // console.log("handle export data");
     let _data = data;
-    let keys = _data.reduce(function (acc, obj) {
-      Object.keys(obj).forEach(function (key) {
-        // console.log("key", key);
-        if (key === "extraData" || key === "selected") return null;
-        if (!acc.includes(key)) acc.push(key);
-      });
-      return acc;
-    }, []);
+    // let keys = _data.reduce(function (acc, obj) {
+    //   Object.keys(obj).forEach(function (key) {
+    //     // console.log("key", key);
+    //     if (key === "extraData" || key === "selected") return null;
+    //     if (!acc.includes(key)) acc.push(key);
+    //   });
+    //   return acc;
+    // }, []);
     // console.log("_data", _data);
     const transformedData = transformData(_data);
     // console.log(transformedData);

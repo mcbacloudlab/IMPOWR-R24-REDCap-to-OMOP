@@ -47,7 +47,7 @@ export default function MyAccountCollectionsView(props) {
   }, []);
 
   return (
-    <div style={{ maxHeight: "400px" }}>
+    <div >
       <h1 style={{ padding: "10px", textAlign: "center" }}>Collections</h1>
       <Grid
         container

@@ -8,7 +8,6 @@ import {
   Divider,
   Drawer,
   Typography,
-  Avatar,
   ListItem,
   ListItemButton,
   IconButton,
@@ -27,8 +26,8 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./CompletedJobs";
 import PendingJobs from "./PendingJobs";
 import FailedJobs from "./FailedJobs";
-import { styled, alpha, useTheme } from "@mui/material/styles";
-import blank_avatar from "../assets/blank_avatar.jpg";
+import { useTheme } from "@mui/material/styles";
+// import blank_avatar from "../assets/blank_avatar.jpg";
 import StorageIcon from "@mui/icons-material/Storage";
 import MyAccountAllCompletedJobs from "./MyAccountAllCompletedJobs";
 import MyAccountCollectionsView from "./MyAccountCollectionsView";
