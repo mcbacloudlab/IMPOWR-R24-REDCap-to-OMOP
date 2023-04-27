@@ -126,7 +126,7 @@ async function getData(snomedDataCollection) {
     ProgressBar.Presets.shades_classic
   );
 
-  console.info("Calculating total words...takes a bit of time");
+  console.info("Pre-calculating total words...takes a bit of time");
   console.log("Loading to array...");
   wordBar.start(wordBarTotal, 0);
   const snomedIds = pgResults.map((elem) => elem.concept_id);
@@ -137,34 +137,37 @@ async function getData(snomedDataCollection) {
     .project(projection);
   const snomedResults = await cursor.toArray();
 
-  // console.log("snomedResults", snomedResults);
-  // console.log("Loaded to array!");
+  console.log("snomedResults", snomedResults);
+  console.log("Loaded to array!");
 
-  for (const elem of pgResults) {
-    try {
-      const result = snomedResults.find(
-        (res) => res.snomed_id === elem.concept_id
-      );
-      let words = elem.concept_name.split(" ");
-      if (!result) {
-        totalWords += words.length;
-        snomedNotEmbeddedCount++;
-        snomedToEmbedList.push({
-          snomed_id: elem.concept_id,
-          snomed_text: elem.concept_name,
-        });
-      } else {
-        snomedAlreadyEmbeddedCount++;
-      }
-      wordBarCount++;
-      wordBar.update(wordBarCount);
-      if (wordBarCount === wordBarTotal) {
-        wordBar.stop();
-      }
-    } catch (err) {
-      console.error(err);
+ // Convert the snomedResults array into a Set for faster lookups
+const snomedIdSet = new Set(snomedResults.map(res => res.snomed_id));
+
+for (const elem of pgResults) {
+  try {
+    // Check if the snomed_id exists in the Set
+    const resultExists = snomedIdSet.has(elem.concept_id);
+    let words = elem.concept_name.split(" ");
+    if (!resultExists) {
+      totalWords += words.length;
+      snomedNotEmbeddedCount++;
+      snomedToEmbedList.push({
+        snomed_id: elem.concept_id,
+        snomed_text: elem.concept_name,
+      });
+    } else {
+      snomedAlreadyEmbeddedCount++;
     }
+    wordBarCount++;
+    wordBar.update(wordBarCount);
+    if (wordBarCount === wordBarTotal) {
+      wordBar.stop();
+    }
+  } catch (err) {
+    console.error(err);
   }
+}
+
 
   console.info("Total words", totalWords);
   console.info(
