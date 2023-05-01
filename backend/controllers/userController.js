@@ -47,7 +47,6 @@ async function signInUser(req, res) {
 }
 
 async function validateUser(req, res) {
-  // console.log('validate user called...')
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader &&
@@ -56,16 +55,10 @@ async function validateUser(req, res) {
       ? authHeader.split(" ")[1]
       : null;
 
-  console.log("login cookies", req.cookies);
-
   // Get token from httpOnly cookie, if it exists
   const tokenFromCookie = req.cookies.token;
-  console.log("tokencookie", tokenFromCookie);
-  console.log("tokenheader", tokenFromHeader);
   // Use the token from the header if it exists; otherwise, use the token from the cookie
   token = tokenFromHeader || tokenFromCookie;
-
-  console.log("token to use", token);
 
   let verified = await userService.validateUser(token);
   if (verified) {

@@ -125,7 +125,7 @@ async function validateUser(authData) {
   try {
     let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
     //now get user info again
-    console.log("jwtverified", jwtVerified);
+    // console.log("jwtverified", jwtVerified);
     let userInfoToReturn;
     let userInfo = [];
     if (jwtVerified.orcidId) {
@@ -148,7 +148,7 @@ async function validateUser(authData) {
     };
     return userInfoToReturn;
   } catch (error) {
-    console.log("error!", error);
+    // console.log("error!", error);
     return false;
   }
 }
@@ -203,20 +203,15 @@ async function getUserJobs(req, res) {
       ? authHeader.split(" ")[1]
       : null;
 
-  console.log("get user jobs login cookies", req.cookies);
-
   // Get token from httpOnly cookie, if it exists
   const tokenFromCookie = req.cookies.token;
-  console.log("tokencookie", tokenFromCookie);
-  console.log("tokenheader", tokenFromHeader);
   // Use the token from the header if it exists; otherwise, use the token from the cookie
   token = tokenFromHeader || tokenFromCookie;
 
-  console.log("token to use", token);
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    console.log("get user jobs for", email);
+    // console.log("get user jobs for", email);
     const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
@@ -294,11 +289,21 @@ async function getUserJobs(req, res) {
 
 async function getAllUserJobs(req, res) {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+  const tokenFromHeader =
+    authHeader &&
+    authHeader.split(" ")[1] !== "undefined" &&
+    authHeader.split(" ")[1] !== "null"
+      ? authHeader.split(" ")[1]
+      : null;
+
+  // Get token from httpOnly cookie, if it exists
+  const tokenFromCookie = req.cookies.token;
+  // Use the token from the header if it exists; otherwise, use the token from the cookie
+  token = tokenFromHeader || tokenFromCookie;
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    console.log("get user jobs for", req.body.type);
+    // console.log("get user jobs for", req.body.type);
     let query;
     if (req.body.type == "complete") {
       query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs

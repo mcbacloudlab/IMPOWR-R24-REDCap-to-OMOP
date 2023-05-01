@@ -12,16 +12,10 @@ import SignUpPage from "./pages/SignUpPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import Cookies from "js-cookie";
 import { Navigate, useLocation } from "react-router-dom";
-import jwtDecode from "jwt-decode";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
 import CompletedJobsViewPage from "./pages/CompletedJobsViewPage";
 import { ListsProvider } from "./components/ListsContext";
 import { ViewProvider } from "./components/ViewContext";
-// const darkTheme = createTheme({
-//   palette: {
-//     mode: "dark",
-//   },
-// });
 
 const theme = createTheme({
   palette: {
@@ -35,17 +29,7 @@ const theme = createTheme({
 });
 
 const validateJwtToken = async (jwtToken) => {
-  console.log("validate jwt");
-  console.log("jwtToken", jwtToken);
   try {
-    // const decodedToken = jwtDecode(jwtToken);
-    // if (!decodedToken) {
-    //   return null;
-    // }
-    const now = Date.now().valueOf() / 1000;
-    // if (typeof decodedToken.exp !== "undefined" && decodedToken.exp < now) {
-    //   return null;
-    // } else {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + jwtToken);
 
@@ -70,16 +54,34 @@ const validateJwtToken = async (jwtToken) => {
         return resp;
       });
     } else {
-      // Cookies.remove("token");
-      // Cookies.remove("user");
-      return null;
+      Cookies.remove("token");
+      Cookies.remove("user");
+      orcidLogout();
+      return <Navigate to="/signin" replace />;
     }
-    // }
   } catch (error) {
     console.log("error validating jwt", error);
-    return null;
+    return <Navigate to="/signin" replace />;
   }
 };
+
+// Client-side code to sign out the user
+function orcidLogout() {
+  // Make a request to the server-side endpoint to sign out the user and clear the JWT cookie
+  fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/orcid/orcidLogout`, {
+    credentials: "include", // Include cookies with the request
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Handle successful sign out (e.g., update user state, navigate to sign-in page)
+      return;
+      // ...
+    })
+    .catch((error) => {
+      // Handle errors
+      console.error(error);
+    });
+}
 
 function ProtectedRoute({
   user,
@@ -105,9 +107,15 @@ function ProtectedRoute({
 
     const validateUser = async () => {
       const result = await validateJwtToken(jwtToken);
-      console.log("result", result);
-      setUser(result);
-      setIsLoading(false);
+      if(result.props){
+        setUser(null)
+        setIsLoading(false);
+        <Navigate to="/signin" replace />
+      }else{
+        setUser(result);
+        setIsLoading(false);
+      }
+      
     };
 
     validateUser();
@@ -118,9 +126,9 @@ function ProtectedRoute({
   }
 
   if (!user) {
-    // Cookies.remove("token");
-    // Cookies.remove("user");
-    // return <Navigate to="/signin" replace />;
+    Cookies.remove("token");
+    Cookies.remove("user");
+    return <Navigate to="/signin" replace />;
   }
 
   return children;

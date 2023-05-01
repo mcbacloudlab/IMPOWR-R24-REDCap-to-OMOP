@@ -70,7 +70,7 @@ async function orcidCallback(req, res) {
 
 async function orcidLogout(req, res) {
   // Clear the JWT cookie by setting its value to an empty string and its expiration date to the past
-  console.log('orcidLogout', res.cookie)
+  // console.log('orcidLogout', res.cookie)
   res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
   res.cookie('user', '', { httpOnly: true, expires: new Date(0) });
 

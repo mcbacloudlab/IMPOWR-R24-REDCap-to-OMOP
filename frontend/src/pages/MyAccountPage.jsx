@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 // import AdminSection from "../components/MyAccountAdminSection";
 import MyAccountNavBar from "../components/MyAccountNavBar";
 
+
 export default function MyAccountPage(props) {
   // console.log("myaccount", props);
   const [username, setUsername] = useState("");
@@ -16,11 +17,15 @@ export default function MyAccountPage(props) {
   const [role, setRole] = useState(null);
   useEffect(() => {
     try {
-      let userCookie = JSON.parse(Cookies.get("user"));
+      let userCookie =(Cookies.get("user"));
+      let userInfo
+      if(userCookie){
+        userCookie = JSON.parse(userCookie)
+        setUsername(userCookie.email);
+        setName(userCookie.firstName + " " + userCookie.lastName);
+        userInfo = JSON.parse(props.user);
+      }
       console.log('usercook', userCookie)
-      setUsername(userCookie.email);
-      setName(userCookie.firstName + " " + userCookie.lastName);
-      let userInfo = JSON.parse(props.user);
       console.log("userInfo.", userInfo);
       if(!userInfo){
         setRole(null)
