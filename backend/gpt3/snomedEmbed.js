@@ -6,7 +6,7 @@ require("dotenv").config();
 const fs = require("fs");
 const prompts = require("prompts");
 const axiosThrottle = require("axios-request-throttle");
-axiosThrottle.use(axios, { requestsPerSecond: 40 }); //GPT3 limit is 3,000 per minute, might need to adjust to avoid any sort of rate limit errors
+axiosThrottle.use(axios, { requestsPerSecond: 20 }); //GPT3 limit is 3,000 per minute, might need to adjust to avoid any sort of rate limit errors
 const ProgressBar = require("cli-progress");
 const { Client } = require("pg");
 
@@ -46,7 +46,7 @@ const query = () =>
       `SELECT * 
      FROM public.concept 
      WHERE vocabulary_id = 'SNOMED' 
-     AND standard_concept = 'S'
+     AND standard_concept is null
      `,
       (err, res) => {
         if (err) {
@@ -75,7 +75,7 @@ async function startMongo() {
     const db = client.db(dbName);
 
     // Set SNOMED Collection Name for MongoDB collection
-    let snomedCollectionName = "gpt3_snomed_embeddings";
+    let snomedCollectionName = "gpt3_snomed_embeddings_non_standard";
 
     // Check if the collection already exists
     console.info(`Create collection ${snomedCollectionName} if does not exist`);

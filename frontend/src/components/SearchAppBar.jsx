@@ -73,10 +73,12 @@ export default function SearchAppBar(props) {
           // userInfo = JSON.parse(props.user);
         } catch (error) {
           // Handle the case where the string is not valid JSON
-          console.info('The provided string is not a valid JSON object:', error.message);
+          console.info(
+            "The provided string is not a valid JSON object:",
+            error.message
+          );
           return;
         }
-        
       }
       // console.log("prfewefwefops.", userInfo);
       // setRole(userInfo.role);
@@ -107,9 +109,28 @@ export default function SearchAppBar(props) {
     Cookies.remove("user");
     props.setToken(null);
     props.updateUser(null);
-    props.setServerError(true)
+    // props.setServerError(true)
+    orcidLogout()
     navigate("/signin");
   };
+
+  // Client-side code to sign out the user
+  function orcidLogout() {
+    // Make a request to the server-side endpoint to sign out the user and clear the JWT cookie
+    fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/orcid/orcidLogout`, {
+      credentials: "include", // Include cookies with the request
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle successful sign out (e.g., update user state, navigate to sign-in page)
+        console.log(data.message);
+        // ...
+      })
+      .catch((error) => {
+        // Handle errors
+        console.error(error);
+      });
+  }
 
   const handleNavigate = (url) => {
     handleMenuClose();
@@ -245,6 +266,7 @@ export default function SearchAppBar(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -252,17 +274,16 @@ export default function SearchAppBar(props) {
       requestOptions
     )
       .then((response) => {
-        const statusCode = response.status
-        if(statusCode !== 200){
-          console.log('Error!', statusCode)
-          handleSignOut('Server error')
+        const statusCode = response.status;
+        if (statusCode !== 200) {
+          console.log("Error!", statusCode);
+          // handleSignOut('Server error')
           return;
-        }else return response.text()
+        } else return response.text();
       })
       .then((result) => {
-        
         let resultObj = JSON.parse(result);
-        
+
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
             return obj;
@@ -278,7 +299,6 @@ export default function SearchAppBar(props) {
           if (obj.jobStatus === "failed") return obj;
           else return null;
         });
-
 
         // Use functional update form of setState
         setPendingList((prevPendingList) => {
@@ -321,19 +341,19 @@ export default function SearchAppBar(props) {
         // setCompletedList(_completedList);
       })
       .catch((error) => {
-        handleSignOut();
+        // handleSignOut();
         console.log("error", error);
       });
   }
 
   useEffect(() => {
     // Fetch data initially
-    checkJobs();
+    // checkJobs();
 
     // Fetch data every 15 seconds
     const intervalId = setInterval(() => {
       checkJobs();
-    }, 1000);
+    }, 5000);
 
     // Clean up interval on unmount
     return () => {

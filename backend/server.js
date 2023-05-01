@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 require("dotenv").config();
 const fileUpload = require("express-fileupload");
@@ -12,6 +13,7 @@ const collectionRoutes = require("./routes/collectionRoutes")
 const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const umlsRoutes = require("./routes/umlsRoutes");
+const orcidRoutes = require('./routes/orcidRoutes')
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
@@ -59,7 +61,13 @@ const { router, setQueues, replaceQueues, addQueue, removeQueue } =
 let appPort = process.env.EXPRESS_PORT;
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(bodyParser.json({ limit: "50mb" }));
-app.use(cors());
+// Use the cookie-parser middleware
+app.use(cookieParser());
+// Use the cors middleware and configure it to allow credentials
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with the origin of your client-side application
+  credentials: true
+}));
 
 const skipRoutes = ["/getUserJobs", "/queues", "/validateUser"];
 const skip = (req, res) => {
@@ -86,6 +94,7 @@ app.use("/api/keys", apiLimiter);
 
 //sign in/up routes, no auth necessary
 app.use("/api/users", userRoutes);
+app.use("/api/orcid", orcidRoutes);
 
 //authed user routes
 app.use("/api/file", authenticate, fileRoutes);

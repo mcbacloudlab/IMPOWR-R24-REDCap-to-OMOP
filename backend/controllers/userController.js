@@ -20,8 +20,13 @@ async function createUser(req, res) {
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-    let userInfo = {firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, role: 'default'} //set initial user as default user role
-    res.status(200).send({jwtToken: jwtToken, userInfo: userInfo});
+    let userInfo = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      role: "default",
+    }; //set initial user as default user role
+    res.status(200).send({ jwtToken: jwtToken, userInfo: userInfo });
   } catch (error) {
     console.error(error);
     res.status(400).send("Error");
@@ -44,7 +49,24 @@ async function signInUser(req, res) {
 async function validateUser(req, res) {
   // console.log('validate user called...')
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1]; // get token from Authorization header
+  const tokenFromHeader =
+    authHeader &&
+    authHeader.split(" ")[1] !== "undefined" &&
+    authHeader.split(" ")[1] !== "null"
+      ? authHeader.split(" ")[1]
+      : null;
+
+  console.log("login cookies", req.cookies);
+
+  // Get token from httpOnly cookie, if it exists
+  const tokenFromCookie = req.cookies.token;
+  console.log("tokencookie", tokenFromCookie);
+  console.log("tokenheader", tokenFromHeader);
+  // Use the token from the header if it exists; otherwise, use the token from the cookie
+  token = tokenFromHeader || tokenFromCookie;
+
+  console.log("token to use", token);
+
   let verified = await userService.validateUser(token);
   if (verified) {
     res.status(200).send(JSON.stringify(verified));
@@ -69,5 +91,5 @@ module.exports = {
   signInUser,
   validateUser,
   getUserJobs,
-  getAllUserJobs
+  getAllUserJobs,
 };

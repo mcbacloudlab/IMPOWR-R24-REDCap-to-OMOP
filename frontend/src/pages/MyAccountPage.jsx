@@ -17,11 +17,17 @@ export default function MyAccountPage(props) {
   useEffect(() => {
     try {
       let userCookie = JSON.parse(Cookies.get("user"));
+      console.log('usercook', userCookie)
       setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
       let userInfo = JSON.parse(props.user);
-      // console.log("prfewefwefops.", userInfo);
-      setRole(userInfo.role);
+      console.log("userInfo.", userInfo);
+      if(!userInfo){
+        setRole(null)
+      }else{
+        setRole(userInfo.role);
+      }
+      
     } catch (error) {
       console.log("error", error);
     }

@@ -35,44 +35,48 @@ const theme = createTheme({
 });
 
 const validateJwtToken = async (jwtToken) => {
+  console.log("validate jwt");
+  console.log("jwtToken", jwtToken);
   try {
-    const decodedToken = jwtDecode(jwtToken);
-    if (!decodedToken) {
-      return null;
-    }
+    // const decodedToken = jwtDecode(jwtToken);
+    // if (!decodedToken) {
+    //   return null;
+    // }
     const now = Date.now().valueOf() / 1000;
-    if (typeof decodedToken.exp !== "undefined" && decodedToken.exp < now) {
-      return null;
+    // if (typeof decodedToken.exp !== "undefined" && decodedToken.exp < now) {
+    //   return null;
+    // } else {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + jwtToken);
+
+    var formdata = new FormData();
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
+      requestOptions
+    );
+
+    if (response.status === 200) {
+      return response.text().then((resp) => {
+        Cookies.set("user", resp, { expires: 7, secure: true });
+        return resp;
+      });
     } else {
-      const myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer " + jwtToken);
-
-      var formdata = new FormData();
-
-      var requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: formdata,
-        redirect: "follow",
-      };
-
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
-        requestOptions
-      );
-
-      if (response.status === 200) {
-        return response.text().then((resp) => {
-          Cookies.set("user", resp, { expires: 7, secure: true });
-          return resp;
-        });
-      } else {
-        Cookies.remove("token");
-        Cookies.remove("user");
-        return null;
-      }
+      // Cookies.remove("token");
+      // Cookies.remove("user");
+      return null;
     }
+    // }
   } catch (error) {
+    console.log("error validating jwt", error);
     return null;
   }
 };
@@ -94,14 +98,14 @@ function ProtectedRoute({
     setToken(jwtToken);
     const userInfo = Cookies.get("user");
     if (!jwtToken || !userInfo) {
-      setUser(null);
-      setIsLoading(false);
-      return;
+      // setUser(null);
+      // setIsLoading(false);
+      // return;
     }
 
     const validateUser = async () => {
       const result = await validateJwtToken(jwtToken);
-      // console.log('result', result)
+      console.log("result", result);
       setUser(result);
       setIsLoading(false);
     };
@@ -114,9 +118,9 @@ function ProtectedRoute({
   }
 
   if (!user) {
-    Cookies.remove("token");
-    Cookies.remove("user");
-    return <Navigate to="/signin" replace />;
+    // Cookies.remove("token");
+    // Cookies.remove("user");
+    // return <Navigate to="/signin" replace />;
   }
 
   return children;

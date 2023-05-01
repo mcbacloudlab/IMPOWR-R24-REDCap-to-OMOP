@@ -125,9 +125,22 @@ async function validateUser(authData) {
   try {
     let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
     //now get user info again
-    let userInfo = await getUserByEmail(jwtVerified.user);
+    console.log("jwtverified", jwtVerified);
+    let userInfoToReturn;
+    let userInfo = [];
+    if (jwtVerified.orcidId) {
+      userInfo[0] = {
+        firstName: "orcidUserFirst",
+        lastName: "orcidUserLast",
+        email: jwtVerified.orcidId,
+        role: "default",
+      };
+    } else {
+      userInfo = await getUserByEmail(jwtVerified.user);
+    }
+
     userInfo = userInfo[0];
-    let userInfoToReturn = {
+    userInfoToReturn = {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
       email: userInfo.email,
@@ -135,6 +148,7 @@ async function validateUser(authData) {
     };
     return userInfoToReturn;
   } catch (error) {
+    console.log("error!", error);
     return false;
   }
 }
@@ -182,11 +196,27 @@ async function getUserJobs(req, res) {
     }
   });
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
+  const tokenFromHeader =
+    authHeader &&
+    authHeader.split(" ")[1] !== "undefined" &&
+    authHeader.split(" ")[1] !== "null"
+      ? authHeader.split(" ")[1]
+      : null;
+
+  console.log("get user jobs login cookies", req.cookies);
+
+  // Get token from httpOnly cookie, if it exists
+  const tokenFromCookie = req.cookies.token;
+  console.log("tokencookie", tokenFromCookie);
+  console.log("tokenheader", tokenFromHeader);
+  // Use the token from the header if it exists; otherwise, use the token from the cookie
+  token = tokenFromHeader || tokenFromCookie;
+
+  console.log("token to use", token);
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    // console.log('get user jobs for', email)
+    console.log("get user jobs for", email);
     const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
     INNER JOIN jobs ON users.id = jobs.userId
@@ -242,7 +272,7 @@ async function getUserJobs(req, res) {
           }
         } catch (error) {
           console.log("error", error);
-          if(!responseSent) res.status(500).send("Error");
+          if (!responseSent) res.status(500).send("Error");
         }
         // console.log('jobstat', job.jobStatus)
         if (job.jobStatus != "completed") {
