@@ -115,6 +115,7 @@ export default function PendingJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -158,6 +159,7 @@ export default function PendingJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

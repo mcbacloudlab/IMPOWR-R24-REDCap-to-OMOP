@@ -29,6 +29,7 @@ export default function MyAccountCollectionsView(props) {
         method: "GET",
         headers: myHeaders,
         redirect: "follow",
+        credentials: "include", // Include cookies with the request
       };
 
       fetch(

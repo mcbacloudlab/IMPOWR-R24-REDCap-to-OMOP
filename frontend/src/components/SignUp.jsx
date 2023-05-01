@@ -32,6 +32,7 @@ export default function SignUp({ props }) {
       method: "POST",
       body: data,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

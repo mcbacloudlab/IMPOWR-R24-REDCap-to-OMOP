@@ -32,17 +32,15 @@ const jobOptions = {
 
 myQueue.process(jobOptions.concurrency, async (job) => {
   console.log("job", job.data);
-  let jobData = JSON.parse(job.data.data)
-  let result
-  const containsLookupTrue = jobData.some(
-    (element) => element.lookup === true
-  );
-  console.log('contains lookup', containsLookupTrue)
+  let jobData = JSON.parse(job.data.data);
+  let result;
+  const containsLookupTrue = jobData.some((element) => element.lookup === true);
+  console.log("contains lookup", containsLookupTrue);
   if (job.data.lookup && containsLookupTrue) {
     await embedRedcapLookupText(job);
   } else if (job.data.lookup) {
     //nothing to lookup, everything was already embedded
-    console.log('No lookups to embed, done')
+    console.log("No lookups to embed, done");
     return;
   } else {
     await importToMongo(job);
@@ -309,12 +307,29 @@ async function submit(req, res) {
     const data = req.body;
     console.log("data", data.filename);
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const tokenFromHeader =
+      authHeader &&
+      authHeader.split(" ")[1] !== "undefined" &&
+      authHeader.split(" ")[1] !== "null"
+        ? authHeader.split(" ")[1]
+        : null;
+
+    // Get token from httpOnly cookie, if it exists
+    const tokenFromCookie = req.cookies.token;
+    // Use the token from the header if it exists; otherwise, use the token from the cookie
+    token = tokenFromHeader || tokenFromCookie;
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
-    let userId = await getUserByEmail(email);
-    userId = userId[0].id;
+    let userId
+    if(jwtVerified.user == 'orcidUser'){
+      userId = jwtVerified.orcidId
+      email = userId
+    }else{
+      userId = await getUserByEmail(email);
+      userId = userId[0].id;
+    }
+    
     console.log("email", email);
     console.log("the user id!!", userId);
     const job = await myQueue.add(data, jobOptions);
@@ -350,7 +365,17 @@ async function retryJob(req, res) {
   try {
     const jobId = req.body.jobId;
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const tokenFromHeader =
+      authHeader &&
+      authHeader.split(" ")[1] !== "undefined" &&
+      authHeader.split(" ")[1] !== "null"
+        ? authHeader.split(" ")[1]
+        : null;
+
+    // Get token from httpOnly cookie, if it exists
+    const tokenFromCookie = req.cookies.token;
+    // Use the token from the header if it exists; otherwise, use the token from the cookie
+    token = tokenFromHeader || tokenFromCookie;
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
@@ -401,7 +426,17 @@ async function cancelJob(req, res) {
   try {
     const jobId = req.body.jobId;
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const tokenFromHeader =
+      authHeader &&
+      authHeader.split(" ")[1] !== "undefined" &&
+      authHeader.split(" ")[1] !== "null"
+        ? authHeader.split(" ")[1]
+        : null;
+
+    // Get token from httpOnly cookie, if it exists
+    const tokenFromCookie = req.cookies.token;
+    // Use the token from the header if it exists; otherwise, use the token from the cookie
+    token = tokenFromHeader || tokenFromCookie;
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
@@ -493,7 +528,17 @@ async function updateJobName(req, res) {
     const jobId = req.body.jobId;
     const jobName = req.body.jobName;
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const tokenFromHeader =
+      authHeader &&
+      authHeader.split(" ")[1] !== "undefined" &&
+      authHeader.split(" ")[1] !== "null"
+        ? authHeader.split(" ")[1]
+        : null;
+
+    // Get token from httpOnly cookie, if it exists
+    const tokenFromCookie = req.cookies.token;
+    // Use the token from the header if it exists; otherwise, use the token from the cookie
+    token = tokenFromHeader || tokenFromCookie;
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
@@ -678,7 +723,17 @@ async function submitJobVerify(req, res) {
     const data = req.body;
     console.log("data", data.filename);
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const tokenFromHeader =
+      authHeader &&
+      authHeader.split(" ")[1] !== "undefined" &&
+      authHeader.split(" ")[1] !== "null"
+        ? authHeader.split(" ")[1]
+        : null;
+
+    // Get token from httpOnly cookie, if it exists
+    const tokenFromCookie = req.cookies.token;
+    // Use the token from the header if it exists; otherwise, use the token from the cookie
+    token = tokenFromHeader || tokenFromCookie;
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;

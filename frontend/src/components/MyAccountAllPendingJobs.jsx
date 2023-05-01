@@ -50,6 +50,7 @@ export default function MyAccountAllPendingJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -99,6 +100,7 @@ export default function MyAccountAllPendingJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -166,6 +168,7 @@ export default function MyAccountAllPendingJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

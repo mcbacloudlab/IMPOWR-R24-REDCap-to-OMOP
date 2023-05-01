@@ -42,6 +42,7 @@ export default function MyAccountAPIKeys(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -103,6 +104,7 @@ export default function MyAccountAPIKeys(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -217,6 +219,7 @@ export default function MyAccountAPIKeys(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -250,6 +253,7 @@ export default function MyAccountAPIKeys(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -283,6 +287,7 @@ export default function MyAccountAPIKeys(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the requestcredentials: "include", // Include cookies with the request
     };
 
     fetch(

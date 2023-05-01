@@ -24,6 +24,7 @@ export default function DataDictionaryList(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
     fetch(
       `${process.env.REACT_APP_BACKEND_API_URL}/api/file/get_data_dictionary_list`,
@@ -65,6 +66,7 @@ export default function DataDictionaryList(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -104,6 +106,7 @@ export default function DataDictionaryList(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

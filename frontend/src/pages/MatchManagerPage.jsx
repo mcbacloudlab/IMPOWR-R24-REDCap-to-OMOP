@@ -143,6 +143,7 @@ export default function MatchManager(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -279,6 +280,7 @@ export default function MatchManager(props) {
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

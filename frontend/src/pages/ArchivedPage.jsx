@@ -96,6 +96,7 @@ export default function Archived(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -137,6 +138,7 @@ export default function Archived(props) {
       body: formdata,
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

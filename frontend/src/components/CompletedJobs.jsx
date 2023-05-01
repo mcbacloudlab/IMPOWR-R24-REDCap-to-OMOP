@@ -83,6 +83,7 @@ export default function CompletedJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -150,6 +151,7 @@ export default function CompletedJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -190,6 +192,7 @@ export default function CompletedJobs(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

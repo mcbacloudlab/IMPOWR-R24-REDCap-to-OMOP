@@ -83,6 +83,7 @@ export default function SignIn({ props }) {
       method: "POST",
       body: data,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(

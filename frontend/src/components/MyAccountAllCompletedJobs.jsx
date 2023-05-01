@@ -56,6 +56,7 @@ export default function MyAccountAllCompletedJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -107,6 +108,7 @@ export default function MyAccountAllCompletedJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -178,6 +180,7 @@ export default function MyAccountAllCompletedJobs(props) {
       headers: myHeaders,
       body: formdata,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
@@ -216,6 +219,7 @@ export default function MyAccountAllCompletedJobs(props) {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
+      credentials: "include", // Include cookies with the request
     };
 
     fetch(
