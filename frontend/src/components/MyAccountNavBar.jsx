@@ -39,11 +39,14 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useNavigate } from "react-router-dom";
 import { ViewContext } from "./ViewContext";
+import EmailIcon from '@mui/icons-material/Email';
+import OrcidIcon from '../assets/orcid_16x16.gif';
 
 const drawerWidth = "270px";
 const miniDrawerWidth = 56;
 
 export default function MyAccountNavBar(props) {
+  console.log("myaccountnavbar props", props);
   const navigate = useNavigate();
   const theme = useTheme();
   // console.log("navbar props", props);
@@ -114,7 +117,6 @@ export default function MyAccountNavBar(props) {
   ];
 
   const adminMenuItems = [
-  
     {
       title: "All Completed Jobs",
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
@@ -316,9 +318,21 @@ export default function MyAccountNavBar(props) {
                 <Typography sx={{ textAlign: "left" }}>
                   <b>Name:</b> {props.name}
                 </Typography>
-                <Typography sx={{ textAlign: "left" }}>
-                  <b>Email:</b> {props.username}
-                </Typography>
+                {props.orcidBool ? (
+                  <Typography sx={{ textAlign: "left" }}>
+                    <img
+                      src={OrcidIcon}
+                      alt="ORCID"
+                      style={{ width: 24, height: 24, marginRight: 8 }}
+                    />
+                    <a href={`https://sandbox.orcid.org/${props.username}`}>https://orcid.org/{props.username} </a>
+                  </Typography>
+                ) : (
+                  <Typography sx={{ textAlign: "left" }}>
+                    <EmailIcon sx={{ marginRight: 1 }} />
+                    <b>Email:</b> {props.username}
+                  </Typography>
+                )}
                 <Typography sx={{ textAlign: "left" }}>
                   {props.role && (
                     <>

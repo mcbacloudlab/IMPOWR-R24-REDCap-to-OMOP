@@ -11,10 +11,12 @@ import MyAccountNavBar from "../components/MyAccountNavBar";
 
 
 export default function MyAccountPage(props) {
-  // console.log("myaccount", props);
+  console.log("myaccount", props);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
+  const [orcidBool, setOrcidBool] = useState(false)
+
   useEffect(() => {
     try {
       let userCookie =(Cookies.get("user"));
@@ -23,6 +25,9 @@ export default function MyAccountPage(props) {
         userCookie = JSON.parse(userCookie)
         setUsername(userCookie.email);
         setName(userCookie.firstName + " " + userCookie.lastName);
+        if(userCookie.orcidId){
+          setOrcidBool(true)
+        }
         userInfo = JSON.parse(props.user);
       }
       console.log('usercook', userCookie)
@@ -41,7 +46,7 @@ export default function MyAccountPage(props) {
   return (
       <Container component="main" maxWidth="90%">
         <CssBaseline />
-          <MyAccountNavBar props={props} username={username} name={name} role={role}/>
+          <MyAccountNavBar props={props} username={username} name={name} role={role} orcidBool={orcidBool}/>
         {/* </Paper> */}
       </Container>
   );

@@ -92,15 +92,15 @@ async function orcidCallback(req, res) {
         );
         // Use the ORCID iD in your application (e.g., log in the user)
         // res.send(`Logged in with ORCID iD: ${orcidId}`);
-        const orcidRecord = await getOrcidRecord(accessToken, orcidId);
-        console.log("orcidRecord", orcidRecord);
-        if (!orcidRecord) return;
-        else {
-          res.send({
-            orcidId: orcidId,
-            orcidRecord: orcidRecord,
-          });
-        }
+        // const orcidRecord = await getOrcidRecord(accessToken, orcidId);
+        // console.log("orcidRecord", orcidRecord);
+        // if (!orcidRecord) return;
+        // else {
+        //   res.send({
+        //     orcidId: orcidId,
+        //     orcidRecord: orcidRecord,
+        //   });
+        // }
       }
     }
   );

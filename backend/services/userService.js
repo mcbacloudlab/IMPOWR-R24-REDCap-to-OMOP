@@ -134,6 +134,7 @@ async function validateUser(authData) {
         lastName: jwtVerified.lastName,
         email: jwtVerified.orcidId,
         role: "default",
+        orcidId: true
       };
     } else {
       userInfo = await getUserByEmail(jwtVerified.user);
@@ -145,6 +146,7 @@ async function validateUser(authData) {
       lastName: userInfo.lastName,
       email: userInfo.email,
       role: userInfo.role,
+      orcidId: userInfo.orcidId
     };
     return userInfoToReturn;
   } catch (error) {
