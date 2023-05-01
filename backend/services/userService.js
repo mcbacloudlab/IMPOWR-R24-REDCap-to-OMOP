@@ -130,8 +130,8 @@ async function validateUser(authData) {
     let userInfo = [];
     if (jwtVerified.orcidId) {
       userInfo[0] = {
-        firstName: "orcidUserFirst",
-        lastName: "orcidUserLast",
+        firstName: jwtVerified.firstName,
+        lastName: jwtVerified.lastName,
         email: jwtVerified.orcidId,
         role: "default",
       };

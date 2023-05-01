@@ -1,5 +1,6 @@
 const OAuth2 = require("oauth").OAuth2;
 var jwt = require("jsonwebtoken");
+const axios = require("axios");
 // Initialize the OAuth2 client
 const CLIENT_ID = process.env.ORCID_CLIENT_ID;
 const CLIENT_SECRET = process.env.ORCID_CLIENT_SECRET;
@@ -22,7 +23,7 @@ async function orcidLogin(req, res) {
   const authURL = oauth2.getAuthorizeUrl({
     redirect_uri: REDIRECT_URI,
     response_type: "code",
-    scope: "/authenticate",
+    scope: "/authenticate openid",
   });
   res.redirect(authURL);
 }
@@ -36,33 +37,70 @@ async function orcidCallback(req, res) {
   oauth2.getOAuthAccessToken(
     code,
     { grant_type: "authorization_code", redirect_uri: REDIRECT_URI },
-    (error, accessToken, refreshToken, results) => {
+    async (error, accessToken, refreshToken, results) => {
       if (error) {
         console.log("error", error);
         res.send("Error during ORCID login");
       } else {
         // Get the user's ORCID iD from the access token response
         const orcidId = results.orcid;
-
+        console.log("results", results);
+        console.log("accesstoken", accessToken);
+        const decoded = jwt.decode(results.id_token);
+        console.log(decoded);
         // Create a JWT payload with the user's ORCID iD
-        const jwtPayload = { user: 'orcidUser', orcidId: orcidId, firstName: 'orcidFirst', lastName: 'orcidLast', role: 'default' };
+        let firstName, lastName
+        if(decoded){
+          firstName = decoded.given_name
+          lastName = decoded.family_name
+        }else{
+          firstName = results.name
+          lastName = ""
+        }
+        const jwtPayload = {
+          user: "orcidUser",
+          orcidId: orcidId,
+          firstName: firstName,
+          lastName: lastName,
+          role: "default",
+        };
 
         // Sign the JWT with the secret key
-        const token = jwt.sign(jwtPayload, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+        const token = jwt.sign(jwtPayload, process.env.JWT_SECRET_KEY, {
+          expiresIn: "1h",
+        });
 
         // Store the JWT in a cookie
         res.cookie("token", token, { httpOnly: true });
-
         // Store the user information in another cookie (optional)
-        res.cookie("user", JSON.stringify({ user:'orcidUser', orcidId: orcidId, firstName: 'orcidFirst', lastName: 'orcidLast', role: 'default' }));
-
+        res.cookie(
+          "user",
+          JSON.stringify({
+            user: "orcidUser",
+            orcidId: orcidId,
+            firstName: firstName,
+            lastName: lastName,
+            role: "default",
+          })
+        );
 
         //need to attempt to get email address from ORCID, won't always get an email address if unverified or private emails, just store orcid id if no email found
 
         // Redirect the user to the /myaccount route and pass the ORCID iD as a query parameter
-        res.redirect(`${process.env.FRONTEND_URL}/myaccount?orcidId=${orcidId}`);
+        res.redirect(
+          `${process.env.FRONTEND_URL}/myaccount?orcidId=${orcidId}`
+        );
         // Use the ORCID iD in your application (e.g., log in the user)
         // res.send(`Logged in with ORCID iD: ${orcidId}`);
+        const orcidRecord = await getOrcidRecord(accessToken, orcidId);
+        console.log("orcidRecord", orcidRecord);
+        if (!orcidRecord) return;
+        else {
+          res.send({
+            orcidId: orcidId,
+            orcidRecord: orcidRecord,
+          });
+        }
       }
     }
   );
@@ -71,17 +109,31 @@ async function orcidCallback(req, res) {
 async function orcidLogout(req, res) {
   // Clear the JWT cookie by setting its value to an empty string and its expiration date to the past
   // console.log('orcidLogout', res.cookie)
-  res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
-  res.cookie('user', '', { httpOnly: true, expires: new Date(0) });
+  res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
+  res.cookie("user", "", { httpOnly: true, expires: new Date(0) });
 
   // Optionally, clear any other cookies you want to remove here
 
   // Send a response indicating successful sign out
-  res.json({ message: 'Signed out successfully' });
+  res.json({ message: "Signed out successfully" });
+}
+
+async function getOrcidRecord(accessToken, orcidId) {
+  const headers = { Authorization: `Bearer ${accessToken}` };
+  try {
+    const response = await axios.get(
+      `${process.env.ORCID_RECORD_URL}${orcidId}`,
+      { headers }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error.response.data);
+    // throw new Error('Failed to retrieve ORCID record');
+  }
 }
 
 module.exports = {
   orcidLogin,
   orcidCallback,
-  orcidLogout
+  orcidLogout,
 };
