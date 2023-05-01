@@ -325,7 +325,7 @@ export default function MyAccountNavBar(props) {
                       alt="ORCID"
                       style={{ width: 24, height: 24, marginRight: 8 }}
                     />
-                    <a href={`https://sandbox.orcid.org/${props.username}`}>https://orcid.org/{props.username} </a>
+                    <a href={`${process.env.REACT_APP_ORCID_URL}/${props.username}`}>{process.env.REACT_APP_ORCID_URL}/{props.username} </a>
                   </Typography>
                 ) : (
                   <Typography sx={{ textAlign: "left" }}>
