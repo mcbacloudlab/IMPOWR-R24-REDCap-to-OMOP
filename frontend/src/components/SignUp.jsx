@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import { useState } from "react";
 import Cookies from "js-cookie";
+import OrcidLogo from "../assets/orcid.logo.svg";
+import { Divider } from "@mui/material";
 
 export default function SignUp({ props }) {
   console.log('sign up props', props)
@@ -59,6 +61,12 @@ export default function SignUp({ props }) {
     })
     .catch((error) => console.log("error", error));
   };
+
+    // Function to initiate the ORCID login process
+    const loginWithORCID = () => {
+      // Redirect the user to the /login endpoint on the backend
+      window.location.href = `${process.env.REACT_APP_BACKEND_API_URL}/api/orcid/orcidLogin`;
+    };
 
   return (
       <Container component="main" maxWidth="xs">
@@ -140,6 +148,27 @@ export default function SignUp({ props }) {
             >
               Sign Up
             </Button>
+            <Button
+            variant="contained"
+            color="primary"
+            onClick={loginWithORCID}
+            startIcon={
+              <img src={OrcidLogo} alt="ORCID logo" width="24" height="24" />
+            }
+            sx={{
+              mt: 2,
+              backgroundColor: "rgb(68, 116, 5)",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "rgb(85, 145, 10)", // Specify the desired hover background color here
+                // If you don't want a boxShadow on hover, you can set it to 'none'
+                boxShadow: "none",
+              },
+            }}
+          >
+            Login with ORCID
+          </Button>
+          <Divider sx={{ mb: 2, mt: 2 }} />
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="signin" variant="body2">

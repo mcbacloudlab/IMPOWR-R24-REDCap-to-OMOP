@@ -5,6 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 // import FormControlLabel from "@mui/material/FormControlLabel";
 // import Checkbox from "@mui/material/Checkbox";
+import { Divider } from "@mui/material";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -25,40 +26,39 @@ export default function SignIn({ props }) {
 
   const navigate = useNavigate();
   const jwtToken = Cookies.get("token");
-  console.log('token', jwtToken)
+  console.log("token", jwtToken);
   //check if user has token
   useEffect(() => {
-    console.log('token', jwtToken)
+    console.log("token", jwtToken);
     // if (jwtToken) {
-      //now we to actually validate it on the server checking the signature
-      var myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer " + jwtToken);
+    //now we to actually validate it on the server checking the signature
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + jwtToken);
 
-      var formdata = new FormData();
+    var formdata = new FormData();
 
-      var requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: formdata,
-        redirect: "follow",
-        credentials: 'include', // Include cookies with the request
-      };
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
 
-      fetch(
-        `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
-        requestOptions
-      )
-        .then((response) => response.status)
-        .then((result) => {
-          if (result === 200) {
-            props.updateUser("loggedIn");
-            navigate("/myaccount");
-          } else {
-            
-            navigate("/signin");
-          }
-        })
-        .catch((error) => console.log("error", error));
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
+      requestOptions
+    )
+      .then((response) => response.status)
+      .then((result) => {
+        if (result === 200) {
+          props.updateUser("loggedIn");
+          navigate("/myaccount");
+        } else {
+          navigate("/signin");
+        }
+      })
+      .catch((error) => console.log("error", error));
     // }
   }, [jwtToken, navigate, props]);
 
@@ -138,11 +138,12 @@ export default function SignIn({ props }) {
           alignItems: "center",
         }}
       >
+        
         <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          REDCap to OMOP
         </Typography>
         {loginError && <ErrorAlert />}
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -167,6 +168,14 @@ export default function SignIn({ props }) {
             autoComplete="current-password"
           />
           <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign In
+          </Button>
+          <Button
             variant="contained"
             color="primary"
             onClick={loginWithORCID}
@@ -186,14 +195,7 @@ export default function SignIn({ props }) {
           >
             Login with ORCID
           </Button>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
+          <Divider sx={{ mb: 2, mt: 2 }} />
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
