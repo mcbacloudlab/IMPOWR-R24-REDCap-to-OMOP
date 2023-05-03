@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 const db = require("../db/mysqlConnection.cjs");
 
 async function authenticate(req, res, next) {
-  console.log('authenticating')
+  // console.log('authenticating')
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader &&
@@ -21,7 +21,7 @@ async function authenticate(req, res, next) {
   }
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log('jwtveri', jwtVerified)
+    // console.log('jwtveri', jwtVerified)
     let userInfo
     if(jwtVerified.user == 'orcidUser'){
       userInfo = 'orcidUser'

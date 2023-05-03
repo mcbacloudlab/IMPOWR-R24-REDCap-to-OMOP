@@ -44,10 +44,10 @@ async function orcidCallback(req, res) {
       } else {
         // Get the user's ORCID iD from the access token response
         const orcidId = results.orcid;
-        console.log("results", results);
-        console.log("accesstoken", accessToken);
+        // console.log("results", results);
+        // console.log("accesstoken", accessToken);
         const decoded = jwt.decode(results.id_token);
-        console.log(decoded);
+        // console.log(decoded);
         // Create a JWT payload with the user's ORCID iD
         let firstName, lastName
         if(decoded){

@@ -10,3 +10,5 @@ backend/deleted/
 backend/gpt3/test.js
 frontend/.env.production
 frontend/build.zip
+backend/.env.production
+*.tgz
