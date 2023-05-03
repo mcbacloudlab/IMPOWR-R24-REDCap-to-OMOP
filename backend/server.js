@@ -24,10 +24,10 @@ const syncRedisAndJobDB = require('./gpt3/syncRedisAndJobDB');
 const EventEmitter = require('events'); // Import the EventEmitter class from the 'events' module
 const commander = new EventEmitter(); // Create a new instance of EventEmitter
 
-// const _redisServer = require("redis-server");
+
 
 commander.setMaxListeners(20); // Increase the limit to 20
-
+// const _redisServer = require("redis-server");
 // Sync redis and mysql job ids
 setInterval(syncRedisAndJobDB, 60000);
 

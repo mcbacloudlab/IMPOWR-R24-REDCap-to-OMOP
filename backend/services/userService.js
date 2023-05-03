@@ -2,6 +2,7 @@ const db = require("../db/mysqlConnection.cjs");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+const util = require('util');
 const Bull = require("bull");
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -134,7 +135,7 @@ async function validateUser(authData) {
         lastName: jwtVerified.lastName,
         email: jwtVerified.orcidId,
         role: "default",
-        orcidId: true
+        orcidId: true,
       };
     } else {
       userInfo = await getUserByEmail(jwtVerified.user);
@@ -146,7 +147,7 @@ async function validateUser(authData) {
       lastName: userInfo.lastName,
       email: userInfo.email,
       role: userInfo.role,
-      orcidId: userInfo.orcidId
+      orcidId: userInfo.orcidId,
     };
     return userInfoToReturn;
   } catch (error) {
@@ -185,18 +186,36 @@ async function getUserJobs(req, res) {
   // Define a boolean variable to track whether a response has been sent
   let responseSent = false;
 
-  myQueue.client.on("error", (err) => {
-    // Log the error
-    console.error("Error connecting to Redis:", err);
-    // Check if a response has already been sent
-    if (!responseSent) {
-      // Send the response
+  try {
+    // Define a timeout duration (in milliseconds)
+    const timeoutDuration = 3000; // 3 seconds
+
+    // Use the Redis PING command to check the connection status
+    // Use Promise.race to implement a timeout mechanism
+    await Promise.race([
+      myQueue.client.ping(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Redis timeout')), timeoutDuration)
+      ),
+    ]);
+
+    // ... rest of the getUserJobs function ...
+
+  } catch (error) {
+    // If a timeout occurs or an error occurs while pinging Redis, respond with a 500 error message
+    if (error.message === 'Connection is closed.' || error.message === 'Redis timeout') {
+      console.error("Error connecting to Redis:", error);
       res.status(500).json({ message: "Error. Redis server is down" });
-      // Set the variable to indicate that a response has been sent
-      responseSent = true;
       return;
     }
-  });
+
+    // Handle other errors
+    console.log("getUserJobs error", error);
+    res.status(500).send("Error");
+    return false;
+  }
+
+
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader &&

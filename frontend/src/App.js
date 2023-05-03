@@ -54,9 +54,9 @@ const validateJwtToken = async (jwtToken) => {
         return resp;
       });
     } else {
-      // Cookies.remove("token");
-      // Cookies.remove("user");
-      // orcidLogout();
+      Cookies.remove("token");
+      Cookies.remove("user");
+      orcidLogout();
       return <Navigate to="/signin" replace />;
     }
   } catch (error) {
