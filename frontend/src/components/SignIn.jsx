@@ -20,16 +20,16 @@ import Cookies from "js-cookie";
 import OrcidLogo from "../assets/orcid.logo.svg";
 
 export default function SignIn({ props }) {
-  console.log("sign in props", props);
+  // console.log("sign in props", props);
   const [loginError, setLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
 
   const navigate = useNavigate();
   const jwtToken = Cookies.get("token");
-  console.log("token", jwtToken);
+  // console.log("token", jwtToken);
   //check if user has token
   useEffect(() => {
-    console.log("token", jwtToken);
+    // console.log("token", jwtToken);
     // if (jwtToken) {
     //now we to actually validate it on the server checking the signature
     var myHeaders = new Headers();
@@ -100,7 +100,7 @@ export default function SignIn({ props }) {
           if (result !== "Error") {
             result = JSON.parse(result);
             // set the cookie
-            console.log('setting the cookie login', result)
+            // console.log('setting the cookie login', result)
             Cookies.set("token", result.jwtToken, { expires: 7 });
             Cookies.set("user", JSON.stringify(result.userInfo), {
               expires: 7,

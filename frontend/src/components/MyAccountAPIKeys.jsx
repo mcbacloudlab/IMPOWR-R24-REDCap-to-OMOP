@@ -10,7 +10,7 @@ import Paper from "@mui/material/Paper";
 // import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
 export default function MyAccountAPIKeys(props) {
-  console.log("adminsec", props);
+  // console.log("adminsec", props);
   const [redcapKey, setRedcapKey] = useState("");
   const [redcapURL, setRedcapURL] = useState("");
   const [prevRedcapURL, setPrevRedcapURL] = useState("");
@@ -65,10 +65,10 @@ export default function MyAccountAPIKeys(props) {
         const gpt3Result = resultObj.find((api) => api.name === "gpt3APIKey");
         if (redcapKeyResult) {
           setRedcapKey("****************");
-          console.log("redcapresult", redcapKeyResult);
+          // console.log("redcapresult", redcapKeyResult);
         }
         if (redcapURLResult) {
-          console.log("url result", redcapURLResult);
+          // console.log("url result", redcapURLResult);
           setRedcapURL(redcapURLResult.endpoints);
         }
         if (umlsResult) {
@@ -84,9 +84,9 @@ export default function MyAccountAPIKeys(props) {
 
   const handleAPIKeySubmit = (event, formName) => {
     event.preventDefault();
-    console.log("form", formName);
+    // console.log("form", formName);
 
-    console.log("event", event.target[formName].value);
+    // console.log("event", event.target[formName].value);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -112,7 +112,7 @@ export default function MyAccountAPIKeys(props) {
       requestOptions
     )
       .then((response) => {
-        console.log("respons", response.status);
+        // console.log("respons", response.status);
         if (response.status === 200) {
           if (formName === "redcapAPIKey") {
             console.log("set redcap key2");
@@ -140,8 +140,8 @@ export default function MyAccountAPIKeys(props) {
 
   const handleEdit = (event) => {
     event.preventDefault();
-    console.log("handle key edit");
-    console.log("event.!!", event.target.value);
+    // console.log("handle key edit");
+    // console.log("event.!!", event.target.value);
     switch (event.target.value) {
       case "redcapAPIKey": {
         console.log("set redcap key3");
@@ -173,12 +173,12 @@ export default function MyAccountAPIKeys(props) {
 
   const handleCancel = (event) => {
     event.preventDefault();
-    console.log("handle cancel", event.target.value);
+    // console.log("handle cancel", event.target.value);
     switch (event.target.value) {
       case "redcapAPIKey": {
         console.log("redcap key", redcapKey);
         if (redcapKey) {
-          console.log("setting redcap key");
+          // console.log("setting redcap key");
           setRedcapKey("****************");
         }
         setEditModeRedcapKey(false);
@@ -190,13 +190,13 @@ export default function MyAccountAPIKeys(props) {
         break;
       }
       case "umlsAPIKey": {
-        console.log("umls key", umlsKey);
+        // console.log("umls key", umlsKey);
         if (umlsKey) setUMLSKey("****************");
         setEditModeUMLS(false);
         break;
       }
       case "gpt3APIKey": {
-        console.log("gpt3 key", gpt3Key);
+        // console.log("gpt3 key", gpt3Key);
         if (gpt3Key) setGPT3Key("****************");
         setEditModeGPT3(false);
         break;
@@ -211,7 +211,7 @@ export default function MyAccountAPIKeys(props) {
 
   const testRedcapAPI = (event) => {
     // event.preventDefault();
-    console.log("test redcap api");
+    // console.log("test redcap api");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -227,14 +227,14 @@ export default function MyAccountAPIKeys(props) {
       requestOptions
     )
       .then((response) => {
-        console.log("response stat", response.status);
+        // console.log("response stat", response.status);
         if (response.status !== 200) {
           throw new Error();
         }
         return response.text();
       })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         setRedcapAPITest("REDCap API Connected!");
       })
       .catch((error) => {
@@ -245,7 +245,7 @@ export default function MyAccountAPIKeys(props) {
 
   const testUMLSAPI = (event) => {
     // event.preventDefault();
-    console.log("test umls api");
+    // console.log("test umls api");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -261,14 +261,14 @@ export default function MyAccountAPIKeys(props) {
       requestOptions
     )
       .then((response) => {
-        console.log("response stat", response.status);
+        // console.log("response stat", response.status);
         if (response.status !== 200) {
           throw new Error();
         }
         return response.text();
       })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         setUMLSAPITest("UMLS API Connected!");
       })
       .catch((error) => {
@@ -279,7 +279,7 @@ export default function MyAccountAPIKeys(props) {
 
   const testGPT3API = (event) => {
     // event.preventDefault();
-    console.log("test gpt3 api");
+    // console.log("test gpt3 api");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -295,14 +295,14 @@ export default function MyAccountAPIKeys(props) {
       requestOptions
     )
       .then((response) => {
-        console.log("response stat", response.status);
+        // console.log("response stat", response.status);
         if (response.status !== 200) {
           throw new Error();
         }
         return response.text();
       })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         setGPT3APITest("GPT3 API Connected!");
       })
       .catch((error) => {

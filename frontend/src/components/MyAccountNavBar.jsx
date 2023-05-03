@@ -46,7 +46,7 @@ const drawerWidth = "270px";
 const miniDrawerWidth = 56;
 
 export default function MyAccountNavBar(props) {
-  console.log("myaccountnavbar props", props);
+  // console.log("myaccountnavbar props", props);
   const navigate = useNavigate();
   const theme = useTheme();
   // console.log("navbar props", props);

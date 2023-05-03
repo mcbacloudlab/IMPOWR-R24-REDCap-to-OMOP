@@ -7,7 +7,7 @@ import SignIn from "../components/SignIn";
 // import Alert from "@mui/material/Alert";
 
 export default function SignIn_Page(props) {
-  console.log('sign in props', props)
+  // console.log('sign in props', props)
   return (
       <Container component="main" maxWidth="90%">
         <CssBaseline />

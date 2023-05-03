@@ -13,7 +13,7 @@ import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
 
 export default function ProjectManagementPage(props) {
   let token = props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
-  console.log('token', token)
+  // console.log('token', token)
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

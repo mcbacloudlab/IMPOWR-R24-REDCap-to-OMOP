@@ -11,7 +11,7 @@ import MyAccountNavBar from "../components/MyAccountNavBar";
 
 
 export default function MyAccountPage(props) {
-  console.log("myaccount", props);
+  // console.log("myaccount", props);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
@@ -30,8 +30,8 @@ export default function MyAccountPage(props) {
         }
         userInfo = JSON.parse(props.user);
       }
-      console.log('usercook', userCookie)
-      console.log("userInfo.", userInfo);
+      // console.log('usercook', userCookie)
+      // console.log("userInfo.", userInfo);
       if(!userInfo){
         setRole(null)
       }else{

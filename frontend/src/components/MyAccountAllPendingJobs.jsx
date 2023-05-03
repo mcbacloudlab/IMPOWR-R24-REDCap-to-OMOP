@@ -198,7 +198,7 @@ export default function MyAccountAllPendingJobs(props) {
     );
   };
 
-  console.log('columns', columns)
+  // console.log('columns', columns)
   return (
     <div>
       <h1

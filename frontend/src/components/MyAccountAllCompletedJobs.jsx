@@ -244,7 +244,7 @@ export default function MyAccountAllCompletedJobs(props) {
       .catch((error) => console.log("error", error));
   }
 
-  console.log('columns', columns)
+  // console.log('columns', columns)
   return (
     <div style={{ maxHeight: "400px" }}>
       <h1
