@@ -125,9 +125,9 @@ export default function CompletedJobs(props) {
   }, [completedList]);
 
   const handleToggleEditMode = (jobId) => {
-    console.log("edit mode for", jobId);
-    console.log("jobs", jobs);
-    console.log("columns", columns);
+    // console.log("edit mode for", jobId);
+    // console.log("jobs", jobs);
+    // console.log("columns", columns);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, editMode: !job.editMode } : job
@@ -228,16 +228,17 @@ export default function CompletedJobs(props) {
       >
         Completed Jobs
       </h1>
+      {!completedList.length && <h3>There are currently no completed jobs.</h3>}
       <Grid
         container
         spacing={1}
         justifyContent="center"
-        style={{ backgroundColor: "rgb(251 251 251)" }}
+        // style={{ backgroundColor: "rgb(251 251 251)" }}
       >
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <List dense>
-              {column.map((job) => (
+              {column?.map((job) => (
                 <Paper
                   elevation={3}
                   key={job.jobId}
