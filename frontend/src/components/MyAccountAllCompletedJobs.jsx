@@ -256,6 +256,7 @@ export default function MyAccountAllCompletedJobs(props) {
       >
         All Completed Jobs
       </h1>
+      {!completedList.length && <h3>There are currently no completed jobs.</h3>}
       <Grid
         container
         spacing={1}
