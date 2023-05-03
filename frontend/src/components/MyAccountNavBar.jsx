@@ -67,6 +67,8 @@ export default function MyAccountNavBar(props) {
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {
       setDrawerOpen(JSON.parse(storedDrawerOpen));
+    }else{
+      setDrawerOpen(false)
     }
   }, []);
 

@@ -9,7 +9,7 @@
     "gpt3Snomed": "node --max-old-space-size=32768 ./gpt3/snomedEmbed.js",
     "gpt3Loinc": "node --max-old-space-size=32768 ./gpt3/loincEmbed.js",
     "start": "node index.js",
-    "pm2": "pm2 start server.js --name redcap-omop-server --watch"
+    "pm2": "pm2 start server.js --name redcap-omop-server"
   },
   "nodemonConfig": {
     "ignore": [

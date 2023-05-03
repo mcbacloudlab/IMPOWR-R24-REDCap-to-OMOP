@@ -64,8 +64,24 @@ app.use(bodyParser.json({ limit: "50mb" }));
 // Use the cookie-parser middleware
 app.use(cookieParser());
 // Use the cors middleware and configure it to allow credentials
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://192.168.50.125:3000',
+  'http://34.23.5.184/redcap-omop',
+  'http://34.23.5.184'
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000', // Replace with the origin of your client-side application
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    // Check if the origin is in the list of allowed origins
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
 

@@ -54,9 +54,9 @@ const validateJwtToken = async (jwtToken) => {
         return resp;
       });
     } else {
-      Cookies.remove("token");
-      Cookies.remove("user");
-      orcidLogout();
+      // Cookies.remove("token");
+      // Cookies.remove("user");
+      // orcidLogout();
       return <Navigate to="/signin" replace />;
     }
   } catch (error) {
@@ -118,7 +118,9 @@ function ProtectedRoute({
       
     };
 
-    validateUser();
+    // setTimeout(()=>{
+      validateUser()
+    // }, 1000)
   }, [location, setUser, validateJwtToken, setToken, token]);
 
   if (isLoading) {
@@ -151,7 +153,7 @@ function App() {
       <CssBaseline />
       <div className="App">
         <header className="App-header">
-          <BrowserRouter>
+          <BrowserRouter basename="/redcap-omop">
             <ViewProvider>
               <ListsProvider>
                 <div>

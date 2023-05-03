@@ -1,6 +1,6 @@
 RewriteEngine On
-RewriteBase /redcap_omop/
+RewriteBase /redcap-omop/
 RewriteRule ^index\.html$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /redcap_omop/index.html [L]
+RewriteRule . /redcap-omop/index.html [L]

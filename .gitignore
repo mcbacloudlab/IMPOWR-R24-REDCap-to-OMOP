@@ -8,3 +8,5 @@ backend/deleted/
 *.xlsx
 *.json
 backend/gpt3/test.js
+frontend/.env.production
+frontend/build.zip

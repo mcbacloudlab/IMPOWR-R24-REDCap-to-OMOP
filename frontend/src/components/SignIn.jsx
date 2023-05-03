@@ -100,10 +100,10 @@ export default function SignIn({ props }) {
           if (result !== "Error") {
             result = JSON.parse(result);
             // set the cookie
-            Cookies.set("token", result.jwtToken, { expires: 7, secure: true });
+            console.log('setting the cookie login', result)
+            Cookies.set("token", result.jwtToken, { expires: 7 });
             Cookies.set("user", JSON.stringify(result.userInfo), {
               expires: 7,
-              secure: true,
             });
             props.updateUser(data.get("email"));
             props.setToken(result.jwtToken);
