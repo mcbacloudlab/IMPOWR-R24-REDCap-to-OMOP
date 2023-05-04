@@ -3,9 +3,9 @@ name: Backend CI
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push events to the "main" branch
+      - main # Trigger the workflow on push events to the "main" branch
     paths:
-      - 'backend/**'   # Trigger the workflow if there are changes in the "backend" directory
+      - 'backend/**'  # Trigger the workflow if there are changes in the "backend" directory
 
 jobs:
   backend:
@@ -13,7 +13,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Run backend tests
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Deploy to VM using Rsync Deployments action
+        uses: Burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -avz --delete --exclude=.env # rsync flags to overwrite and to exclude .env file
+          remote_path: /home/mattperkinsee/backendApps/redcap-omop/
+          remote_host: 34.23.5.184
+          remote_user: mattperkinsee
+          path: backend/ # Update the path to include the backend/ directory
+          remote_key: ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }}
+          
+      - name: Restart app using PM2 on remote server
         run: |
-          cd backend
-          # Add commands to build and test the backend here
+          ssh -i ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }} mattperkinsee@34.23.5.184 "pm2 restart redcap-omop-server"
