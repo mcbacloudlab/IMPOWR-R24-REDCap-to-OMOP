@@ -1,0 +1,29 @@
+name: Frontend and Backend CI
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push events to the "main" branch
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'frontend/')  # Run this job only if there are changes in the "frontend" directory
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          # Add commands to build and test the frontend here
+
+  backend:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'backend/')  # Run this job only if there are changes in the "backend" directory
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run backend tests
+        run: |
+          cd backend
+          # Add commands to build and test the backend here
