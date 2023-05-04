@@ -3,12 +3,12 @@ name: Frontend and Backend CI
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push events to the "main" branch
+      - main # Trigger the workflow on push events to the "main" branch
 
 jobs:
   frontend:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'frontend/')  # Run this job only if there are changes in the "frontend" directory
+    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'frontend/') # Run this job only if there are changes in the "frontend" directory
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,9 +17,33 @@ jobs:
           cd frontend
           # Add commands to build and test the frontend here
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to VM using Rsync Deployments action
+        uses: Burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -avz --delete #rsync flags to overwrite and to remove any left-over files
+          remote_path: /var/www/html/redcap-omop/
+          remote_host: 34.23.5.184
+          remote_user: mattperkinsee
+          path: build/
+          remote_key: ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }}
+
+      - name: Cleanup build files
+        run: rm -rf build/
+
   backend:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'backend/')  # Run this job only if there are changes in the "backend" directory
+    if: contains(github.event.head_commit.message, '[skip-ci]') == false && contains(toJSON(github.event.commits.*.modified), 'backend/') # Run this job only if there are changes in the "backend" directory
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
