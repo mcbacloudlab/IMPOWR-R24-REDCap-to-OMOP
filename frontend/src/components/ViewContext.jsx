@@ -8,7 +8,6 @@ export const ViewProvider = ({ children }) => {
   useEffect(() => {
     // Store the initial view in the browser history state
     window.history.replaceState({ view: 'My Account' }, '');
-    // console.log('Initial view set:', 'My Account');
 
     const handlePopState = (e) => {
       // Update the view based on the browser history state
