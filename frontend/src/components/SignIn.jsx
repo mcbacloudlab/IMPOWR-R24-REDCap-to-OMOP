@@ -20,17 +20,13 @@ import Cookies from "js-cookie";
 import OrcidLogo from "../assets/orcid.logo.svg";
 
 export default function SignIn({ props }) {
-  // console.log("sign in props", props);
   const [loginError, setLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
 
   const navigate = useNavigate();
   const jwtToken = Cookies.get("token");
-  // console.log("token", jwtToken);
   //check if user has token
   useEffect(() => {
-    // console.log("token", jwtToken);
-    // if (jwtToken) {
     //now we to actually validate it on the server checking the signature
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + jwtToken);
