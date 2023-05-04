@@ -106,20 +106,17 @@ function ProtectedRoute({
 
     const validateUser = async () => {
       const result = await validateJwtToken(jwtToken);
-      if(result.props){
-        setUser(null)
+      if (result.props) {
+        setUser(null);
         setIsLoading(false);
-        <Navigate to="/signin" replace />
-      }else{
+        <Navigate to="/signin" replace />;
+      } else {
         setUser(result);
         setIsLoading(false);
       }
-      
     };
 
-    // setTimeout(()=>{
-      validateUser()
-    // }, 1000)
+    validateUser();
   }, [location, setUser, validateJwtToken, setToken, token]);
 
   if (isLoading) {
