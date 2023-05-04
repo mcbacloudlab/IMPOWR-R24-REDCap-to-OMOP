@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main # Trigger the workflow on push events to the "main" branch
-
+    paths:
+      - 'frontend/**'  # Trigger the workflow if there are changes in the "frontend" directory
+      - 'backend/**'   # Trigger the workflow if there are changes in the "backend" directory
 jobs:
   frontend:
     runs-on: ubuntu-latest
