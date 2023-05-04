@@ -2,7 +2,7 @@ const db = require("../db/mysqlConnection.cjs");
 const crypto = require("crypto");
 var axios = require("axios");
 var FormData = require("form-data");
-var cheerio = require('cheerio')
+var cheerio = require("cheerio");
 
 function decrypt(encryptedData, iv, algorithm, secretKey) {
   const decipher = crypto.createDecipheriv(
@@ -22,7 +22,7 @@ async function getForms(req, res) {
   db.execute(query, [], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
-      res.status(500).send("Error");
+      res.status(500).json({ message: "Error" });
     }
     // console.log("results", results);
 
@@ -74,18 +74,18 @@ async function getForms(req, res) {
           }
         }
         // console.log(Array.from(formNames));
-        res.status(200).send(JSON.stringify(Array.from(formNames)))
+        res.status(200).send(JSON.stringify(Array.from(formNames)));
       })
       .catch(function (error) {
         // console.log(error);
-        res.status(500).send('Error')
+        res.status(500).send("Error");
       });
   });
 }
 
-async function exportMetadata(req,res){
-  if(!req.body.form) {
-    res.status(500).send('Error')
+async function exportMetadata(req, res) {
+  if (!req.body.form) {
+    res.status(500).send("Error");
     return;
   }
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
@@ -121,13 +121,12 @@ async function exportMetadata(req,res){
       process.env.AES_32_BIT_KEY
     );
     // console.log("apiKeyDec", apiKeyDecrypted);
-      // console.log('req', req.body)
+    // console.log('req', req.body)
     var data = new FormData();
     data.append("token", apiKeyDecrypted);
     data.append("content", "metadata");
     data.append("format", "json");
-    data.append('forms[0]', req.body.form);
-
+    data.append("forms[0]", req.body.form);
 
     var config = {
       method: "post",
@@ -144,21 +143,20 @@ async function exportMetadata(req,res){
         // console.log(JSON.stringify(response.data));
         const metadata = response.data;
         // console.log('metadata', metadata)
-        metadata.map((item) =>{
+        metadata.map((item) => {
           // console.log('item', item.field_label)
-          item.field_label = cheerio.load(item.field_label).text()
-        })
-        res.status(200).send(JSON.stringify(metadata))
+          item.field_label = cheerio.load(item.field_label).text();
+        });
+        res.status(200).send(JSON.stringify(metadata));
       })
       .catch(function (error) {
         console.log(error);
-        res.status(500).send('Error')
+        res.status(500).send("Error");
       });
   });
-
 }
 
 module.exports = {
   getForms,
-  exportMetadata
+  exportMetadata,
 };
