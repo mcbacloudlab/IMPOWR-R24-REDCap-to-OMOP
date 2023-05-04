@@ -35,4 +35,7 @@ jobs:
           
       - name: Restart app using PM2 on remote server
         run: |
-          ssh -i ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }} mattperkinsee@34.23.5.184 "pm2 restart redcap-omop-server"
+          echo "${{ secrets.PROD_VM_SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          ssh-agent bash -c 'ssh-add private_key.pem; ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null mattperkinsee@34.23.5.184 "pm2 restart redcap-omop-server"'
+          rm -f private_key.pem
