@@ -1,14 +1,15 @@
 .env
 node_modules
-package-lock.json
 work/output
 backend/uploads/
 backend/work/output/
 backend/deleted/
 *.xlsx
-*.json
 backend/gpt3/test.js
 frontend/.env.production
 frontend/build.zip
 backend/.env.production
 *.tgz
+backend/gpt3/test.json
+.vscode/restore-terminals.json
+gpt3responses.json
