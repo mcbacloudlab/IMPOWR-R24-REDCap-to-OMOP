@@ -28,7 +28,7 @@ jobs:
 
       - name: Create .env.production file
         run: |
-          echo "${{ secrets.ENV_PRODUCTION }}" > frontend/.env.production
+          echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
         working-directory: frontend
 
       - name: Build project
@@ -46,5 +46,4 @@ jobs:
           remote_key: ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }}
 
       - name: Cleanup build files
-        run: rm -rf build/
-        working-directory: frontend
+        run: rm -rf frontend/build
