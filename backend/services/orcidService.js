@@ -60,6 +60,7 @@ async function orcidCallback(req, res) {
         const jwtPayload = {
           user: "orcidUser",
           orcidId: orcidId,
+          email: orcidId,
           firstName: firstName,
           lastName: lastName,
           role: "default",
@@ -67,7 +68,7 @@ async function orcidCallback(req, res) {
 
         // Sign the JWT with the secret key
         const token = jwt.sign(jwtPayload, process.env.JWT_SECRET_KEY, {
-          expiresIn: "1h",
+          expiresIn: "8h",
         });
 
         // Store the JWT in a cookie
@@ -78,6 +79,7 @@ async function orcidCallback(req, res) {
           JSON.stringify({
             user: "orcidUser",
             orcidId: orcidId,
+            email: orcidId,
             firstName: firstName,
             lastName: lastName,
             role: "default",

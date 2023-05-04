@@ -50,7 +50,7 @@ const validateJwtToken = async (jwtToken) => {
 
     if (response.status === 200) {
       return response.text().then((resp) => {
-        Cookies.set("user", resp, { expires: 7, secure: true });
+        Cookies.set("user", resp, { expires: 7 });
         return resp;
       });
     } else {
