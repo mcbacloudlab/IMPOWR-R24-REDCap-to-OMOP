@@ -26,6 +26,11 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Create .env.production file
+        run: |
+          echo "${{ secrets.ENV_PRODUCTION }}" > frontend/.env.production
+        working-directory: frontend
+
       - name: Build project
         run: npm run build
         working-directory: frontend
