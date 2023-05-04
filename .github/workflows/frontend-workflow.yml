@@ -1,4 +1,4 @@
-name: Frontend and Backend CI
+name: Frontend CI
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
           remote_path: /var/www/html/redcap-omop/
           remote_host: 34.23.5.184
           remote_user: mattperkinsee
-          path: build/
+          path: frontend/build/ # Update the path to include the frontend/ directory
           remote_key: ${{ secrets.PROD_VM_SSH_PRIVATE_KEY }}
 
       - name: Cleanup build files
