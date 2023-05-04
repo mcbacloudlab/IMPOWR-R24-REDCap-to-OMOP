@@ -31,7 +31,7 @@ async function getForms(req, res) {
     const redcapURLResult = results.find((api) => api.name === "redcapAPIURL");
 
     if (!redcapKeyResult || !redcapURLResult) {
-      res.status(500).send("Error");
+      res.status(500).json({ message: "Error" });
       return;
     }
 
@@ -78,7 +78,7 @@ async function getForms(req, res) {
       })
       .catch(function (error) {
         // console.log(error);
-        res.status(500).send("Error");
+        res.status(500).json({ message: "Error" });
       });
   });
 }

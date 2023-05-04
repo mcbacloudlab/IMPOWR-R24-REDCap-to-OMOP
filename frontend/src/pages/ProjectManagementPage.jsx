@@ -9,10 +9,14 @@ import FormSelect from "../components/FormSelect";
 import CssBaseline from "@mui/material/CssBaseline";
 // import ProjectBottomBar from "../components/ProjectBottomBar";
 import CircularProgress from "@mui/material/CircularProgress";
-import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
+import AddHomeWorkIcon from "@mui/icons-material/AddHomeWork";
 
 export default function ProjectManagementPage(props) {
-  let token = props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
+  let token =
+    props.props?.props?.token ??
+    props.props?.token ??
+    props?.token ??
+    props.token;
   // console.log('token', token)
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
@@ -36,7 +40,10 @@ export default function ProjectManagementPage(props) {
       `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/getForms`,
       requestOptions
     )
-      .then((response) => response.text())
+      .then((response) => {
+        if (response.ok) response.text();
+        else throw new Error("Error");
+      })
       .then((result) => {
         // console.log(JSON.parse(result));
         setForms(JSON.parse(result));
@@ -69,25 +76,23 @@ export default function ProjectManagementPage(props) {
       >
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
-            <h1><AddHomeWorkIcon/> Project Management</h1>
+            <h1>
+              <AddHomeWorkIcon /> Project Management
+            </h1>
             {/* <h2>REDCap Forms</h2> */}
-            <Grid xs={12} md={4} sx={{margin:'auto'}}>
-            {addSSError && (
-              <Alert severity="error">
-                Error Loading REDCap Dictionaries. Check REDCap API settings
-                under My Account.
-              </Alert>
-            )}
+            <Grid xs={12} md={4} sx={{ margin: "auto" }}>
+              {addSSError && (
+                <Alert severity="error">
+                  Error Loading REDCap Dictionaries. Check REDCap API settings
+                  under My Account.
+                </Alert>
+              )}
             </Grid>
             {isLoading ? (
               <CircularProgress />
             ) : (
               <>
-                <FormSelect
-                  props={props}
-                  forms={forms}
-                  isLoading={isLoading}
-                />
+                <FormSelect props={props} forms={forms} isLoading={isLoading} />
               </>
             )}
           </Grid>
