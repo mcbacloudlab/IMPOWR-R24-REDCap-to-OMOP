@@ -44,10 +44,7 @@ async function orcidCallback(req, res) {
       } else {
         // Get the user's ORCID iD from the access token response
         const orcidId = results.orcid;
-        // console.log("results", results);
-        // console.log("accesstoken", accessToken);
         const decoded = jwt.decode(results.id_token);
-        // console.log(decoded);
         // Create a JWT payload with the user's ORCID iD
         let firstName, lastName
         if(decoded){
@@ -91,18 +88,7 @@ async function orcidCallback(req, res) {
         // Redirect the user to the /myaccount route and pass the ORCID iD as a query parameter
         res.redirect(
           `${process.env.FRONTEND_URL}/myaccount?orcidId=${orcidId}`
-        );
-        // Use the ORCID iD in your application (e.g., log in the user)
-        // res.send(`Logged in with ORCID iD: ${orcidId}`);
-        // const orcidRecord = await getOrcidRecord(accessToken, orcidId);
-        // console.log("orcidRecord", orcidRecord);
-        // if (!orcidRecord) return;
-        // else {
-        //   res.send({
-        //     orcidId: orcidId,
-        //     orcidRecord: orcidRecord,
-        //   });
-        // }
+        ); 
       }
     }
   );
@@ -110,12 +96,8 @@ async function orcidCallback(req, res) {
 
 async function orcidLogout(req, res) {
   // Clear the JWT cookie by setting its value to an empty string and its expiration date to the past
-  // console.log('orcidLogout', res.cookie)
   res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
   res.cookie("user", "", { httpOnly: true, expires: new Date(0) });
-
-  // Optionally, clear any other cookies you want to remove here
-
   // Send a response indicating successful sign out
   res.json({ message: "Signed out successfully" });
 }

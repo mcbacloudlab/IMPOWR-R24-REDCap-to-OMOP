@@ -41,11 +41,11 @@ export default function ProjectManagementPage(props) {
       requestOptions
     )
       .then((response) => {
-        if (response.ok) response.text();
+        if (response.ok) return response.text();
         else throw new Error("Error");
       })
       .then((result) => {
-        // console.log(JSON.parse(result));
+        console.log((result));
         setForms(JSON.parse(result));
         // console.log("forms", forms);
         setIsLoading(false);

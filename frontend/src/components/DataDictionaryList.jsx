@@ -114,7 +114,7 @@ export default function DataDictionaryList(props) {
       requestOptions
     )
       .then((response) => {
-        if (response.ok) response.text();
+        if (response.ok) return response.text();
         else throw new Error("Upload error");
       })
       .then((result) => {

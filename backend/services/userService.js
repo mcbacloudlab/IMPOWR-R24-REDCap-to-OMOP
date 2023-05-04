@@ -232,17 +232,17 @@ async function getUserJobs(req, res) {
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    // console.log("get user jobs for", email);
+    // console.log("get user jobs for", jwtVerified);
     const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
-    INNER JOIN jobs ON users.id = jobs.userId
-    where email = ? 
+    RIGHT JOIN jobs ON users.id = jobs.userId
+    WHERE ((email = ?) OR (jobs.userId = ?))
     and (jobStatus != 'cancelled' OR jobStatus IS NULL)
     and jobName != 'lookupEmbeddings'
     ORDER BY (jobStatus = 'active') DESC, jobId DESC
     limit 100`;
     //   return new Promise((resolve, reject) => {
-    db.execute(query, [email], async function (err, results, fields) {
+    db.execute(query, [email, jwtVerified.orcidId], async function (err, results, fields) {
       if (err) {
         console.log("error!", err);
         res.status(500).send("Error");
