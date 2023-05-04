@@ -94,7 +94,6 @@ function ProtectedRoute({
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   useEffect(() => {
-    // console.log('use effect ran')
     setIsLoading(true);
     const jwtToken = Cookies.get("token");
     setToken(jwtToken);
