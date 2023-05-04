@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 const db = require("../db/mysqlConnection.cjs");
 
 async function authenticate(req, res, next) {
-  // console.log('authenticating')
+  //authenticate
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader &&
