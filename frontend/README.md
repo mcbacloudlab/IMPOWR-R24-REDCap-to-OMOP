@@ -68,3 +68,35 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+### Frontend update commands
+unzip build.zip 
+sudo cp -rf build/* /var/www/html/redcap-omop/
+
+### Backend update command
+tar -xzf redcap_omop-1.0.0.tgz  -C backendApps/redcap-omop/
+
+
+### Server fail2ban commands
+sudo fail2ban-client status sshd
+
+### Unban ssh IP
+sudo fail2ban-client set sshd unbanip BANNED_IP
+
+
+### Pm2 app restarting due to .pid permission errors
+To resolve the issue, you can try changing the SELinux context type of the PID file and the .pm2 directory to a type that allows access by the systemd service, such as init_var_run_t. You can use the chcon command to temporarily change the SELinux context type:
+
+
+sudo chcon -t init_var_run_t /home/mattperkinsee/.pm2/pm2.pid
+sudo chcon -t init_var_run_t /home/mattperkinsee/.pm2
+
+After changing the SELinux context type, try restarting the pm2-mattperkinsee.service systemd service and check the status to see if the issue is resolved:
+sudo systemctl restart pm2-mattperkinsee.service
+sudo systemctl status pm2-mattperkinsee.service
+
+If this resolves the issue, you can make the SELinux context change permanent by creating a custom SELinux policy module or by using the semanage fcontext command to define the file context and then applying it with the restorecon command:
+sudo semanage fcontext -a -t init_var_run_t "/home/mattperkinsee/.pm2(/.*)?"
+sudo restorecon -Rv /home/mattperkinsee/.pm2
+

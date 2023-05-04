@@ -2,7 +2,7 @@ const db = require("../db/mysqlConnection.cjs");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
-const util = require('util');
+const util = require("util");
 const Bull = require("bull");
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -24,11 +24,13 @@ async function getUserByEmail(email) {
   });
 }
 
-async function createUser(userData) {
+async function createUser(userData, orcidUser) {
+  // console.log("userData", userData);
   const userDataSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().required(),
+    // email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
 
@@ -42,12 +44,15 @@ async function createUser(userData) {
   }
 
   return validateUserData(userData).then((userData) => {
-    return getUserByEmail(userData.email).then((user) => {
+    return getUserByEmail(userData.email).then(async (user) => {
       if (user.length > 0) {
-        throw new Error("Error! User already exists");
+        console.log('user already exists just returning')
+        return;
+        // throw new Error("Error! User already exists");
       }
       const saltRounds = 10;
       const myPlaintextPassword = userData.password;
+      console.log("userData", userData);
 
       return bcrypt.genSalt(saltRounds, function (err, salt) {
         bcrypt.hash(myPlaintextPassword, salt, function (err, hash) {
@@ -195,15 +200,17 @@ async function getUserJobs(req, res) {
     await Promise.race([
       myQueue.client.ping(),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Redis timeout')), timeoutDuration)
+        setTimeout(() => reject(new Error("Redis timeout")), timeoutDuration)
       ),
     ]);
 
     // ... rest of the getUserJobs function ...
-
   } catch (error) {
     // If a timeout occurs or an error occurs while pinging Redis, respond with a 500 error message
-    if (error.message === 'Connection is closed.' || error.message === 'Redis timeout') {
+    if (
+      error.message === "Connection is closed." ||
+      error.message === "Redis timeout"
+    ) {
       console.error("Error connecting to Redis:", error);
       res.status(500).json({ message: "Error. Redis server is down" });
       return;
@@ -214,7 +221,6 @@ async function getUserJobs(req, res) {
     res.status(500).send("Error");
     return false;
   }
-
 
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
@@ -233,73 +239,81 @@ async function getUserJobs(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
     // console.log("get user jobs for", jwtVerified);
+    if (!jwtVerified.orcidId) {
+      jwtVerified.orcidId = null;
+    }
+
     const query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
-    RIGHT JOIN jobs ON users.id = jobs.userId
-    WHERE ((email = ?) OR (jobs.userId = ?))
+    LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    WHERE ((email = ?) OR (email = ?))
     and (jobStatus != 'cancelled' OR jobStatus IS NULL)
     and jobName != 'lookupEmbeddings'
     ORDER BY (jobStatus = 'active') DESC, jobId DESC
     limit 100`;
     //   return new Promise((resolve, reject) => {
-    db.execute(query, [email, jwtVerified.orcidId], async function (err, results, fields) {
-      if (err) {
-        console.log("error!", err);
-        res.status(500).send("Error");
-      }
-      // console.log("results", results);
-      //get status for unknown statuses for jobs....
+    db.execute(
+      query,
+      [email, jwtVerified.orcidId],
+      async function (err, results, fields) {
+        if (err) {
+          console.log("error!", err);
+          res.status(500).send("Error");
+        }
+        // console.log("results", results);
+        //get status for unknown statuses for jobs....
 
-      for (const job of results) {
-        try {
-          const foundJob = await myQueue.getJob(job.jobId);
-          if (!foundJob) {
-            // console.log("no found job for:" + job.jobId);
-            //clean up unfound jobs - likely deleted from redis
-            db.execute(
-              `DELETE FROM jobs WHERE jobId = ?`,
-              [job.jobId],
-              async function (err, results, fields) {
-                if (err) {
-                  console.log("error!", err);
-                  res.status(500).send("Error");
-                } else {
-                  console.log("cleaned up job from db:" + job.jobId);
+        for (const job of results) {
+          try {
+            const foundJob = await myQueue.getJob(job.jobId);
+            if (!foundJob) {
+              // console.log("no found job for:" + job.jobId);
+              //clean up unfound jobs - likely deleted from redis
+              db.execute(
+                `DELETE FROM jobs WHERE jobId = ?`,
+                [job.jobId],
+                async function (err, results, fields) {
+                  if (err) {
+                    console.log("error!", err);
+                    res.status(500).send("Error");
+                  } else {
+                    console.log("cleaned up job from db:" + job.jobId);
+                  }
                 }
-              }
-            );
-            continue;
-          } else {
-            // console.log(job)
+              );
+              continue;
+            } else {
+              // console.log(job)
 
-            const status = await foundJob.getState();
-            const timeAdded = foundJob.timestamp;
-            const startedAt = foundJob.processedOn;
-            const finishedAt = foundJob.finishedOn;
-            const progress = await foundJob.progress();
-            const dataLength = foundJob.data.dataLength;
-            // console.log("status", status);
-            // console.log("timeadded", timeAdded);
-            job.timeAdded = timeAdded;
-            job.startedAt = startedAt;
-            job.finishedAt = finishedAt;
-            job.progress = progress;
-            job.dataLength = dataLength;
+              const status = await foundJob.getState();
+              const timeAdded = foundJob.timestamp;
+              const startedAt = foundJob.processedOn;
+              const finishedAt = foundJob.finishedOn;
+              const progress = await foundJob.progress();
+              const dataLength = foundJob.data.dataLength;
+              // console.log("status", status);
+              // console.log("timeadded", timeAdded);
+              job.timeAdded = timeAdded;
+              job.startedAt = startedAt;
+              job.finishedAt = finishedAt;
+              job.progress = progress;
+              job.dataLength = dataLength;
+            }
+          } catch (error) {
+            console.log("error", error);
+            if (!responseSent) res.status(500).send("Error");
           }
-        } catch (error) {
-          console.log("error", error);
-          if (!responseSent) res.status(500).send("Error");
+          // console.log('jobstat', job.jobStatus)
+          if (job.jobStatus != "completed") {
+            // console.log('updating')
+            await updateJobStatus(job.jobId);
+          }
         }
-        // console.log('jobstat', job.jobStatus)
-        if (job.jobStatus != "completed") {
-          // console.log('updating')
-          await updateJobStatus(job.jobId);
-        }
-      }
 
-      // console.log("send status results", results);
-      res.status(200).send(results);
-    });
+        // console.log("send status results", results);
+        res.status(200).send(results);
+      }
+    );
     //   });
   } catch (error) {
     console.log("getUserJobs error", error);
@@ -329,19 +343,19 @@ async function getAllUserJobs(req, res) {
     if (req.body.type == "complete") {
       query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
-      INNER JOIN jobs ON users.id = jobs.userId
+      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
       where jobStatus = 'completed'
       order by lastUpdated desc`;
     } else if (req.body.type == "pending") {
       query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
-      INNER JOIN jobs ON users.id = jobs.userId
+      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
       where jobStatus = 'active' or jobStatus = 'waiting'
       order by lastUpdated desc`;
     } else if (req.body.type == "failed") {
       query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
       FROM redcap.users 
-      INNER JOIN jobs ON users.id = jobs.userId
+      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
       where jobStatus = 'failed'
       order by lastUpdated desc`;
     }

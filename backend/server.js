@@ -73,11 +73,13 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://192.168.50.125:3000',
   'http://34.23.5.184/redcap-omop',
-  'http://34.23.5.184'
+  'http://34.23.5.184',
+  'http://localhost:5000'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // console.log('origin', origin)
     // Allow requests with no origin (e.g. mobile apps or curl requests)
     if (!origin) return callback(null, true);
     // Check if the origin is in the list of allowed origins
@@ -125,7 +127,7 @@ app.use("/api/umls", authenticate, umlsRoutes);
 
 //admin only routes
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
-app.use("/api/collections", authenticate, requireAdmin, collectionRoutes);
+app.use("/api/collections", authenticate, collectionRoutes);
 
 // Exclude all routes under /admin/queues/static from the requireAdmin middleware
 // app.use("/admin/queues/static/*", router);

@@ -15,6 +15,7 @@ import AddTaskIcon from "@mui/icons-material/AddTask";
 import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
 import TransferList from "./TransferList";
+import CollectionList from "./CollectionList";
 import { ExportToCsv } from "export-to-csv";
 import Skeleton from "@mui/material/Skeleton";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
@@ -272,13 +273,14 @@ export default function FormSelect(props) {
               />
             )}
             {isFormLoaded && (
-              <TransferList
-                props={props}
-                setData={setData}
-                data={data}
-                setColDefs={setColDefs}
-                colDefs={colDefs}
-              />
+              <CollectionList/>
+              // <TransferList
+              //   props={props}
+              //   setData={setData}
+              //   data={data}
+              //   setColDefs={setColDefs}
+              //   colDefs={colDefs}
+              // />
             )}
           </Grid>
 

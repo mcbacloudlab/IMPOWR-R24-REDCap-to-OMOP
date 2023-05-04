@@ -1,6 +1,9 @@
 const OAuth2 = require("oauth").OAuth2;
 var jwt = require("jsonwebtoken");
 const axios = require("axios");
+const db = require("../db/mysqlConnection.cjs");
+const userService = require("./userService.js");
+
 // Initialize the OAuth2 client
 const CLIENT_ID = process.env.ORCID_CLIENT_ID;
 const CLIENT_SECRET = process.env.ORCID_CLIENT_SECRET;
@@ -46,13 +49,13 @@ async function orcidCallback(req, res) {
         const orcidId = results.orcid;
         const decoded = jwt.decode(results.id_token);
         // Create a JWT payload with the user's ORCID iD
-        let firstName, lastName
-        if(decoded){
-          firstName = decoded.given_name
-          lastName = decoded.family_name
-        }else{
-          firstName = results.name
-          lastName = ""
+        let firstName, lastName;
+        if (decoded) {
+          firstName = decoded.given_name;
+          lastName = decoded.family_name;
+        } else {
+          firstName = results.name;
+          lastName = "";
         }
         const jwtPayload = {
           user: "orcidUser",
@@ -82,13 +85,35 @@ async function orcidCallback(req, res) {
             role: "default",
           })
         );
-
-        //need to attempt to get email address from ORCID, won't always get an email address if unverified or private emails, just store orcid id if no email found
+        // Function to generate a random password
+        const generateRandomPassword = (length = 8) => {
+          const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+          let result = "";
+          for (let i = 0; i < length; i++) {
+            result += characters.charAt(
+              Math.floor(Math.random() * characters.length)
+            );
+          }
+          return result;
+        };
+        // Create user in mysql DB with orcid ID as the userId
+        let userInfo = {
+          // id: orcidId,
+          firstName: firstName,
+          lastName: lastName,
+          email: orcidId,
+          // role: "default",
+          password: generateRandomPassword(),
+        };
+        userService.createUser(userInfo, true);
+        // Need to attempt to get email address from ORCID, won't always get an email address if unverified or private emails, just store orcid id if no email found
+        // NOTE: Getting the orcid email address requires the orcid paid member api
 
         // Redirect the user to the /myaccount route and pass the ORCID iD as a query parameter
         res.redirect(
           `${process.env.FRONTEND_URL}/myaccount?orcidId=${orcidId}`
-        ); 
+        );
       }
     }
   );
