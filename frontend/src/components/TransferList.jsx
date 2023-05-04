@@ -29,7 +29,6 @@ export default function TransferList(props) {
   const [left, setLeft] = React.useState([]);
   const [right, setRight] = React.useState([]);
   const [checked, setChecked] = React.useState([]);
-  //   const [headersToRemove, setHeadersToRemove] = useState();
   const [defaultHeaders, setDefaultHeaders] = useState();
   const [origData, setOrigData] = useState();
   const leftChecked = intersection(checked, left);
@@ -145,7 +144,6 @@ export default function TransferList(props) {
               }}
             />
           }
-          // title={title}
           subheader={`${numberOfChecked(items)}/${items.length} selected`}
         />
       </Tooltip>
