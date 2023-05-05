@@ -58,7 +58,7 @@ async function orcidCallback(req, res) {
           lastName = "";
         }
         const jwtPayload = {
-          user: "orcidUser",
+          user: orcidId,
           orcidId: orcidId,
           email: orcidId,
           firstName: firstName,
@@ -77,7 +77,7 @@ async function orcidCallback(req, res) {
         res.cookie(
           "user",
           JSON.stringify({
-            user: "orcidUser",
+            user: orcidId,
             orcidId: orcidId,
             email: orcidId,
             firstName: firstName,

@@ -22,7 +22,12 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
-  let token = props.props.props?.props?.token ?? props.props?.props?.token ?? props.props?.token ?? props?.token ?? props.token;
+  let token =
+    props.props.props?.props?.token ??
+    props.props?.props?.token ??
+    props.props?.token ??
+    props?.token ??
+    props.token;
   const [selectedForm, setSelectedForm] = useState("");
   const [data, setData] = useState();
   const [colDefs, setColDefs] = useState([]);
@@ -33,6 +38,7 @@ export default function FormSelect(props) {
   const [csvFilename, setCSVFilename] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectRowsError, setSelectRowsError] = useState(false);
+  const [checkedItems, setCheckedItems] = useState([]);
 
   var tableInstanceRef = useRef(null);
   useEffect(() => {
@@ -150,20 +156,16 @@ export default function FormSelect(props) {
 
     // Reformat the array of objects
     const reformattedArray = selectedRows.map((obj) => obj.original);
-    let dataToSendToQueue
+    let dataToSendToQueue;
     if (!reformattedArray || reformattedArray.length <= 0) {
-      dataToSendToQueue = data
+      dataToSendToQueue = data;
       // setSelectRowsError(true) //uncomment these lines if you want to require rows to be selected, disabled means if no rows selected then all get sent
       // return;
-    }else{
-      dataToSendToQueue = reformattedArray
+    } else {
+      dataToSendToQueue = reformattedArray;
     }
-    setSelectRowsError(false)
-    window.scrollTo(0, 0); //scroll to top of page
-    setShowSubmittedNotifcation(true);
-    setTimeout(() => {
-      setShowSubmittedNotifcation(false);
-    }, 5000);
+    setSelectRowsError(false);
+
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
     // console.log("send data", data);
@@ -172,6 +174,31 @@ export default function FormSelect(props) {
     formdata.append("data", JSON.stringify(dataToSendToQueue));
     formdata.append("selectedForm", selectedForm);
     formdata.append("dataLength", dataToSendToQueue.length);
+    formdata.append("collections", checkedItems);
+    console.log("collections to use", checkedItems);
+
+    const checkIfAllFalse = (checkedItems) => {
+      // Extract an array of values from the checkedItems object
+      const values = Object.values(checkedItems);
+
+      // Use the every() method to check if every value is false
+      const allFalse = values.every((value) => value === false);
+
+      // If the array is empty or all values are false, set selectRowsErrors to true
+      if (values.length === 0 || allFalse) {
+        setSelectRowsError(true);
+        return false;
+      } else {
+        setSelectRowsError(false);
+        return true;
+      }
+    };
+
+    // Call the checkIfAllFalse function and pass the checkedItems object
+    let checkedItem = checkIfAllFalse(checkedItems);
+    if (!checkedItem) return;
+
+   
 
     var requestOptions = {
       method: "POST",
@@ -186,7 +213,14 @@ export default function FormSelect(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        console.log(result)
+        window.scrollTo(0, 0); //scroll to top of page
+        setShowSubmittedNotifcation(true);
+        setTimeout(() => {
+          setShowSubmittedNotifcation(false);
+        }, 5000);
+      })
       .catch((error) => console.log("error", error));
   }
 
@@ -253,7 +287,7 @@ export default function FormSelect(props) {
                   </MenuItem>
                 ))}
               </Select>
-              <Grid sx={{mt:1, mb:1}}>
+              <Grid sx={{ mt: 1, mb: 1 }}>
                 <Button
                   variant="contained"
                   component="label"
@@ -273,7 +307,12 @@ export default function FormSelect(props) {
               />
             )}
             {isFormLoaded && (
-              <CollectionList/>
+              <CollectionList
+                token={token}
+                setCheckedItems={setCheckedItems}
+                checkedItems={checkedItems}
+              />
+              
               // <TransferList
               //   props={props}
               //   setData={setData}
@@ -282,6 +321,22 @@ export default function FormSelect(props) {
               //   colDefs={colDefs}
               // />
             )}
+            {selectRowsError && (
+                    <Alert
+                      severity="error"
+                      sx={{
+                        fontSize: "1.2rem",
+                        maxWidth: "400px",
+                      }}
+                    >
+                      <Typography variant="h6" gutterBottom>
+                        Error
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Please select as least one collection to use.
+                      </Typography>
+                    </Alert>
+                  )}
           </Grid>
 
           <Grid
@@ -307,35 +362,24 @@ export default function FormSelect(props) {
                   tableInstanceRef={tableInstanceRef}
                 />
 
-                <Grid item xs={12} sx={{mt:2}} >
-                  <Tooltip title={'This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label'}>
-                  <Button
-                    // sx={{ float: "right" }}
-                    variant="contained"
-                    color="primary"
-                    component="label"
-                    startIcon={<AddTaskIcon />}
-                    onClick={(e) => submitToProcess(e)}
+                <Grid item xs={12} sx={{ mt: 2 }}>
+                  <Tooltip
+                    title={
+                      "This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label"
+                    }
                   >
-                    Submit Job To Queue
-                  </Button>
+                    <Button
+                      // sx={{ float: "right" }}
+                      variant="contained"
+                      color="primary"
+                      component="label"
+                      startIcon={<AddTaskIcon />}
+                      onClick={(e) => submitToProcess(e)}
+                    >
+                      Submit Job To Queue
+                    </Button>
                   </Tooltip>
-                  {selectRowsError && (
-                  <Alert
-                    severity="error"
-                    sx={{
-                      fontSize: "1.2rem",
-                      maxWidth: '400px'
-                    }}
-                  >
-                    <Typography variant="h6" gutterBottom>
-                      Error
-                    </Typography>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Please select as least 1 row to submit to the queue.
-                    </Typography>
-                  </Alert>
-                )}
+                  
                 </Grid>
                 {showSubmittedNotifcation && (
                   <Box
@@ -368,7 +412,6 @@ export default function FormSelect(props) {
                     </Alert>
                   </Box>
                 )}
-               
               </>
             )}
           </Grid>

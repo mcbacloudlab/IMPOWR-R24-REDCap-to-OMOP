@@ -1,44 +1,92 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import {
+  Checkbox,
+  //   FormControlLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  //   Typography,
+} from "@mui/material";
 
-const CollectionList = () => {
-  const [collections, setCollections] = useState([]);
-  const [checkedCollections, setCheckedCollections] = useState({});
+const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
+  const [filteredCollections, setFilteredCollections] = useState([]);
+  //   const [checkedItems, setCheckedItems] = useState({});
 
   useEffect(() => {
-    // Fetch collection names from the backend API
     const fetchCollections = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`);
-        const data = await response.json();
-        setCollections(data);
-      } catch (error) {
-        console.error('Failed to fetch collections:', error);
-      }
+      var myHeaders = new Headers();
+      myHeaders.append("Authorization", "Bearer " + token);
+
+      var requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow",
+        credentials: "include",
+      };
+
+      fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`,
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then((result) => {
+          result = JSON.parse(result);
+          result.sort((a, b) => a.name.localeCompare(b.name));
+          const filteredData = result.filter(
+            (item) =>
+              item.name.includes("snomed") || item.name.includes("loinc")
+          );
+          setFilteredCollections(filteredData);
+        })
+        .catch((error) => console.log("error", error));
     };
     fetchCollections();
   }, []);
 
-  // Handle checkbox change
   const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
-    setCheckedCollections((prev) => ({ ...prev, [name]: checked }));
+    setCheckedItems({
+      ...checkedItems,
+      [event.target.name]: event.target.checked,
+    });
   };
 
   return (
-    <form>
-      {collections.map((collection, index) => (
-        <div key={index}>
-          <input
-            type="checkbox"
-            id={`collection-${index}`}
-            name={collection}
-            checked={checkedCollections[collection] || false}
-            onChange={handleCheckboxChange}
-          />
-          <label htmlFor={`collection-${index}`}>{collection}</label>
-        </div>
-      ))}
-    </form>
+    <TableContainer component={Paper}>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell padding="checkbox"></TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Documents</TableCell>
+            {/* <TableCell>Storage Size</TableCell> */}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {filteredCollections.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={checkedItems[item.name] || false}
+                  onChange={handleCheckboxChange}
+                  name={item.name}
+                />
+              </TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell align="right">
+                {item.documentCount
+                  ? item.documentCount.toLocaleString()
+                  : "N/A"}
+              </TableCell>
+              {/* <TableCell>{item.storageSize}</TableCell> */}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

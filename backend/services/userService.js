@@ -46,7 +46,7 @@ async function createUser(userData, orcidUser) {
   return validateUserData(userData).then((userData) => {
     return getUserByEmail(userData.email).then(async (user) => {
       if (user.length > 0) {
-        console.log('user already exists just returning')
+        // User already exists just returning
         return;
         // throw new Error("Error! User already exists");
       }
@@ -134,17 +134,17 @@ async function validateUser(authData) {
     // console.log("jwtverified", jwtVerified);
     let userInfoToReturn;
     let userInfo = [];
-    if (jwtVerified.orcidId) {
-      userInfo[0] = {
-        firstName: jwtVerified.firstName,
-        lastName: jwtVerified.lastName,
-        email: jwtVerified.orcidId,
-        role: "default",
-        orcidId: true,
-      };
-    } else {
+    // if (jwtVerified.orcidId) {
+    //   userInfo[0] = {
+    //     firstName: jwtVerified.firstName,
+    //     lastName: jwtVerified.lastName,
+    //     email: jwtVerified.orcidId,
+    //     role: "default",
+    //     orcidId: true,
+    //   };
+    // } else {
       userInfo = await getUserByEmail(jwtVerified.user);
-    }
+    // }
 
     userInfo = userInfo[0];
     userInfoToReturn = {
@@ -152,7 +152,7 @@ async function validateUser(authData) {
       lastName: userInfo.lastName,
       email: userInfo.email,
       role: userInfo.role,
-      orcidId: userInfo.orcidId,
+      orcidId: jwtVerified.orcidId?true:false,
     };
     return userInfoToReturn;
   } catch (error) {
