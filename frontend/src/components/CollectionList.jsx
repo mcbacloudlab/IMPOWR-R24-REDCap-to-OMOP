@@ -45,6 +45,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
         .catch((error) => console.log("error", error));
     };
     fetchCollections();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCheckboxChange = (event) => {

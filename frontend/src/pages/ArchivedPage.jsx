@@ -25,7 +25,9 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { darken } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { ExportToCsv } from "export-to-csv";
+// import { ExportToCsv } from "export-to-csv";
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
 import LinearProgress from "@mui/material/LinearProgress";
 
 var XLSX = require("xlsx");
@@ -45,26 +47,47 @@ export default function Archived(props) {
   const [isLoading, setIsLoading] = useState();
   const [selectedIndex, setSelectedIndex] = React.useState(1);
 
-  const csvOptions = {
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    showLabels: true,
-    useBom: false,
-    useKeysAsHeaders: false,
-    headers: colDefs.map((c) => {
-      return c.header;
-    }),
-  };
+  // const csvOptions = {
+  //   fieldSeparator: ",",
+  //   quoteStrings: '"',
+  //   decimalSeparator: ".",
+  //   showLabels: true,
+  //   useBom: false,
+  //   useKeysAsHeaders: false,
+  //   headers: colDefs.map((c) => {
+  //     return c.header;
+  //   }),
+  // };
 
-  const csvExporter = new ExportToCsv(csvOptions);
+  // const csvExporter = new ExportToCsv(csvOptions);
   useEffect(() => {
     getFileList();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // const handleExportData = () => {
+  //   let _data = data;
+  //   let keys = _data.reduce(function (acc, obj) {
+  //     Object.keys(obj).forEach(function (key) {
+  //       if (!acc.includes(key)) acc.push(key);
+  //     });
+  //     return acc;
+  //   }, []);
+
+  //   _data.forEach(function (obj) {
+  //     keys.forEach(function (key) {
+  //       if (!obj[key]) obj[key] = "";
+  //     });
+  //   });
+
+  //   csvExporter.generateCsv(_data);
+  // };
+
   const handleExportData = () => {
     let _data = data;
+    // if (selectedTabIdx) {
+    //   _data = approvedData; //change export data if on approved tab
+    // }
     let keys = _data.reduce(function (acc, obj) {
       Object.keys(obj).forEach(function (key) {
         if (!acc.includes(key)) acc.push(key);
@@ -77,8 +100,14 @@ export default function Archived(props) {
         if (!obj[key]) obj[key] = "";
       });
     });
+    // Convert the results array to CSV format using papaparse
+    const csvData = Papa.unparse(_data);
 
-    csvExporter.generateCsv(_data);
+    // Create a Blob from the CSV data
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+
+    // Use FileSaver to save the generated CSV file
+    saveAs(blob, "matchManagerPage.csv");
   };
 
   useEffect(() => {

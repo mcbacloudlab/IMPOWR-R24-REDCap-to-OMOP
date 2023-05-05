@@ -16,9 +16,12 @@ import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
 // import TransferList from "./TransferList";
 import CollectionList from "./CollectionList";
-import { ExportToCsv } from "export-to-csv";
+// import { ExportToCsv } from "export-to-csv";
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
 import Skeleton from "@mui/material/Skeleton";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
+
 
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
@@ -224,19 +227,40 @@ export default function FormSelect(props) {
       .catch((error) => console.log("error", error));
   }
 
-  const csvOptions = {
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    filename: csvFilename.replace(/\.[^/.]+$/, ""),
-    showLabels: true,
-    useBom: false,
-    useKeysAsHeaders: false,
-    headers: colDefs.map((c) => {
-      return c.header;
-    }),
-  };
-  const csvExporter = new ExportToCsv(csvOptions);
+  // const csvOptions = {
+  //   fieldSeparator: ",",
+  //   quoteStrings: '"',
+  //   decimalSeparator: ".",
+  //   filename: csvFilename.replace(/\.[^/.]+$/, ""),
+  //   showLabels: true,
+  //   useBom: false,
+  //   useKeysAsHeaders: false,
+  //   headers: colDefs.map((c) => {
+  //     return c.header;
+  //   }),
+  // };
+  // const csvExporter = new ExportToCsv(csvOptions);
+  // const handleExportData = () => {
+  //   let _data = data;
+  //   // if (selectedTabIdx) {
+  //   //   _data = approvedData; //change export data if on approved tab
+  //   // }
+  //   let keys = _data.reduce(function (acc, obj) {
+  //     Object.keys(obj).forEach(function (key) {
+  //       if (!acc.includes(key)) acc.push(key);
+  //     });
+  //     return acc;
+  //   }, []);
+
+  //   _data.forEach(function (obj) {
+  //     keys.forEach(function (key) {
+  //       if (!obj[key]) obj[key] = "";
+  //     });
+  //   });
+
+  //   csvExporter.generateCsv(_data);
+  // };
+
   const handleExportData = () => {
     let _data = data;
     // if (selectedTabIdx) {
@@ -254,8 +278,14 @@ export default function FormSelect(props) {
         if (!obj[key]) obj[key] = "";
       });
     });
+    // Convert the results array to CSV format using papaparse
+    const csvData = Papa.unparse(_data);
 
-    csvExporter.generateCsv(_data);
+    // Create a Blob from the CSV data
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+
+    // Use FileSaver to save the generated CSV file
+    saveAs(blob, `${csvFilename}.csv`);
   };
 
   function resetScreen() {

@@ -13,7 +13,9 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { ExportToCsv } from "export-to-csv";
+// import { ExportToCsv } from "export-to-csv";
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
 import CircularProgress from "@mui/material/CircularProgress";
 import MatchManagerPendingTable from "../components/MatchManagerPendingTable";
 import MatchManagerApprovedTable from "../components/MatchManagerApprovedTable";
@@ -39,32 +41,53 @@ export default function MatchManager(props) {
   // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
 
-  const csvOptions = {
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    filename: csvFilename.replace(/\.[^/.]+$/, ""),
-    showLabels: true,
-    useBom: false,
-    useKeysAsHeaders: false,
-    headers: colDefs.map((c) => {
-      return c.header;
-    }),
-  };
+  // const csvOptions = {
+  //   fieldSeparator: ",",
+  //   quoteStrings: '"',
+  //   decimalSeparator: ".",
+  //   filename: csvFilename.replace(/\.[^/.]+$/, ""),
+  //   showLabels: true,
+  //   useBom: false,
+  //   useKeysAsHeaders: false,
+  //   headers: colDefs.map((c) => {
+  //     return c.header;
+  //   }),
+  // };
 
   const handleDataChange = (newData, colDefs, csvFilename) => {
-    console.log('newdata', newData)
+    console.log("newdata", newData);
     setData(newData);
-    setColDefs(colDefs)
-    setCSVFilename(csvFilename)
+    setColDefs(colDefs);
+    setCSVFilename(csvFilename);
   };
 
-  const csvExporter = new ExportToCsv(csvOptions);
+  // const csvExporter = new ExportToCsv(csvOptions);
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // getFileList();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // const handleExportData = () => {
+  //   let _data = data;
+  //   if (selectedTabIdx) {
+  //     _data = approvedData; //change export data if on approved tab
+  //   }
+  //   let keys = _data.reduce(function (acc, obj) {
+  //     Object.keys(obj).forEach(function (key) {
+  //       if (!acc.includes(key)) acc.push(key);
+  //     });
+  //     return acc;
+  //   }, []);
+
+  //   _data.forEach(function (obj) {
+  //     keys.forEach(function (key) {
+  //       if (!obj[key]) obj[key] = "";
+  //     });
+  //   });
+
+  //   csvExporter.generateCsv(_data);
+  // };
 
   const handleExportData = () => {
     let _data = data;
@@ -83,8 +106,14 @@ export default function MatchManager(props) {
         if (!obj[key]) obj[key] = "";
       });
     });
+    // Convert the results array to CSV format using papaparse
+    const csvData = Papa.unparse(_data);
 
-    csvExporter.generateCsv(_data);
+    // Create a Blob from the CSV data
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+
+    // Use FileSaver to save the generated CSV file
+    saveAs(blob, "matchManagerPage.csv");
   };
 
   useEffect(() => {
@@ -227,7 +256,6 @@ export default function MatchManager(props) {
     };
   }
 
-
   function importExcel(e) {
     const file = e.data;
     setCSVFilename(file.name);
@@ -308,8 +336,6 @@ export default function MatchManager(props) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-
-
   function resetScreen() {
     setData("");
     setApprovedData("");
@@ -326,150 +352,152 @@ export default function MatchManager(props) {
 
   // const uploadInputRef = React.useRef(null);
   return (
-      <Container component="main" maxWidth="90%">
-        <CssBaseline />
-        <Paper
-          sx={{
-            minHeight: "90vh",
-            paddingLeft: 1,
-            paddingRight: 1,
-            m: 2,
-          }}
-        >
-
-          <Grid container spacing={1}>
-            <Grid item md={12} lg={2}>
-              <Box>
+    <Container component="main" maxWidth="90%">
+      <CssBaseline />
+      <Paper
+        sx={{
+          minHeight: "90vh",
+          paddingLeft: 1,
+          paddingRight: 1,
+          m: 2,
+        }}
+      >
+        <Grid container spacing={1}>
+          <Grid item md={12} lg={2}>
+            <Box>
               {addSSError ? (
-                  <Snackbar
-                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                    open={open}
-                    autoHideDuration={6000}
+                <Snackbar
+                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  open={open}
+                  autoHideDuration={6000}
+                  onClose={handleClose}
+                >
+                  <Alert
                     onClose={handleClose}
+                    severity="error"
+                    sx={{ width: "100%" }}
                   >
-                    <Alert
-                      onClose={handleClose}
-                      severity="error"
-                      sx={{ width: "100%" }}
-                    >
-                      Error Occurred!
-                    </Alert>
-                  </Snackbar>
-                ) : (
-                  ""
-                )}
-                <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-                  Data Dictionaries
-                </Typography>
-                <DataDictionaryList props={props} onDataChange={handleDataChange}/>
-              </Box>
-            </Grid>
+                    Error Occurred!
+                  </Alert>
+                </Snackbar>
+              ) : (
+                ""
+              )}
+              <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                Data Dictionaries
+              </Typography>
+              <DataDictionaryList
+                props={props}
+                onDataChange={handleDataChange}
+              />
+            </Box>
+          </Grid>
 
-            <Grid item sm={12} md={10}>
-              <Grid container>
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      marginTop: 2,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    {isLoading ? (
-                      <Box sx={{ marginTop: "100px", width: "100%" }}>
-                        <CircularProgress size={80} thickness={4} />
-                      </Box>
-                    ) : data.length || approvedData.length ? (
-                      <Grid item xs={12}>
-                        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                          <h2>{csvFilename}</h2>
-                          <Box sx={{ justifyContent: "flex-end" }}></Box>
-                          <Tabs
-                            centered
-                            value={value}
-                            onChange={handleChange}
-                            aria-label="basic tabs example"
-                          >
-                            <Tab
-                              onClick={(event) =>
-                                getFile(event, csvFilename, true, 0)
-                              }
-                              label="Needs Review"
-                              {...a11yProps(0)}
-                            />
-                            <Tab
-                              onClick={(event) =>
-                                getFile(event, csvFilename, true, 1)
-                              }
-                              label="Approved"
-                              {...a11yProps(1)}
-                            />
-                          </Tabs>
-                        </Box>
-                        <TabPanel
+          <Grid item sm={12} md={10}>
+            <Grid container>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    marginTop: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  {isLoading ? (
+                    <Box sx={{ marginTop: "100px", width: "100%" }}>
+                      <CircularProgress size={80} thickness={4} />
+                    </Box>
+                  ) : data.length || approvedData.length ? (
+                    <Grid item xs={12}>
+                      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                        <h2>{csvFilename}</h2>
+                        <Box sx={{ justifyContent: "flex-end" }}></Box>
+                        <Tabs
+                          centered
                           value={value}
-                          index={0}
-                          style={{ minWidth: "800px" }}
+                          onChange={handleChange}
+                          aria-label="basic tabs example"
                         >
-                          <Grid container id="dvCSV">
-                            <Grid item xs={12}>
-                              {/* <div sx={{ minWidth: "800px" }}> */}
-                              <div>
-                                <MatchManagerPendingTable
-                                  props={props}
-                                  columns={columns}
-                                  data={data}
-                                  setSorting={setSorting}
-                                  handleSaveRow={handleSaveRow}
-                                  saveSuccess={saveSuccess}
-                                  isSaving={isSaving}
-                                  saveFile={saveFile}
-                                  value={value}
-                                  handleExportData={handleExportData}
-                                  resetScreen={resetScreen}
-                                />
-                              </div>
-                            </Grid>
-                            <Grid item></Grid>
+                          <Tab
+                            onClick={(event) =>
+                              getFile(event, csvFilename, true, 0)
+                            }
+                            label="Needs Review"
+                            {...a11yProps(0)}
+                          />
+                          <Tab
+                            onClick={(event) =>
+                              getFile(event, csvFilename, true, 1)
+                            }
+                            label="Approved"
+                            {...a11yProps(1)}
+                          />
+                        </Tabs>
+                      </Box>
+                      <TabPanel
+                        value={value}
+                        index={0}
+                        style={{ minWidth: "800px" }}
+                      >
+                        <Grid container id="dvCSV">
+                          <Grid item xs={12}>
+                            {/* <div sx={{ minWidth: "800px" }}> */}
+                            <div>
+                              <MatchManagerPendingTable
+                                props={props}
+                                columns={columns}
+                                data={data}
+                                setSorting={setSorting}
+                                handleSaveRow={handleSaveRow}
+                                saveSuccess={saveSuccess}
+                                isSaving={isSaving}
+                                saveFile={saveFile}
+                                value={value}
+                                handleExportData={handleExportData}
+                                resetScreen={resetScreen}
+                              />
+                            </div>
                           </Grid>
-                        </TabPanel>
-                        <TabPanel value={value} index={1}>
-                          <Grid container id="dvCSV">
-                            <Grid item xs={12}>
-                              {/* <div sx={{ minWidth: "800px" }}> */}
-                              <div>
-                                <MatchManagerApprovedTable
-                                  props={props}
-                                  approvedData={approvedData}
-                                  isSavingErr={isSavingErr}
-                                  columns={columns}
-                                  data={data}
-                                  setSorting={setSorting}
-                                  handleSaveRow={handleSaveRow}
-                                  saveSuccess={saveSuccess}
-                                  isSaving={isSaving}
-                                  saveFile={saveFile}
-                                  value={value}
-                                  handleExportData={handleExportData}
-                                  resetScreen={resetScreen}
-                                />
-                              </div>
-                            </Grid>
-                            <Grid item></Grid>
+                          <Grid item></Grid>
+                        </Grid>
+                      </TabPanel>
+                      <TabPanel value={value} index={1}>
+                        <Grid container id="dvCSV">
+                          <Grid item xs={12}>
+                            {/* <div sx={{ minWidth: "800px" }}> */}
+                            <div>
+                              <MatchManagerApprovedTable
+                                props={props}
+                                approvedData={approvedData}
+                                isSavingErr={isSavingErr}
+                                columns={columns}
+                                data={data}
+                                setSorting={setSorting}
+                                handleSaveRow={handleSaveRow}
+                                saveSuccess={saveSuccess}
+                                isSaving={isSaving}
+                                saveFile={saveFile}
+                                value={value}
+                                handleExportData={handleExportData}
+                                resetScreen={resetScreen}
+                              />
+                            </div>
                           </Grid>
-                        </TabPanel>
-                      </Grid>
-                    ) : (
-                      <Typography>Select or add a data dictionary</Typography>
-                    )}
-                  </Box>
-                </Grid>
+                          <Grid item></Grid>
+                        </Grid>
+                      </TabPanel>
+                    </Grid>
+                  ) : (
+                    <Typography>Select or add a data dictionary</Typography>
+                  )}
+                </Box>
               </Grid>
             </Grid>
-            {/* } */}
           </Grid>
-        </Paper>
-      </Container>
+          {/* } */}
+        </Grid>
+      </Paper>
+    </Container>
   );
 }

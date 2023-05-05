@@ -4,8 +4,17 @@ import Container from "@mui/material/Container";
 import { useState, useEffect, useMemo, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
-import { ExportToCsv } from "export-to-csv";
-import { Box, Button, Divider, IconButton, Typography, Tooltip } from "@mui/material";
+// import { ExportToCsv } from "export-to-csv";
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Typography,
+  Tooltip,
+} from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
@@ -61,8 +70,6 @@ export default function CompletedJobsViewPage(props) {
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
   const { view, setView } = useContext(ViewContext);
-
-  
 
   const umlsModalStyle = {
     position: "absolute",
@@ -748,22 +755,30 @@ export default function CompletedJobsViewPage(props) {
 
         // console.log('jsonResult', jsonResult)
 
-        const csvOptions = {
-          fieldSeparator: ",",
-          quoteStrings: '"',
-          decimalSeparator: ".",
-          filename: csvFilename.replace(/\.[^/.]+$/, ""),
-          showLabels: true,
-          useBom: false,
-          useKeysAsHeaders: true,
-          // headers: colDefs.map((c) => {
-          //   return c.header;
-          // }),
-        };
-        const csvExporter = new ExportToCsv(csvOptions);
+        // const csvOptions = {
+        //   fieldSeparator: ",",
+        //   quoteStrings: '"',
+        //   decimalSeparator: ".",
+        //   filename: csvFilename.replace(/\.[^/.]+$/, ""),
+        //   showLabels: true,
+        //   useBom: false,
+        //   useKeysAsHeaders: true,
+        //   // headers: colDefs.map((c) => {
+        //   //   return c.header;
+        //   // }),
+        // };
+        // const csvExporter = new ExportToCsv(csvOptions);
         console.log("jsonresult");
         console.log(jsonResult);
-        csvExporter.generateCsv(jsonResult);
+        // Convert the results array to CSV format using papaparse
+        const csvData = Papa.unparse(jsonResult);
+
+        // Create a Blob from the CSV data
+        const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+
+        // Use FileSaver to save the generated CSV file
+        saveAs(blob, `${csvFilename}.csv`);
+        // csvExporter.generateCsv(jsonResult);
       })
       .catch((error) => {
         console.log("error", error);
@@ -983,7 +998,7 @@ export default function CompletedJobsViewPage(props) {
   return (
     <>
       <CssBaseline />
-      <Container sx={{margin:'auto', minWidth: '75%', maxWidth: '1400px'}}>
+      <Container sx={{ margin: "auto", minWidth: "75%", maxWidth: "1400px" }}>
         <MyAccountNavBar
           props={props}
           username={username}
@@ -993,7 +1008,12 @@ export default function CompletedJobsViewPage(props) {
           setView={setView}
         />
         {!view && (
-          <Container className='whatthe' component="main" maxWidth='100vw' sx={{margin:'0px' , padding: '0px'}}>
+          <Container
+            className="whatthe"
+            component="main"
+            maxWidth="100vw"
+            sx={{ margin: "0px", padding: "0px" }}
+          >
             <div style={{ textAlign: "left" }}>
               <span
                 style={{
@@ -1086,15 +1106,15 @@ export default function CompletedJobsViewPage(props) {
                     )}
                   </Box>
                 </Modal>
-                
+
                 {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
                 <Typography>
                   Verified {verifiedRecords}/{totalRecords}
                 </Typography>
-                
+
                 {selectedTabIdx === 2 && (
                   <Button
-                    sx={{  }}
+                    sx={{}}
                     variant="contained"
                     color="primary"
                     component="label"
@@ -1104,7 +1124,7 @@ export default function CompletedJobsViewPage(props) {
                     Submit
                   </Button>
                 )}
-                <Divider sx={{margin: '30px'}}/>
+                <Divider sx={{ margin: "30px" }} />
                 <Tabs
                   centered
                   value={value}
@@ -1191,7 +1211,6 @@ export default function CompletedJobsViewPage(props) {
                   selectedTabIdx={selectedTabIdx}
                 />
 
-                
                 <Snackbar
                   open={snackbarOpen}
                   autoHideDuration={5000}
