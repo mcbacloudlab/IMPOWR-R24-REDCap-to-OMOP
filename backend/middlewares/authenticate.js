@@ -55,16 +55,28 @@ async function getUserByEmail(email) {
 }
 
 async function requireAdmin(req, res, next) {
-  console.log("require admin");
+  // console.log("require admin");
   // console.log("req", req.body);
   // console.log('query', req.query)
   const authHeader = req.headers.authorization;
-  let token;
-  if (req.query.token) {
-    token = req.query.token;
-  } else {
-    token = authHeader && authHeader.split(" ")[1];
-  }
+  const tokenFromHeader =
+    authHeader &&
+    authHeader.split(" ")[1] !== "undefined" &&
+    authHeader.split(" ")[1] !== "null"
+      ? authHeader.split(" ")[1]
+      : null;
+
+  // Get token from httpOnly cookie, if it exists
+  const tokenFromCookie = req.cookies.token;
+  // Use the token from the header if it exists; otherwise, use the token from the cookie
+  let token = tokenFromHeader || tokenFromCookie;
+
+  // console.log('token', token)
+  // if (req.query.token) {
+  //   token = req.query.token;
+  // } else {
+  //   token = authHeader && authHeader.split(" ")[1];
+  // }
   
 
   try {
