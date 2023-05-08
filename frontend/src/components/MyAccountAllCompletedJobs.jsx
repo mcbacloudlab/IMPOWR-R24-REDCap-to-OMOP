@@ -246,7 +246,7 @@ export default function MyAccountAllCompletedJobs(props) {
 
   // console.log('columns', columns)
   return (
-    <div style={{ maxHeight: "400px" }}>
+    <div style={{ }}>
       <h1
         style={{
           paddingLeft: "20px",
@@ -261,7 +261,7 @@ export default function MyAccountAllCompletedJobs(props) {
         container
         spacing={1}
         justifyContent="center"
-        style={{ backgroundColor: "rgb(251 251 251)" }}
+        style={{ }}
       >
         {columns.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>

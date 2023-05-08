@@ -88,7 +88,7 @@ async function importToMongo(job) {
       }
 
       if (data.toString().startsWith("[[")) {
-        console.log("data to capture");
+        // console.log("data to capture");
         capturedData = data;
       }
       // console.log('captured data', capturedData)
@@ -131,10 +131,10 @@ async function embedRedcapText(job) {
 
     let capturedData;
     process.stdout.on("data", (data) => {
-      console.log("data", data.toString());
+      // console.log("data", data.toString());
 
       if (data.toString().startsWith("[[")) {
-        console.log("data to capture");
+        // console.log("data to capture");
         capturedData = data;
       }
     });
@@ -173,10 +173,10 @@ async function embedRedcapLookupText(job) {
 
     let capturedData;
     process.stdout.on("data", (data) => {
-      console.log("data", data.toString());
+      // console.log("data", data.toString());
 
       if (data.toString().startsWith("[[")) {
-        console.log("data to capture");
+        // console.log("data to capture");
         capturedData = data;
       }
     });
@@ -201,7 +201,7 @@ async function compareEmbeddings(job) {
   console.log("jobid", job.id);
   let storedTotal = false;
   console.log("Starting Embedding Comparisons...");
-  console.log("job.data");
+  console.log("job.data", job.data);
 
   return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(
@@ -211,9 +211,14 @@ async function compareEmbeddings(job) {
     const args = ["--max-old-space-size=32768"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
-    const process = spawn("node", args.concat([scriptPath, filename]), {
-      stdio: "pipe",
-    });
+    const collectionsToUse = job.data.collections;
+    const process = spawn(
+      "node",
+      args.concat([scriptPath, filename, collectionsToUse]),
+      {
+        stdio: "pipe",
+      }
+    );
     activeJobProcess = process;
     console.log(`Sending input data with length ${data.length}`);
     process.stdin.write(JSON.stringify(data)); //pass data into child process
@@ -227,19 +232,15 @@ async function compareEmbeddings(job) {
     // ********************
     // capture data returned from child
     process.stdout.on("data", async (data) => {
-      // console.log('data', data.toString())
       if (data.toString().startsWith('{"endResult":')) {
-        console.log("data to capture");
+        // console.log("data to capture");
         capturedData = JSON.parse(data.toString()).endResult;
         capturedData = JSON.stringify(capturedData);
       } else {
-        console.log("data", data.toString());
         if (data.toString().startsWith("Total Documents")) {
           totalDocuments = parseInt(data.toString().split(":")[1].trim());
           console.log(totalDocuments);
-        }
-
-        if (data.toString().startsWith("Processing Document At")) {
+        } else if (data.toString().startsWith("Processing Document At")) {
           const currentDocument = parseInt(
             data.toString().split(":")[1].trim()
           );
@@ -256,13 +257,10 @@ async function compareEmbeddings(job) {
               ? Math.round((currentDocument / totalDocuments) * 100)
               : 1
           );
-        }
-        if (data.toString().startsWith("Collection used")) {
+        } else if (data.toString().startsWith("Collection(s) used")) {
           collectionName = data.toString().split(":")[1].trim();
           console.log("captured collection name:", collectionName);
-        }
-
-        if (data.toString().startsWith("Total Documents")) {
+        } else if (data.toString().startsWith("Total Documents")) {
           console.log("storing total docs in db for job", totalDocuments);
           console.log("collection used!!", collectionName);
           console.log("job", job.id);
@@ -278,6 +276,8 @@ async function compareEmbeddings(job) {
             console.log("error!", err);
             throw new Error("Error");
           }
+        } else {
+          console.log("log:", data.toString());
         }
       }
     });
@@ -321,15 +321,15 @@ async function submit(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
-    let userId
-    if(jwtVerified.user == 'orcidUser'){
-      userId = jwtVerified.orcidId
-      email = userId
-    }else{
+    let userId;
+    if (jwtVerified.user == "orcidUser") {
+      userId = jwtVerified.orcidId;
+      email = userId;
+    } else {
       userId = await getUserByEmail(email);
       userId = userId[0].id;
     }
-    
+
     console.log("email", email);
     console.log("the user id!!", userId);
     const job = await myQueue.add(data, jobOptions);

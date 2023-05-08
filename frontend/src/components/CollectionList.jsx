@@ -56,13 +56,13 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{margin: 1}}>
       <Table size="small">
-        <TableHead>
+        <TableHead sx={{backgroundColor: '#343541', color: 'white'}}>
           <TableRow>
             <TableCell padding="checkbox"></TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Documents</TableCell>
+            <TableCell sx={{color: "white"}}>Name</TableCell>
+            <TableCell sx={{color: 'white'}}>Documents</TableCell>
             {/* <TableCell>Storage Size</TableCell> */}
           </TableRow>
         </TableHead>

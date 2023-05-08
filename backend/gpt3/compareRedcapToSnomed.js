@@ -11,7 +11,7 @@ require("dotenv").config();
 // Connection URL
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
-
+let collectionsToUse
 async function main() {
   console.log("Start comparing embeddings");
   await client.connect();
@@ -21,7 +21,9 @@ async function main() {
 main().then(async () => {
   try {
     const { stdin } = process;
-
+    console.log('process argv', process.argv)
+    collectionsToUse = process.argv[3]
+    console.log('collectionsToUse', JSON.parse(collectionsToUse))
     let inputData = "";
 
     stdin.setEncoding("utf8");
@@ -71,7 +73,6 @@ main().then(async () => {
 
         // console.log('document2', document2)
 
-
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
         // console.log('merged doc', mergedDocument)
@@ -82,6 +83,8 @@ main().then(async () => {
     const redCapCollectionArray = transformedData;
     // console.log("redcap array", redCapCollectionArray);
     console.info("Loaded Redcap Collection into memory");
+    console.log('collections to use', collectionsToUse)
+    console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))
     const snomedCollection = client
       .db("GPT3_Embeddings")
       .collection("gpt3_snomed_embeddings");
@@ -171,6 +174,9 @@ async function startProcessing(
   const chunkSize = Math.ceil(redCapCollectionArray.length / numWorkers);
   const workers = [];
   const finalList = [];
+  const receivedDataPortions = [];
+  let receivedPortionCount = 0;
+  let totalDataPortions = 0;
   const progress = { count: 0 };
   const startProcTime = Date.now();
 
@@ -193,7 +199,7 @@ async function startProcessing(
     const workerData = {
       redCapCollectionArray: redCapCollectionArray.slice(start, end),
       dbName: "GPT3_Embeddings",
-      collectionName: "gpt3_snomed_embeddings",
+      collectionsToUse: collectionsToUse,
       progress: progress,
     };
     const worker = new Worker("./gpt3/compareRedcapToSnomed_worker.js", {
@@ -204,9 +210,16 @@ async function startProcessing(
     worker.on("message", (message) => {
       if (message.log) {
         console.log("log", ...message.log);
-      } else if (message.endResult) {
-        console.log("endResult. pushing final list");
-        finalList.push(...message.endResult);
+      } else if (message.dataPortion) {
+        // Handle each portion of data received from the worker
+        receivedDataPortions[message.portionIndex] = message.dataPortion;
+        receivedPortionCount++;
+        totalDataPortions = message.totalDataPortions;
+        if (receivedPortionCount === totalDataPortions) {
+          // All data portions received, reassemble the portions
+          finalList.push(...receivedDataPortions.flat());
+          console.log("endResult. pushing final list");
+        }
       } else {
         console.log(message);
       }

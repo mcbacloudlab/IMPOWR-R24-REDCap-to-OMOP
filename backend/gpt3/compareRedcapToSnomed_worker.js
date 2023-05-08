@@ -5,8 +5,8 @@ const cosineSimilarity = require("compute-cosine-similarity");
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
-
-const collectionName = "gpt3_snomed_embeddings";
+console.log("workerData", workerData.collections);
+const collectionName = "gpt3_snomed_embeddings30k";
 const snomedCollection = client
   .db("GPT3_Embeddings")
   .collection(collectionName);
@@ -15,8 +15,10 @@ const redcapLookupCollection = client
   .db("GPT3_Embeddings")
   .collection("gpt3_redcap_lookup_embeddings");
 
-console.log("Collection used: " + collectionName);
+console.log("Collection(s) used: " + collectionName);
 let finalList = [];
+const portionSize = 1000; // Adjust this value based on your use case
+
 
 function isEmptyObject(obj) {
   if (obj === null || obj === undefined) {
@@ -49,7 +51,8 @@ async function processChunk(
     let topResults = [];
 
     // If skip is 0 (first iteration), include redcapLookupArray, otherwise, use snomedChunk only
-    const combinedData = skip === 0 ? [...snomedChunk, ...redcapLookupArray] : snomedChunk;
+    const combinedData =
+      skip === 0 ? [...snomedChunk, ...redcapLookupArray] : snomedChunk;
 
     for (const data of combinedData) {
       let dataEmbedding = data.gpt3_data.data[0].embedding;
@@ -76,9 +79,9 @@ async function processChunk(
   return finalList;
 }
 
-
-async function processChunks(redCapCollectionArray, chunkSize) {
+async function processChunks(redCapCollectionArray, chunkSize, progress, collectionsToUse) {
   const count = await snomedCollection.countDocuments();
+  console.log('worker collections to use', Object.keys(JSON.parse(collectionsToUse)))
   // parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
   parentPort.postMessage(`Total Documents: ${count}`);
   // console.log(`Loading SNOMED Collection into memory (${count} documents)...`);
@@ -127,11 +130,23 @@ async function processChunks(redCapCollectionArray, chunkSize) {
   // parentPort.postMessage({ log: filteredData.flat() });
   // console.log("filtered data", filteredData.flat());
   setTimeout(() => {
-    parentPort.postMessage({ endResult: filteredData.flat() });
+    const totalDataPortions = Math.ceil(filteredData.length / portionSize);
+    for (let i = 0; i < totalDataPortions; i++) {
+      const start = i * portionSize;
+      const end = start + portionSize;
+      const dataPortion = filteredData.slice(start, end);
+      parentPort.postMessage({
+        dataPortion,
+        portionIndex: i,
+        totalDataPortions,
+      });
+    }
+
+    parentPort.postMessage({ endResult: null }); // Signal the end of data transmission
     parentPort.close();
     process.exit(0);
   }, 5000);
 }
 
 // start processing in chunks, second param is size of chunk, assists in errors from running out of memory
-processChunks(workerData.redCapCollectionArray, 30000, workerData.progress);
+processChunks(workerData.redCapCollectionArray, 30000, workerData.progress, workerData.collectionsToUse);

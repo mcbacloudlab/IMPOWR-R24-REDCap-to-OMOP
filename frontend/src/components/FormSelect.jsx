@@ -22,7 +22,6 @@ import { saveAs } from "file-saver";
 import Skeleton from "@mui/material/Skeleton";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 
-
 var XLSX = require("xlsx");
 export default function FormSelect(props) {
   let token =
@@ -177,9 +176,13 @@ export default function FormSelect(props) {
     formdata.append("data", JSON.stringify(dataToSendToQueue));
     formdata.append("selectedForm", selectedForm);
     formdata.append("dataLength", dataToSendToQueue.length);
-    formdata.append("collections", checkedItems);
-    console.log("collections to use", checkedItems);
 
+    // Filter out properties with the value of false
+    const filteredCollections = Object.fromEntries(
+      Object.entries(checkedItems).filter(([key, value]) => value !== false)
+    );
+    console.log("collections to use", JSON.stringify(filteredCollections));
+    formdata.append("collections", JSON.stringify(filteredCollections));
     const checkIfAllFalse = (checkedItems) => {
       // Extract an array of values from the checkedItems object
       const values = Object.values(checkedItems);
@@ -201,8 +204,6 @@ export default function FormSelect(props) {
     let checkedItem = checkIfAllFalse(checkedItems);
     if (!checkedItem) return;
 
-   
-
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
@@ -217,7 +218,7 @@ export default function FormSelect(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        console.log(result)
+        console.log(result);
         window.scrollTo(0, 0); //scroll to top of page
         setShowSubmittedNotifcation(true);
         setTimeout(() => {
@@ -336,37 +337,41 @@ export default function FormSelect(props) {
                 height={"30vh"}
               />
             )}
-            {isFormLoaded && (
-              <CollectionList
-                token={token}
-                setCheckedItems={setCheckedItems}
-                checkedItems={checkedItems}
-              />
-              
-              // <TransferList
-              //   props={props}
-              //   setData={setData}
-              //   data={data}
-              //   setColDefs={setColDefs}
-              //   colDefs={colDefs}
-              // />
-            )}
-            {selectRowsError && (
-                    <Alert
-                      severity="error"
-                      sx={{
-                        fontSize: "1.2rem",
-                        maxWidth: "400px",
-                      }}
-                    >
-                      <Typography variant="h6" gutterBottom>
-                        Error
-                      </Typography>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Please select as least one collection to use.
-                      </Typography>
-                    </Alert>
-                  )}
+            <Grid sx={{ margin: 1 }}>
+              {isFormLoaded && (
+                <CollectionList
+                  token={token}
+                  setCheckedItems={setCheckedItems}
+                  checkedItems={checkedItems}
+                />
+
+                // <TransferList
+                //   props={props}
+                //   setData={setData}
+                //   data={data}
+                //   setColDefs={setColDefs}
+                //   colDefs={colDefs}
+                // />
+              )}
+            </Grid>
+            <Grid sx={{ margin: "auto", mt: 2 }}>
+              {selectRowsError && (
+                <Alert
+                  severity="error"
+                  sx={{
+                    fontSize: "1.2rem",
+                    maxWidth: "400px",
+                  }}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    Error
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Please select as least one collection to use.
+                  </Typography>
+                </Alert>
+              )}
+            </Grid>
           </Grid>
 
           <Grid
@@ -409,7 +414,6 @@ export default function FormSelect(props) {
                       Submit Job To Queue
                     </Button>
                   </Tooltip>
-                  
                 </Grid>
                 {showSubmittedNotifcation && (
                   <Box

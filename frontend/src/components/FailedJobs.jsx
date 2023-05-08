@@ -192,7 +192,7 @@ export default function FailedJobs(props) {
   };
 
   return (
-    <div style={{ maxHeight: "400px" }}>
+    <div style={{ }}>
       <h1
         style={{
           paddingLeft: "20px",

@@ -228,7 +228,7 @@ export default function MyAccountAllFailedJobs(props) {
   // console.log('columns', columns)
 
   return (
-    <div style={{ maxHeight: "400px" }}>
+    <div style={{ }}>
       <h1
         style={{
           paddingLeft: "20px",

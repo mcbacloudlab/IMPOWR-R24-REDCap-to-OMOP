@@ -512,7 +512,7 @@ export default function MyAccountAPIKeys(props) {
           <Grid
             item
             xs={12}
-            md={3}
+            lg={3}
             sx={{
               justifyContent: "center",
               display: "flex",

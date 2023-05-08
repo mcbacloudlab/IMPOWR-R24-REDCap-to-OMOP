@@ -100,7 +100,7 @@ async function updateAPIKey(req, res) {
 
 async function testRedcapAPI(req, res) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
-  console.log("test redcap api");
+  // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'redcap%'";
   //   return new Promise((resolve, reject) => {
   db.execute(query, [], function (err, results, fields) {
@@ -175,7 +175,7 @@ async function testUMLSAPI(req, res) {
 
     const umlsKeyResult = results.find((api) => api.name === "umlsAPIKey");
 
-    console.log("umlsKeyResult", umlsKeyResult);
+    // console.log("umlsKeyResult", umlsKeyResult);
     if (!umlsKeyResult) {
       res.status(500).send("Error");
       return;
@@ -227,7 +227,7 @@ async function testGPT3API(req, res) {
 
     const gpt3KeyResult = results.find((api) => api.name === "gpt3APIKey");
 
-    console.log("gpt3KeyResult", gpt3KeyResult);
+    // console.log("gpt3KeyResult", gpt3KeyResult);
     if (!gpt3KeyResult) {
       res.status(500).send("Error");
       return;

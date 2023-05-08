@@ -218,7 +218,7 @@ export default function CompletedJobs(props) {
   }
 
   return (
-    <div style={{ maxHeight: "400px" }}>
+    <div style={{ }}>
       <h1
         style={{
           paddingLeft: "20px",
