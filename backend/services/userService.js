@@ -283,7 +283,7 @@ async function getUserJobs(req, res) {
               );
               continue;
             } else {
-              // console.log(job)
+              // console.log('foundJob', foundJob.data.collections)
 
               const status = await foundJob.getState();
               const timeAdded = foundJob.timestamp;
@@ -298,6 +298,7 @@ async function getUserJobs(req, res) {
               job.finishedAt = finishedAt;
               job.progress = progress;
               job.dataLength = dataLength;
+              job.collections = foundJob.data.collections
             }
           } catch (error) {
             console.log("error", error);

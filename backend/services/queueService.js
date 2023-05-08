@@ -31,7 +31,7 @@ const jobOptions = {
 };
 
 myQueue.process(jobOptions.concurrency, async (job) => {
-  console.log("job", job.data);
+  // console.log("job", job.data);
   let jobData = JSON.parse(job.data.data);
   let result;
   const containsLookupTrue = jobData.some((element) => element.lookup === true);
@@ -48,7 +48,7 @@ myQueue.process(jobOptions.concurrency, async (job) => {
     result = await compareEmbeddings(job);
     if (result) {
       // console.log("result to return", result.toString());
-      console.log("Job finished. Returning results");
+      console.log(`Job ${job.id} finished. Returning results`);
     } else {
       console.log("No result");
     }
@@ -201,7 +201,7 @@ async function compareEmbeddings(job) {
   console.log("jobid", job.id);
   let storedTotal = false;
   console.log("Starting Embedding Comparisons...");
-  console.log("job.data", job.data);
+  // console.log("job.data", job.data);
 
   return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(
@@ -237,15 +237,12 @@ async function compareEmbeddings(job) {
         capturedData = JSON.parse(data.toString()).endResult;
         capturedData = JSON.stringify(capturedData);
       } else {
-        if (data.toString().startsWith("Total Documents")) {
-          totalDocuments = parseInt(data.toString().split(":")[1].trim());
-          console.log(totalDocuments);
-        } else if (data.toString().startsWith("Processing Document At")) {
+        if (data.toString().startsWith("Processing Document At")) {
           const currentDocument = parseInt(
             data.toString().split(":")[1].trim()
           );
-          console.log("curdoc", currentDocument);
-          console.log("totaldocs", totalDocuments);
+          console.log("Current Document:", currentDocument);
+          console.log("Total Documents:", totalDocuments);
           console.log(
             "setting job to: ",
             currentDocument / totalDocuments
@@ -258,11 +255,13 @@ async function compareEmbeddings(job) {
               : 1
           );
         } else if (data.toString().startsWith("Collection(s) used")) {
-          collectionName = data.toString().split(":")[1].trim();
+          console.log('datacoll', data.toString().split(':')[1])
+          collectionName = data.toString().split(":")[1];
           console.log("captured collection name:", collectionName);
         } else if (data.toString().startsWith("Total Documents")) {
+          totalDocuments = parseInt(data.toString().split(":")[1].trim());
           console.log("storing total docs in db for job", totalDocuments);
-          console.log("collection used!!", collectionName);
+          // console.log("collection used!!", collectionName);
           console.log("job", job.id);
           const query =
             "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
@@ -739,8 +738,8 @@ async function submitJobVerify(req, res) {
     let email = jwtVerified.user;
     let userId = await getUserByEmail(email);
     userId = userId[0].id;
-    console.log("email", email);
-    console.log("the user id!!", userId);
+    // console.log("email", email);
+    // console.log("the user id!!", userId);
     const job = await myQueue.add(data, jobOptions);
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();

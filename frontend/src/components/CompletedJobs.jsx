@@ -34,7 +34,7 @@ export default function CompletedJobs(props) {
   const { completedList } = useLists();
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
-  // console.log("completeld list", completedList);
+  console.log("completeld list", completedList);
 
   // console.log('token?', token)
   // const [open, setOpen] = useState(false);
@@ -311,11 +311,11 @@ export default function CompletedJobs(props) {
                               <b>REDCap Questions:</b> {job.dataLength}
                             </div>
                             <div>
-                              <b>Collection / Doc Size:</b>
-                              {job.collectionName &&
+                              <b>Collections:</b>
+                              {job.collections &&
                               job.totalCollectionDocs !== null
                                 ? ` ${
-                                    job.collectionName
+                                    job.collections
                                   } / ${job.totalCollectionDocs.toLocaleString()}`
                                 : "N/A"}
                             </div>

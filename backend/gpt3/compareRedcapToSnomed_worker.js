@@ -1,24 +1,17 @@
 const { parentPort, workerData } = require("worker_threads");
 const cosineSimilarity = require("compute-cosine-similarity");
-
 // Connection URL
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 console.log("workerData", workerData.collections);
-const collectionName = "gpt3_snomed_embeddings30k";
-const snomedCollection = client
-  .db("GPT3_Embeddings")
-  .collection(collectionName);
-
+console.time('child worker started')
+let totalDocuments = 0
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
   .collection("gpt3_redcap_lookup_embeddings");
 
-console.log("Collection(s) used: " + collectionName);
-let finalList = [];
 const portionSize = 1000; // Adjust this value based on your use case
-
 
 function isEmptyObject(obj) {
   if (obj === null || obj === undefined) {
@@ -36,7 +29,7 @@ async function processChunk(
 ) {
   console.log("Processing Document At:", skip);
   console.log("Processing Document To:", skip + limit);
-  finalList = [];
+  let finalList = [];
   let snomedCursor, snomedChunk;
   try {
     snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
@@ -80,42 +73,54 @@ async function processChunk(
 }
 
 async function processChunks(redCapCollectionArray, chunkSize, progress, collectionsToUse) {
-  const count = await snomedCollection.countDocuments();
-  console.log('worker collections to use', Object.keys(JSON.parse(collectionsToUse)))
-  // parentPort.postMessage( `Loading SNOMED Collection into memory (${count} documents)...`);
-  parentPort.postMessage(`Total Documents: ${count}`);
-  // console.log(`Loading SNOMED Collection into memory (${count} documents)...`);
+  // Parse collectionsToUse from a JSON string to an array
+  const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
+  console.log('Collection(s) used:', collectionsArray)
+  // Map each collection name to a MongoDB collection
+  const snomedCollections = collectionsArray.map(collectionName => 
+    client.db("GPT3_Embeddings").collection(collectionName)
+  );
 
-  let skip = 0;
-  const results = [];
-  redcapLookupArray = await redcapLookupCollection.find({}).toArray();
-  while (skip < count) {
-    const limit = Math.min(chunkSize, count - skip);
-    const finalList = await processChunk(
-      redCapCollectionArray,
-      snomedCollection,
-      skip,
-      limit,
-      redcapLookupArray
-    );
-    results.push(...finalList);
-    skip += limit;
+  // Initialize an empty array to store all results
+  const allResults = [];
+
+  // Process each collection
+  for (const snomedCollection of snomedCollections) {
+    const count = await snomedCollection.countDocuments();
+    console.log(`Total Documents in ${snomedCollection.collectionName}: ${count}`);
+    totalDocuments += count
+    let skip = 0;
+    const results = [];
+    const redcapLookupArray = await redcapLookupCollection.find({}).toArray();
+    while (skip < count) {
+      const limit = Math.min(chunkSize, count - skip);
+      const finalList = await processChunk(
+        redCapCollectionArray,
+        snomedCollection,
+        skip,
+        limit,
+        redcapLookupArray
+      );
+      results.push(...finalList);
+      skip += limit;
+    }
+
+    // Add the results from this collection to allResults
+    allResults.push(...results);
   }
-  // clean up and only return top 3
-  // get unique values of redcapFieldLabel
-  // console.log("results!", results);
 
-  //because of the chunks we now need to reduce and flatten and only return the top 3 results for each
+  console.log('Total Documents:', totalDocuments)
+  // Now that all collections have been processed, we can sort and filter allResults
   const fieldLabels = [
     ...new Set(
-      results
+      allResults
         .flat()
         .map((item) => item.redcapFieldLabel + "-" + item.extraData.field_name)
     ),
   ];
 
   const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = results
+    const items = allResults
       .flat()
       .filter(
         (item) =>
@@ -126,9 +131,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
     acc.push(...items.slice(0, 5));
     return acc;
   }, []);
-  // parentPort.postMessage('filtering data down done' );
-  // parentPort.postMessage({ log: filteredData.flat() });
-  // console.log("filtered data", filteredData.flat());
+
   setTimeout(() => {
     const totalDataPortions = Math.ceil(filteredData.length / portionSize);
     for (let i = 0; i < totalDataPortions; i++) {
@@ -141,7 +144,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
         totalDataPortions,
       });
     }
-
+    console.timeEnd("child worker done")
     parentPort.postMessage({ endResult: null }); // Signal the end of data transmission
     parentPort.close();
     process.exit(0);
@@ -150,3 +153,4 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
 
 // start processing in chunks, second param is size of chunk, assists in errors from running out of memory
 processChunks(workerData.redCapCollectionArray, 30000, workerData.progress, workerData.collectionsToUse);
+
