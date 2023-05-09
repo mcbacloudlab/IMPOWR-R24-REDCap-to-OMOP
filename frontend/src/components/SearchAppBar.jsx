@@ -390,7 +390,7 @@ export default function SearchAppBar(props) {
               component="div"
               sx={{ display: { xs: "none", sm: "block" } }}
             >
-              REDCap To OMOP
+              CDE To OMOP
             </Typography>
             {/* <Avatar alt="Redcap Logo">
               <img

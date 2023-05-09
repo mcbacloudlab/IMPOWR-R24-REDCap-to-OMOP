@@ -139,7 +139,7 @@ export default function SignIn({ props }) {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          REDCap to OMOP
+          CDE to OMOP
         </Typography>
         {loginError && <ErrorAlert />}
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
