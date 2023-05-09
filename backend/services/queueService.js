@@ -708,7 +708,7 @@ async function getJobVerifyInfo(req, res) {
       res.status(200).json(document);
     } else {
       // Send a not found response
-      res.status(404).send("Document not found");
+      res.status(500).json({message: "Document not found"});
     }
   } catch (error) {
     console.error("Error connecting to MongoDB", error);

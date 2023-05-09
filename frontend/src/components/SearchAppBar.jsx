@@ -123,7 +123,7 @@ export default function SearchAppBar(props) {
       .then((response) => response.json())
       .then((data) => {
         // Handle successful sign out (e.g., update user state, navigate to sign-in page)
-        console.log(data.message);
+        // console.log(data.message);
         // ...
       })
       .catch((error) => {

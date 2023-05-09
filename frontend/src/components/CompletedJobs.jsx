@@ -29,12 +29,10 @@ import { useLists } from "./ListsContext";
 import { ViewContext } from './ViewContext';
 
 export default function CompletedJobs(props) {
-  // console.log('completedjobs props', props)
   // const { completedList } = props.props.props ?? props.props;
   const { completedList } = useLists();
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
-  console.log("completeld list", completedList);
 
   // console.log('token?', token)
   // const [open, setOpen] = useState(false);
@@ -52,26 +50,26 @@ export default function CompletedJobs(props) {
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
   const handleClickOpen = (jobId) => {
-    console.log("jobid", jobId);
+    // console.log("jobid", jobId);
     setJobIdSelected(jobId);
     setOpen(true);
   };
 
   const handleClose = (jobId) => {
-    console.log("jobid", jobIdSelected);
+    // console.log("jobid", jobIdSelected);
     setOpen(false);
   };
 
   const handleConfirm = (jobId) => {
     // Do something when the user confirms
-    console.log("jb", jobIdSelected);
+    // console.log("jb", jobIdSelected);
     setOpen(false);
-    console.log("confirm delete", jobIdSelected);
+    // console.log("confirm delete", jobIdSelected);
     cancelJob(jobIdSelected);
   };
 
   const cancelJob = (jobId) => {
-    console.log("cancel job", jobId);
+    // console.log("cancel job", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -91,7 +89,9 @@ export default function CompletedJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        // console.log(result)
+      })
       .catch((error) => console.log("error", error));
   };
 
@@ -174,8 +174,8 @@ export default function CompletedJobs(props) {
   };
 
   const handleJobNameChange = (jobId, newValue) => {
-    console.log("handlejobnamechange", jobId);
-    console.log("new value", newValue);
+    // console.log("handlejobnamechange", jobId);
+    // console.log("new value", newValue);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, newJobName: newValue } : job
@@ -184,7 +184,7 @@ export default function CompletedJobs(props) {
   };
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
-    console.log("event view", job);
+    // console.log("event view", job);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 

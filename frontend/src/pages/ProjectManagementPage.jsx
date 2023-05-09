@@ -17,14 +17,13 @@ export default function ProjectManagementPage(props) {
     props.props?.token ??
     props?.token ??
     props.token;
-  // console.log('token', token)
+
   const [addSSError, setAddSSError] = useState();
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     //get available forms
-    // console.log("use effect formselect ran");
     setIsLoading(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
@@ -45,9 +44,7 @@ export default function ProjectManagementPage(props) {
         else throw new Error("Error");
       })
       .then((result) => {
-        console.log((result));
         setForms(JSON.parse(result));
-        // console.log("forms", forms);
         setIsLoading(false);
       })
       .catch((error) => {

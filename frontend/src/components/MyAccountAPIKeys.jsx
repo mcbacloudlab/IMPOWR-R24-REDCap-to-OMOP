@@ -115,7 +115,7 @@ export default function MyAccountAPIKeys(props) {
         // console.log("respons", response.status);
         if (response.status === 200) {
           if (formName === "redcapAPIKey") {
-            console.log("set redcap key2");
+            // console.log("set redcap key2");
             setRedcapKey("****************");
             setEditModeRedcapKey(false);
           }
@@ -144,7 +144,7 @@ export default function MyAccountAPIKeys(props) {
     // console.log("event.!!", event.target.value);
     switch (event.target.value) {
       case "redcapAPIKey": {
-        console.log("set redcap key3");
+        // console.log("set redcap key3");
         setRedcapKey("");
         setEditModeRedcapKey(true);
         break;
@@ -176,7 +176,7 @@ export default function MyAccountAPIKeys(props) {
     // console.log("handle cancel", event.target.value);
     switch (event.target.value) {
       case "redcapAPIKey": {
-        console.log("redcap key", redcapKey);
+        // console.log("redcap key", redcapKey);
         if (redcapKey) {
           // console.log("setting redcap key");
           setRedcapKey("****************");

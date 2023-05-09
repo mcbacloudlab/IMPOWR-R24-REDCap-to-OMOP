@@ -39,7 +39,7 @@ export default function FailedJobs(props) {
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
   const handleClickOpen = (jobId) => {
-    console.log("jobid", jobId);
+    // console.log("jobid", jobId);
     setJobIdSelected(jobId);
     setOpen(true);
   };
@@ -51,9 +51,9 @@ export default function FailedJobs(props) {
 
   const handleConfirm = (jobId) => {
     // Do something when the user confirms
-    console.log("jb", jobIdSelected);
+    // console.log("jb", jobIdSelected);
     setOpen(false);
-    console.log("confirm delete", jobIdSelected);
+    // console.log("confirm delete", jobIdSelected);
     cancelJob(jobIdSelected);
   };
 
@@ -87,7 +87,7 @@ export default function FailedJobs(props) {
   }, [failedList]);
 
   function handleRetry(jobId) {
-    console.log("event view", jobId);
+    // console.log("event view", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -107,7 +107,9 @@ export default function FailedJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        // console.log(result)
+      })
       .catch((error) => console.log("error", error));
   }
 
@@ -167,7 +169,7 @@ export default function FailedJobs(props) {
   };
 
   const cancelJob = (jobId) => {
-    console.log("cancel job", jobId);
+    // console.log("cancel job", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -187,7 +189,9 @@ export default function FailedJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        // console.log(result)
+      })
       .catch((error) => console.log("error", error));
   };
 

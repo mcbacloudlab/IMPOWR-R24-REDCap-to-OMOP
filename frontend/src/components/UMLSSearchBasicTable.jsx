@@ -88,7 +88,7 @@ export default function BasicTable(props) {
 
     for (const obj of modifiedSubRows) {
       if (obj.snomedID === row.ui || newModalRowData.snomedID === row.ui) {
-        console.log("Found a matching object:", obj);
+        // console.log("Found a matching object:", obj);
         setLookUpDupe(true);
         return;
       }
@@ -112,7 +112,7 @@ export default function BasicTable(props) {
       ...props.modalRowData,
       subRows: modifiedSubRows,
     };
-    console.log("update modal row data", updatedModalRowData);
+    // console.log("update modal row data", updatedModalRowData);
     props.setModalRowData(updatedModalRowData);
     let tableData = props.tempAllData;
     // console.log('tableData', tableData)
@@ -135,14 +135,14 @@ export default function BasicTable(props) {
     props.setLookupModalOpen(false);
     props.handleSetTempAllData(newArray);
     // props.showTab(null,true,props.selectedTabIdx)
-    console.log("newSubRow", newSubRow);
+    // console.log("newSubRow", newSubRow);
     props.verifyRow(newSubRow, false, true);
     //count and update selected and verified records
     newArray.map((item) => {
       return null;
     });
   }
-  console.log('tableDta', tableData)
+  // console.log('tableDta', tableData)
   return (
     <>
       {lookUpDupe && (

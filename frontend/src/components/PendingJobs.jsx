@@ -42,21 +42,21 @@ export default function PendingJobs(props) {
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
   const handleClickOpen = (jobId) => {
-    console.log("jobid", jobId);
+    // console.log("jobid", jobId);
     setJobIdSelected(jobId);
     setOpen(true);
   };
 
   const handleClose = (jobId) => {
-    console.log("jobid", jobIdSelected);
+    // console.log("jobid", jobIdSelected);
     setOpen(false);
   };
 
   const handleConfirm = (jobId) => {
     // Do something when the user confirms
-    console.log("jb", jobIdSelected);
+    // console.log("jb", jobIdSelected);
     setOpen(false);
-    console.log("confirm delete", jobIdSelected);
+    // console.log("confirm delete", jobIdSelected);
     cancelJob(jobIdSelected);
   };
 
@@ -91,7 +91,7 @@ export default function PendingJobs(props) {
   }, [pendingList]);
 
   const handleToggleEditMode = (jobId) => {
-    console.log("edit mode for", jobId);
+    // console.log("edit mode for", jobId);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, editMode: !job.editMode } : job
@@ -138,7 +138,7 @@ export default function PendingJobs(props) {
   };
 
   const handleJobNameChange = (jobId, newValue) => {
-    console.log("handle job name change", newValue);
+    // console.log("handle job name change", newValue);
     setJobs(
       jobs.map((job) =>
         job.jobId === jobId ? { ...job, newJobName: newValue } : job
@@ -147,7 +147,7 @@ export default function PendingJobs(props) {
   };
 
   const cancelJob = (jobId) => {
-    console.log("cancel job", jobId);
+    // console.log("cancel job", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -167,7 +167,9 @@ export default function PendingJobs(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        // console.log(result)
+      })
       .catch((error) => console.log("error", error));
   };
 

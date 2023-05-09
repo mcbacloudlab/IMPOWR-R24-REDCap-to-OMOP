@@ -181,7 +181,7 @@ export default function FormSelect(props) {
     const filteredCollections = Object.fromEntries(
       Object.entries(checkedItems).filter(([key, value]) => value !== false)
     );
-    console.log("collections to use", JSON.stringify(filteredCollections));
+    // console.log("collections to use", JSON.stringify(filteredCollections));
     formdata.append("collections", JSON.stringify(filteredCollections));
     const checkIfAllFalse = (checkedItems) => {
       // Extract an array of values from the checkedItems object
@@ -218,7 +218,7 @@ export default function FormSelect(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         window.scrollTo(0, 0); //scroll to top of page
         setShowSubmittedNotifcation(true);
         setTimeout(() => {

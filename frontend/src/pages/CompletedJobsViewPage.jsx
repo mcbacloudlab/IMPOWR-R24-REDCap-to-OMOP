@@ -44,7 +44,6 @@ import { ViewContext } from "../components/ViewContext";
 // var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
-  console.log("complete view page", props);
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
   const [colDefs, setColDefs] = useState([]);
@@ -136,7 +135,7 @@ export default function CompletedJobsViewPage(props) {
   }, [props.user]);
 
   function searchUMLS(text) {
-    console.log("search UMLS clicked");
+    // console.log("search UMLS clicked");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -183,9 +182,13 @@ export default function CompletedJobsViewPage(props) {
       `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobVerifyinfo`,
       requestOptions
     )
-      .then((response) => response.text())
+      .then((response) => {
+        if (response.ok) return response.text();
+        else throw new Error("Error");
+      })
       .then((result) => {
         jobVerificationData = JSON.parse(result);
+        console.log("jobVerif", jobVerificationData);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
           if (_jobId) setJobId(_jobId);
@@ -197,7 +200,7 @@ export default function CompletedJobsViewPage(props) {
         }
       })
       .catch((error) => {
-        console.log("error", error);
+        // console.log("error", error);
         if (_jobId) setJobId(_jobId);
         //on an error reading from the db just load a new blank job
         buildTable(JSON.parse(_data), false);
@@ -546,7 +549,6 @@ export default function CompletedJobsViewPage(props) {
     };
 
     function LookUpCode(row) {
-      console.log("look up code called");
       setModalRowData(row.original);
       setSearchUMLSValue(row.original.redcapFieldLabel);
       searchUMLS(row.original.redcapFieldLabel);
@@ -687,7 +689,6 @@ export default function CompletedJobsViewPage(props) {
           ]
         : []),
     ];
-    // console.log("selectedTab", selectedTabIdx);
     setColDefs(cols);
     _dataObj = result;
     setData(result);
@@ -732,8 +733,8 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        console.log("the result");
-        console.log(JSON.parse(result));
+        // console.log("the result");
+        // console.log(JSON.parse(result));
         //update field_annotation with the preferred value id
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
@@ -746,7 +747,7 @@ export default function CompletedJobsViewPage(props) {
               transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
             ) {
               // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-              console.log("match!", transformedData[i]);
+              // console.log("match!", transformedData[i]);
               jsonResult[j]["field_annotation"] =
                 transformedData[i]["Field Annotations"];
             }
@@ -768,8 +769,8 @@ export default function CompletedJobsViewPage(props) {
         //   // }),
         // };
         // const csvExporter = new ExportToCsv(csvOptions);
-        console.log("jsonresult");
-        console.log(jsonResult);
+        // console.log("jsonresult");
+        // console.log(jsonResult);
         // Convert the results array to CSV format using papaparse
         const csvData = Papa.unparse(jsonResult);
 
@@ -994,7 +995,7 @@ export default function CompletedJobsViewPage(props) {
   // console.log('umlsResultsData', umlsResultsData.length)
   // console.log(umlsResultsData)
   // console.log('typeof', typeof umlsResultsData)
-  console.log("view", view);
+  // console.log("view", view);
   return (
     <>
       <CssBaseline />
