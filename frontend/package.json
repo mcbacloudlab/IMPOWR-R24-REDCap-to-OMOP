@@ -24,6 +24,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "react-scripts": "^5.0.1"
   },
   "scripts": {
