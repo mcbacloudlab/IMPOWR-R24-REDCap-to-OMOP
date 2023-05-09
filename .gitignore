@@ -13,3 +13,5 @@ backend/.env.production
 backend/gpt3/test.json
 .vscode/restore-terminals.json
 gpt3responses.json
+ChainBundle2.crt
+ServerCertificate.crt
