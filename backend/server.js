@@ -74,7 +74,8 @@ const allowedOrigins = [
   'http://192.168.50.125:3000',
   'http://34.23.5.184/redcap-omop',
   'http://34.23.5.184',
-  'http://localhost:5000'
+  'http://localhost:5000',
+  'https://cde2omop.wakehealth.edu'
 ];
 
 app.use(cors({

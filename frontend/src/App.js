@@ -149,7 +149,7 @@ function App() {
       <CssBaseline />
       <div className="App">
         <header className="App-header">
-          <BrowserRouter basename="/redcap-omop">
+          <BrowserRouter>
             <ViewProvider>
               <ListsProvider>
                 <div>
