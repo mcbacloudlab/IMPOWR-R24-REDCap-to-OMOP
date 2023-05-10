@@ -1,5 +1,5 @@
 const fs = require("fs");
-const xlsx = require("xlsx");
+// const xlsx = require("xlsx");
 const MongoClient = require("mongodb").MongoClient;
 const cliProgress = require("cli-progress");
 const prompts = require("prompts");

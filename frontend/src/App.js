@@ -5,8 +5,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SearchAppBar from "./components/SearchAppBar";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import MatchManager from "./pages/MatchManagerPage";
-import Archived from "./pages/ArchivedPage";
+// import MatchManager from "./pages/MatchManagerPage";
+// import Archived from "./pages/ArchivedPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import MyAccountPage from "./pages/MyAccountPage";
@@ -180,7 +180,7 @@ function App() {
                       }
                       exact
                     />
-                    <Route
+                    {/* <Route
                       path="/match-manager"
                       element={
                         <ProtectedRoute
@@ -193,8 +193,8 @@ function App() {
                           <MatchManager token={token}></MatchManager>
                         </ProtectedRoute>
                       }
-                    />
-                    <Route
+                    /> */}
+                    {/* <Route
                       path="/archived"
                       element={
                         <ProtectedRoute
@@ -208,7 +208,7 @@ function App() {
                         </ProtectedRoute>
                       }
                       exact
-                    />
+                    /> */}
                     <Route
                       path="/myaccount"
                       element={

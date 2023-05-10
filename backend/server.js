@@ -8,7 +8,6 @@ require("dotenv").config();
 const fileUpload = require("express-fileupload");
 const morgan = require("morgan");
 const userRoutes = require("./routes/userRoutes");
-const fileRoutes = require("./routes/fileRoutes");
 const keyRoutes = require("./routes/keyRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const redcapRoutes = require("./routes/redcapRoutes");
@@ -122,7 +121,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/orcid", orcidRoutes);
 
 //authed user routes
-app.use("/api/file", authenticate, fileRoutes);
 app.use("/api/redcap", authenticate, redcapRoutes);
 app.use("/api/queue", authenticate, queueRoutes);
 app.use("/api/umls", authenticate, umlsRoutes);
