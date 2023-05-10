@@ -224,70 +224,81 @@ async function compareEmbeddings(job) {
     process.stdin.write(JSON.stringify(data)); //pass data into child process
     process.stdin.end();
 
-    let capturedData, totalDocuments, currentDocument, collectionName;
-
+    let totalDocuments, currentDocument, collectionName;
+    let capturedData = ''  
     // ********************
     // Using startsWith is not very reliable when you start adding console.logs to the process.
     // It's not reliable due to the standard output occassionally lumping outputs together. Using a delimiter and capturing the entire standard output would likely be more reliable here
     // ********************
-    // capture data returned from child
+    let buffer = "";
+
     process.stdout.on("data", async (data) => {
-      if (data.toString().startsWith('{"endResult":')) {
-        console.log("data to capture", data.toString());
-        capturedData = JSON.parse(data.toString()).endResult;
-        capturedData = JSON.stringify(capturedData);
-      } else {
-        if (data.toString().startsWith("Processing Document At")) {
-          const currentDocument = parseInt(
-            data.toString().split(":")[1].trim()
-          );
-          console.log("Current Document:", currentDocument);
-          console.log("Total Documents:", totalDocuments);
-          console.log(
-            "setting job to: ",
-            currentDocument / totalDocuments
-              ? currentDocument / totalDocuments
-              : 0
-          );
-          job.progress(
-            currentDocument / totalDocuments
-              ? Math.round((currentDocument / totalDocuments) * 100)
-              : 1
-          );
-        } else if (data.toString().startsWith("Collection(s) used")) {
-          // console.log('datacoll', data.toString().split(':')[1])
-          collectionName = data.toString().split(":")[1];
-          // console.log("captured collection name:", collectionName);
-        } else if (data.toString().startsWith("Total Documents")) {
-          totalDocuments = parseInt(data.toString().split(":")[1].trim());
-          console.log("Storing total docs in db for job", totalDocuments);
-          // console.log("collection used!!", collectionName);
-          // console.log("job", job.id);
-          const query =
-            "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
-          try {
-            const [rows, fields] = await db
-              .promise()
-              .execute(query, [collectionName, totalDocuments, job.id]);
-            console.log("MongoDB collection info updated in DB for job");
-            // res.send(`Job ${job.id} added to queue`);
-          } catch (err) {
-            console.log("error!", err);
-            throw new Error("Error");
-          }
+      buffer += data.toString();
+
+      while (true) {
+        const endObjectIndex = buffer.indexOf("}\n");
+
+        if (endObjectIndex === -1) {
+          // We don't have a complete JSON object yet
+          break;
+        }
+
+        const jsonString = buffer.slice(0, endObjectIndex + 1);
+        buffer = buffer.slice(endObjectIndex + 2);
+
+        if (jsonString.startsWith('{"endResult":')) {
+          capturedData = JSON.parse(jsonString).endResult;
+          capturedData = JSON.stringify(capturedData);
         } else {
-          console.log("log:", data.toString());
+          const logMessage = jsonString.trim();
+
+          if (logMessage.startsWith("Processing Document At")) {
+            const currentDocument = parseInt(logMessage.split(":")[1].trim());
+            console.log("Current Document:", currentDocument);
+            console.log("Total Documents:", totalDocuments);
+            console.log(
+              "setting job to: ",
+              currentDocument / totalDocuments
+                ? currentDocument / totalDocuments
+                : 0
+            );
+            job.progress(
+              currentDocument / totalDocuments
+                ? Math.round((currentDocument / totalDocuments) * 100)
+                : 1
+            );
+          } else if (logMessage.startsWith("Collection(s) used")) {
+            collectionName = logMessage.split(":")[1];
+          } else if (logMessage.startsWith("Total Documents")) {
+            totalDocuments = parseInt(logMessage.split(":")[1].trim());
+            console.log("Storing total docs in db for job", totalDocuments);
+            const query =
+              "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+            try {
+              const [rows, fields] = await db
+                .promise()
+                .execute(query, [collectionName, totalDocuments, job.id]);
+              console.log("MongoDB collection info updated in DB for job");
+            } catch (err) {
+              console.log("error!", err);
+              throw new Error("Error");
+            }
+          } else {
+            console.log("log:", logMessage);
+          }
         }
       }
     });
+
     process.stderr.on("data", (data) => {
       console.error(`stderr: ${data}`);
     });
 
     process.on("close", (code) => {
-      if (code === 0) {
+      if (code === 0 && capturedData) {
         console.log("Embedding comparisons finished successfully");
         job.progress(100);
+        console.log('resolved', capturedData)
         resolve(capturedData);
       } else {
         console.error(
@@ -708,7 +719,7 @@ async function getJobVerifyInfo(req, res) {
       res.status(200).json(document);
     } else {
       // Send a not found response
-      res.status(500).json({message: "Document not found"});
+      res.status(500).json({ message: "Document not found" });
     }
   } catch (error) {
     console.error("Error connecting to MongoDB", error);

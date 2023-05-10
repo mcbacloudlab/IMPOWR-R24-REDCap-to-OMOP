@@ -209,7 +209,7 @@ async function startProcessing(
 
     worker.on("message", (message) => {
       if (message.log) {
-        console.log("log2", ...message.log);
+        // console.log("log", ...message.log);
       } else if (message.dataPortion) {
         // Handle each portion of data received from the worker
         receivedDataPortions[message.portionIndex] = message.dataPortion;
@@ -253,8 +253,8 @@ async function startProcessing(
           const outputString =
             JSON.stringify({ endResult: mergedAndModifiedList });
           setTimeout(() => {
-            process.stdout.write(outputString);
-          }, 5000);
+            process.stdout.write(outputString + '\n');
+          }, 2000);
 
           // process.stdout.write({ endResult: JSON.stringify(finalList) + "\n" });
           resolve();
