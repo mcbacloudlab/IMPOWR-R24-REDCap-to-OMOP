@@ -19,43 +19,17 @@ const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
 const { createBullBoard } = require("bull-board");
 const { BullAdapter } = require("bull-board/bullAdapter");
-// const basicAuth = require('express-basic-auth');
 const syncRedisAndJobDB = require("./gpt3/syncRedisAndJobDB");
 const EventEmitter = require("events"); // Import the EventEmitter class from the 'events' module
 const commander = new EventEmitter(); // Create a new instance of EventEmitter
 
 commander.setMaxListeners(20); // Increase the limit to 20
-// const _redisServer = require("redis-server");
+
 // Sync redis and mysql job ids
 setInterval(syncRedisAndJobDB, 60000);
 
 const someQueue = new Queue("process-queue");
 
-
-// process.on("uncaughtException", (err) => {
-//   console.error("Uncaught exception:", err);
-//   console.error('Please make sure redis is installed')
-// });
-
-// try {
-//   const redisServer = new _redisServer({
-//     port: 6379,
-//   });
-
-//   redisServer.open((err) => {
-//     if (err) {
-//       console.error("Error starting Redis server:", err);
-//     } else {
-//       console.log("Redis server started successfully");
-//     }
-//   });
-// } catch (error) {
-//   if (error.code === "ENOENT" && error.syscall === "spawn redis-server") {
-//     console.error("Redis is not installed on this system");
-//   } else {
-//     console.error("Unhandled error:", error);
-//   }
-// }
 
 let appPort = process.env.EXPRESS_PORT;
 // Use Helmet!
@@ -99,12 +73,14 @@ const skip = (req, res) => {
 };
 app.use(morgan("dev", { skip }));
 
-// enable files upload
-app.use(
-  fileUpload({
-    createParentPath: true,
-  })
-);
+//using express-fileupload for parsing body
+app.use(fileUpload({
+  createParentPath: true,
+  useTempFiles : false, //enable/disable file-uploads
+  tempFileDir : false //enable/disable file-uploads
+}));
+
+
 
 const apiLimiter = rateLimit({
   windowMs: 1000, // time window in milliseconds
@@ -112,7 +88,6 @@ const apiLimiter = rateLimit({
 });
 
 //api rate limited routes
-app.use("/api/file", apiLimiter);
 app.use("/api/users", apiLimiter);
 app.use("/api/keys", apiLimiter);
 
