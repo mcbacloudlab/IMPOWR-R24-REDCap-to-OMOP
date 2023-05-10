@@ -69,7 +69,7 @@ async function importToMongo(job) {
       __dirname,
       "../mongo/importRedcap_To_MongoDB.js"
     );
-    const args = ["--max-old-space-size=32768"];
+    const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
@@ -119,7 +119,7 @@ async function embedRedcapText(job) {
 
   return new Promise((resolve) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");
-    const args = ["--max-old-space-size=32768"];
+    const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
@@ -161,7 +161,7 @@ async function embedRedcapLookupText(job) {
 
   return new Promise((resolve) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapLookupEmbed.js");
-    const args = ["--max-old-space-size=32768"];
+    const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
     const process = spawn("node", args.concat([scriptPath, filename]), {
@@ -208,7 +208,7 @@ async function compareEmbeddings(job) {
       __dirname,
       "../gpt3/compareRedcapToSnomed.js"
     );
-    const args = ["--max-old-space-size=32768"];
+    const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
     const collectionsToUse = job.data.collections;
