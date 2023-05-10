@@ -14,7 +14,10 @@ function decrypt(encryptedData, iv, algorithm, secretKey) {
 }
 
 async function getUMLSSearchResults(req, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  if(process.env.NODE_ENV == 'local'){
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  }
+ 
   console.log('reqbody', req.body.searchText)
   if(!req.body.searchText){
     res.status(500).send("Error");

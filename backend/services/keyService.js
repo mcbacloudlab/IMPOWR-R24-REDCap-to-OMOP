@@ -99,7 +99,9 @@ async function updateAPIKey(req, res) {
 }
 
 async function testRedcapAPI(req, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  if(process.env.NODE_ENV == 'local'){
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  }
   // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'redcap%'";
   //   return new Promise((resolve, reject) => {
@@ -162,7 +164,9 @@ async function testRedcapAPI(req, res) {
 }
 
 async function testUMLSAPI(req, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  if(process.env.NODE_ENV == 'local'){
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  }
   // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'umls%'";
   //   return new Promise((resolve, reject) => {
@@ -214,7 +218,9 @@ async function testUMLSAPI(req, res) {
 }
 
 async function testGPT3API(req, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  if(process.env.NODE_ENV == 'local'){
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  }
   // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'gpt3%'";
   //   return new Promise((resolve, reject) => {

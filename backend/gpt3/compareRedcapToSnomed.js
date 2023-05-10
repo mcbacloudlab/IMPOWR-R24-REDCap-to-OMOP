@@ -1,8 +1,8 @@
 const MongoClient = require("mongodb").MongoClient;
 const cosineSimilarity = require("compute-cosine-similarity");
 // var eDistance = require("euclidean-distance");
-const ProgressBar = require("cli-progress");
-const Excel = require("exceljs");
+// const ProgressBar = require("cli-progress");
+// const Excel = require("exceljs");
 var axios = require("axios");
 const cheerio = require("cheerio");
 const axiosThrottle = require("axios-request-throttle");

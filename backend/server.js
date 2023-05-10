@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express();
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 require("dotenv").config();
 const fileUpload = require("express-fileupload");
@@ -9,22 +10,20 @@ const morgan = require("morgan");
 const userRoutes = require("./routes/userRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const keyRoutes = require("./routes/keyRoutes");
-const collectionRoutes = require("./routes/collectionRoutes")
+const collectionRoutes = require("./routes/collectionRoutes");
 const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const umlsRoutes = require("./routes/umlsRoutes");
-const orcidRoutes = require('./routes/orcidRoutes')
+const orcidRoutes = require("./routes/orcidRoutes");
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
 const { createBullBoard } = require("bull-board");
 const { BullAdapter } = require("bull-board/bullAdapter");
-const basicAuth = require('express-basic-auth');
-const syncRedisAndJobDB = require('./gpt3/syncRedisAndJobDB');
-const EventEmitter = require('events'); // Import the EventEmitter class from the 'events' module
+// const basicAuth = require('express-basic-auth');
+const syncRedisAndJobDB = require("./gpt3/syncRedisAndJobDB");
+const EventEmitter = require("events"); // Import the EventEmitter class from the 'events' module
 const commander = new EventEmitter(); // Create a new instance of EventEmitter
-
-
 
 commander.setMaxListeners(20); // Increase the limit to 20
 // const _redisServer = require("redis-server");
@@ -32,10 +31,6 @@ commander.setMaxListeners(20); // Increase the limit to 20
 setInterval(syncRedisAndJobDB, 60000);
 
 const someQueue = new Queue("process-queue");
-
-const { router, setQueues, replaceQueues, addQueue, removeQueue } =
-  createBullBoard([new BullAdapter(someQueue)]);
-
 
 
 // process.on("uncaughtException", (err) => {
@@ -64,34 +59,40 @@ const { router, setQueues, replaceQueues, addQueue, removeQueue } =
 // }
 
 let appPort = process.env.EXPRESS_PORT;
+// Use Helmet!
+app.use(helmet());
+
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(bodyParser.json({ limit: "50mb" }));
 // Use the cookie-parser middleware
 app.use(cookieParser());
 // Use the cors middleware and configure it to allow credentials
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://192.168.50.125:3000',
-  'http://34.23.5.184/redcap-omop',
-  'http://34.23.5.184',
-  'http://localhost:5000',
-  'https://cde2omop.wakehealth.edu'
+  "http://localhost:3000",
+  "http://192.168.50.125:3000",
+  "http://34.23.5.184/redcap-omop",
+  "http://34.23.5.184",
+  "http://localhost:5000",
+  "https://cde2omop.wakehealth.edu",
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // console.log('origin', origin)
-    // Allow requests with no origin (e.g. mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    // Check if the origin is in the list of allowed origins
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // console.log('origin', origin)
+      // Allow requests with no origin (e.g. mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      // Check if the origin is in the list of allowed origins
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 const skipRoutes = ["/getUserJobs", "/queues", "/validateUser"];
 const skip = (req, res) => {
@@ -134,8 +135,11 @@ app.use("/api/collections", authenticate, collectionRoutes);
 // app.use("/admin/queues/static/*", router);
 
 // Apply the requireAdmin middleware to all other routes under /admin/queues
-app.use("/admin/queues", router);
-
+if (process.env.NODE_ENV == "local" || process.env.NODE_ENV == "development") {
+  const { router, setQueues, replaceQueues, addQueue, removeQueue } =
+    createBullBoard([new BullAdapter(someQueue)]);
+    app.use("/admin/queues", router);
+}
 
 
 var server = app.listen(appPort, function () {
@@ -144,5 +148,5 @@ var server = app.listen(appPort, function () {
   console.info("Port to use:", port);
   if (host === "::") host = "localhost";
   console.info("Backend Express Server listening at http://%s:%s", host, port);
-  syncRedisAndJobDB()
+  syncRedisAndJobDB();
 });
