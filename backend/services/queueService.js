@@ -233,7 +233,7 @@ async function compareEmbeddings(job) {
     // capture data returned from child
     process.stdout.on("data", async (data) => {
       if (data.toString().startsWith('{"endResult":')) {
-        // console.log("data to capture");
+        console.log("data to capture", data.toString());
         capturedData = JSON.parse(data.toString()).endResult;
         capturedData = JSON.stringify(capturedData);
       } else {

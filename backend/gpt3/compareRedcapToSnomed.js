@@ -251,10 +251,10 @@ async function startProcessing(
           );
           // console.log("Merged and modified list:", mergedAndModifiedList);
           const outputString =
-            JSON.stringify({ endResult: mergedAndModifiedList }) + "\n";
+            JSON.stringify({ endResult: mergedAndModifiedList });
           setTimeout(() => {
             process.stdout.write(outputString);
-          }, 2000);
+          }, 5000);
 
           // process.stdout.write({ endResult: JSON.stringify(finalList) + "\n" });
           resolve();
