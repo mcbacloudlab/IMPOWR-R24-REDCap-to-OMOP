@@ -1,7 +1,7 @@
 const queueService = require("../services/queueService");
 
 async function submit(req, res) {
-  console.log("submit to redis queue");
+  // console.log("submit to redis queue");
   try {
     await queueService.submit(req, res);
     // console.log("after submit", status)
@@ -50,7 +50,7 @@ async function updateJobName(req, res) {
 
 async function getJobStatus(req, res) {
   const jobID = req.query.jobID;
-  console.log("get job status", jobID);
+  // console.log("get job status", jobID);
   try {
     await queueService.getJobStatus(req, res);
     // res.status(200).send("Ok");
@@ -62,7 +62,7 @@ async function getJobStatus(req, res) {
 
 async function getJobReturnData(req, res) {
   const jobID = req.query.jobID;
-  console.log("get job status", jobID);
+  // console.log("get job status", jobID);
   try {
     await queueService.getJobReturnData(req, res);
     // res.status(200).send("Ok");
@@ -100,7 +100,7 @@ async function storeJobCompleteInfo(req, res){
 }
 
 async function submitJobVerify(req, res) {
-  console.log("submit to redis queue");
+  // console.log("submit to redis queue");
   try {
     await queueService.submitJobVerify(req, res);
     // console.log("after submit", status)

@@ -4,8 +4,8 @@ const cosineSimilarity = require("compute-cosine-similarity");
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
-console.log("workerData", workerData.collections);
-console.time('child worker started')
+// console.log("workerData", workerData.collections);
+// console.time('child worker started')
 let totalDocuments = 0
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
@@ -144,7 +144,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
         totalDataPortions,
       });
     }
-    console.timeEnd("child worker done")
+    // console.timeEnd("child worker done")
     parentPort.postMessage({ endResult: null }); // Signal the end of data transmission
     parentPort.close();
     process.exit(0);

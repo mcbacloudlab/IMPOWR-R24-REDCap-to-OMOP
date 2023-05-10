@@ -35,7 +35,7 @@ myQueue.process(jobOptions.concurrency, async (job) => {
   let jobData = JSON.parse(job.data.data);
   let result;
   const containsLookupTrue = jobData.some((element) => element.lookup === true);
-  console.log("contains lookup", containsLookupTrue);
+  // console.log("contains lookup", containsLookupTrue);
   if (job.data.lookup && containsLookupTrue) {
     await embedRedcapLookupText(job);
   } else if (job.data.lookup) {
@@ -115,7 +115,7 @@ async function embedRedcapText(job) {
 
   console.log("Starting REDCap GPT3 Embedding...");
   // job.progress(60);
-  console.log("job.data");
+  // console.log("job.data");
 
   return new Promise((resolve) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");
@@ -255,14 +255,14 @@ async function compareEmbeddings(job) {
               : 1
           );
         } else if (data.toString().startsWith("Collection(s) used")) {
-          console.log('datacoll', data.toString().split(':')[1])
+          // console.log('datacoll', data.toString().split(':')[1])
           collectionName = data.toString().split(":")[1];
-          console.log("captured collection name:", collectionName);
+          // console.log("captured collection name:", collectionName);
         } else if (data.toString().startsWith("Total Documents")) {
           totalDocuments = parseInt(data.toString().split(":")[1].trim());
-          console.log("storing total docs in db for job", totalDocuments);
+          console.log("Storing total docs in db for job", totalDocuments);
           // console.log("collection used!!", collectionName);
-          console.log("job", job.id);
+          // console.log("job", job.id);
           const query =
             "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
           try {
@@ -329,8 +329,8 @@ async function submit(req, res) {
       userId = userId[0].id;
     }
 
-    console.log("email", email);
-    console.log("the user id!!", userId);
+    // console.log("email", email);
+    // console.log("the user id!!", userId);
     const job = await myQueue.add(data, jobOptions);
     console.log(`Job ${job.id} added to queue`);
     const now = new Date();
@@ -720,7 +720,7 @@ async function getJobVerifyInfo(req, res) {
 async function submitJobVerify(req, res) {
   try {
     const data = req.body;
-    console.log("data", data.filename);
+    // console.log("data", data.filename);
     const authHeader = req.headers.authorization;
     const tokenFromHeader =
       authHeader &&

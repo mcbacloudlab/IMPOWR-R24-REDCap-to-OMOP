@@ -83,7 +83,7 @@ main().then(async () => {
     const redCapCollectionArray = transformedData;
     // console.log("redcap array", redCapCollectionArray);
     console.info("Loaded Redcap Collection into memory");
-    console.log('collections to use', collectionsToUse)
+    // console.log('collections to use', collectionsToUse)
     console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))
     const snomedCollection = client
       .db("GPT3_Embeddings")
@@ -209,7 +209,7 @@ async function startProcessing(
 
     worker.on("message", (message) => {
       if (message.log) {
-        console.log("log", ...message.log);
+        console.log("log2", ...message.log);
       } else if (message.dataPortion) {
         // Handle each portion of data received from the worker
         receivedDataPortions[message.portionIndex] = message.dataPortion;

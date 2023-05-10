@@ -14,7 +14,7 @@ import Button from "@mui/material/Button";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
-// import TransferList from "./TransferList";
+import TransferList from "./TransferList";
 import CollectionList from "./CollectionList";
 // import { ExportToCsv } from "export-to-csv";
 import Papa from "papaparse";
@@ -339,19 +339,22 @@ export default function FormSelect(props) {
             )}
             <Grid sx={{ margin: 1 }}>
               {isFormLoaded && (
+                <>
                 <CollectionList
                   token={token}
                   setCheckedItems={setCheckedItems}
                   checkedItems={checkedItems}
                 />
 
-                // <TransferList
-                //   props={props}
-                //   setData={setData}
-                //   data={data}
-                //   setColDefs={setColDefs}
-                //   colDefs={colDefs}
-                // />
+                <TransferList
+                
+                  props={props}
+                  setData={setData}
+                  data={data}
+                  setColDefs={setColDefs}
+                  colDefs={colDefs}
+                />
+                </>
               )}
             </Grid>
             <Grid sx={{ margin: "auto", mt: 2 }}>
