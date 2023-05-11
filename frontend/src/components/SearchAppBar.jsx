@@ -35,6 +35,7 @@ import _ from "lodash";
 // import { NavLink } from 'react-router-dom';
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
+import Logo from '../assets/logo.png'
 
 export default function SearchAppBar(props) {
   // console.log('search bar', props.user)
@@ -371,6 +372,7 @@ export default function SearchAppBar(props) {
         >
           <Toolbar>
             {/* <TemporaryDrawer /> */}
+            <img src={Logo} alt="logo" width="30" height="30" sx={{marginRight: '30px'}} />
             {/* <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
               <img
                 src={REDCapLogo}
@@ -388,7 +390,7 @@ export default function SearchAppBar(props) {
               variant="h6"
               noWrap
               component="div"
-              sx={{ display: { xs: "none", sm: "block" } }}
+              sx={{ display: { xs: "none", sm: "block" }, marginLeft: '20px' }}
             >
               CDE To OMOP
             </Typography>

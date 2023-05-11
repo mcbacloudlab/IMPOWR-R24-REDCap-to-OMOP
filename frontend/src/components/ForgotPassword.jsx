@@ -20,7 +20,7 @@ import Cookies from "js-cookie";
 import OrcidLogo from "../assets/orcid.logo.svg";
 import Logo from '../assets/logo.png'
 
-export default function SignIn({ props }) {
+export default function ForgotPassword({ props }) {
   const [loginError, setLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
 
@@ -34,29 +34,29 @@ export default function SignIn({ props }) {
 
     var formdata = new FormData();
 
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-      redirect: "follow",
-      credentials: "include", // Include cookies with the request
-    };
+    // var requestOptions = {
+    //   method: "POST",
+    //   headers: myHeaders,
+    //   body: formdata,
+    //   redirect: "follow",
+    //   credentials: "include", // Include cookies with the request
+    // };
 
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
-      requestOptions
-    )
-      .then((response) => response.status)
-      .then((result) => {
-        if (result === 200) {
-          props.updateUser("loggedIn");
-          navigate("/myaccount");
-        } else {
-          navigate("/signin");
-        }
-      })
-      .catch((error) => console.log("error", error));
-    // }
+    // fetch(
+    //   `${process.env.REACT_APP_BACKEND_API_URL}/api/users/validateUser`,
+    //   requestOptions
+    // )
+    //   .then((response) => response.status)
+    //   .then((result) => {
+    //     if (result === 200) {
+    //       props.updateUser("loggedIn");
+    //       navigate("/myaccount");
+    //     } else {
+    //       navigate("/signin");
+    //     }
+    //   })
+    //   .catch((error) => console.log("error", error));
+    // // }
   }, [jwtToken, navigate, props]);
 
   function ErrorAlert() {
@@ -136,12 +136,9 @@ export default function SignIn({ props }) {
         }}
       >
         <img src={Logo} alt="logo" width="48" height="48" />
-        {/* <Avatar sx={{ m: 1, bgcolor: "primary.main" }}> */}
-          {/* <LockOutlinedIcon /> */}
-          {/* startIcon={ */}
-              {/* <img src={Logo} alt="ORCID logo" width="48" height="48" /> */}
-            {/* } */}
-        {/* </Avatar> */}
+        {/* <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+          <LockOutlinedIcon />
+        </Avatar> */}
         <Typography component="h1" variant="h5">
           CDE to OMOP
         </Typography>
@@ -157,7 +154,7 @@ export default function SignIn({ props }) {
             autoComplete="email"
             autoFocus
           />
-          <TextField
+          {/* <TextField
             margin="normal"
             required
             fullWidth
@@ -166,14 +163,14 @@ export default function SignIn({ props }) {
             type="password"
             id="password"
             autoComplete="current-password"
-          />
+          /> */}
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
+            Send Reset Password Email
           </Button>
           <Button
             variant="contained"
@@ -198,8 +195,8 @@ export default function SignIn({ props }) {
           <Divider sx={{ mb: 2, mt: 2 }} />
           <Grid container>
             <Grid item xs>
-              <Link href="forgotpassword" variant="body2">
-                Forgot password?
+              <Link href="signin" variant="body2">
+                Already have an account? Sign in
               </Link>
             </Grid>
             <Grid item>

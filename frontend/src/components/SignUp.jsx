@@ -15,6 +15,7 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import OrcidLogo from "../assets/orcid.logo.svg";
 import { Divider } from "@mui/material";
+import Logo from '../assets/logo.png'
 
 export default function SignUp({ props }) {
   console.log('sign up props', props)
@@ -79,11 +80,12 @@ export default function SignUp({ props }) {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+          <img src={Logo} alt="logo" width="48" height="48" />
+          {/* <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
-          </Avatar>
+          </Avatar> */}
           <Typography component="h1" variant="h5">
-            Sign up
+            CDE to OMOP
           </Typography>
           {signUpError && (
             <Alert severity="error">Error</Alert>

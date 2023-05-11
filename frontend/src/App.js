@@ -9,6 +9,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 // import Archived from "./pages/ArchivedPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import Cookies from "js-cookie";
 import { Navigate, useLocation } from "react-router-dom";
@@ -286,6 +287,17 @@ function App() {
                           token={token}
                           setToken={setToken}
                         ></SignUpPage>
+                      }
+                      exact
+                    />
+                      <Route
+                      path="/forgotpassword"
+                      element={
+                        <ForgotPasswordPage
+                          updateUser={updateUser}
+                          token={token}
+                          setToken={setToken}
+                        ></ForgotPasswordPage>
                       }
                       exact
                     />
