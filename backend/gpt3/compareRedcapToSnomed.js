@@ -50,10 +50,10 @@ main().then(async () => {
     const redcapCollection = client
       .db("GPT3_Embeddings")
       .collection("gpt3_redcap_embeddings");
-
-    const redcapLookupCollection = client
-      .db("GPT3_Embeddings")
-      .collection("gpt3_redcap_lookup_embeddings");
+    console.log('Got Redcap Embeddings from Mongo')
+    // const redcapLookupCollection = client
+    //   .db("GPT3_Embeddings")
+    //   .collection("gpt3_redcap_lookup_embeddings");
 
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
@@ -65,13 +65,9 @@ main().then(async () => {
           variableName: obj.field_name,
         });
 
-        const document2 = await redcapLookupCollection.findOne({
-          fieldLabel: obj.field_label,
-        });
-
-        // console.log('document1', document)
-
-        // console.log('document2', document2)
+        // const document2 = await redcapLookupCollection.findOne({
+        //   fieldLabel: obj.field_label,
+        // });
 
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
