@@ -237,7 +237,44 @@ async function compareEmbeddings(job) {
 
       while (true) {
         const endObjectIndex = buffer.indexOf("}\n");
+        
+        const logMessage = data.toString().trim();
 
+        if (logMessage.startsWith("Processing Document At")) {
+          const currentDocument = parseInt(logMessage.split(":")[1].trim());
+          console.log("Current Document:", currentDocument);
+          console.log("Total Documents:", totalDocuments);
+          console.log(
+            "setting job to: ",
+            currentDocument / totalDocuments
+              ? currentDocument / totalDocuments
+              : 0
+          );
+          job.progress(
+            currentDocument / totalDocuments
+              ? Math.round((currentDocument / totalDocuments) * 100)
+              : 1
+          );
+        } else if (logMessage.startsWith("Collection(s) used")) {
+          collectionName = logMessage.split(":")[1];
+        } else if (logMessage.startsWith("Total Documents")) {
+          totalDocuments = parseInt(logMessage.split(":")[1].trim());
+          console.log("Storing total docs in db for job", totalDocuments);
+          const query =
+            "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+          try {
+            const [rows, fields] = await db
+              .promise()
+              .execute(query, [collectionName, totalDocuments, job.id]);
+            console.log("MongoDB collection info updated in DB for job");
+          } catch (err) {
+            console.log("error!", err);
+            throw new Error("Error");
+          }
+        } else {
+          // console.log("log:", logMessage);
+        }
+        
         if (endObjectIndex === -1) {
           // We don't have a complete JSON object yet
           break;
@@ -250,42 +287,7 @@ async function compareEmbeddings(job) {
           capturedData = JSON.parse(jsonString).endResult;
           capturedData = JSON.stringify(capturedData);
         } else {
-          const logMessage = jsonString.trim();
-
-          if (logMessage.startsWith("Processing Document At")) {
-            const currentDocument = parseInt(logMessage.split(":")[1].trim());
-            console.log("Current Document:", currentDocument);
-            console.log("Total Documents:", totalDocuments);
-            console.log(
-              "setting job to: ",
-              currentDocument / totalDocuments
-                ? currentDocument / totalDocuments
-                : 0
-            );
-            job.progress(
-              currentDocument / totalDocuments
-                ? Math.round((currentDocument / totalDocuments) * 100)
-                : 1
-            );
-          } else if (logMessage.startsWith("Collection(s) used")) {
-            collectionName = logMessage.split(":")[1];
-          } else if (logMessage.startsWith("Total Documents")) {
-            totalDocuments = parseInt(logMessage.split(":")[1].trim());
-            console.log("Storing total docs in db for job", totalDocuments);
-            const query =
-              "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
-            try {
-              const [rows, fields] = await db
-                .promise()
-                .execute(query, [collectionName, totalDocuments, job.id]);
-              console.log("MongoDB collection info updated in DB for job");
-            } catch (err) {
-              console.log("error!", err);
-              throw new Error("Error");
-            }
-          } else {
-            console.log("log:", logMessage);
-          }
+         
         }
       }
     });
