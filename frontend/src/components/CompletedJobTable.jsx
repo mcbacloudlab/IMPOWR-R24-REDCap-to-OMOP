@@ -38,7 +38,7 @@ export default function CompletedJobTable({
       getSubRows={(originalRow) => {
         return originalRow.subRows;
       }} //default, can customize
-      paginateExpandedRows={true}
+      paginateExpandedRows={false}
       RowProps={{ sx: { marginBottom: "10px" } }}
       // enableRowNumbers
       // enableRowVirtualization

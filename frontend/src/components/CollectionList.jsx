@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Checkbox,
-  //   FormControlLabel,
+  Grid,
   Table,
   TableBody,
   TableCell,
@@ -45,7 +45,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
         .catch((error) => console.log("error", error));
     };
     fetchCollections();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCheckboxChange = (event) => {
@@ -56,38 +56,40 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
   };
 
   return (
-    <TableContainer component={Paper} sx={{margin: 1}}>
-      <Table size="small">
-        <TableHead sx={{backgroundColor: '#343541', color: 'white'}}>
-          <TableRow>
-            <TableCell padding="checkbox"></TableCell>
-            <TableCell sx={{color: "white"}}>Name</TableCell>
-            <TableCell sx={{color: 'white'}}>Documents</TableCell>
-            {/* <TableCell>Storage Size</TableCell> */}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredCollections.map((item, index) => (
-            <TableRow key={index}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={checkedItems[item.name] || false}
-                  onChange={handleCheckboxChange}
-                  name={item.name}
-                />
-              </TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell align="right">
-                {item.documentCount
-                  ? item.documentCount.toLocaleString()
-                  : "N/A"}
-              </TableCell>
-              {/* <TableCell>{item.storageSize}</TableCell> */}
+    <Grid container spacing={1} justifyContent="center" alignItems="center">
+      <TableContainer component={Paper} sx={{ margin: 0 }}>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: "#343541", color: "white" }}>
+            <TableRow>
+              <TableCell padding="checkbox"></TableCell>
+              <TableCell sx={{ color: "white" }}>Name</TableCell>
+              <TableCell sx={{ color: "white" }}>Documents</TableCell>
+              {/* <TableCell>Storage Size</TableCell> */}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {filteredCollections.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={checkedItems[item.name] || false}
+                    onChange={handleCheckboxChange}
+                    name={item.name}
+                  />
+                </TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell align="right">
+                  {item.documentCount
+                    ? item.documentCount.toLocaleString()
+                    : "N/A"}
+                </TableCell>
+                {/* <TableCell>{item.storageSize}</TableCell> */}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Grid>
   );
 };
 

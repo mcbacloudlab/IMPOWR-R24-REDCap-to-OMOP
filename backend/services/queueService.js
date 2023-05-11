@@ -298,7 +298,7 @@ async function compareEmbeddings(job) {
       if (code === 0 && capturedData) {
         console.log("Embedding comparisons finished successfully");
         job.progress(100);
-        console.log('resolved', capturedData)
+        // console.log('resolved', capturedData)
         resolve(capturedData);
       } else {
         console.error(
