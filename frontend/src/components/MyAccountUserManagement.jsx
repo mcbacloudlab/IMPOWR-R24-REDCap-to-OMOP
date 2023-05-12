@@ -67,6 +67,10 @@ export default function MyAccountUserManagement(props) {
       //   Cell: RemoveCell,
       // },
       {
+        header: "Approved",
+        accessorKey: "approved",
+      },
+      {
         header: "First Name",
         accessorKey: "firstName",
       },
@@ -110,12 +114,13 @@ export default function MyAccountUserManagement(props) {
         return response.text();
       })
       .then((result) => {
-        console.log("result", result);
+        // console.log("result", result);
         let jsonData = JSON.parse(result);
         setAllUsers(jsonData);
-        setTableData(jsonData);
+        // setTableData(jsonData);
         setAllUsersCount(jsonData.length);
         // Count variable for objects where approved is not 'Y'
+        console.log('pending users', jsonData.filter((obj) => obj.approved !== "Y"))
         setPendingUsersCount(
           jsonData.filter((obj) => obj.approved !== "Y").length
         );

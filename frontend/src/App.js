@@ -123,7 +123,7 @@ function ProtectedRoute({
     };
 
     validateUser();
-  }, [location, setUser, validateJwtToken, setToken, token]);
+  }, [location, setUser, validateJwtToken, setToken, token, setOpenSnackbar]);
 
   if (isLoading) {
     return <div></div>;
@@ -267,6 +267,7 @@ function App() {
                           validateJwtToken={validateJwtToken}
                           token={token}
                           setToken={setToken}
+                          setOpenSnackbar={setOpenSnackbar}
                         >
                           <CompletedJobsViewPage
                             user={user}
