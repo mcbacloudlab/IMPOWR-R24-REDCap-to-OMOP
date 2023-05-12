@@ -8,6 +8,8 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 // import TextField from "@mui/material/TextField";
@@ -310,24 +312,28 @@ export default function MyAccountUserManagement(props) {
                             gap: "8px",
                           }}
                         >
+                          <Tooltip title="Approve">
                           <IconButton
                             color="success"
                             onClick={() => {
-                              handleClickApproveOpen(row.original)
+                              handleClickApproveOpen(row.original);
                             }}
                           >
                             <CheckIcon />
                           </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Remove">
                           <IconButton
                             color="error"
                             onClick={() => {
                               // tableData.splice(row.index, 1); //assuming simple data table
                               // setTableData([...tableData]);
-                              handleClickOpen(row.original)
+                              handleClickOpen(row.original);
                             }}
                           >
                             <DeleteIcon />
                           </IconButton>
+                          </Tooltip>
                         </Box>,
                       ],
                     })}
@@ -340,14 +346,17 @@ export default function MyAccountUserManagement(props) {
                             gap: "8px",
                           }}
                         >
-                          <IconButton
-                            color="secondary"
-                            onClick={() => {
-                              table.setEditingRow(row);
-                            }}
-                          >
-                            <EditIcon />
-                          </IconButton>
+                          <Tooltip title="Edit">
+                            <IconButton
+                              color="secondary"
+                              onClick={() => {
+                                table.setEditingRow(row);
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Remove">
                           <IconButton
                             color="error"
                             onClick={() => {
@@ -356,6 +365,7 @@ export default function MyAccountUserManagement(props) {
                           >
                             <DeleteIcon />
                           </IconButton>
+                          </Tooltip>
                         </Box>,
                       ],
                     })}
@@ -443,7 +453,14 @@ export default function MyAccountUserManagement(props) {
                   <DialogTitle>Confirm Deletion</DialogTitle>
                   <DialogContent>
                     <DialogContentText>
-                      Are you sure you want to remove {userSelected}?
+                      <Typography
+                        color="error"
+                        component="span"
+                        variant="inherit"
+                      >
+                        Remove
+                      </Typography>{" "}
+                      <b>{userSelected}</b>?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
@@ -462,8 +479,15 @@ export default function MyAccountUserManagement(props) {
                 <Dialog open={approveOpen} onClose={handleApproveClose}>
                   <DialogTitle>Confirm Approval</DialogTitle>
                   <DialogContent>
-                    <DialogContentText>
-                      Are you sure you want to approve {userSelected}?
+                    <DialogContentText color="success">
+                      <Typography
+                        component="span"
+                        variant="inherit"
+                        sx={{ color: "green" }}
+                      >
+                        Approve
+                      </Typography>{" "}
+                      <b>{userSelected}</b>?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>

@@ -35,10 +35,12 @@ import _ from "lodash";
 // import { NavLink } from 'react-router-dom';
 // import OMOPLogo from "../assets/6570077.png";
 // import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
-import Logo from '../assets/logo.png'
+import Logo from "../assets/logo.png";
+import MuiAlert from "@mui/material/Alert";
 
-export default function SearchAppBar(props) {
-  // console.log('search bar', props.user)
+export default function SearchAppBar({ openSnackbar, ...props }) {
+  console.log('search bar', props)
+  console.log('opensnackbar', openSnackbar)
   const {
     pendingList,
     // failedList,
@@ -51,6 +53,9 @@ export default function SearchAppBar(props) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
+
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
   // const [username, setUsername] = useState("");
   // const [name, setName] = useState("");
   // const [role, setRole] = useState(null);
@@ -111,7 +116,7 @@ export default function SearchAppBar(props) {
     props.setToken(null);
     props.updateUser(null);
     // props.setServerError(true)
-    orcidLogout()
+    orcidLogout();
     navigate("/signin");
   };
 
@@ -350,7 +355,9 @@ export default function SearchAppBar(props) {
   useEffect(() => {
     // Fetch data initially
     // checkJobs();
-
+    displayMessage(
+      "This account is pending approval. Please be patient while we approve all user requests."
+    );
     // Fetch data every 15 seconds
     const intervalId = setInterval(() => {
       checkJobs();
@@ -363,6 +370,10 @@ export default function SearchAppBar(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const displayMessage = (msg) => {
+    setSnackbarMessage(msg);
+  };
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -372,7 +383,13 @@ export default function SearchAppBar(props) {
         >
           <Toolbar>
             {/* <TemporaryDrawer /> */}
-            <img src={Logo} alt="logo" width="30" height="30" sx={{marginRight: '30px'}} />
+            <img
+              src={Logo}
+              alt="logo"
+              width="30"
+              height="30"
+              sx={{ marginRight: "30px" }}
+            />
             {/* <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
               <img
                 src={REDCapLogo}
@@ -390,7 +407,7 @@ export default function SearchAppBar(props) {
               variant="h6"
               noWrap
               component="div"
-              sx={{ display: { xs: "none", sm: "block" }, marginLeft: '20px' }}
+              sx={{ display: { xs: "none", sm: "block" }, marginLeft: "20px" }}
             >
               CDE To OMOP
             </Typography>
@@ -484,6 +501,24 @@ export default function SearchAppBar(props) {
         </AppBar>
         {renderMobileMenu}
         {renderMenu}
+        {/* <Snackbar
+          open={openSnackbar}
+          // autoHideDuration={5000}
+          // onClose={handleSnackbarClose}
+        > */}
+        {openSnackbar && (
+          <MuiAlert
+            elevation={6}
+            variant="filled"
+            // onClose={handleSnackbarClose}
+            sx={{ ml: 6 }}
+            severity="warning" // Change severity to "success", "info", "warning", or "error"
+          >
+            {snackbarMessage}
+          </MuiAlert>
+        )}
+
+        {/* </Snackbar> */}
       </Box>
       <Drawer
         sx={{ height: "600px", overflow: "auto" }}

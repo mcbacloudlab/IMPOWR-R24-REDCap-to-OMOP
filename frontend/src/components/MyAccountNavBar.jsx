@@ -169,7 +169,7 @@ export default function MyAccountNavBar(props) {
                 backgroundColor: theme.palette.primary.main,
                 color: "white",
                 transition: "width 225ms cubic-bezier(0, 0, 0.2, 1)",
-                boxShadow: "4px 0px 10px rgba(0, 0, 0, 0.1)",
+                boxShadow: "4px 0px 10px rgba(0, 0, 0, 0.2)",
               },
             }}
           >

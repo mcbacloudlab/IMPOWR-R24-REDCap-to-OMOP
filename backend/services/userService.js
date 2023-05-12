@@ -25,7 +25,7 @@ async function getUserByEmail(email) {
 }
 
 async function createUser(userData, orcidUser) {
-  // console.log("userData", userData);
+  console.log("create userData", userData);
   const userDataSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
@@ -104,6 +104,7 @@ async function signInUser(userData) {
     lastName: userInfo[0].lastName,
     email: userInfo[0].email,
     role: userInfo[0].role,
+    approved: userInfo[0].approved
   };
 
   if (userInfo.length == 0) {
@@ -153,6 +154,7 @@ async function validateUser(authData) {
       email: userInfo.email,
       role: userInfo.role,
       orcidId: jwtVerified.orcidId?true:false,
+      approved: userInfo.approved
     };
     return userInfoToReturn;
   } catch (error) {

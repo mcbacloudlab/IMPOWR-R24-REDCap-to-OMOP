@@ -91,6 +91,7 @@ function ProtectedRoute({
   token,
   setUser,
   setToken,
+  setOpenSnackbar,
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
@@ -107,12 +108,16 @@ function ProtectedRoute({
 
     const validateUser = async () => {
       const result = await validateJwtToken(jwtToken);
+      console.log("validateResults", JSON.parse(result).approved);
       if (result.props) {
         setUser(null);
         setIsLoading(false);
         <Navigate to="/signin" replace />;
       } else {
+        if (JSON.parse(result).approved !== "Y") setOpenSnackbar(true);
+        else setOpenSnackbar(false);
         setUser(result);
+
         setIsLoading(false);
       }
     };
@@ -140,6 +145,7 @@ function App() {
   const [failedList, setFailedList] = useState();
   const [completedList, setCompletedList] = useState();
   const [serverError, setServerError] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const updateUser = (newUser) => {
     setUser(newUser);
@@ -167,6 +173,8 @@ function App() {
                       setFailedList={setFailedList}
                       setCompletedList={setCompletedList}
                       setServerError={setServerError}
+                      openSnackbar={openSnackbar}
+                      setOpenSnackbar={setOpenSnackbar}
                     />
                   )}
                   <Routes>
@@ -219,6 +227,7 @@ function App() {
                           validateJwtToken={validateJwtToken}
                           token={token}
                           setToken={setToken}
+                          setOpenSnackbar={setOpenSnackbar}
                         >
                           <MyAccountPage
                             user={user}
@@ -290,7 +299,7 @@ function App() {
                       }
                       exact
                     />
-                      <Route
+                    <Route
                       path="/forgotpassword"
                       element={
                         <ForgotPasswordPage

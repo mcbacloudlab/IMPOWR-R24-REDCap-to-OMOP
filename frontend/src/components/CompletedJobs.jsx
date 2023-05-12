@@ -51,7 +51,7 @@ export default function CompletedJobs(props) {
 
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
-  const [selectedTabIdx, setSelectedTabIdx] = useState();
+  const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   // const [sorting, setSorting] = useState();
   const [colDefs, setColDefs] = useState();
 
@@ -223,28 +223,39 @@ export default function CompletedJobs(props) {
     };
 
     const cols = [
-      {
-        header: "View",
-        accessorKey: "jobId",
-        Cell: ViewCell,
-      },
+      // {
+      //   header: "View",
+      //   accessorKey: "jobId",
+      //   Cell: ViewCell,
+      //   maxSize: 100
+      // },
+      // {
+      //   header: "Remove",
+      //   accessorKey: "jobId",
+      //   Cell: RemoveCell,
+      // },
       {
         header: "Job ID",
         accessorKey: "jobId",
+        maxSize: 100
       },
       {
         header: "REDCap Form",
         accessorKey: "redcapFormName",
+        minSize:100
       },
       {
         header: "Collections",
         accessorKey: "collections",
         Cell: CollectionsCell,
+        minSize: 300
       },
       {
         header: "Total Documents",
         accessorKey: "totalCollectionDocs",
         Cell: TotalDocumentsCell,
+        minSize: 150,
+        maxSize: 150
       },
       {
         header: "Questions",
@@ -259,11 +270,7 @@ export default function CompletedJobs(props) {
         accessorKey: "finishedAt",
         Cell: CompletedAtCell,
       },
-      {
-        header: "Remove",
-        accessorKey: "jobId",
-        Cell: RemoveCell,
-      },
+     
     ];
     console.log("columns", cols);
     setColDefs(cols);
@@ -446,6 +453,39 @@ export default function CompletedJobs(props) {
                 enableBottomToolbar={true}
                 enableGlobalFilterModes={true}
                 enablePagination={true}
+                enableRowActions
+                {...(selectedTabIdx === 0 && {
+                  renderRowActions: ({ row, table }) => [
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "nowrap",
+                        gap: "8px",
+                      }}
+                    >
+                      <Tooltip title="Edit">
+                        <IconButton
+                          color="secondary"
+                          onClick={() => {
+                            table.setEditingRow(row);
+                          }}
+                        >
+                          <SummarizeIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Remove">
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          handleClickOpen(row.original);
+                        }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                      </Tooltip>
+                    </Box>,
+                  ],
+                })}
                 // {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
                 RowProps={{ sx: { marginBottom: "10px" } }}
                 // enableRowNumbers

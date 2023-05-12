@@ -42,7 +42,7 @@ async function authenticate(req, res, next) {
 }
 
 async function getUserByEmail(email) {
-  const query = "SELECT * FROM users WHERE email = ?";
+  const query = "SELECT * FROM users WHERE email = ? and approved = 'Y'";
   return new Promise((resolve, reject) => {
     db.execute(query, [email], function (err, results, fields) {
       if (err) {
