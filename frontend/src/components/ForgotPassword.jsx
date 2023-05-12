@@ -196,7 +196,7 @@ export default function ForgotPassword({ props }) {
           <Grid container>
             <Grid item xs>
               <Link href="signin" variant="body2">
-                Already have an account? Sign in
+                Have an account? Sign in
               </Link>
             </Grid>
             <Grid item>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import {
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -337,13 +338,26 @@ export default function MyAccountAllCompletedJobs(props) {
                               <b>REDCap Questions:</b> {job.dataLength}
                             </div>
                             <div>
-                              <b>Collection / Doc Size:</b>
-                              {job.collectionName &&
+                              <b>Collections:</b>
+                              {job.collections &&
                               job.totalCollectionDocs !== null
-                                ? ` ${
-                                    job.collectionName
-                                  } / ${job.totalCollectionDocs.toLocaleString()}`
+                                ? Object.entries(JSON.parse(job.collections)).map(
+                                    ([key, value]) => (
+                                      <Chip
+                                        key={key}
+                                        label={`${key}`}
+                                        color="secondary"
+                                        sx={{margin: '10px'}}
+                                      />
+                                    )
+                                  )
                                 : "N/A"}
+                              {job.totalCollectionDocs !== null && (
+                                <Chip
+                                  label={`Total Docs: ${job.totalCollectionDocs.toLocaleString()}`}
+                                  color="secondary"
+                                />
+                              )}
                             </div>
                             {/* <div sx={{marginRight: '200px'}}> */}
                               <b>Job Name:</b>

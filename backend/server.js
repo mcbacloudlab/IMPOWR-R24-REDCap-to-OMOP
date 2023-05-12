@@ -14,6 +14,7 @@ const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const umlsRoutes = require("./routes/umlsRoutes");
 const orcidRoutes = require("./routes/orcidRoutes");
+const adminRoutes = require('./routes/adminRoutes')
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
@@ -99,10 +100,13 @@ app.use("/api/orcid", orcidRoutes);
 app.use("/api/redcap", authenticate, redcapRoutes);
 app.use("/api/queue", authenticate, queueRoutes);
 app.use("/api/umls", authenticate, umlsRoutes);
+app.use("/api/collections", authenticate, collectionRoutes);
 
 //admin only routes
 app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
-app.use("/api/collections", authenticate, collectionRoutes);
+app.use("/api/admin", authenticate, requireAdmin, adminRoutes);
+
+
 
 // Exclude all routes under /admin/queues/static from the requireAdmin middleware
 // app.use("/admin/queues/static/*", router);

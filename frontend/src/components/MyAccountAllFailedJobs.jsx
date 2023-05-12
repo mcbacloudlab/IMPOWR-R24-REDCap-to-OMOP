@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import {
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -228,7 +229,7 @@ export default function MyAccountAllFailedJobs(props) {
   // console.log('columns', columns)
 
   return (
-    <div style={{ }}>
+    <div style={{}}>
       <h1
         style={{
           paddingLeft: "20px",
@@ -239,9 +240,7 @@ export default function MyAccountAllFailedJobs(props) {
         All Failed Jobs
       </h1>
       {!failedList.length && <h3>There are currently no failed jobs.</h3>}
-      <Grid
-       container spacing={2} justifyContent="center"
-      >
+      <Grid container spacing={2} justifyContent="center">
         {columns?.map((column, index) => (
           <Grid key={index} item xs={12} md={4}>
             <Dialog open={open} onClose={handleClose}>
@@ -278,9 +277,7 @@ export default function MyAccountAllFailedJobs(props) {
                     padding: "10px",
                   }}
                 >
-                  <ListItem
-                    key={job.jobId}
-                  >
+                  <ListItem key={job.jobId}>
                     <ListItemText
                       primary={
                         <Grid key={index} item xs={12}>
@@ -324,13 +321,25 @@ export default function MyAccountAllFailedJobs(props) {
                             <b>REDCap Questions:</b> {job.dataLength}
                           </div>
                           <div>
-                            <b>Collection / Doc Size:</b>{" "}
-                            {job.collectionName &&
-                            job.totalCollectionDocs !== null
-                              ? `${
-                                  job.collectionName
-                                } / ${job.totalCollectionDocs.toLocaleString()}`
+                            <b>Collections:</b>
+                            {job.collections && job.totalCollectionDocs !== null
+                              ? Object.entries(JSON.parse(job.collections)).map(
+                                  ([key, value]) => (
+                                    <Chip
+                                      key={key}
+                                      label={`${key}`}
+                                      color="secondary"
+                                      sx={{ margin: "10px" }}
+                                    />
+                                  )
+                                )
                               : "N/A"}
+                            {job.totalCollectionDocs !== null && (
+                              <Chip
+                                label={`Total Docs: ${job.totalCollectionDocs.toLocaleString()}`}
+                                color="secondary"
+                              />
+                            )}
                           </div>
                           <b>Job Name:</b>
                           {job.editMode ? (

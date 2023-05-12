@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import {
   Button,
+  Chip,
   Box,
   Grid,
   Dialog,
@@ -246,15 +247,17 @@ export default function MyAccountAllPendingJobs(props) {
                     color: "white",
                     maxWidth: "550px",
                     margin: "20px",
-                    padding: '10px'
+                    padding: "10px",
                   }}
                   key={job.jobId}
                 >
                   <ListItem
                     key={job.jobId}
-                    sx={{
-                      // margin: "10px",
-                    }}
+                    sx={
+                      {
+                        // margin: "10px",
+                      }
+                    }
                   >
                     <ListItemText
                       primary={
@@ -302,13 +305,26 @@ export default function MyAccountAllPendingJobs(props) {
                               <b>REDCap Questions:</b> {job.dataLength}
                             </div>
                             <div>
-                              <b>Collection / Doc Size:</b>{" "}
-                              {job.collectionName &&
+                              <b>Collections:</b>
+                              {job.collections &&
                               job.totalCollectionDocs !== null
-                                ? `${
-                                    job.collectionName
-                                  } / ${job.totalCollectionDocs.toLocaleString()}`
+                                ? Object.entries(
+                                    JSON.parse(job.collections)
+                                  ).map(([key, value]) => (
+                                    <Chip
+                                      key={key}
+                                      label={`${key}`}
+                                      color="secondary"
+                                      sx={{ margin: "10px" }}
+                                    />
+                                  ))
                                 : "N/A"}
+                              {job.totalCollectionDocs !== null && (
+                                <Chip
+                                  label={`Total Docs: ${job.totalCollectionDocs.toLocaleString()}`}
+                                  color="secondary"
+                                />
+                              )}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
@@ -319,8 +335,8 @@ export default function MyAccountAllPendingJobs(props) {
                                   width: "250px",
                                   input: {
                                     color: "black",
-                                    paddingLeft: '20px',
-                                    paddingRight: '30px',
+                                    paddingLeft: "20px",
+                                    paddingRight: "30px",
                                     backgroundColor: "white",
                                   },
                                 }}

@@ -16,31 +16,33 @@ import {
 } from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import ErrorIcon from "@mui/icons-material/Error";
-import MyAccountAdminSection from "./MyAccountAPIKeys";
+// import ErrorIcon from "@mui/icons-material/Error";
+import MyAccountAPIKeys from "./MyAccountAPIKeys";
 import { useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
+// import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./CompletedJobs";
-import PendingJobs from "./PendingJobs";
-import FailedJobs from "./FailedJobs";
+// import PendingJobs from "./PendingJobs";
+// import FailedJobs from "./FailedJobs";
 import { useTheme } from "@mui/material/styles";
 // import blank_avatar from "../assets/blank_avatar.jpg";
 import StorageIcon from "@mui/icons-material/Storage";
 import MyAccountAllCompletedJobs from "./MyAccountAllCompletedJobs";
 import MyAccountCollectionsView from "./MyAccountCollectionsView";
-import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
-import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
+// import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
+// import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
 import ProjectManagementPage from "../pages/ProjectManagementPage";
 import AddHomeWorkIcon from "@mui/icons-material/AddHomeWork";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useNavigate } from "react-router-dom";
 import { ViewContext } from "./ViewContext";
-import EmailIcon from '@mui/icons-material/Email';
-import OrcidIcon from '../assets/orcid_16x16.gif';
+import EmailIcon from "@mui/icons-material/Email";
+import OrcidIcon from "../assets/orcid_16x16.gif";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import MyAccountUserManagement from "./MyAccountUserManagement";
 
 const drawerWidth = "270px";
 const miniDrawerWidth = 56;
@@ -67,8 +69,8 @@ export default function MyAccountNavBar(props) {
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {
       setDrawerOpen(JSON.parse(storedDrawerOpen));
-    }else{
-      setDrawerOpen(false)
+    } else {
+      setDrawerOpen(false);
     }
   }, []);
 
@@ -101,39 +103,39 @@ export default function MyAccountNavBar(props) {
       tooltip: "Project Management",
     },
     {
-      title: "Completed Jobs",
+      title: "Jobs Overview",
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
-      tooltip: "Completed Jobs",
+      tooltip: "Jobs Overview",
     },
-    {
-      title: "Pending Jobs",
-      icon: <AutorenewIcon style={{ color: "white" }} />,
-      tooltip: "Pending Jobs",
-    },
-    {
-      title: "Failed Jobs",
-      icon: <ErrorIcon style={{ color: "white" }} />,
-      tooltip: "Failed Jobs",
-    },
+    // {
+    //   title: "Pending Jobs",
+    //   icon: <AutorenewIcon style={{ color: "white" }} />,
+    //   tooltip: "Pending Jobs",
+    // },
+    // {
+    //   title: "Failed Jobs",
+    //   icon: <ErrorIcon style={{ color: "white" }} />,
+    //   tooltip: "Failed Jobs",
+    // },
     // Add more menu items here...
   ];
 
   const adminMenuItems = [
     {
-      title: "All Completed Jobs",
+      title: "All Jobs Overview",
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
-      tooltip: "All Completed Jobs",
+      tooltip: "All Jobs Overview",
     },
-    {
-      title: "All Pending Jobs",
-      icon: <AutorenewIcon style={{ color: "white" }} />,
-      tooltip: "All Pending Jobs",
-    },
-    {
-      title: "All Failed Jobs",
-      icon: <ErrorIcon style={{ color: "white" }} />,
-      tooltip: "All Failed Jobs",
-    },
+    // {
+    //   title: "All Pending Jobs",
+    //   icon: <AutorenewIcon style={{ color: "white" }} />,
+    //   tooltip: "All Pending Jobs",
+    // },
+    // {
+    //   title: "All Failed Jobs",
+    //   icon: <ErrorIcon style={{ color: "white" }} />,
+    //   tooltip: "All Failed Jobs",
+    // },
     {
       title: "Collections",
       icon: <StorageIcon style={{ color: "white" }} />,
@@ -143,6 +145,11 @@ export default function MyAccountNavBar(props) {
       title: "API Keys",
       icon: <KeyIcon style={{ color: "white" }} />,
       tooltip: "API Keys",
+    },
+    {
+      title: "Manage Accounts",
+      icon: <ManageAccountsIcon style={{ color: "white" }} />,
+      tooltip: "Manage Accounts",
     },
     // Add more menu items here...
   ];
@@ -327,7 +334,11 @@ export default function MyAccountNavBar(props) {
                       alt="ORCID"
                       style={{ width: 24, height: 24, marginRight: 8 }}
                     />
-                    <a href={`${process.env.REACT_APP_ORCID_URL}/${props.username}`}>{process.env.REACT_APP_ORCID_URL}/{props.username} </a>
+                    <a
+                      href={`${process.env.REACT_APP_ORCID_URL}/${props.username}`}
+                    >
+                      {process.env.REACT_APP_ORCID_URL}/{props.username}{" "}
+                    </a>
                   </Typography>
                 ) : (
                   <Typography sx={{ textAlign: "left" }}>
@@ -353,13 +364,13 @@ export default function MyAccountNavBar(props) {
                 />
               </>
             )}
-            {view === "Completed Jobs" && (
+            {view === "Jobs Overview" && (
               <>
                 <CompletedJobs props={props} jobs={jobs} setJobs={setJobs} />
               </>
             )}
 
-            {view === "Pending Jobs" && (
+            {/* {view === "Pending Jobs" && (
               <>
                 <PendingJobs props={props} />
               </>
@@ -369,21 +380,21 @@ export default function MyAccountNavBar(props) {
               <>
                 <FailedJobs props={props} />
               </>
-            )}
+            )} */}
 
             {view === "API Keys" && props.role === "admin" ? (
-              <MyAccountAdminSection props={props} />
+              <MyAccountAPIKeys props={props} />
             ) : (
               ""
             )}
 
-            {view === "All Completed Jobs" && props.role === "admin" ? (
+            {view === "All Jobs Overview" && props.role === "admin" ? (
               <MyAccountAllCompletedJobs props={props} />
             ) : (
               ""
             )}
 
-            {view === "All Pending Jobs" && props.role === "admin" ? (
+            {/* {view === "All Pending Jobs" && props.role === "admin" ? (
               <MyAccountAllPendingJobs props={props} />
             ) : (
               ""
@@ -393,10 +404,16 @@ export default function MyAccountNavBar(props) {
               <MyAccountAllFailedJobs props={props} />
             ) : (
               ""
-            )}
+            )} */}
 
             {view === "Collections" && props.role === "admin" ? (
               <MyAccountCollectionsView props={props} />
+            ) : (
+              ""
+            )}
+
+            {view === "Manage Accounts" && props.role === "admin" ? (
+              <MyAccountUserManagement props={props} />
             ) : (
               ""
             )}

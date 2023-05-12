@@ -4,6 +4,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import {
   Button,
   Box,
+  Chip,
   Grid,
   Dialog,
   DialogActions,
@@ -278,13 +279,26 @@ export default function PendingJobs(props) {
                               <b>REDCap Questions:</b> {job.dataLength}
                             </div>
                             <div>
-                              <b>Collection / Doc Size:</b>{" "}
-                              {job.collectionName &&
+                              <b>Collections:</b>
+                              {job.collections &&
                               job.totalCollectionDocs !== null
-                                ? `${
-                                    job.collectionName
-                                  } / ${job.totalCollectionDocs.toLocaleString()}`
+                                ? Object.entries(
+                                    JSON.parse(job.collections)
+                                  ).map(([key, value]) => (
+                                    <Chip
+                                      key={key}
+                                      label={`${key}`}
+                                      color="secondary"
+                                      sx={{ margin: "10px" }}
+                                    />
+                                  ))
                                 : "N/A"}
+                              {job.totalCollectionDocs !== null && (
+                                <Chip
+                                  label={`Total Docs: ${job.totalCollectionDocs.toLocaleString()}`}
+                                  color="secondary"
+                                />
+                              )}
                             </div>
                             <b>Job Name:</b>
                             {job.editMode ? (
