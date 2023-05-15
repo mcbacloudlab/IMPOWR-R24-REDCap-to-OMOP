@@ -108,7 +108,7 @@ function ProtectedRoute({
 
     const validateUser = async () => {
       const result = await validateJwtToken(jwtToken);
-      console.log("validateResults", JSON.parse(result).approved);
+
       if (result.props) {
         setUser(null);
         setIsLoading(false);
