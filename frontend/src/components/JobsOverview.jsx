@@ -48,6 +48,16 @@ export default function JobsOverview(props) {
   // const handleChange = (event, newValue) => {
   //   setSelectedTabIdx(newValue);
   // };
+
+  useEffect(() => {
+    setColDefs(cols);
+    setLoading(false);
+    if(selectedTabIdx === 0) setTableData(completedList);
+    else if(selectedTabIdx === 1) setTableData(pendingList)
+    else if(selectedTabIdx === 2) setTableData(failedList)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedList, pendingList, failedList]);
+
   async function showTab(e, switching, panelIndex) {
     setLoading(true);
     if (!panelIndex) panelIndex = 0;
@@ -203,12 +213,7 @@ export default function JobsOverview(props) {
     },
   ];
 
-  useEffect(() => {
-    setColDefs(cols);
-    setLoading(false);
-    setTableData(completedList);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completedList]);
+ 
 
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);

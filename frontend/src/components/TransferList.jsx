@@ -217,7 +217,7 @@ export default function TransferList(props) {
 
       <Grid item>{customList("Remove", right)}</Grid>
 
-      <Grid xs={12}>
+      <Grid item xs={12}>
         <Alert style={{ marginTop: "10px", maxWidth: "90%" }} severity="info">
           The <b>field name, field label, and form name</b> are required for the
           process to function properly.{" "}
