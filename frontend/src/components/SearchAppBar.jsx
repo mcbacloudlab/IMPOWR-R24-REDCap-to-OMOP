@@ -25,7 +25,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 // import ErrorIcon from "@mui/icons-material/Error";
 // import { styled, alpha } from "@mui/material/styles";
 // import blank_avatar from "../assets/blank_avatar.jpg";
-import CompletedJobs from "./CompletedJobs";
+import CompletedJobs from "./JobsOverview";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";

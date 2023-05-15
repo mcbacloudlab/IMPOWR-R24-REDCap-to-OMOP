@@ -21,7 +21,6 @@ import SummarizeIcon from "@mui/icons-material/Summarize";
 import { useLists } from "./ListsContext";
 import { ViewContext } from "./ViewContext";
 import MaterialReactTable from "material-react-table";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Badge from "@mui/material/Badge";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -29,66 +28,63 @@ import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ErrorIcon from "@mui/icons-material/Error";
 
-export default function CompletedJobs(props) {
-  // const { completedList } = props.props.props ?? props.props;
+export default function MyAccountAllJobsOverview(props) {
+  const navigate = useNavigate();
+
   const { completedList } = useLists();
+  const { pendingList } = useLists();
+  const { failedList } = useLists();
+
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
-
-  // console.log('token?', token)
-  // const [open, setOpen] = useState(false);
-  const [jobs, setJobs] = useState(
-    completedList?.map((job) => ({
-      ...job,
-      editMode: false,
-      newJobName: job.jobName,
-    })) || []
-  );
-
-  // const [columns, setColumns] = useState([]);
-
-  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [jobIdSelected, setJobIdSelected] = useState();
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
-  // const [sorting, setSorting] = useState();
+  const [loading, setLoading] = useState(true);
   const [colDefs, setColDefs] = useState();
+  const [tableData, setTableData] = useState(completedList);
 
-  const handleChange = (event, newValue) => {
-    setSelectedTabIdx(newValue);
-  };
+  // const handleChange = (event, newValue) => {
+  //   setSelectedTabIdx(newValue);
+  // };
+  useEffect(() => {
+    setColDefs(cols);
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function showTab(e, switching, panelIndex) {
-    // setIsLoading(true);
-    // setSelectedFile(value);
+    setLoading(true);
     if (!panelIndex) panelIndex = 0;
     setSelectedTabIdx(panelIndex);
-    if (!switching) handleChange(e, 0); //reset tab to default tab
+    // if (!switching) handleChange(e, 0); //reset tab to default tab
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
-        // setTableData(allUsers);
+        setTableData(completedList);
+        setLoading(false);
         break;
       }
       case 1: {
-        // setUnverifiedElements(unverifiedElements.length)
-        // setTableData(pendingUsers);
+        setTableData(pendingList);
+        setLoading(false);
         break;
       }
       case 2: {
+        setTableData(failedList);
+        setLoading(false);
         break;
       }
 
       default: {
+        setLoading(false);
         break;
       }
     }
   }
 
-  const handleExportData = () => {};
-
   const handleClickOpen = (jobId) => {
-    // console.log("jobid", jobId);
     setJobIdSelected(jobId);
     setOpen(true);
   };
@@ -101,13 +97,11 @@ export default function CompletedJobs(props) {
   }
 
   const handleClose = (jobId) => {
-    // console.log("jobid", jobIdSelected);
     setOpen(false);
   };
 
   const handleConfirm = (jobIdSelected) => {
     // Do something when the user confirms
-    console.log("jb", jobIdSelected);
     setOpen(false);
     // console.log("confirm delete", jobIdSelected);
     cancelJob(jobIdSelected.jobId);
@@ -140,164 +134,88 @@ export default function CompletedJobs(props) {
       .catch((error) => console.log("error", error));
   };
 
-  useEffect(() => {
-    console.log("completedList", completedList);
-    if (jobs) {
-      // const chunkSize = Math.ceil(jobs.length / 3);
-      const _columns = [[], [], []];
-
-      for (let i = 0; i < jobs.length; i++) {
-        const columnIndex = i % 3;
-        _columns[columnIndex].push(jobs[i]);
-      }
-      // setColumns(_columns);
-    }
-
-    console.log("jobs", jobs);
-
-    const CollectionsCell = ({ cell, row }) => {
-      let job = cell.getValue();
-      if (job) job = JSON.parse(job);
-      console.log("row", row.original);
-      console.log("the job", job);
-      return (
-        <>
-          {row.original.collections && row.original.totalCollectionDocs !== null
-            ? Object.entries(JSON.parse(row.original.collections)).map(
-                ([key, value]) => (
-                  <>
-                    <Chip
-                      key={key}
-                      label={`${key}`}
-                      color="secondary"
-                      sx={{ margin: "10px" }}
-                    />
-                    <br />
-                  </>
-                )
+  const CollectionsCell = ({ cell, row }) => {
+    let job = cell.getValue();
+    if (job) job = JSON.parse(job);
+    return (
+      <>
+        {row.original.collections && row.original.totalCollectionDocs !== null
+          ? Object.entries(JSON.parse(row.original.collections)).map(
+              ([key, value]) => (
+                <>
+                  <Chip
+                    key={key}
+                    label={`${key}`}
+                    color="secondary"
+                    sx={{ margin: "10px" }}
+                  />
+                  <br />
+                </>
               )
-            : "N/A"}
-        </>
-      );
-    };
-
-    const CompletedAtCell = ({ cell, row }) => {
-      return row.original.finishedAt
-        ? new Date(row.original.finishedAt).toLocaleString()
-        : "Not Completed Yet";
-    };
-
-    const TotalDocumentsCell = ({ cell, row }) => {
-      return (
-        <Chip
-          key={cell.getValue()}
-          label={`${cell.getValue().toLocaleString()}`}
-          color="secondary"
-          sx={{ margin: "10px" }}
-        />
-      );
-    };
-
-    // const ViewCell = ({ cell, row }) => {
-    //   return (
-    //     <Tooltip title="View Report">
-    //       <IconButton onClick={(event) => handleView(row.original)}>
-    //         <SummarizeIcon />
-    //       </IconButton>
-    //     </Tooltip>
-    //   );
-    // };
-
-    // const RemoveCell = ({ cell, row }) => {
-    //   return (
-    //     <Tooltip title="Delete Job">
-    //       <IconButton
-    //         onClick={() => {
-    //           handleClickOpen(row.original);
-    //         }}
-    //       >
-    //         <CloseIcon />
-    //       </IconButton>
-    //     </Tooltip>
-    //   );
-    // };
-
-    const cols = [
-      // {
-      //   header: "View",
-      //   accessorKey: "jobId",
-      //   Cell: ViewCell,
-      //   maxSize: 100
-      // },
-      // {
-      //   header: "Remove",
-      //   accessorKey: "jobId",
-      //   Cell: RemoveCell,
-      // },
-      {
-        header: "Job ID",
-        accessorKey: "jobId",
-        maxSize: 100,
-      },
-      {
-        header: "REDCap Form",
-        accessorKey: "redcapFormName",
-        minSize: 100,
-      },
-      {
-        header: "Collections",
-        accessorKey: "collections",
-        Cell: CollectionsCell,
-        minSize: 300,
-      },
-      {
-        header: "Total Documents",
-        accessorKey: "totalCollectionDocs",
-        Cell: TotalDocumentsCell,
-        minSize: 150,
-        maxSize: 150,
-      },
-      {
-        header: "Questions",
-        accessorKey: "dataLength",
-      },
-      {
-        header: "Submitted By",
-        accessorKey: "submittedBy",
-      },
-      {
-        header: "Completed At",
-        accessorKey: "finishedAt",
-        Cell: CompletedAtCell,
-      },
-    ];
-    console.log("columns", cols);
-    setColDefs(cols);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobs, completedList]);
-
-  useEffect(() => {
-    // console.log('completedList', completedList)
-    setJobs(
-      completedList?.map((pendingJob) => {
-        const jobInJobs = jobs.find((job) => job.jobId === pendingJob.jobId);
-        const editMode = jobInJobs ? jobInJobs.editMode : false;
-        const newJobName = jobInJobs ? jobInJobs.newJobName : "";
-        return {
-          ...pendingJob,
-          editMode: editMode,
-          newJobName: newJobName,
-        };
-      })
+            )
+          : "N/A"}
+      </>
     );
+  };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completedList]);
+  const CompletedAtCell = ({ cell, row }) => {
+    return row.original.finishedAt
+      ? new Date(row.original.finishedAt).toLocaleString()
+      : "Not Completed Yet";
+  };
+
+  const TotalDocumentsCell = ({ cell, row }) => {
+    return (
+      <Chip
+        key={cell.getValue()}
+        label={`${cell.getValue() ? cell.getValue().toLocaleString() : "N/A"}`}
+        color="secondary"
+        sx={{ margin: "10px" }}
+      />
+    );
+  };
+
+  const cols = [
+    {
+      header: "Job ID",
+      accessorKey: "jobId",
+      maxSize: 100,
+    },
+    {
+      header: "REDCap Form",
+      accessorKey: "redcapFormName",
+      minSize: 100,
+    },
+    {
+      header: "Collections",
+      accessorKey: "collections",
+      Cell: CollectionsCell,
+      minSize: 300,
+    },
+    {
+      header: "Total Documents",
+      accessorKey: "totalCollectionDocs",
+      Cell: TotalDocumentsCell,
+      minSize: 150,
+      maxSize: 150,
+    },
+    {
+      header: "Questions",
+      accessorKey: "dataLength",
+    },
+    {
+      header: "Submitted By",
+      accessorKey: "submittedBy",
+    },
+    {
+      header: "Completed At",
+      accessorKey: "finishedAt",
+      Cell: CompletedAtCell,
+    },
+  ];
 
   function handleView(job) {
-    console.log("handleView", job);
     if (props.setOpen) props.setOpen(false);
-    // console.log("event view", job);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -314,8 +232,6 @@ export default function CompletedJobs(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        // console.log(result);
-        // setOpen(false);
         setView("");
         navigate("/completed-jobs", {
           state: {
@@ -330,33 +246,25 @@ export default function CompletedJobs(props) {
       .catch((error) => console.log("error", error));
   }
 
-  function handleTabChange() {}
-
   return (
     <div>
       <h1
         style={{
           paddingLeft: "20px",
           textAlign: "center",
-          // backgroundColor: "rgb(251 251 251)",
         }}
       >
-        Jobs Overview
+        Jobs Overview 
       </h1>
-      {completedList.length === 0 && (
-        <Typography variant="h5">
-          There are currently no completed jobs.
-        </Typography>
-      )}
-      {completedList.length !== 0 && (
+
+      {!loading && (
         <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12} md={12}>
-            {jobs.length && colDefs && (
+            {!loading && (
               <>
                 <Tabs
                   centered
                   value={selectedTabIdx}
-                  onChange={handleTabChange}
                   aria-label="basic tabs example"
                 >
                   <Tab
@@ -373,7 +281,9 @@ export default function CompletedJobs(props) {
                           }}
                         >
                           <Badge
-                            badgeContent={1}
+                            badgeContent={
+                              completedList ? completedList.length : "0"
+                            }
                             max={9999}
                             color="secondary"
                           />
@@ -397,7 +307,9 @@ export default function CompletedJobs(props) {
                             }}
                           >
                             <Badge
-                              badgeContent={2}
+                              badgeContent={
+                                pendingList ? pendingList.length : "0"
+                              }
                               max={9999}
                               color="secondary"
                             />
@@ -421,7 +333,7 @@ export default function CompletedJobs(props) {
                           }}
                         >
                           <Badge
-                            badgeContent={3}
+                            badgeContent={failedList ? failedList.length : "0"}
                             max={9999}
                             color="secondary"
                           />
@@ -442,7 +354,7 @@ export default function CompletedJobs(props) {
                       >
                         Remove
                       </Typography>{" "}
-                      <b>{jobIdSelected?jobIdSelected.jobId:''}</b>?
+                      <b>{jobIdSelected ? jobIdSelected.jobId : ""}</b>?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
@@ -459,23 +371,26 @@ export default function CompletedJobs(props) {
                   </DialogActions>
                 </Dialog>
                 <MaterialReactTable
+                  key={selectedTabIdx}
                   //passing the callback function variant. (You should get type hints for all the callback parameters available)
                   columns={colDefs}
-                  data={jobs}
+                  data={tableData}
                   enableDensityToggle={false} //density does not work with memoized cells
                   memoMode="cells" // memoize table cells to improve render performance, but break some features
                   enableBottomToolbar={true}
                   enableGlobalFilterModes={true}
                   enablePagination={true}
-                  enableRowActions
+                  enableRowActions={true}
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        sx={{
-                          display: "flex",
-                          flexWrap: "nowrap",
-                          gap: "8px",
-                        }}
+                        sx={
+                          {
+                            // display: "flex",
+                            // flexWrap: "nowrap",
+                            // gap: "0px",
+                          }
+                        }
                       >
                         <Tooltip title="View">
                           <IconButton
@@ -487,6 +402,29 @@ export default function CompletedJobs(props) {
                             <SummarizeIcon />
                           </IconButton>
                         </Tooltip>
+                        <br />
+                        <Tooltip title="Remove">
+                          <IconButton
+                            color="error"
+                            onClick={() => {
+                              handleClickOpen(row.original);
+                            }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>,
+                    ],
+                  })}
+                  {...(selectedTabIdx !== 0 && {
+                    renderRowActions: ({ row, table }) => [
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "nowrap",
+                          gap: "8px",
+                        }}
+                      >
                         <Tooltip title="Remove">
                           <IconButton
                             color="error"
@@ -555,7 +493,6 @@ export default function CompletedJobs(props) {
                       },
                     }),
                   }}
-                  // autoWidth={true}
                   positionToolbarAlertBanner="bottom"
                   renderTopToolbarCustomActions={({ table }) => (
                     <Box
@@ -567,18 +504,6 @@ export default function CompletedJobs(props) {
                         flexWrap: "wrap",
                       }}
                     >
-                      {selectedTabIdx === 2 && (
-                        <Button
-                          color="success"
-                          //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-                          onClick={handleExportData}
-                          startIcon={<FileDownloadIcon />}
-                          variant="contained"
-                        >
-                          Export Data Dictionary
-                        </Button>
-                      )}
-
                       <Box style={{ marginLeft: "auto" }}></Box>
                     </Box>
                   )}

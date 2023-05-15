@@ -53,19 +53,6 @@ export default function MyAccountUserManagement(props) {
     console.log("selectedTabIdx", selectedTabIdx);
     getUsers();
     const cols = [
-      // {
-      //   header: "Approve",
-      //   accessorKey: "email",
-      //   Cell: ApproveCell,
-      //   maxSize: 1000,
-      //   minSize:1000,
-      //   size: 1000
-      // },
-      // {
-      //   header: "Remove",
-      //   accessorKey: "email",
-      //   Cell: RemoveCell,
-      // },
       {
         header: "Approved",
         accessorKey: "approved",
@@ -90,7 +77,7 @@ export default function MyAccountUserManagement(props) {
     console.log("columns", cols);
     setColDefs(cols);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTabIdx]);
+  }, []);
 
   function getUsers() {
     setLoading(true);
@@ -117,10 +104,9 @@ export default function MyAccountUserManagement(props) {
         // console.log("result", result);
         let jsonData = JSON.parse(result);
         setAllUsers(jsonData);
-        // setTableData(jsonData);
+        setTableData(jsonData);
         setAllUsersCount(jsonData.length);
         // Count variable for objects where approved is not 'Y'
-        console.log('pending users', jsonData.filter((obj) => obj.approved !== "Y"))
         setPendingUsersCount(
           jsonData.filter((obj) => obj.approved !== "Y").length
         );
@@ -207,8 +193,6 @@ export default function MyAccountUserManagement(props) {
     }
   }
 
-  function handleTabChange() {}
-
   const handleSaveRow = async ({ exitEditingMode, row, values }) => {
     //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
     tableData[row.index] = values;
@@ -250,7 +234,6 @@ export default function MyAccountUserManagement(props) {
                 <Tabs
                   centered
                   value={selectedTabIdx}
-                  onChange={handleTabChange}
                   aria-label="basic tabs example"
                 >
                   <Tab
@@ -302,8 +285,9 @@ export default function MyAccountUserManagement(props) {
                   />
                 </Tabs>
 
-                <Grid xs={12}>
+                <Grid item xs={12}>
                   <MaterialReactTable
+                    key={selectedTabIdx}
                     //passing the callback function variant. (You should get type hints for all the callback parameters available)
                     columns={colDefs}
                     data={tableData}
@@ -318,26 +302,26 @@ export default function MyAccountUserManagement(props) {
                           }}
                         >
                           <Tooltip title="Approve">
-                          <IconButton
-                            color="success"
-                            onClick={() => {
-                              handleClickApproveOpen(row.original);
-                            }}
-                          >
-                            <CheckIcon />
-                          </IconButton>
+                            <IconButton
+                              color="success"
+                              onClick={() => {
+                                handleClickApproveOpen(row.original);
+                              }}
+                            >
+                              <CheckIcon />
+                            </IconButton>
                           </Tooltip>
                           <Tooltip title="Remove">
-                          <IconButton
-                            color="error"
-                            onClick={() => {
-                              // tableData.splice(row.index, 1); //assuming simple data table
-                              // setTableData([...tableData]);
-                              handleClickOpen(row.original);
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => {
+                                // tableData.splice(row.index, 1); //assuming simple data table
+                                // setTableData([...tableData]);
+                                handleClickOpen(row.original);
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
                           </Tooltip>
                         </Box>,
                       ],
@@ -362,14 +346,14 @@ export default function MyAccountUserManagement(props) {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Remove">
-                          <IconButton
-                            color="error"
-                            onClick={() => {
-                              handleClickOpen(row.original);
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => {
+                                handleClickOpen(row.original);
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
                           </Tooltip>
                         </Box>,
                       ],
