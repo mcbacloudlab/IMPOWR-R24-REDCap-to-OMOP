@@ -291,12 +291,12 @@ export default function MyAccountUserManagement(props) {
                         <Box
                           key={selectedTabIdx + row.id + 'approve'}
                           sx={{
-                            display: "flex",
-                            flexWrap: "nowrap",
-                            gap: "8px",
+                            // display: "flex",
+                            // flexWrap: "nowrap",
+                            // gap: "8px",
                           }}
                         >
-                          <Tooltip title="Approve">
+                          <Tooltip title="Approve"  placement="left">
                             <IconButton
                               color="success"
                               onClick={() => {
@@ -306,7 +306,8 @@ export default function MyAccountUserManagement(props) {
                               <CheckIcon />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Remove">
+                          <br /> 
+                          <Tooltip title="Remove"  placement="left">
                             <IconButton
                               color="error"
                               onClick={() => {
@@ -326,14 +327,14 @@ export default function MyAccountUserManagement(props) {
                         <Box
                         key={selectedTabIdx + row.id + 'edit'}
                           sx={{
-                            display: "flex",
-                            flexWrap: "nowrap",
-                            gap: "8px",
+                            // display: "flex",
+                            // flexWrap: "nowrap",
+                            // gap: "8px",
                           }}
                         >
-                          <Tooltip title="Edit">
+                          <Tooltip title="Edit"  placement="left">
                             <IconButton
-                              color="secondary"
+                              color="primary"
                               onClick={() => {
                                 table.setEditingRow(row);
                               }}
@@ -342,7 +343,7 @@ export default function MyAccountUserManagement(props) {
                             </IconButton>
                           </Tooltip>
                           <br /> 
-                          <Tooltip title="Remove">
+                          <Tooltip title="Remove"  placement="left">
                             <IconButton
                               color="error"
                               onClick={() => {

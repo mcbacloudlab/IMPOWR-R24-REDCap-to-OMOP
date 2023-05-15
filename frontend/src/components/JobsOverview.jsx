@@ -392,7 +392,7 @@ export default function JobsOverview(props) {
                           }
                         }
                       >
-                        <Tooltip title="View">
+                        <Tooltip title="View" placement="left">
                           <IconButton
                             color="primary"
                             onClick={() => {
@@ -403,7 +403,7 @@ export default function JobsOverview(props) {
                           </IconButton>
                         </Tooltip>
                         <br />
-                        <Tooltip title="Remove">
+                        <Tooltip title="Remove" placement="left">
                           <IconButton
                             color="error"
                             onClick={() => {
@@ -426,7 +426,7 @@ export default function JobsOverview(props) {
                           gap: "8px",
                         }}
                       >
-                        <Tooltip title="Remove">
+                        <Tooltip title="Remove" placement="left">
                           <IconButton
                             color="error"
                             onClick={() => {
@@ -449,7 +449,7 @@ export default function JobsOverview(props) {
                           gap: "8px",
                         }}
                       >
-                        <Tooltip title="Remove">
+                        <Tooltip title="Remove" placement="left">
                           <IconButton
                             color="error"
                             onClick={() => {
