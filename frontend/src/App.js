@@ -235,6 +235,7 @@ function App() {
                             completedList={completedList}
                             pendingList={pendingList}
                             failedList={failedList}
+                            openSnackbar={openSnackbar}
                           ></MyAccountPage>
                         </ProtectedRoute>
                       }

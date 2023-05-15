@@ -50,7 +50,6 @@ export default function MyAccountUserManagement(props) {
   };
 
   useEffect(() => {
-    console.log("selectedTabIdx", selectedTabIdx);
     getUsers();
     const cols = [
       {
@@ -74,14 +73,12 @@ export default function MyAccountUserManagement(props) {
         accessorKey: "role",
       },
     ];
-    console.log("columns", cols);
     setColDefs(cols);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function getUsers() {
     setLoading(true);
-    console.log("getUsers");
     //check for existing keys
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
@@ -101,7 +98,6 @@ export default function MyAccountUserManagement(props) {
         return response.text();
       })
       .then((result) => {
-        // console.log("result", result);
         let jsonData = JSON.parse(result);
         setAllUsers(jsonData);
         setTableData(jsonData);
@@ -117,13 +113,11 @@ export default function MyAccountUserManagement(props) {
   }
 
   const handleClickOpen = (userId) => {
-    console.log("userId", userId);
     setUserSelected(userId.email);
     setOpen(true);
   };
 
   const handleClickApproveOpen = (userId) => {
-    console.log("userId", userId);
     setUserSelected(userId.email);
     setApproveOpen(true);
   };
@@ -295,6 +289,7 @@ export default function MyAccountUserManagement(props) {
                     {...(selectedTabIdx === 1 && {
                       renderRowActions: ({ row, table }) => [
                         <Box
+                          key={row.id}
                           sx={{
                             display: "flex",
                             flexWrap: "nowrap",

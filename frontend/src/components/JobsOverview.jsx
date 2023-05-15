@@ -119,8 +119,7 @@ export default function JobsOverview(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => {
-      })
+      .then((result) => {})
       .catch((error) => console.log("error", error));
   };
 
@@ -380,11 +379,14 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        sx={{
-                          // display: "flex",
-                          // flexWrap: "nowrap",
-                          // gap: "0px",
-                        }}
+                        key={row.id}
+                        sx={
+                          {
+                            // display: "flex",
+                            // flexWrap: "nowrap",
+                            // gap: "0px",
+                          }
+                        }
                       >
                         <Tooltip title="View">
                           <IconButton
@@ -396,7 +398,7 @@ export default function JobsOverview(props) {
                             <SummarizeIcon />
                           </IconButton>
                         </Tooltip>
-                        <br/>
+                        <br />
                         <Tooltip title="Remove">
                           <IconButton
                             color="error"

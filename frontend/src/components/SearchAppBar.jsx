@@ -21,26 +21,18 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-// import ErrorIcon from "@mui/icons-material/Error";
-// import { styled, alpha } from "@mui/material/styles";
-// import blank_avatar from "../assets/blank_avatar.jpg";
 import CompletedJobs from "./JobsOverview";
 import FailedJobs from "./FailedJobs";
 import PendingJobs from "./PendingJobs";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
 import _ from "lodash";
-// import AddHomeWorkIcon from '@mui/icons-material/AddHomeWork';
-// import { NavLink } from 'react-router-dom';
-// import OMOPLogo from "../assets/6570077.png";
-// import REDCapLogo from "../assets/redcap_logo_high_res_white_on_black.svg";
 import Logo from "../assets/logo.png";
 import MuiAlert from "@mui/material/Alert";
 
 export default function SearchAppBar({ openSnackbar, ...props }) {
-  console.log('search bar', props)
-  console.log('opensnackbar', openSnackbar)
+  // console.log('search bar', props)
+  // console.log('opensnackbar', openSnackbar)
   const {
     pendingList,
     // failedList,
@@ -359,16 +351,20 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       "This account is pending approval. Please be patient while we approve all user requests."
     );
     // Fetch data every 15 seconds
-    const intervalId = setInterval(() => {
-      checkJobs();
-    }, 2000);
+    let intervalId 
+    console.log('open', openSnackbar)
+    if (!openSnackbar) {
+      intervalId= setInterval(() => {
+        checkJobs();
+      }, 2000);
+    }
 
     // Clean up interval on unmount
     return () => {
       clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [openSnackbar]);
 
   const displayMessage = (msg) => {
     setSnackbarMessage(msg);
@@ -511,7 +507,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
             elevation={6}
             variant="filled"
             // onClose={handleSnackbarClose}
-            sx={{ ml: 6 }}
+            sx={{  }}
             severity="warning" // Change severity to "success", "info", "warning", or "error"
           >
             {snackbarMessage}
