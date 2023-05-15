@@ -289,7 +289,7 @@ export default function MyAccountUserManagement(props) {
                     {...(selectedTabIdx === 1 && {
                       renderRowActions: ({ row, table }) => [
                         <Box
-                          key={row.id}
+                          key={selectedTabIdx + row.id + 'approve'}
                           sx={{
                             display: "flex",
                             flexWrap: "nowrap",
@@ -324,6 +324,7 @@ export default function MyAccountUserManagement(props) {
                     {...(selectedTabIdx === 0 && {
                       renderRowActions: ({ row, table }) => [
                         <Box
+                        key={selectedTabIdx + row.id + 'edit'}
                           sx={{
                             display: "flex",
                             flexWrap: "nowrap",
@@ -340,6 +341,7 @@ export default function MyAccountUserManagement(props) {
                               <EditIcon />
                             </IconButton>
                           </Tooltip>
+                          <br /> 
                           <Tooltip title="Remove">
                             <IconButton
                               color="error"

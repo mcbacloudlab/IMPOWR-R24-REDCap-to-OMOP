@@ -352,7 +352,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     );
     // Fetch data every 15 seconds
     let intervalId 
-    console.log('open', openSnackbar)
+    // console.log('open', openSnackbar)
     if (!openSnackbar) {
       intervalId= setInterval(() => {
         checkJobs();

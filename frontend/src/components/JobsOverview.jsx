@@ -131,21 +131,21 @@ export default function JobsOverview(props) {
         {row.original.collections && row.original.totalCollectionDocs !== null
           ? Object.entries(JSON.parse(row.original.collections)).map(
               ([key, value]) => (
-                <>
+                <React.Fragment key={key + row.id}>
                   <Chip
-                    key={key}
                     label={`${key}`}
                     color="secondary"
                     sx={{ margin: "10px" }}
                   />
                   <br />
-                </>
+                </React.Fragment>
               )
             )
           : "N/A"}
       </>
     );
   };
+  
 
   const CompletedAtCell = ({ cell, row }) => {
     return row.original.finishedAt
@@ -156,7 +156,7 @@ export default function JobsOverview(props) {
   const TotalDocumentsCell = ({ cell, row }) => {
     return (
       <Chip
-        key={cell.getValue()}
+        key={cell.getValue() + row.id}
         label={`${cell.getValue() ? cell.getValue().toLocaleString() : "N/A"}`}
         color="secondary"
         sx={{ margin: "10px" }}
@@ -206,8 +206,9 @@ export default function JobsOverview(props) {
   useEffect(() => {
     setColDefs(cols);
     setLoading(false);
+    setTableData(completedList);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [completedList]);
 
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
@@ -263,6 +264,7 @@ export default function JobsOverview(props) {
                   aria-label="basic tabs example"
                 >
                   <Tab
+                    key="completed"
                     onClick={(event) => showTab(event, true, 0)}
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
@@ -288,6 +290,7 @@ export default function JobsOverview(props) {
                     {...a11yProps(0)}
                   />
                   <Tab
+                    key="pending"
                     onClick={(event) => showTab(event, true, 1)}
                     label={
                       <>
@@ -315,6 +318,7 @@ export default function JobsOverview(props) {
                     {...a11yProps(1)}
                   />
                   <Tab
+                    key="failed"
                     onClick={(event) => showTab(event, true, 2)}
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
@@ -379,7 +383,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id}
+                        key={row.id + selectedTabIdx + 'completed'}
                         sx={
                           {
                             // display: "flex",
@@ -412,9 +416,33 @@ export default function JobsOverview(props) {
                       </Box>,
                     ],
                   })}
-                  {...(selectedTabIdx !== 0 && {
+                  {...(selectedTabIdx === 1 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
+                        key={row.id + selectedTabIdx + 'pending'}
+                        sx={{
+                          display: "flex",
+                          flexWrap: "nowrap",
+                          gap: "8px",
+                        }}
+                      >
+                        <Tooltip title="Remove">
+                          <IconButton
+                            color="error"
+                            onClick={() => {
+                              handleClickOpen(row.original);
+                            }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>,
+                    ],
+                  })}
+                  {...(selectedTabIdx === 2 && {
+                    renderRowActions: ({ row, table }) => [
+                      <Box
+                        key={row.id + selectedTabIdx + 'failed'}
                         sx={{
                           display: "flex",
                           flexWrap: "nowrap",
