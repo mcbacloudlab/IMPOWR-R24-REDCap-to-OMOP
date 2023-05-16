@@ -336,7 +336,7 @@ export default function MyAccountUserManagement(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Approved Users
-                        <PlaylistAddCheckSharpIcon />
+                        {/* <PlaylistAddCheckSharpIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",
@@ -360,7 +360,7 @@ export default function MyAccountUserManagement(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Pending Users
-                        <ErrorIcon />
+                        {/* <ErrorIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",

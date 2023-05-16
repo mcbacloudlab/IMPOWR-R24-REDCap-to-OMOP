@@ -274,7 +274,7 @@ export default function JobsOverview(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Completed
-                        <PlaylistAddCheckSharpIcon />
+                        {/* <PlaylistAddCheckSharpIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",
@@ -301,7 +301,7 @@ export default function JobsOverview(props) {
                       <>
                         <Box sx={{ position: "relative", margin: "20px" }}>
                           Pending
-                          <AutorenewIcon />
+                          {/* <AutorenewIcon /> */}
                           <Box
                             sx={{
                               position: "absolute",
@@ -328,7 +328,7 @@ export default function JobsOverview(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Failed
-                        <ErrorIcon />
+                        {/* <ErrorIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",
