@@ -43,6 +43,7 @@ export default function MyAccountUserManagement(props) {
   const [open, setOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
   const [userSelected, setUserSelected] = useState("");
+  const [userName, setUsername] = useState()
   const [loading, setLoading] = useState(true);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   // const [allUsersCount, setAllUsersCount] = useState();
@@ -71,7 +72,7 @@ export default function MyAccountUserManagement(props) {
         accessorKey: "lastName",
       },
       {
-        header: "Email",
+        header: "Email / ORCID",
         accessorKey: "email",
       },
       {
@@ -134,11 +135,13 @@ export default function MyAccountUserManagement(props) {
   const handleClickRemoveOpen = (userId) => {
     console.log("handle click remove open");
     setUserSelected(userId.email);
+    setUsername(userId.firstName + ' ' + userId.lastName)
     setOpen(true);
   };
 
   const handleClickApproveOpen = (userId) => {
     setUserSelected(userId.email);
+    setUsername(userId.firstName + ' ' + userId.lastName)
     setApproveOpen(true);
   };
 
@@ -571,7 +574,7 @@ export default function MyAccountUserManagement(props) {
                       >
                         Remove
                       </Typography>{" "}
-                      <b>{userSelected}</b>?
+                      <b>{userName} - {userSelected}</b>?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
@@ -598,7 +601,7 @@ export default function MyAccountUserManagement(props) {
                       >
                         Approve
                       </Typography>{" "}
-                      <b>{userSelected}</b>?
+                      <b>{userName} - {userSelected}</b>?
                     </DialogContentText>
                   </DialogContent>
                   <DialogActions>
