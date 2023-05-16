@@ -26,6 +26,8 @@ import ErrorIcon from "@mui/icons-material/Error";
 // import { MenuItem } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 // import CheckIcon from "@mui/icons-material/Check";
 // import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
@@ -33,8 +35,9 @@ export default function MyAccountUserManagement(props) {
   let propsUserObj = JSON.parse(props.props.props.user);
   let propsToken = props.props.props.token;
 
-  const [tableData, setTableData] = useState();
-  const [allUsers, setAllUsers] = useState();
+  const [tableData, setTableData] = useState([]);
+  // const [allUsers, setAllUsers] = useState();
+  const [approvedUsers, setApprovedUsers] = useState();
   const [pendingUsers, setPendingUsers] = useState();
   const [colDefs, setColDefs] = useState();
   const [open, setOpen] = useState(false);
@@ -42,8 +45,11 @@ export default function MyAccountUserManagement(props) {
   const [userSelected, setUserSelected] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
-  const [allUsersCount, setAllUsersCount] = useState();
-  const [pendingUsersCount, setPendingUsersCount] = useState();
+  // const [allUsersCount, setAllUsersCount] = useState();
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
+  const [approvedUsersCount, setApprovedUsersCount] = useState(0);
+  const [editingRow, setEditingRow] = useState(false);
+  const [editingRowID, setEditingRowID] = useState();
 
   const handleChange = (event, newValue) => {
     setSelectedTabIdx(newValue);
@@ -99,20 +105,34 @@ export default function MyAccountUserManagement(props) {
       })
       .then((result) => {
         let jsonData = JSON.parse(result);
-        setAllUsers(jsonData);
-        setTableData(jsonData);
-        setAllUsersCount(jsonData.length);
+        // setAllUsers(jsonData);
+        setSelectedTabIdx(selectedTabIdx);
+        // setAllUsersCount(jsonData.length);
+        // console.log('selectedTabidx', selectedTabIdx)
         // Count variable for objects where approved is not 'Y'
         setPendingUsersCount(
           jsonData.filter((obj) => obj.approved !== "Y").length
         );
-        setPendingUsers(jsonData.filter((obj) => obj.approved !== "Y"));
-        setLoading(false);
+        let _pendingUsers = jsonData.filter((obj) => obj.approved !== "Y");
+        setPendingUsers(_pendingUsers);
+
+        setApprovedUsersCount(
+          jsonData.filter((obj) => obj.approved === "Y").length
+        );
+        setApprovedUsers(jsonData.filter((obj) => obj.approved === "Y"));
+        if (selectedTabIdx === 0) {
+          setTableData(jsonData.filter((obj) => obj.approved === "Y"));
+          setLoading(false);
+        } else if (selectedTabIdx === 1) {
+          setTableData(_pendingUsers);
+          setLoading(false);
+        }
       })
       .catch((error) => console.log("error", error));
   }
 
-  const handleClickOpen = (userId) => {
+  const handleClickRemoveOpen = (userId) => {
+    console.log("handle click remove open");
     setUserSelected(userId.email);
     setOpen(true);
   };
@@ -132,7 +152,7 @@ export default function MyAccountUserManagement(props) {
     setApproveOpen(false);
   };
 
-  const handleConfirm = (jobId) => {
+  const handleRemoveConfirm = (jobId) => {
     // Do something when the user confirms
     // console.log("jb", jobIdSelected);
     setOpen(false);
@@ -150,10 +170,61 @@ export default function MyAccountUserManagement(props) {
 
   const removeUser = (userSelected) => {
     console.log("removeUser", userSelected);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + propsToken);
+
+    var formdata = new FormData();
+    formdata.append("email", userSelected);
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/admin/removeUser`,
+      requestOptions
+    )
+      .then((response) => {
+        return response.text();
+      })
+      .then((result) => {
+        // console.log('result', result)
+        getUsers();
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
   };
 
   const approveUser = (userSelected) => {
-    console.log("approveUser", userSelected);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + propsToken);
+
+    var formdata = new FormData();
+    formdata.append("email", userSelected);
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/admin/approveUser`,
+      requestOptions
+    )
+      .then((response) => {
+        return response.text();
+      })
+      .then((result) => {
+        // console.log('result', result)
+        getUsers();
+      })
+      .catch((error) => console.log("error", error));
   };
 
   function a11yProps(index) {
@@ -172,7 +243,7 @@ export default function MyAccountUserManagement(props) {
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
-        setTableData(allUsers);
+        setTableData(approvedUsers);
         break;
       }
       case 1: {
@@ -187,15 +258,45 @@ export default function MyAccountUserManagement(props) {
     }
   }
 
-  const handleSaveRow = async ({ exitEditingMode, row, values }) => {
-    //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
-    tableData[row.index] = values;
-    //send/receive api updates here
-    setTableData([...tableData]);
-    exitEditingMode(); //required to exit editing mode
+  const handleSaveRow = async (cell, row, table) => {
+    console.log("save row", row);
+    console.log(row._valuesCache);
+
+    // If the row doesn't have an index, something is wrong
+    if (row.index === undefined) {
+      console.error("Row has no index:", row);
+      return;
+    }
+
+    // setTableData((prevTableData) => {
+    //   // Make a new copy of the array
+    //   const newTableData = [...prevTableData];
+
+    //   // Replace the original data at the correct index
+    //   newTableData[row.index] = row._valuesCache;
+
+    //   // Return the new array
+    //   return newTableData;
+    // });
+    table.setEditingRow(null); // Clear the editingRow
+    setEditingRow(false);
+  };
+
+  // const editRow = (row, table) => {
+  //   // console.log("editing row", row);
+  //   // console.log("table", table);
+  //   setEditingRow(true);
+  // };
+
+  const cancelEditRow = (row, table) => {
+    // console.log("editing row", row);
+    // console.log("table", table);
+    table.setEditingRow(null); // Clear the editingRow
+    setEditingRow(false);
   };
 
   if (propsUserObj.role === "admin") {
+    
     return (
       <>
         <Grid>
@@ -206,7 +307,7 @@ export default function MyAccountUserManagement(props) {
               backgroundColor: "rgb(251 251 251)",
             }}
           >
-            Manage Accounts
+            Manage User Accounts
           </h1>
         </Grid>
 
@@ -234,7 +335,7 @@ export default function MyAccountUserManagement(props) {
                     onClick={(event) => showTab(event, true, 0)}
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
-                        All Users
+                        Approved Users
                         <PlaylistAddCheckSharpIcon />
                         <Box
                           sx={{
@@ -244,7 +345,7 @@ export default function MyAccountUserManagement(props) {
                           }}
                         >
                           <Badge
-                            badgeContent={allUsersCount}
+                            badgeContent={approvedUsersCount}
                             max={9999}
                             color="secondary"
                           />
@@ -286,17 +387,74 @@ export default function MyAccountUserManagement(props) {
                     columns={colDefs}
                     data={tableData}
                     enableRowActions
+                    //default approved users tab
+                    {...(selectedTabIdx === 0 && {
+                      renderRowActions: ({ cell, row, table }) => [
+                        (() => {
+                          // console.log("editingRow:", editingRowID);
+                          // console.log("row:", row.id);
+                          // console.log('editingrow', editingRow)
+                          return editingRow && editingRowID === row.id ? (
+                            <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
+                              <Tooltip title="Cancel" placement="left">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    cancelEditRow(row, table);
+                                  }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <br />
+                              <Tooltip title="Save" placement="left">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => {
+                                    // Access onEditingRowSave and pass necessary data
+                                    handleSaveRow(cell, row, table)
+                                  }}
+                                >
+                                  <SaveIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
+                              <Tooltip title="Edit" placement="left">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => {
+                                    table.setEditingRow(row);
+                                    setEditingRowID(row.id);
+                                    setEditingRow(true);
+                                    // editRow(row, table); If you have additional operations during editing
+                                  }}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <br />
+                              <Tooltip title="Remove" placement="left">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    handleClickRemoveOpen(row.original);
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          );
+                        })(),
+                      ],
+                    })}
+                    //pending users tab
                     {...(selectedTabIdx === 1 && {
-                      renderRowActions: ({ row, table }) => [
-                        <Box
-                          key={selectedTabIdx + row.id + 'approve'}
-                          sx={{
-                            // display: "flex",
-                            // flexWrap: "nowrap",
-                            // gap: "8px",
-                          }}
-                        >
-                          <Tooltip title="Approve"  placement="left">
+                      renderRowActions: ({ cell, row, table }) => [
+                        <Box key={selectedTabIdx + row.id + "approve"} sx={{}}>
+                          <Tooltip title="Approve" placement="left">
                             <IconButton
                               color="success"
                               onClick={() => {
@@ -306,48 +464,14 @@ export default function MyAccountUserManagement(props) {
                               <CheckIcon />
                             </IconButton>
                           </Tooltip>
-                          <br /> 
-                          <Tooltip title="Remove"  placement="left">
+                          <br />
+                          <Tooltip title="Remove" placement="left">
                             <IconButton
                               color="error"
                               onClick={() => {
                                 // tableData.splice(row.index, 1); //assuming simple data table
                                 // setTableData([...tableData]);
-                                handleClickOpen(row.original);
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>,
-                      ],
-                    })}
-                    {...(selectedTabIdx === 0 && {
-                      renderRowActions: ({ row, table }) => [
-                        <Box
-                        key={selectedTabIdx + row.id + 'edit'}
-                          sx={{
-                            // display: "flex",
-                            // flexWrap: "nowrap",
-                            // gap: "8px",
-                          }}
-                        >
-                          <Tooltip title="Edit"  placement="left">
-                            <IconButton
-                              color="primary"
-                              onClick={() => {
-                                table.setEditingRow(row);
-                              }}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <br /> 
-                          <Tooltip title="Remove"  placement="left">
-                            <IconButton
-                              color="error"
-                              onClick={() => {
-                                handleClickOpen(row.original);
+                                handleClickRemoveOpen(row.original);
                               }}
                             >
                               <DeleteIcon />
@@ -362,7 +486,7 @@ export default function MyAccountUserManagement(props) {
                     enableGlobalFilterModes={true}
                     enablePagination={true}
                     enableColumnResizing={true}
-                    editingMode="modal" //default
+                    editingMode="row" //modal is default
                     enableEditing
                     onEditingRowSave={handleSaveRow}
                     // {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
@@ -455,7 +579,7 @@ export default function MyAccountUserManagement(props) {
                       No
                     </Button>
                     <Button
-                      onClick={() => handleConfirm(userSelected)}
+                      onClick={() => handleRemoveConfirm(userSelected)}
                       color="primary"
                       autoFocus
                     >
