@@ -24,9 +24,9 @@ import MaterialReactTable from "material-react-table";
 import Badge from "@mui/material/Badge";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ErrorIcon from "@mui/icons-material/Error";
+// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
+// import AutorenewIcon from "@mui/icons-material/Autorenew";
+// import ErrorIcon from "@mui/icons-material/Error";
 
 export default function JobsOverview(props) {
   const navigate = useNavigate();

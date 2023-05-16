@@ -24,9 +24,9 @@ import MaterialReactTable from "material-react-table";
 import Badge from "@mui/material/Badge";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ErrorIcon from "@mui/icons-material/Error";
+// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
+// import AutorenewIcon from "@mui/icons-material/Autorenew";
+// import ErrorIcon from "@mui/icons-material/Error";
 
 export default function JobsOverview(props) {
   const navigate = useNavigate();
@@ -274,7 +274,7 @@ export default function JobsOverview(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Completed
-                        <PlaylistAddCheckSharpIcon />
+                        {/* <PlaylistAddCheckSharpIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",
@@ -301,7 +301,7 @@ export default function JobsOverview(props) {
                       <>
                         <Box sx={{ position: "relative", margin: "20px" }}>
                           Pending
-                          <AutorenewIcon />
+                          {/* <AutorenewIcon /> */}
                           <Box
                             sx={{
                               position: "absolute",
@@ -328,7 +328,7 @@ export default function JobsOverview(props) {
                     label={
                       <Box sx={{ position: "relative", margin: "20px" }}>
                         Failed
-                        <ErrorIcon />
+                        {/* <ErrorIcon /> */}
                         <Box
                           sx={{
                             position: "absolute",
