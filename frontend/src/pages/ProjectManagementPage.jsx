@@ -77,7 +77,7 @@ export default function ProjectManagementPage(props) {
               <AddHomeWorkIcon /> Project Management
             </h1>
             {/* <h2>REDCap Forms</h2> */}
-            <Grid  sx={{ margin: "auto" }}>
+            <Grid item xs={12} md={6} sx={{ margin: "auto" }}>
               {addSSError && (
                 <Alert severity="error">
                   Error Loading REDCap Dictionaries. Check REDCap API settings

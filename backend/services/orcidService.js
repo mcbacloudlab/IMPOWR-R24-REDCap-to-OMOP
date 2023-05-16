@@ -37,6 +37,10 @@ async function orcidCallback(req, res) {
   const code = req.query.code;
 
   // Exchange the authorization code for an access token
+  try{}
+  catch(error){
+
+  }
   oauth2.getOAuthAccessToken(
     code,
     { grant_type: "authorization_code", redirect_uri: REDIRECT_URI },
@@ -85,18 +89,39 @@ async function orcidCallback(req, res) {
             role: "default",
           })
         );
-        // Function to generate a random password
         const generateRandomPassword = (length = 8) => {
-          const characters =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-          let result = "";
-          for (let i = 0; i < length; i++) {
-            result += characters.charAt(
-              Math.floor(Math.random() * characters.length)
-            );
+          const requiredCharacters =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*";
+          let password = "";
+
+          // If the length is less than 8, set it to 8
+          if (length < 8) {
+            length = 8;
           }
-          return result;
+
+          // Ensure at least one character of each type
+          password += requiredCharacters[Math.floor(Math.random() * 10)]; // Number
+          password += requiredCharacters[Math.floor(Math.random() * 26) + 10]; // Lowercase letter
+          password += requiredCharacters[Math.floor(Math.random() * 26) + 36]; // Uppercase letter
+          password += requiredCharacters[Math.floor(Math.random() * 9) + 62]; // Special character
+
+          // Fill the remaining length with random characters
+          for (let i = 4; i < length; i++) {
+            password +=
+              requiredCharacters[
+                Math.floor(Math.random() * requiredCharacters.length)
+              ];
+          }
+
+          // Shuffle the password
+          password = password
+            .split("")
+            .sort(() => Math.random() - 0.5)
+            .join("");
+
+          return password;
         };
+
         // Create user in mysql DB with orcid ID as the userId
         let userInfo = {
           // id: orcidId,
@@ -106,7 +131,15 @@ async function orcidCallback(req, res) {
           // role: "default",
           password: generateRandomPassword(),
         };
-        userService.createUser(userInfo, true);
+
+          userService.createUser(userInfo, true)
+          .catch(error => {
+            console.error("Error in creating user:", error);
+            // Handle the error appropriately here
+          });;
+
+      
+        
         // Need to attempt to get email address from ORCID, won't always get an email address if unverified or private emails, just store orcid id if no email found
         // NOTE: Getting the orcid email address requires the orcid paid member api
 

@@ -25,13 +25,24 @@ async function getUserByEmail(email) {
 }
 
 async function createUser(userData, orcidUser) {
-  console.log("create userData", userData);
+  // console.log("create userData", userData);
+
+  const passwordSchema = Joi.string()
+  .pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/)
+  .required()
+  .messages({
+    'string.base': 'Password must be a string',
+    'string.empty': 'Password is required',
+    'string.pattern.base': 'Password must contain at least 1 number and 1 special character',
+    'string.min': 'Password should have a minimum length of {#limit}',
+  });
+
   const userDataSchema = Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     email: Joi.string().required(),
     // email: Joi.string().email().required(),
-    password: Joi.string().min(8).required(),
+    password: passwordSchema,
   });
 
   function validateUserData(userData) {
@@ -52,7 +63,7 @@ async function createUser(userData, orcidUser) {
       }
       const saltRounds = 10;
       const myPlaintextPassword = userData.password;
-      console.log("userData", userData);
+      // console.log("userData", userData);
 
       return bcrypt.genSalt(saltRounds, function (err, salt) {
         bcrypt.hash(myPlaintextPassword, salt, function (err, hash) {
