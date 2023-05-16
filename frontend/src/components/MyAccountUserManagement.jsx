@@ -28,13 +28,15 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import { useTheme } from '@mui/material/styles';
+
 // import CheckIcon from "@mui/icons-material/Check";
 // import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 
 export default function MyAccountUserManagement(props) {
   let propsUserObj = JSON.parse(props.props.props.user);
   let propsToken = props.props.props.token;
-
+  const theme = useTheme();
   const [tableData, setTableData] = useState([]);
   // const [allUsers, setAllUsers] = useState();
   const [approvedUsers, setApprovedUsers] = useState();
@@ -43,7 +45,7 @@ export default function MyAccountUserManagement(props) {
   const [open, setOpen] = useState(false);
   const [approveOpen, setApproveOpen] = useState(false);
   const [userSelected, setUserSelected] = useState("");
-  const [userName, setUsername] = useState()
+  const [userName, setUsername] = useState();
   const [loading, setLoading] = useState(true);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   // const [allUsersCount, setAllUsersCount] = useState();
@@ -135,13 +137,13 @@ export default function MyAccountUserManagement(props) {
   const handleClickRemoveOpen = (userId) => {
     console.log("handle click remove open");
     setUserSelected(userId.email);
-    setUsername(userId.firstName + ' ' + userId.lastName)
+    setUsername(userId.firstName + " " + userId.lastName);
     setOpen(true);
   };
 
   const handleClickApproveOpen = (userId) => {
     setUserSelected(userId.email);
-    setUsername(userId.firstName + ' ' + userId.lastName)
+    setUsername(userId.firstName + " " + userId.lastName);
     setApproveOpen(true);
   };
 
@@ -299,7 +301,6 @@ export default function MyAccountUserManagement(props) {
   };
 
   if (propsUserObj.role === "admin") {
-    
     return (
       <>
         <Grid>
@@ -313,314 +314,254 @@ export default function MyAccountUserManagement(props) {
             Manage User Accounts
           </h1>
         </Grid>
-
         <Grid container spacing={1} sx={{ margin: "30px" }}>
-          <Grid
-            item
-            xs={12}
-            lg={12}
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              margin: "20px",
-            }}
-          >
-            {!loading && (
-              // <Paper elevation={3} sx={{ padding: "10px" }}>
-              <>
-                <Tabs
-                  centered
-                  value={selectedTabIdx}
-                  aria-label="basic tabs example"
-                >
-                  <Tab
-                    onClick={(event) => showTab(event, true, 0)}
-                    label={
-                      <Box sx={{ position: "relative", margin: "20px" }}>
-                        Approved Users
-                        {/* <PlaylistAddCheckSharpIcon /> */}
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            right: "-20px", // Adjust the right position of the badge
-                          }}
-                        >
-                          <Badge
-                            badgeContent={approvedUsersCount}
-                            max={9999}
-                            color="secondary"
-                          />
-                        </Box>
+          <Grid item xs={12} md={2}>
+            <Tabs
+              value={selectedTabIdx}
+              aria-label="basic tabs example"
+              orientation="vertical"
+              TabIndicatorProps={{
+                style: {
+                  display: "none",
+                },
+              }}
+            >
+              <Tab
+                onClick={(event) => showTab(event, true, 0)}
+                style={{
+                  backgroundColor: selectedTabIdx === 0 ? theme.palette.secondary.main : "inherit",
+                }}
+                label={
+                  <Box sx={{ position: "relative", margin: "20px" }}>
+                    Approved Users
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: "-20px",
+                      }}
+                    >
+                      <Badge
+                        badgeContent={approvedUsersCount}
+                        max={9999}
+                        color="secondary"
+                      />
+                    </Box>
+                  </Box>
+                }
+                {...a11yProps(0)}
+              />
+              <br />
+              <Tab
+                onClick={(event) => showTab(event, true, 1)}
+                style={{
+                  backgroundColor: selectedTabIdx === 1 ? theme.palette.secondary.main : "inherit",
+                }}
+                label={
+                  <Box sx={{ position: "relative", margin: "20px" }}>
+                    Pending Users
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: "-20px",
+                      }}
+                    >
+                      <Badge
+                        badgeContent={pendingUsersCount}
+                        max={9999}
+                        color="secondary"
+                      />
+                    </Box>
+                  </Box>
+                }
+                {...a11yProps(1)}
+              />
+            </Tabs>
+          </Grid>
+          {!loading && (
+            <Grid item xs={12} md={9}>
+            <MaterialReactTable
+              key={selectedTabIdx}
+              //passing the callback function variant. (You should get type hints for all the callback parameters available)
+              columns={colDefs}
+              data={tableData}
+              enableRowActions
+              //default approved users tab
+              {...(selectedTabIdx === 0 && {
+                renderRowActions: ({ cell, row, table }) => [
+                  (() => {
+                    // console.log("editingRow:", editingRowID);
+                    // console.log("row:", row.id);
+                    // console.log('editingrow', editingRow)
+                    return editingRow && editingRowID === row.id ? (
+                      <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
+                        <Tooltip title="Cancel" placement="left">
+                          <IconButton
+                            color="error"
+                            onClick={() => {
+                              cancelEditRow(row, table);
+                            }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <br />
+                        <Tooltip title="Save" placement="left">
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              // Access onEditingRowSave and pass necessary data
+                              handleSaveRow(cell, row, table);
+                            }}
+                          >
+                            <SaveIcon />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
-                    }
-                    {...a11yProps(0)}
-                  />
-
-                  <Tab
-                    onClick={(event) => showTab(event, true, 1)}
-                    label={
-                      <Box sx={{ position: "relative", margin: "20px" }}>
-                        Pending Users
-                        {/* <ErrorIcon /> */}
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            right: "-20px", // Adjust the right position of the badge
-                          }}
-                        >
-                          <Badge
-                            badgeContent={pendingUsersCount}
-                            max={9999}
-                            color="secondary"
-                          />
-                        </Box>
+                    ) : (
+                      <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
+                        <Tooltip title="Edit" placement="left">
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              table.setEditingRow(row);
+                              setEditingRowID(row.id);
+                              setEditingRow(true);
+                              // editRow(row, table); If you have additional operations during editing
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <br />
+                        <Tooltip title="Remove" placement="left">
+                          <IconButton
+                            color="error"
+                            onClick={() => {
+                              handleClickRemoveOpen(row.original);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
-                    }
-                    {...a11yProps(1)}
-                  />
-                </Tabs>
-
-                <Grid item xs={12}>
-                  <MaterialReactTable
-                    key={selectedTabIdx}
-                    //passing the callback function variant. (You should get type hints for all the callback parameters available)
-                    columns={colDefs}
-                    data={tableData}
-                    enableRowActions
-                    //default approved users tab
-                    {...(selectedTabIdx === 0 && {
-                      renderRowActions: ({ cell, row, table }) => [
-                        (() => {
-                          // console.log("editingRow:", editingRowID);
-                          // console.log("row:", row.id);
-                          // console.log('editingrow', editingRow)
-                          return editingRow && editingRowID === row.id ? (
-                            <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
-                              <Tooltip title="Cancel" placement="left">
-                                <IconButton
-                                  color="error"
-                                  onClick={() => {
-                                    cancelEditRow(row, table);
-                                  }}
-                                >
-                                  <CloseIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <br />
-                              <Tooltip title="Save" placement="left">
-                                <IconButton
-                                  color="primary"
-                                  onClick={() => {
-                                    // Access onEditingRowSave and pass necessary data
-                                    handleSaveRow(cell, row, table)
-                                  }}
-                                >
-                                  <SaveIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          ) : (
-                            <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
-                              <Tooltip title="Edit" placement="left">
-                                <IconButton
-                                  color="primary"
-                                  onClick={() => {
-                                    table.setEditingRow(row);
-                                    setEditingRowID(row.id);
-                                    setEditingRow(true);
-                                    // editRow(row, table); If you have additional operations during editing
-                                  }}
-                                >
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <br />
-                              <Tooltip title="Remove" placement="left">
-                                <IconButton
-                                  color="error"
-                                  onClick={() => {
-                                    handleClickRemoveOpen(row.original);
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          );
-                        })(),
-                      ],
-                    })}
-                    //pending users tab
-                    {...(selectedTabIdx === 1 && {
-                      renderRowActions: ({ cell, row, table }) => [
-                        <Box key={selectedTabIdx + row.id + "approve"} sx={{}}>
-                          <Tooltip title="Approve" placement="left">
-                            <IconButton
-                              color="success"
-                              onClick={() => {
-                                handleClickApproveOpen(row.original);
-                              }}
-                            >
-                              <CheckIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <br />
-                          <Tooltip title="Remove" placement="left">
-                            <IconButton
-                              color="error"
-                              onClick={() => {
-                                // tableData.splice(row.index, 1); //assuming simple data table
-                                // setTableData([...tableData]);
-                                handleClickRemoveOpen(row.original);
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>,
-                      ],
-                    })}
-                    enableDensityToggle={false} //density does not work with memoized cells
-                    memoMode="cells" // memoize table cells to improve render performance, but break some features
-                    enableBottomToolbar={true}
-                    enableGlobalFilterModes={true}
-                    enablePagination={true}
-                    enableColumnResizing={true}
-                    editingMode="row" //modal is default
-                    enableEditing
-                    onEditingRowSave={handleSaveRow}
-                    // {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
-                    RowProps={{ sx: { marginBottom: "10px" } }}
-                    // enableRowNumbers
-                    // enableRowVirtualization
-                    muiTableContainerProps={{
-                      sx: {
-                        maxWidth: "100vw",
-                        maxHeight: "50vh",
-                      },
-                    }}
-                    initialState={{
-                      density: "compact",
-                      // pagination: { pageSize: 50, pageIndex: 0 },
-                    }}
-                    enableSorting={true}
-                    enableStickyHeader
-                    muiTableProps={{
-                      sx: {
-                        borderCollapse: "separate",
-                        borderSpacing: "0 10px", // set the desired space between rows
-                        tableLayout: "fixed",
-                      },
-                    }}
-                    muiTablePaperProps={{
-                      elevation: 2, //change the mui box shadow
-                      //customize paper styles
-                      sx: {
-                        borderRadius: "0",
-                        border: "1px solid #e0e0e0",
-                      },
-                    }}
-                    muiTableBodyProps={{
-                      sx: {
-                        "& .subrow": {
-                          backgroundColor: "pink",
-                        },
-                      },
-                    }}
-                    muiTableHeadProps={{
-                      sx: (theme) => ({
-                        "& tr": {
-                          backgroundColor: "#4a4a4a",
-                          color: "#ffffff",
-                        },
-                      }),
-                    }}
-                    muiTableHeadCellProps={{
-                      sx: (theme) => ({
-                        div: {
-                          backgroundColor: "#4a4a4a",
-                          color: "#ffffff",
-                        },
-                      }),
-                    }}
-                    // autoWidth={true}
-                    positionToolbarAlertBanner="bottom"
-                    renderTopToolbarCustomActions={({ table }) => (
-                      <Box
-                        width="100%"
-                        sx={{
-                          display: "flex",
-                          gap: "1rem",
-                          p: "0.5rem",
-                          flexWrap: "wrap",
+                    );
+                  })(),
+                ],
+              })}
+              //pending users tab
+              {...(selectedTabIdx === 1 && {
+                renderRowActions: ({ cell, row, table }) => [
+                  <Box key={selectedTabIdx + row.id + "approve"} sx={{}}>
+                    <Tooltip title="Approve" placement="left">
+                      <IconButton
+                        color="success"
+                        onClick={() => {
+                          handleClickApproveOpen(row.original);
                         }}
                       >
-                        <Box style={{ marginLeft: "auto" }}></Box>
-                      </Box>
-                    )}
-                  />
-                </Grid>
-                <Dialog open={open} onClose={handleClose}>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      <Typography
+                        <CheckIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <br />
+                    <Tooltip title="Remove" placement="left">
+                      <IconButton
                         color="error"
-                        component="span"
-                        variant="inherit"
+                        onClick={() => {
+                          // tableData.splice(row.index, 1); //assuming simple data table
+                          // setTableData([...tableData]);
+                          handleClickRemoveOpen(row.original);
+                        }}
                       >
-                        Remove
-                      </Typography>{" "}
-                      <b>{userName} - {userSelected}</b>?
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                      No
-                    </Button>
-                    <Button
-                      onClick={() => handleRemoveConfirm(userSelected)}
-                      color="primary"
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-                <Dialog open={approveOpen} onClose={handleApproveClose}>
-                  <DialogTitle>Confirm Approval</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText color="success">
-                      <Typography
-                        component="span"
-                        variant="inherit"
-                        sx={{ color: "green" }}
-                      >
-                        Approve
-                      </Typography>{" "}
-                      <b>{userName} - {userSelected}</b>?
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleApproveClose} color="primary">
-                      No
-                    </Button>
-                    <Button
-                      onClick={() => handleApproveConfirm(userSelected)}
-                      color="primary"
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </>
-              // </Paper>
-            )}
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>,
+                ],
+              })}
+              enableDensityToggle={false} //density does not work with memoized cells
+              memoMode="cells" // memoize table cells to improve render performance, but break some features
+              enableBottomToolbar={true}
+              enableGlobalFilterModes={true}
+              enablePagination={true}
+              enableColumnResizing={true}
+              editingMode="row" //modal is default
+              enableEditing
+              onEditingRowSave={handleSaveRow}
+              // {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}
+              RowProps={{ sx: { marginBottom: "10px" } }}
+              // enableRowNumbers
+              // enableRowVirtualization
+              muiTableContainerProps={{
+                sx: {
+                  maxWidth: "100vw",
+                  maxHeight: "50vh",
+                },
+              }}
+              initialState={{
+                density: "compact",
+                // pagination: { pageSize: 50, pageIndex: 0 },
+              }}
+              enableSorting={true}
+              enableStickyHeader
+              muiTableProps={{
+                sx: {
+                  borderCollapse: "separate",
+                  borderSpacing: "0 10px", // set the desired space between rows
+                  tableLayout: "fixed",
+                },
+              }}
+              muiTablePaperProps={{
+                elevation: 2, //change the mui box shadow
+                //customize paper styles
+                sx: {
+                  borderRadius: "0",
+                  border: "1px solid #e0e0e0",
+                },
+              }}
+              muiTableBodyProps={{
+                sx: {
+                  "& .subrow": {
+                    backgroundColor: "pink",
+                  },
+                },
+              }}
+              muiTableHeadProps={{
+                sx: (theme) => ({
+                  "& tr": {
+                    backgroundColor: "#4a4a4a",
+                    color: "#ffffff",
+                  },
+                }),
+              }}
+              muiTableHeadCellProps={{
+                sx: (theme) => ({
+                  div: {
+                    backgroundColor: "#4a4a4a",
+                    color: "#ffffff",
+                  },
+                }),
+              }}
+              // autoWidth={true}
+              positionToolbarAlertBanner="bottom"
+              renderTopToolbarCustomActions={({ table }) => (
+                <Box
+                  width="100%"
+                  sx={{
+                    display: "flex",
+                    gap: "1rem",
+                    p: "0.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Box style={{ marginLeft: "auto" }}></Box>
+                </Box>
+              )}
+            />
           </Grid>
+          )}     
+          
         </Grid>
       </>
     );

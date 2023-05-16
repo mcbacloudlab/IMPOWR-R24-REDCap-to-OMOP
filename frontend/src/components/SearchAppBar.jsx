@@ -11,7 +11,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
 // import TemporaryDrawer from "./TemporaryDrawer";
@@ -19,7 +18,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./JobsOverview";
 import FailedJobs from "./FailedJobs";
@@ -29,9 +28,10 @@ import { useLists } from "./ListsContext";
 import _ from "lodash";
 import Logo from "../assets/logo.png";
 import MuiAlert from "@mui/material/Alert";
+import { ViewContext } from "./ViewContext";
 
 export default function SearchAppBar({ openSnackbar, ...props }) {
-  // console.log('search bar', props)
+  console.log("search bar", props);
   // console.log('opensnackbar', openSnackbar)
   const {
     pendingList,
@@ -40,11 +40,17 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     setPendingList,
     setFailedList,
     setCompletedList,
+    setAllCompletedList,
+    setAllPendingList,
+    setAllFailedList,
   } = useLists();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
+  const { view, setView } = useContext(ViewContext);
+
+  console.log('view', view)
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -83,7 +89,19 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     } catch (error) {
       console.log("error", error);
     }
-  }, [props.user]);
+  }, [props.user, view]);
+
+  let userCookie = Cookies.get("user");
+  let userInfo;
+  let role = 'default'
+  if (userCookie) {
+    userCookie = JSON.parse(userCookie);
+    userInfo = JSON.parse(props.user);
+    console.log("userInfo", userInfo.role);
+    role = userInfo.role
+  }
+
+
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -344,6 +362,95 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       });
   }
 
+  
+  function checkAllJobs() {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/users/getAllUserJobs`,
+      requestOptions
+    )
+      .then((response) => {
+        const statusCode = response.status;
+        if (statusCode !== 200) {
+          console.log("Error!", statusCode);
+          // handleSignOut('Server error')
+          return;
+        } else return response.text();
+      })
+      .then((result) => {
+        let resultObj = JSON.parse(result);
+        // console.log('resultobj', resultObj)
+        let _pendingList = resultObj.filter((obj) => {
+          if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
+            return obj;
+          else return null;
+        });
+
+        let _completedList = resultObj.filter((obj) => {
+          if (obj.jobStatus === "completed") return obj;
+          else return null;
+        });
+
+        let _failedList = resultObj.filter((obj) => {
+          if (obj.jobStatus === "failed") return obj;
+          else return null;
+        });
+
+        // Use functional update form of setState
+        setAllPendingList((prevPendingList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevPendingList, _pendingList)) {
+            // console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _pendingList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevPendingList;
+        });
+
+        // Use functional update form of setState
+        setAllFailedList((prevFailedList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevFailedList, _failedList)) {
+            // console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _failedList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevFailedList;
+        });
+
+        // Use functional update form of setState
+        setAllCompletedList((prevCompletedList) => {
+          // Compare the previous state with the new value
+          if (!_.isEqual(prevCompletedList, _completedList)) {
+            // console.log("set the pending, found diff");
+            // Return the new value to update the state
+            return _completedList;
+          }
+          // Return the previous state to keep it unchanged
+          return prevCompletedList;
+        });
+
+        // setPendingList(_pendingList);
+        // setFailedList(_failedList);
+        // setCompletedList(_completedList);
+      })
+      .catch((error) => {
+        // handleSignOut();
+        console.log("error", error);
+      });
+  }
+
   useEffect(() => {
     // Fetch data initially
     // checkJobs();
@@ -351,20 +458,33 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       "This account is pending approval. Please be patient while we approve all user requests."
     );
     // Fetch data every 15 seconds
-    let intervalId 
+    let userJobsInterval, allJobsInterval;
     // console.log('open', openSnackbar)
+    console.log('view', view)
+    console.log('role', role)
     if (!openSnackbar) {
-      intervalId= setInterval(() => {
+      userJobsInterval = setInterval(() => {
         checkJobs();
       }, 2000);
+    }else{
+      clearInterval(userJobsInterval);
+    }
+
+    if(role === 'admin' && view === 'All Jobs Overview'){
+      allJobsInterval = setInterval(() => {
+        checkAllJobs();
+      }, 2000);
+    }else{
+      clearInterval(allJobsInterval)
     }
 
     // Clean up interval on unmount
     return () => {
-      clearInterval(intervalId);
+      clearInterval(userJobsInterval);
+      clearInterval(allJobsInterval)
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openSnackbar]);
+  }, [openSnackbar, view]);
 
   const displayMessage = (msg) => {
     setSnackbarMessage(msg);
@@ -507,7 +627,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
             elevation={6}
             variant="filled"
             // onClose={handleSnackbarClose}
-            sx={{  }}
+            sx={{}}
             severity="warning" // Change severity to "success", "info", "warning", or "error"
           >
             {snackbarMessage}

@@ -12,6 +12,7 @@ import {
   DialogTitle,
   Grid,
   IconButton,
+  LinearProgress,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -31,9 +32,9 @@ import Tab from "@mui/material/Tab";
 export default function JobsOverview(props) {
   const navigate = useNavigate();
 
-  const { completedList } = useLists();
-  const { pendingList } = useLists();
-  const { failedList } = useLists();
+  const { allCompletedList } = useLists();
+  const { allPendingList } = useLists();
+  const { allFailedList } = useLists();
 
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
@@ -43,40 +44,43 @@ export default function JobsOverview(props) {
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [loading, setLoading] = useState(true);
   const [colDefs, setColDefs] = useState();
-  const [tableData, setTableData] = useState(completedList);
+  const [tableData, setTableData] = useState(allCompletedList);
 
   // const handleChange = (event, newValue) => {
   //   setSelectedTabIdx(newValue);
   // };
 
   useEffect(() => {
-    setColDefs(cols);
+    setColDefs(getCols(selectedTabIdx));
+    setLoading(true);
+    if (selectedTabIdx === 0) setTableData(allCompletedList);
+    else if (selectedTabIdx === 1) setTableData(allPendingList);
+    else if (selectedTabIdx === 2) setTableData(allFailedList);
     setLoading(false);
-    if(selectedTabIdx === 0) setTableData(completedList);
-    else if(selectedTabIdx === 1) setTableData(pendingList)
-    else if(selectedTabIdx === 2) setTableData(failedList)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completedList, pendingList, failedList]);
+  }, [allCompletedList, allPendingList, allFailedList, selectedTabIdx]);
 
   async function showTab(e, switching, panelIndex) {
     setLoading(true);
     if (!panelIndex) panelIndex = 0;
+    setColDefs(getCols(panelIndex));
     setSelectedTabIdx(panelIndex);
+
     // if (!switching) handleChange(e, 0); //reset tab to default tab
     //set table data based on panelIndex
     switch (panelIndex) {
       case 0: {
-        setTableData(completedList);
+        setTableData(allCompletedList);
         setLoading(false);
         break;
       }
       case 1: {
-        setTableData(pendingList);
+        setTableData(allPendingList);
         setLoading(false);
         break;
       }
       case 2: {
-        setTableData(failedList);
+        setTableData(allFailedList);
         setLoading(false);
         break;
       }
@@ -134,27 +138,42 @@ export default function JobsOverview(props) {
   };
 
   const CollectionsCell = ({ cell, row }) => {
-    let job = cell.getValue();
-    if (job) job = JSON.parse(job);
+    console.log("collection", typeof row.original.collectionName);
+    console.log(row.original.collectionName);
+  
+    let resultArray = [];
+  
+    if (row.original.collectionName) {
+      const trimmedString = row.original.collectionName.slice(1, -1);
+      const arrayStrings = trimmedString.split("][");
+      resultArray = arrayStrings.flatMap((str) => {
+        const cleanedString = str.replace(/[\[\]']+/g, "").trim();
+        return cleanedString.split(",").map((element) => element.trim());
+      });
+      resultArray.forEach((item) => {
+        console.log('item', item);
+      });
+    }
+  
     return (
       <>
-        {row.original.collections && row.original.totalCollectionDocs !== null
-          ? Object.entries(JSON.parse(row.original.collections)).map(
-              ([key, value]) => (
-                <React.Fragment key={key + row.id}>
-                  <Chip
-                    label={`${key}`}
-                    color="secondary"
-                    sx={{ margin: "10px" }}
-                  />
-                  <br />
-                </React.Fragment>
-              )
-            )
+        {row.original.collectionName && row.original.totalCollectionDocs !== null
+          ? resultArray.map((label, index) => (
+              <React.Fragment key={index}>
+                <Chip
+                  label={label}
+                  color="secondary"
+                  sx={{ margin: "10px" }}
+                />
+                <br />
+              </React.Fragment>
+            ))
           : "N/A"}
       </>
     );
   };
+  
+  
   
 
   const CompletedAtCell = ({ cell, row }) => {
@@ -174,46 +193,75 @@ export default function JobsOverview(props) {
     );
   };
 
-  const cols = [
-    {
-      header: "Job ID",
-      accessorKey: "jobId",
-      maxSize: 100,
-    },
-    {
-      header: "REDCap Form",
-      accessorKey: "redcapFormName",
-      minSize: 100,
-    },
-    {
-      header: "Collections",
-      accessorKey: "collections",
-      Cell: CollectionsCell,
-      minSize: 300,
-    },
-    {
-      header: "Total Documents",
-      accessorKey: "totalCollectionDocs",
-      Cell: TotalDocumentsCell,
-      minSize: 150,
-      maxSize: 150,
-    },
-    {
-      header: "Questions",
-      accessorKey: "dataLength",
-    },
-    {
-      header: "Submitted By",
-      accessorKey: "submittedBy",
-    },
-    {
-      header: "Completed At",
-      accessorKey: "finishedAt",
-      Cell: CompletedAtCell,
-    },
-  ];
+  const ProgressCell = ({ cell, row }) => {
+    return (
+      <Box display="flex" alignItems="center">
+        <Box width="100%" mr={1}>
+          <LinearProgress
+            variant="determinate"
+            value={cell.getValue() ? cell.getValue() : 0}
+          />
+        </Box>
+        <Typography variant="body2">{`${
+          cell.getValue() ? cell.getValue() : 0
+        }%`}</Typography>
+      </Box>
+    );
+  };
 
- 
+  const getCols = (panelIndex) => {
+    const cols = [
+      {
+        header: "Job ID",
+        accessorKey: "jobId",
+        maxSize: 100,
+      },
+      ...(panelIndex === 1 || panelIndex === 2
+        ? [
+            {
+              header: "Progress",
+              accessorKey: "progress",
+              Cell: ProgressCell,
+              minSize: 150,
+              maxSize: 150,
+            },
+          ]
+        : []),
+      {
+        header: "REDCap Form",
+        accessorKey: "redcapFormName",
+        minSize: 100,
+      },
+      {
+        header: "Collections",
+        accessorKey: "collections",
+        Cell: CollectionsCell,
+        minSize: 300,
+      },
+      {
+        header: "Total Documents",
+        accessorKey: "totalCollectionDocs",
+        Cell: TotalDocumentsCell,
+        minSize: 150,
+        maxSize: 150,
+      },
+      {
+        header: "Questions",
+        accessorKey: "dataLength",
+      },
+      {
+        header: "Submitted By",
+        accessorKey: "submittedBy",
+      },
+      {
+        header: "Completed At",
+        accessorKey: "finishedAt",
+        Cell: CompletedAtCell,
+      },
+    ];
+
+    return cols;
+  };
 
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
@@ -255,7 +303,7 @@ export default function JobsOverview(props) {
           textAlign: "center",
         }}
       >
-        Jobs Overview
+        All Jobs Overview
       </h1>
 
       {!loading && (
@@ -284,7 +332,7 @@ export default function JobsOverview(props) {
                         >
                           <Badge
                             badgeContent={
-                              completedList ? completedList.length : "0"
+                              allCompletedList ? allCompletedList.length : "0"
                             }
                             max={9999}
                             color="secondary"
@@ -311,7 +359,7 @@ export default function JobsOverview(props) {
                           >
                             <Badge
                               badgeContent={
-                                pendingList ? pendingList.length : "0"
+                                allPendingList ? allPendingList.length : "0"
                               }
                               max={9999}
                               color="secondary"
@@ -337,7 +385,9 @@ export default function JobsOverview(props) {
                           }}
                         >
                           <Badge
-                            badgeContent={failedList ? failedList.length : "0"}
+                            badgeContent={
+                              allFailedList ? allFailedList.length : "0"
+                            }
                             max={9999}
                             color="secondary"
                           />
@@ -388,7 +438,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'completed'}
+                        key={row.id + selectedTabIdx + "completed"}
                         sx={
                           {
                             // display: "flex",
@@ -424,7 +474,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 1 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'pending'}
+                        key={row.id + selectedTabIdx + "pending"}
                         sx={{
                           display: "flex",
                           flexWrap: "nowrap",
@@ -447,7 +497,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 2 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'failed'}
+                        key={row.id + selectedTabIdx + "failed"}
                         sx={{
                           display: "flex",
                           flexWrap: "nowrap",

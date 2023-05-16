@@ -12,6 +12,7 @@ import {
   DialogTitle,
   Grid,
   IconButton,
+  LinearProgress,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -50,13 +51,13 @@ export default function JobsOverview(props) {
   // };
 
   useEffect(() => {
-    setColDefs(cols);
+    setColDefs(getCols(selectedTabIdx));
     setLoading(false);
-    if(selectedTabIdx === 0) setTableData(completedList);
-    else if(selectedTabIdx === 1) setTableData(pendingList)
-    else if(selectedTabIdx === 2) setTableData(failedList)
+    if (selectedTabIdx === 0) setTableData(completedList);
+    else if (selectedTabIdx === 1) setTableData(pendingList);
+    else if (selectedTabIdx === 2) setTableData(failedList);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [completedList, pendingList, failedList]);
+  }, [completedList, pendingList, failedList, selectedTabIdx]);
 
   async function showTab(e, switching, panelIndex) {
     setLoading(true);
@@ -64,6 +65,7 @@ export default function JobsOverview(props) {
     setSelectedTabIdx(panelIndex);
     // if (!switching) handleChange(e, 0); //reset tab to default tab
     //set table data based on panelIndex
+    setColDefs(getCols(panelIndex));
     switch (panelIndex) {
       case 0: {
         setTableData(completedList);
@@ -135,6 +137,7 @@ export default function JobsOverview(props) {
 
   const CollectionsCell = ({ cell, row }) => {
     let job = cell.getValue();
+    console.log('job user', job)
     if (job) job = JSON.parse(job);
     return (
       <>
@@ -155,7 +158,6 @@ export default function JobsOverview(props) {
       </>
     );
   };
-  
 
   const CompletedAtCell = ({ cell, row }) => {
     return row.original.finishedAt
@@ -174,46 +176,75 @@ export default function JobsOverview(props) {
     );
   };
 
-  const cols = [
-    {
-      header: "Job ID",
-      accessorKey: "jobId",
-      maxSize: 100,
-    },
-    {
-      header: "REDCap Form",
-      accessorKey: "redcapFormName",
-      minSize: 100,
-    },
-    {
-      header: "Collections",
-      accessorKey: "collections",
-      Cell: CollectionsCell,
-      minSize: 300,
-    },
-    {
-      header: "Total Documents",
-      accessorKey: "totalCollectionDocs",
-      Cell: TotalDocumentsCell,
-      minSize: 150,
-      maxSize: 150,
-    },
-    {
-      header: "Questions",
-      accessorKey: "dataLength",
-    },
-    {
-      header: "Submitted By",
-      accessorKey: "submittedBy",
-    },
-    {
-      header: "Completed At",
-      accessorKey: "finishedAt",
-      Cell: CompletedAtCell,
-    },
-  ];
+  const ProgressCell = ({ cell, row }) => {
+    return (
+      <Box display="flex" alignItems="center">
+        <Box width="100%" mr={1}>
+          <LinearProgress
+            variant="determinate"
+            value={cell.getValue() ? cell.getValue() : 0}
+          />
+        </Box>
+        <Typography variant="body2">{`${
+          cell.getValue() ? cell.getValue() : 0
+        }%`}</Typography>
+      </Box>
+    );
+  };
 
- 
+  const getCols = (panelIndex) => {
+    const cols = [
+      {
+        header: "Job ID",
+        accessorKey: "jobId",
+        maxSize: 100,
+      },
+      ...(panelIndex === 1 || panelIndex === 2
+        ? [
+            {
+              header: "Progress",
+              accessorKey: "progress",
+              Cell: ProgressCell,
+              minSize: 150,
+              maxSize: 150,
+            },
+          ]
+        : []),
+      {
+        header: "REDCap Form",
+        accessorKey: "redcapFormName",
+        minSize: 100,
+      },
+      {
+        header: "Collections",
+        accessorKey: "collections",
+        Cell: CollectionsCell,
+        minSize: 300,
+      },
+      {
+        header: "Total Documents",
+        accessorKey: "totalCollectionDocs",
+        Cell: TotalDocumentsCell,
+        minSize: 150,
+        maxSize: 150,
+      },
+      {
+        header: "Questions",
+        accessorKey: "dataLength",
+      },
+      {
+        header: "Submitted By",
+        accessorKey: "submittedBy",
+      },
+      {
+        header: "Completed At",
+        accessorKey: "finishedAt",
+        Cell: CompletedAtCell,
+      },
+    ];
+
+    return cols;
+  };
 
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
@@ -388,7 +419,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'completed'}
+                        key={row.id + selectedTabIdx + "completed"}
                         sx={
                           {
                             // display: "flex",
@@ -424,7 +455,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 1 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'pending'}
+                        key={row.id + selectedTabIdx + "pending"}
                         sx={{
                           display: "flex",
                           flexWrap: "nowrap",
@@ -447,7 +478,7 @@ export default function JobsOverview(props) {
                   {...(selectedTabIdx === 2 && {
                     renderRowActions: ({ row, table }) => [
                       <Box
-                        key={row.id + selectedTabIdx + 'failed'}
+                        key={row.id + selectedTabIdx + "failed"}
                         sx={{
                           display: "flex",
                           flexWrap: "nowrap",

@@ -353,26 +353,29 @@ async function getAllUserJobs(req, res) {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
     // console.log("get user jobs for", req.body.type);
-    let query;
-    if (req.body.type == "complete") {
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-      FROM redcap.users 
-      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
-      where jobStatus = 'completed'
-      order by lastUpdated desc`;
-    } else if (req.body.type == "pending") {
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-      FROM redcap.users 
-      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
-      where jobStatus = 'active' or jobStatus = 'waiting'
-      order by lastUpdated desc`;
-    } else if (req.body.type == "failed") {
-      query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-      FROM redcap.users 
-      LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
-      where jobStatus = 'failed'
-      order by lastUpdated desc`;
-    }
+    let query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
+    FROM redcap.users 
+    LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    ORDER BY (jobStatus = 'active') DESC, jobId DESC`;
+    // if (req.body.type == "complete") {
+    //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
+    //   FROM redcap.users 
+    //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    //   where jobStatus = 'completed'
+    //   order by lastUpdated desc`;
+    // } else if (req.body.type == "pending") {
+    //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
+    //   FROM redcap.users 
+    //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    //   where jobStatus = 'active' or jobStatus = 'waiting'
+    //   order by lastUpdated desc`;
+    // } else if (req.body.type == "failed") {
+    //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
+    //   FROM redcap.users 
+    //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    //   where jobStatus = 'failed'
+    //   order by lastUpdated desc`;
+    // }
 
     //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {

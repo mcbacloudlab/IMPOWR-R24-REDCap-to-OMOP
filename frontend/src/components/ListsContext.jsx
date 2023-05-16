@@ -10,6 +10,9 @@ export const ListsProvider = ({ children }) => {
   const [pendingList, setPendingList] = useState([]);
   const [failedList, setFailedList] = useState([]);
   const [completedList, setCompletedList] = useState([]);
+  const [allCompletedList, setAllCompletedList] = useState([]);
+  const [allPendingList, setAllPendingList] = useState([]);
+  const [allFailedList, setAllFailedList] = useState([]);
 
   const value = {
     pendingList,
@@ -18,6 +21,12 @@ export const ListsProvider = ({ children }) => {
     setPendingList,
     setFailedList,
     setCompletedList,
+    allCompletedList,
+    allPendingList,
+    allFailedList,
+    setAllCompletedList,
+    setAllPendingList,
+    setAllFailedList
   };
 
   return (
