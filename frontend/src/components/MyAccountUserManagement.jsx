@@ -423,6 +423,49 @@ export default function MyAccountUserManagement(props) {
                                 <DeleteIcon />
                               </IconButton>
                             </Tooltip>
+                            <Dialog
+                              open={removeOpen}
+                              onClose={handleRemoveClose}
+                            >
+                              <DialogTitle>Confirm Removal</DialogTitle>
+                              <DialogContent>
+                                <DialogContentText color="error">
+                                  <Typography
+                                    component="span"
+                                    variant="inherit"
+                                    sx={{ color: "red" }}
+                                    onClick={() => {
+                                      // tableData.splice(row.index, 1); //assuming simple data table
+                                      // setTableData([...tableData]);
+                                      handleClickRemoveOpen(row.original);
+                                    }}
+                                  >
+                                    Remove
+                                  </Typography>{" "}
+                                  <b>
+                                    {userName} - {userSelected}
+                                  </b>
+                                  ?
+                                </DialogContentText>
+                              </DialogContent>
+                              <DialogActions>
+                                <Button
+                                  onClick={handleRemoveClose}
+                                  color="primary"
+                                >
+                                  No
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    handleRemoveConfirm(userSelected)
+                                  }
+                                  color="primary"
+                                  autoFocus
+                                >
+                                  Yes
+                                </Button>
+                              </DialogActions>
+                            </Dialog>
                           </Box>
                         );
                       })(),
@@ -457,7 +500,7 @@ export default function MyAccountUserManagement(props) {
                         </Tooltip>
 
                         <Dialog open={removeOpen} onClose={handleRemoveClose}>
-                          <DialogTitle>Confirm Approval</DialogTitle>
+                          <DialogTitle>Confirm Removal</DialogTitle>
                           <DialogContent>
                             <DialogContentText color="error">
                               <Typography
@@ -479,10 +522,7 @@ export default function MyAccountUserManagement(props) {
                             </DialogContentText>
                           </DialogContent>
                           <DialogActions>
-                            <Button
-                              onClick={handleRemoveClose}
-                              color="primary"
-                            >
+                            <Button onClick={handleRemoveClose} color="primary">
                               No
                             </Button>
                             <Button
