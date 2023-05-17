@@ -28,14 +28,15 @@ async function createUser(userData, orcidUser) {
   // console.log("create userData", userData);
 
   const passwordSchema = Joi.string()
-  .pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/)
-  .required()
-  .messages({
-    'string.base': 'Password must be a string',
-    'string.empty': 'Password is required',
-    'string.pattern.base': 'Password must contain at least 1 number and 1 special character',
-    'string.min': 'Password should have a minimum length of {#limit}',
-  });
+    .pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/)
+    .required()
+    .messages({
+      "string.base": "Password must be a string",
+      "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must contain at least 1 number and 1 special character",
+      "string.min": "Password should have a minimum length of {#limit}",
+    });
 
   const userDataSchema = Joi.object({
     firstName: Joi.string().required(),
@@ -115,7 +116,7 @@ async function signInUser(userData) {
     lastName: userInfo[0].lastName,
     email: userInfo[0].email,
     role: userInfo[0].role,
-    approved: userInfo[0].approved
+    approved: userInfo[0].approved,
   };
 
   if (userInfo.length == 0) {
@@ -155,7 +156,7 @@ async function validateUser(authData) {
     //     orcidId: true,
     //   };
     // } else {
-      userInfo = await getUserByEmail(jwtVerified.user);
+    userInfo = await getUserByEmail(jwtVerified.user);
     // }
 
     userInfo = userInfo[0];
@@ -164,8 +165,8 @@ async function validateUser(authData) {
       lastName: userInfo.lastName,
       email: userInfo.email,
       role: userInfo.role,
-      orcidId: jwtVerified.orcidId?true:false,
-      approved: userInfo.approved
+      orcidId: jwtVerified.orcidId ? true : false,
+      approved: userInfo.approved,
     };
     return userInfoToReturn;
   } catch (error) {
@@ -311,7 +312,7 @@ async function getUserJobs(req, res) {
               job.finishedAt = finishedAt;
               job.progress = progress;
               job.dataLength = dataLength;
-              job.collections = foundJob.data.collections
+              job.collections = foundJob.data.collections;
             }
           } catch (error) {
             console.log("error", error);
@@ -356,22 +357,23 @@ async function getAllUserJobs(req, res) {
     let query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
     FROM redcap.users 
     LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
+    WHERE jobName not like 'lookup%'
     ORDER BY (jobStatus = 'active') DESC, jobId DESC`;
     // if (req.body.type == "complete") {
     //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-    //   FROM redcap.users 
+    //   FROM redcap.users
     //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
     //   where jobStatus = 'completed'
     //   order by lastUpdated desc`;
     // } else if (req.body.type == "pending") {
     //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-    //   FROM redcap.users 
+    //   FROM redcap.users
     //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
     //   where jobStatus = 'active' or jobStatus = 'waiting'
     //   order by lastUpdated desc`;
     // } else if (req.body.type == "failed") {
     //   query = `SELECT jobId, jobStatus, concat(firstName, ' ', lastName) as submittedBy, jobName, email, redcapFormName, collectionName, totalCollectionDocs
-    //   FROM redcap.users 
+    //   FROM redcap.users
     //   LEFT JOIN jobs ON users.id = jobs.userId or users.email = jobs.userId
     //   where jobStatus = 'failed'
     //   order by lastUpdated desc`;
