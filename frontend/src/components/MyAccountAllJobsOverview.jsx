@@ -147,6 +147,7 @@ export default function JobsOverview(props) {
       const trimmedString = row.original.collectionName.slice(1, -1);
       const arrayStrings = trimmedString.split("][");
       resultArray = arrayStrings.flatMap((str) => {
+        // eslint-disable-next-line no-useless-escape
         const cleanedString = str.replace(/[\[\]']+/g, "").trim();
         return cleanedString.split(",").map((element) => element.trim());
       });

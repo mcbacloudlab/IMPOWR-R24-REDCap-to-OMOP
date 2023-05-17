@@ -48,9 +48,9 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
-  const { view, setView } = useContext(ViewContext);
+  const { view } = useContext(ViewContext);
 
-  console.log('view', view)
+  // console.log('view', view)
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -94,12 +94,17 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
   let userCookie = Cookies.get("user");
   let userInfo;
   let role = 'default'
-  if (userCookie) {
-    userCookie = JSON.parse(userCookie);
-    userInfo = JSON.parse(props.user);
-    console.log("userInfo", userInfo.role);
-    role = userInfo.role
+  try{
+    if (userCookie) {
+      userCookie = JSON.parse(userCookie);
+      userInfo = JSON.parse(props.user);
+      console.log("userInfo", userInfo.role);
+      role = userInfo.role
+    }
+  }catch(error){
+    console.log('error', error)
   }
+ 
 
 
 
