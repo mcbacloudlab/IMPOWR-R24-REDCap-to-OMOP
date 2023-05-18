@@ -92,7 +92,7 @@ const apiLimiter = rateLimit({
 app.use("/api/users", apiLimiter);
 app.use("/api/keys", apiLimiter);
 
-//sign in/up routes, no auth necessary
+//sign in/up routes, no automatic auth on all routes
 app.use("/api/users", userRoutes);
 app.use("/api/orcid", orcidRoutes);
 

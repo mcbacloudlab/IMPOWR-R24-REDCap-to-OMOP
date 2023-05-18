@@ -8,6 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  lighten,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -22,11 +23,12 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import { useTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export default function MyAccountUserManagement(props) {
   let propsUserObj = JSON.parse(props.props.props.user);
   let propsToken = props.props.props.token;
-  const theme = useTheme();
+  
   const [tableData, setTableData] = useState([]);
   const [approvedUsers, setApprovedUsers] = useState();
   const [pendingUsers, setPendingUsers] = useState();
@@ -45,6 +47,21 @@ export default function MyAccountUserManagement(props) {
   const handleChange = (event, newValue) => {
     setSelectedTabIdx(newValue);
   };
+
+  const theme = useTheme();
+
+  const badgeTheme = createTheme({
+    components: {
+      MuiBadge: {
+        styleOverrides: {
+          badge: {
+            color: "#ffffff",
+            backgroundColor: theme.palette.primary.main,
+          },
+        },
+      },
+    },
+  });
 
   useEffect(() => {
     getUsers();
@@ -305,7 +322,7 @@ export default function MyAccountUserManagement(props) {
                 style={{
                   backgroundColor:
                     selectedTabIdx === 0
-                      ? theme.palette.secondary.main
+                      ? lighten(theme.palette.secondary.main, 0.5)
                       : "inherit",
                 }}
                 label={
@@ -318,23 +335,25 @@ export default function MyAccountUserManagement(props) {
                         right: "-20px",
                       }}
                     >
-                      <Badge
-                        badgeContent={approvedUsersCount}
-                        max={9999}
-                        color="secondary"
-                      />
+                      <ThemeProvider theme={badgeTheme}>
+                        <Badge
+                          badgeContent={approvedUsersCount}
+                          max={9999}
+                          color="secondary"
+                        />
+                      </ThemeProvider>
                     </Box>
                   </Box>
                 }
                 {...a11yProps(0)}
               />
-              <br />
+
               <Tab
                 onClick={(event) => showTab(event, true, 1)}
                 style={{
                   backgroundColor:
                     selectedTabIdx === 1
-                      ? theme.palette.secondary.main
+                      ? lighten(theme.palette.secondary.main, 0.5)
                       : "inherit",
                 }}
                 label={
@@ -347,11 +366,22 @@ export default function MyAccountUserManagement(props) {
                         right: "-20px",
                       }}
                     >
-                      <Badge
-                        badgeContent={pendingUsersCount}
-                        max={9999}
-                        color="secondary"
-                      />
+                      <ThemeProvider theme={badgeTheme}>
+                        <Badge
+                          badgeContent={
+                            <span
+                              sx={{
+                                color: "#ffffff",
+                                "& > *": { color: "#ffffff" },
+                              }}
+                            >
+                              {pendingUsersCount}
+                            </span>
+                          }
+                          max={9999}
+                          color="secondary"
+                        />
+                      </ThemeProvider>
                     </Box>
                   </Box>
                 }

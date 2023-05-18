@@ -12,27 +12,19 @@ import {
   ListItemButton,
   IconButton,
   Tooltip,
-  // Paper
 } from "@mui/material";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-// import ErrorIcon from "@mui/icons-material/Error";
 import MyAccountAPIKeys from "./MyAccountAPIKeys";
 import { useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-// import AutorenewIcon from "@mui/icons-material/Autorenew";
 import CompletedJobs from "./JobsOverview";
-// import PendingJobs from "./PendingJobs";
-// import FailedJobs from "./FailedJobs";
 import { useTheme } from "@mui/material/styles";
-// import blank_avatar from "../assets/blank_avatar.jpg";
 import StorageIcon from "@mui/icons-material/Storage";
 import MyAccountAllCompletedJobs from "./MyAccountAllJobsOverview";
 import MyAccountCollectionsView from "./MyAccountCollectionsView";
-// import MyAccountAllPendingJobs from "./MyAccountAllPendingJobs";
-// import MyAccountAllFailedJobs from "./MyAccountAllFailedJobs";
 import ProjectManagementPage from "../pages/ProjectManagementPage";
 import AddHomeWorkIcon from "@mui/icons-material/AddHomeWork";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -43,16 +35,14 @@ import EmailIcon from "@mui/icons-material/Email";
 import OrcidIcon from "../assets/orcid_16x16.gif";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import MyAccountUserManagement from "./MyAccountUserManagement";
+import ChangePasswordButton from "./ChangePassword";
 
 const drawerWidth = "270px";
 const miniDrawerWidth = 56;
 
 export default function MyAccountNavBar(props) {
-  // console.log("myaccountnavbar props", props);
   const navigate = useNavigate();
   const theme = useTheme();
-  // console.log("navbar props", props);
-  // const [view, setView] = useState();
   const { view, setView } = useContext(ViewContext);
   const [jobs, setJobs] = useState();
   const [drawerOpen, setDrawerOpen] = useState(null);
@@ -153,6 +143,10 @@ export default function MyAccountNavBar(props) {
     },
     // Add more menu items here...
   ];
+
+  // const changePassword = () => {
+  //   console.log("change password", props.username);
+  // };
 
   return (
     <>
@@ -353,6 +347,13 @@ export default function MyAccountNavBar(props) {
                     </>
                   )}
                 </Typography>
+                <br />
+                {!props.orcidBool && (
+                  <Box>
+                  <ChangePasswordButton token={props.props.token}/>
+                </Box>
+                )}
+                
               </>
             )}
             {view === "Project Management" && (

@@ -25,9 +25,8 @@ import MaterialReactTable from "material-react-table";
 import Badge from "@mui/material/Badge";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-// import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
-// import AutorenewIcon from "@mui/icons-material/Autorenew";
-// import ErrorIcon from "@mui/icons-material/Error";
+import { useTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export default function JobsOverview(props) {
   const navigate = useNavigate();
@@ -45,6 +44,21 @@ export default function JobsOverview(props) {
   const [loading, setLoading] = useState(true);
   const [colDefs, setColDefs] = useState();
   const [tableData, setTableData] = useState(completedList);
+
+  const theme = useTheme();
+
+  const badgeTheme = createTheme({
+    components: {
+      MuiBadge: {
+        styleOverrides: {
+          badge: {
+            color: "#ffffff",
+            backgroundColor: theme.palette.primary.main,
+          },
+        },
+      },
+    },
+  });
 
   // const handleChange = (event, newValue) => {
   //   setSelectedTabIdx(newValue);
@@ -137,7 +151,7 @@ export default function JobsOverview(props) {
 
   const CollectionsCell = ({ cell, row }) => {
     let job = cell.getValue();
-    console.log('job user', job)
+    console.log("job user", job);
     if (job) job = JSON.parse(job);
     return (
       <>
@@ -313,13 +327,15 @@ export default function JobsOverview(props) {
                             right: "-20px", // Adjust the right position of the badge
                           }}
                         >
-                          <Badge
-                            badgeContent={
-                              completedList ? completedList.length : "0"
-                            }
-                            max={9999}
-                            color="secondary"
-                          />
+                          <ThemeProvider theme={badgeTheme}>
+                            <Badge
+                              badgeContent={
+                                completedList ? completedList.length : "0"
+                              }
+                              max={9999}
+                              color="secondary"
+                            />
+                          </ThemeProvider>
                         </Box>
                       </Box>
                     }
@@ -340,13 +356,15 @@ export default function JobsOverview(props) {
                               right: "-20px", // Adjust the right position of the badge
                             }}
                           >
-                            <Badge
-                              badgeContent={
-                                pendingList ? pendingList.length : "0"
-                              }
-                              max={9999}
-                              color="secondary"
-                            />
+                            <ThemeProvider theme={badgeTheme}>
+                              <Badge
+                                badgeContent={
+                                  pendingList ? pendingList.length : "0"
+                                }
+                                max={9999}
+                                color="secondary"
+                              />
+                            </ThemeProvider>
                           </Box>
                         </Box>
                       </>
@@ -367,11 +385,15 @@ export default function JobsOverview(props) {
                             right: "-20px", // Adjust the right position of the badge
                           }}
                         >
-                          <Badge
-                            badgeContent={failedList ? failedList.length : "0"}
-                            max={9999}
-                            color="secondary"
-                          />
+                          <ThemeProvider theme={badgeTheme}>
+                            <Badge
+                              badgeContent={
+                                failedList ? failedList.length : "0"
+                              }
+                              max={9999}
+                              color="secondary"
+                            />
+                          </ThemeProvider>
                         </Box>
                       </Box>
                     }

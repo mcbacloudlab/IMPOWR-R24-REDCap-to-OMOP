@@ -31,7 +31,7 @@ import MuiAlert from "@mui/material/Alert";
 import { ViewContext } from "./ViewContext";
 
 export default function SearchAppBar({ openSnackbar, ...props }) {
-  console.log("search bar", props);
+  // console.log("search bar", props);
   // console.log('opensnackbar', openSnackbar)
   const {
     pendingList,
@@ -98,7 +98,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     if (userCookie) {
       userCookie = JSON.parse(userCookie);
       userInfo = JSON.parse(props.user);
-      console.log("userInfo", userInfo.role);
+      // console.log("userInfo", userInfo.role);
       role = userInfo.role
     }
   }catch(error){
@@ -465,8 +465,8 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     // Fetch data every 15 seconds
     let userJobsInterval, allJobsInterval;
     // console.log('open', openSnackbar)
-    console.log('view', view)
-    console.log('role', role)
+    // console.log('view', view)
+    // console.log('role', role)
     if (!openSnackbar) {
       userJobsInterval = setInterval(() => {
         checkJobs();

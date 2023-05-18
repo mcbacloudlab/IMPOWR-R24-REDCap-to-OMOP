@@ -93,21 +93,26 @@ async function createUser(userData, orcidUser) {
   });
 }
 
-async function signInUser(userData) {
-  const userDataSchema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(8).required(),
-  });
+const userDataSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string()
+    .min(8)
+    .pattern(new RegExp("(?=.*[a-z])")) // At least one lowercase letter
+    .pattern(new RegExp("(?=.*[A-Z])")) // At least one uppercase letter
+    .pattern(new RegExp("(?=.*[!@#$%^&*])")) // At least one symbol
+    .required(),
+});
 
-  function validateUserData(userData) {
-    const { error, value } = userDataSchema.validate(userData);
-    if (error) {
-      console.error(error.details[0].message);
-      return Promise.reject(`Validation error: ${error.details[0].message}`);
-    }
-    return Promise.resolve(value);
+function validateUserData(userData) {
+  const { error, value } = userDataSchema.validate(userData);
+  if (error) {
+    console.error(error.details[0].message);
+    return Promise.reject(`Validation error: ${error.details[0].message}`);
   }
+  return Promise.resolve(value);
+}
 
+async function signInUser(userData) {
   const validatedData = await validateUserData(userData);
 
   const userInfo = await getUserByEmail(validatedData.email);
@@ -147,17 +152,8 @@ async function validateUser(authData) {
     // console.log("jwtverified", jwtVerified);
     let userInfoToReturn;
     let userInfo = [];
-    // if (jwtVerified.orcidId) {
-    //   userInfo[0] = {
-    //     firstName: jwtVerified.firstName,
-    //     lastName: jwtVerified.lastName,
-    //     email: jwtVerified.orcidId,
-    //     role: "default",
-    //     orcidId: true,
-    //   };
-    // } else {
+
     userInfo = await getUserByEmail(jwtVerified.user);
-    // }
 
     userInfo = userInfo[0];
     userInfoToReturn = {
@@ -176,25 +172,27 @@ async function validateUser(authData) {
 }
 
 async function updateJobStatus(jobId) {
-  // console.log("updateJobStatus", jobId);
+  //this is not an route/endpoint, just a helper function
   const now = new Date();
   const datetimeString = now.toISOString().slice(0, 19).replace("T", " ");
   try {
-    // console.log('find job for: ', jobId)
     const status = await myQueue.getJob(jobId).then((job) => {
       return job.getState();
     });
-    // console.log('status!', status)
     if (status) {
       // Update job status in MySQL database
-      const query = `UPDATE jobs SET jobStatus = '${status}', lastUpdated = '${datetimeString}' WHERE jobId = '${jobId}'`;
-      db.query(query, (error, results, fields) => {
-        if (error) {
-          console.error(error);
-        } else {
-          // console.log(`Updated job ${jobId} status to ${status}`);
+      const query = `UPDATE jobs SET jobStatus = ?, lastUpdated = ? WHERE jobId = ?`;
+      db.query(
+        query,
+        [status, datetimeString, jobId],
+        (error, results, fields) => {
+          if (error) {
+            console.error(error);
+          } else {
+            // console.log(`Updated job ${jobId} status to ${status}`);
+          }
         }
-      });
+      );
     }
   } catch (error) {
     console.log("error", error);
@@ -208,7 +206,6 @@ async function getUserJobs(req, res) {
   try {
     // Define a timeout duration (in milliseconds)
     const timeoutDuration = 3000; // 3 seconds
-
     // Use the Redis PING command to check the connection status
     // Use Promise.race to implement a timeout mechanism
     await Promise.race([
@@ -276,7 +273,6 @@ async function getUserJobs(req, res) {
         }
         // console.log("results", results);
         //get status for unknown statuses for jobs....
-
         for (const job of results) {
           try {
             const foundJob = await myQueue.getJob(job.jobId);
@@ -297,16 +293,12 @@ async function getUserJobs(req, res) {
               );
               continue;
             } else {
-              // console.log('foundJob', foundJob.data.collections)
-
               const status = await foundJob.getState();
               const timeAdded = foundJob.timestamp;
               const startedAt = foundJob.processedOn;
               const finishedAt = foundJob.finishedOn;
               const progress = await foundJob.progress();
               const dataLength = foundJob.data.dataLength;
-              // console.log("status", status);
-              // console.log("timeadded", timeAdded);
               job.timeAdded = timeAdded;
               job.startedAt = startedAt;
               job.finishedAt = finishedAt;
@@ -423,6 +415,76 @@ async function getAllUserJobs(req, res) {
   }
 }
 
+async function changeUserPassword(req, res) {
+  const authHeader = req.headers.authorization;
+  const tokenFromHeader =
+    authHeader &&
+    authHeader.split(" ")[1] !== "undefined" &&
+    authHeader.split(" ")[1] !== "null"
+      ? authHeader.split(" ")[1]
+      : null;
+
+  // Get token from httpOnly cookie, if it exists
+  const tokenFromCookie = req.cookies.token;
+  // Use the token from the header if it exists; otherwise, use the token from the cookie
+  token = tokenFromHeader || tokenFromCookie;
+  try {
+    let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    let email = jwtVerified.user;
+    let currentPassword = req.body.currentPassword;
+    let newPassword = req.body.newPassword;
+    let currentUserData = {
+      password: req.body.currentPassword,
+      email: email,
+    };
+    let newUserData = {
+      password: req.body.newPassword,
+      email: email,
+    };
+
+    const currentUserValidatedData = await validateUserData(currentUserData);
+    const newUserValidatedData = await validateUserData(newUserData);
+
+    const userInfo = await getUserByEmail(currentUserValidatedData.email);
+    if (userInfo.length == 0) {
+      return "Error!";
+      // throw new Error("Error! User does not exist!");
+    }
+
+    const result = await bcrypt.compare(currentPassword, userInfo[0].password);
+
+    if (result) {
+      //password matches and jwt valid so now we update in db
+      const saltRounds = 10;
+      return bcrypt.genSalt(saltRounds, function (err, salt) {
+        bcrypt.hash(newPassword, salt, function (err, hash) {
+          return new Promise((resolve, reject) => {
+            const query = "UPDATE users SET password = ? WHERE email = ?";
+            db.execute(query, [hash, email], function (err, results, fields) {
+              if (err) {
+                console.log("error!", err);
+                reject("Error");
+              }
+              // console.log('results', results)
+              res.status(200).send("Success");
+            });
+          }).catch((error) => {
+            console.log("DB Error: ", error);
+            throw new Error("DB error");
+          });
+        });
+      });
+    } else {
+      console.log("Error password mismatch");
+      res.status(500).send("Error");
+    }
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).send("Error");
+    return false;
+  }
+}
+
 module.exports = {
   getUserByEmail,
   createUser,
@@ -430,4 +492,5 @@ module.exports = {
   validateUser,
   getUserJobs,
   getAllUserJobs,
+  changeUserPassword,
 };
