@@ -9,10 +9,9 @@ import {
   TextField,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import Divider from "@mui/material/Divider";
+// import Divider from "@mui/material/Divider";
 
 const ChangePasswordButton = ({ token }) => {
-  //   console.log("toknen", token);
   const [showFields, setShowFields] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -25,6 +24,7 @@ const ChangePasswordButton = ({ token }) => {
 
   useEffect(() => {
     validatePasswords();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPassword, confirmPassword]);
 
   const handleClick = () => {
