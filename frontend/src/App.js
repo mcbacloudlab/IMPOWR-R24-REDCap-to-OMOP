@@ -290,7 +290,7 @@ function App() {
                       }
                       exact
                     />
-                    <Route
+                    {/* <Route
                       path="/signup"
                       element={
                         <SignUpPage
@@ -311,7 +311,7 @@ function App() {
                         ></ForgotPasswordPage>
                       }
                       exact
-                    />
+                    /> */}
                     <Route component={Error} />
                   </Routes>
                 </div>
