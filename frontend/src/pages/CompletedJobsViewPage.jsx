@@ -516,7 +516,7 @@ export default function CompletedJobsViewPage(props) {
               onClick={(event) => verifyRow(cell.row.original, true)}
               size="small"
               edge="end"
-              color="primary"
+              color="error"
               sx={{
                 marginLeft: "10px",
               }}
@@ -531,7 +531,7 @@ export default function CompletedJobsViewPage(props) {
     const VerifiedCell = ({ cell, row }) => {
       return cell.getValue() === false ? (
         <CloseIcon
-          color="primary"
+          color="error"
           sx={{
             padding: "0.25rem",
             borderRadius: "4px",
@@ -539,7 +539,7 @@ export default function CompletedJobsViewPage(props) {
         />
       ) : (
         <CheckIcon
-          color="primary"
+          color="success"
           sx={{
             padding: "0.25rem",
             borderRadius: "4px",

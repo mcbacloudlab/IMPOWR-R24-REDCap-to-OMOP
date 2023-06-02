@@ -25,6 +25,8 @@ import MaterialReactTable from "material-react-table";
 import Badge from "@mui/material/Badge";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import { useTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 // import PlaylistAddCheckSharpIcon from "@mui/icons-material/PlaylistAddCheckSharp";
 // import AutorenewIcon from "@mui/icons-material/Autorenew";
 // import ErrorIcon from "@mui/icons-material/Error";
@@ -59,6 +61,21 @@ export default function JobsOverview(props) {
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allCompletedList, allPendingList, allFailedList, selectedTabIdx]);
+
+  const theme = useTheme();
+
+  const badgeTheme = createTheme({
+    components: {
+      MuiBadge: {
+        styleOverrides: {
+          badge: {
+            color: "#ffffff",
+            backgroundColor: theme.palette.primary.main,
+          },
+        },
+      },
+    },
+  });
 
   async function showTab(e, switching, panelIndex) {
     setLoading(true);
@@ -140,9 +157,9 @@ export default function JobsOverview(props) {
   const CollectionsCell = ({ cell, row }) => {
     console.log("collection", typeof row.original.collectionName);
     console.log(row.original.collectionName);
-  
+
     let resultArray = [];
-  
+
     if (row.original.collectionName) {
       const trimmedString = row.original.collectionName.slice(1, -1);
       const arrayStrings = trimmedString.split("][");
@@ -152,20 +169,17 @@ export default function JobsOverview(props) {
         return cleanedString.split(",").map((element) => element.trim());
       });
       resultArray.forEach((item) => {
-        console.log('item', item);
+        console.log("item", item);
       });
     }
-  
+
     return (
       <>
-        {row.original.collectionName && row.original.totalCollectionDocs !== null
+        {row.original.collectionName &&
+        row.original.totalCollectionDocs !== null
           ? resultArray.map((label, index) => (
               <React.Fragment key={index}>
-                <Chip
-                  label={label}
-                  color="secondary"
-                  sx={{ margin: "10px" }}
-                />
+                <Chip label={label} color="secondary" sx={{ margin: "10px" }} />
                 <br />
               </React.Fragment>
             ))
@@ -173,9 +187,6 @@ export default function JobsOverview(props) {
       </>
     );
   };
-  
-  
-  
 
   const CompletedAtCell = ({ cell, row }) => {
     return row.original.finishedAt
@@ -331,13 +342,15 @@ export default function JobsOverview(props) {
                             right: "-20px", // Adjust the right position of the badge
                           }}
                         >
-                          <Badge
-                            badgeContent={
-                              allCompletedList ? allCompletedList.length : "0"
-                            }
-                            max={9999}
-                            color="secondary"
-                          />
+                          <ThemeProvider theme={badgeTheme}>
+                            <Badge
+                              badgeContent={
+                                allCompletedList ? allCompletedList.length : "0"
+                              }
+                              max={9999}
+                              color="secondary"
+                            />
+                          </ThemeProvider>
                         </Box>
                       </Box>
                     }
@@ -358,13 +371,15 @@ export default function JobsOverview(props) {
                               right: "-20px", // Adjust the right position of the badge
                             }}
                           >
-                            <Badge
-                              badgeContent={
-                                allPendingList ? allPendingList.length : "0"
-                              }
-                              max={9999}
-                              color="secondary"
-                            />
+                            <ThemeProvider theme={badgeTheme}>
+                              <Badge
+                                badgeContent={
+                                  allPendingList ? allPendingList.length : "0"
+                                }
+                                max={9999}
+                                color="secondary"
+                              />
+                            </ThemeProvider>
                           </Box>
                         </Box>
                       </>
@@ -385,13 +400,15 @@ export default function JobsOverview(props) {
                             right: "-20px", // Adjust the right position of the badge
                           }}
                         >
-                          <Badge
-                            badgeContent={
-                              allFailedList ? allFailedList.length : "0"
-                            }
-                            max={9999}
-                            color="secondary"
-                          />
+                          <ThemeProvider theme={badgeTheme}>
+                            <Badge
+                              badgeContent={
+                                allFailedList ? allFailedList.length : "0"
+                              }
+                              max={9999}
+                              color="secondary"
+                            />
+                          </ThemeProvider>
                         </Box>
                       </Box>
                     }
