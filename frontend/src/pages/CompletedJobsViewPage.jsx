@@ -318,7 +318,10 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
+                  console.log("set all to true");
                   setAllVerified(true);
+                } else {
+                  setAllVerified(false);
                 }
                 return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
               });
@@ -353,7 +356,10 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
+                  console.log("set all to true");
                   setAllVerified(true);
+                } else {
+                  setAllVerified(false);
                 }
                 return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
               });
@@ -434,6 +440,8 @@ export default function CompletedJobsViewPage(props) {
         // Update the state with the new verified count
         if (verifiedCount === result.length) {
           setAllVerified(true);
+        } else {
+          setAllVerified(false);
         }
         setVerifiedRecords(verifiedCount);
       });
@@ -464,6 +472,8 @@ export default function CompletedJobsViewPage(props) {
       // Update the state with the new verified count
       if (verifiedCount === result.length) {
         setAllVerified(true);
+      } else {
+        setAllVerified(false);
       }
       setVerifiedRecords(verifiedCount);
     }
@@ -655,6 +665,25 @@ export default function CompletedJobsViewPage(props) {
         },
       },
 
+      {
+        header: "Domain ID",
+        accessorKey: "extraData.domain_id",
+        maxSize: 120,
+      },
+
+      {
+        header: "Concept Class ID",
+        accessorKey: "extraData.concept_class_id",
+        maxSize: 120,
+      },
+
+      {
+        header: "Standard",
+        accessorKey: "extraData.standard_concept",
+        maxSize: 120,
+      },
+
+
       // {
       //   header: "User Verified",
       //   accessorKey: "userMatch",
@@ -666,6 +695,7 @@ export default function CompletedJobsViewPage(props) {
         //you can access a row instance in column definition option callbacks like this
 
         Cell: PreferredCell,
+        maxSize: 120,
         sx: {
           "& .MuiButton-root": {
             backgroundColor: "blue",
@@ -682,9 +712,10 @@ export default function CompletedJobsViewPage(props) {
       ...(selectedTabIdx !== 2
         ? [
             {
-              header: "Lookup",
+              header: "",
               accessorKey: "lookup",
               Cell: LookUpCell,
+              maxSize: 60,
             },
           ]
         : []),
@@ -750,6 +781,11 @@ export default function CompletedJobsViewPage(props) {
               // console.log("match!", transformedData[i]);
               jsonResult[j]["field_annotation"] =
                 transformedData[i]["Field Annotations"];
+              jsonResult[j]['standard_concept'] =  transformedData[i]["Standard Concept"]; 
+              jsonResult[j]['concept_class_id'] =  transformedData[i]["Concept Class ID"]; 
+              jsonResult[j]['domain_id'] =  transformedData[i]["Domain ID"]; 
+             console.log('jsonRtranesult', jsonResult[j])   
+             console.log('transform', transformedData[i])
             }
           }
         }
@@ -812,6 +848,9 @@ export default function CompletedJobsViewPage(props) {
         "Field Label": redcapFieldLabel,
         "Field Annotations": snomedID,
         "SNOMED Name": snomedText,
+        "Domain ID": extraData.domain_id,
+        "Concept Class ID": extraData.concept_class_id,
+        "Standard Concept": extraData.standard_concept
         // ...extraData,
       };
     });

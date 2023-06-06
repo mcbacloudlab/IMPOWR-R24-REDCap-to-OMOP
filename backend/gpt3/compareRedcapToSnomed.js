@@ -29,6 +29,7 @@ main().then(async () => {
     stdin.setEncoding("utf8");
     // read the input data from stdin
     stdin.on("data", (chunk) => {
+      // console.log('data', chunk)
       inputData += chunk;
     });
     // parse the input data as JSON
@@ -205,7 +206,7 @@ async function startProcessing(
 
     worker.on("message", (message) => {
       if (message.log) {
-        // console.log("log", ...message.log);
+        console.log("log", ...message.log);
       } else if (message.dataPortion) {
         // Handle each portion of data received from the worker
         receivedDataPortions[message.portionIndex] = message.dataPortion;

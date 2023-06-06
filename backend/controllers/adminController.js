@@ -27,8 +27,18 @@ async function approveUser(req, res) {
   }
 }
 
+async function updateUser(req, res) {
+  try {
+    await adminService.updateUser(req, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error");
+  }
+}
+
 module.exports = {
   queryAllUsers,
   removeUser,
-  approveUser
+  approveUser,
+  updateUser
 };

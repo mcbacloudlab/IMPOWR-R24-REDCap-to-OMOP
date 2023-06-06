@@ -2,6 +2,7 @@ import React from "react";
 import Grid from "@mui/material/Grid";
 import { useState, useEffect } from "react";
 import {
+  // Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -9,6 +10,8 @@ import {
   DialogTitle,
   IconButton,
   lighten,
+  MenuItem,
+  Select,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -20,15 +23,15 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
+// import CloseIcon from "@mui/icons-material/Close";
+// import SaveIcon from "@mui/icons-material/Save";
 import { useTheme } from "@mui/material/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 export default function MyAccountUserManagement(props) {
   let propsUserObj = JSON.parse(props.props.props.user);
   let propsToken = props.props.props.token;
-  
+
   const [tableData, setTableData] = useState([]);
   const [approvedUsers, setApprovedUsers] = useState();
   const [pendingUsers, setPendingUsers] = useState();
@@ -41,8 +44,8 @@ export default function MyAccountUserManagement(props) {
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const [approvedUsersCount, setApprovedUsersCount] = useState(0);
-  const [editingRow, setEditingRow] = useState(false);
-  const [editingRowID, setEditingRowID] = useState();
+  const [editRoleData, setEditRoleData] = useState({}); // Initialize the state
+ 
 
   const handleChange = (event, newValue) => {
     setSelectedTabIdx(newValue);
@@ -63,28 +66,70 @@ export default function MyAccountUserManagement(props) {
     },
   });
 
+  const EditRoleCell = ({ row }) => {
+    const [currentRole, setCurrentRole] = useState(
+      editRoleData[row.id] || row.original.role || "default"
+    );
+  
+    const handleChange = (event) => {
+      const newRole = event.target.value;
+      setCurrentRole(newRole);
+      setEditRoleData((prevData) => ({
+        ...prevData,
+        [row.id]: newRole,
+      }));
+    };
+  
+    // console.log("row", row.original.role);
+    // console.log("editRoleData", editRoleData[row.id]);
+    // console.log("using currentRole", currentRole);
+  
+    return (
+      <Select
+        key={row.id}
+        value={currentRole}
+        onChange={handleChange}
+      >
+        <MenuItem value={"admin"}>Admin</MenuItem>
+        <MenuItem value={"default"}>Default</MenuItem>
+      </Select>
+    );
+  };
+  
+  const RoleCell = ({ row }) => {
+    // console.log('row', row.original.role)
+    return row.original.role?row.original.role:'default'
+  }
+  
+
   useEffect(() => {
     getUsers();
     const cols = [
-      {
-        header: "Approved",
-        accessorKey: "approved",
-      },
+      // {
+      //   header: "Approved",
+      //   accessorKey: "approved",
+      //   Cell: ApprovedCell,
+      // },
       {
         header: "First Name",
         accessorKey: "firstName",
+        enableEditing: false, //disable editing on this column
       },
       {
         header: "Last Name",
         accessorKey: "lastName",
+        enableEditing: false, //disable editing on this column
       },
       {
         header: "Email / ORCID",
         accessorKey: "email",
+        enableEditing: false, //disable editing on this column
       },
       {
         header: "Role",
         accessorKey: "role",
+        Edit: EditRoleCell,
+        Cell: RoleCell
       },
     ];
     setColDefs(cols);
@@ -167,7 +212,7 @@ export default function MyAccountUserManagement(props) {
   };
 
   const removeUser = (userSelected) => {
-    console.log("removeUser", userSelected);
+    // console.log("removeUser", userSelected);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -254,42 +299,54 @@ export default function MyAccountUserManagement(props) {
     }
   }
 
-  const handleSaveRow = async (cell, row, table) => {
-    console.log("save row", row);
-    console.log(row._valuesCache);
 
-    // If the row doesn't have an index, something is wrong
-    if (row.index === undefined) {
-      console.error("Row has no index:", row);
-      return;
+  const handleSaveRow = async ({ exitEditingMode, cell, row, values }) => {
+    // console.log("values", values);
+
+    // If the role was edited, use the new value. Otherwise, use the original value.
+    values.role = editRoleData[row.id] || values.role;
+    // console.log("role update", values.role);
+    let updatedRole = values.role
+    if(!updatedRole){
+      // console.log('no role provided defaulting...',)
+      updatedRole = 'default'
     }
 
-    // setTableData((prevTableData) => {
-    //   // Make a new copy of the array
-    //   const newTableData = [...prevTableData];
+    // console.log(`updating ${values.email} role with ${updatedRole} `)
 
-    //   // Replace the original data at the correct index
-    //   newTableData[row.index] = row._valuesCache;
+    // Send/receive API updates here
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + propsToken);
 
-    //   // Return the new array
-    //   return newTableData;
-    // });
-    table.setEditingRow(null); // Clear the editingRow
-    setEditingRow(false);
+    var formdata = new FormData();
+    formdata.append("email", values.email);
+    formdata.append("role", updatedRole);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/admin/updateUser`,
+      requestOptions
+    )
+      .then((response) => {
+        return response.text();
+      })
+      .then((result) => {
+        // console.log('result', result)
+        getUsers();
+      })
+      .catch((error) => console.log("error", error));
+
+    setTableData([...tableData]);
+    exitEditingMode(); // Required to exit editing mode
   };
 
-  // const editRow = (row, table) => {
-  //   // console.log("editing row", row);
-  //   // console.log("table", table);
-  //   setEditingRow(true);
-  // };
-
-  const cancelEditRow = (row, table) => {
-    // console.log("editing row", row);
-    // console.log("table", table);
-    table.setEditingRow(null); // Clear the editingRow
-    setEditingRow(false);
-  };
 
   if (propsUserObj.role === "admin") {
     return (
@@ -402,40 +459,43 @@ export default function MyAccountUserManagement(props) {
                   {...(selectedTabIdx === 0 && {
                     renderRowActions: ({ cell, row, table }) => [
                       (() => {
-                        return editingRow && editingRowID === row.id ? (
-                          <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
-                            <Tooltip title="Cancel" placement="left">
-                              <IconButton
-                                color="error"
-                                onClick={() => {
-                                  cancelEditRow(row, table);
-                                }}
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <br />
-                            <Tooltip title="Save" placement="left">
-                              <IconButton
-                                color="primary"
-                                onClick={() => {
-                                  // Access onEditingRowSave and pass necessary data
-                                  handleSaveRow(cell, row, table);
-                                }}
-                              >
-                                <SaveIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        ) : (
+                        // return editingRow && editingRowID === row.id ? (
+                        // <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
+                        //   <Tooltip title="Cancel" placement="left">
+                        //     <IconButton
+                        //       color="error"
+                        //       onClick={() => {
+                        //         cancelEditRow(row, table);
+                        //       }}
+                        //     >
+                        //       <CloseIcon />
+                        //     </IconButton>
+                        //   </Tooltip>
+                        //   <br />
+                        //   <Tooltip title="Save" placement="left">
+                        //     <IconButton
+                        //       color="primary"
+                        //       // onClick={handleSaveRow}
+                        //       onClick={(e) => {
+                        //         // Access onEditingRowSave and pass necessary data
+                        //         handleSaveRow(cell, row, table, e);
+                        //       }}
+                        //     >
+                        //       <SaveIcon />
+                        //     </IconButton>
+                        //   </Tooltip>
+                        // </Box>
+                        // ) : (
+
+                        return (
                           <Box key={selectedTabIdx + row.id + "edit"} sx={{}}>
                             <Tooltip title="Edit" placement="left">
                               <IconButton
                                 color="primary"
                                 onClick={() => {
                                   table.setEditingRow(row);
-                                  setEditingRowID(row.id);
-                                  setEditingRow(true);
+                                  // setEditingRowID(row.id);
+                                  // setEditingRow(true);
                                   // editRow(row, table); If you have additional operations during editing
                                 }}
                               >
@@ -612,7 +672,7 @@ export default function MyAccountUserManagement(props) {
                   enableGlobalFilterModes={true}
                   enablePagination={true}
                   enableColumnResizing={true}
-                  editingMode="row" //modal is default
+                  editingMode="modal" //modal is default
                   enableEditing
                   onEditingRowSave={handleSaveRow}
                   // {...(selectedTabIdx === 2 ? {} : { enableExpanding: true })}

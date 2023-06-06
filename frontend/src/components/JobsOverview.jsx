@@ -27,6 +27,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { useTheme } from "@mui/material/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import ReplayIcon from "@mui/icons-material/Replay";
 
 export default function JobsOverview(props) {
   const navigate = useNavigate();
@@ -151,7 +152,7 @@ export default function JobsOverview(props) {
 
   const CollectionsCell = ({ cell, row }) => {
     let job = cell.getValue();
-    console.log("job user", job);
+    // console.log("job user", job);
     if (job) job = JSON.parse(job);
     return (
       <>
@@ -259,6 +260,33 @@ export default function JobsOverview(props) {
 
     return cols;
   };
+
+  function handleRetry({jobId}) {
+    // console.log("event view", jobId);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("jobId", jobId);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/retryJob`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log(result)
+      })
+      .catch((error) => console.log("error", error));
+  }
 
   function handleView(job) {
     if (props.setOpen) props.setOpen(false);
@@ -502,9 +530,9 @@ export default function JobsOverview(props) {
                       <Box
                         key={row.id + selectedTabIdx + "failed"}
                         sx={{
-                          display: "flex",
-                          flexWrap: "nowrap",
-                          gap: "8px",
+                          // display: "flex",
+                          // flexWrap: "nowrap",
+                          // gap: "8px",
                         }}
                       >
                         <Tooltip title="Remove" placement="left">
@@ -515,6 +543,17 @@ export default function JobsOverview(props) {
                             }}
                           >
                             <CloseIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <br/>
+                        <Tooltip title="Retry Job">
+                          <IconButton
+                            onClick={(event) => handleRetry(row.original)}
+                            sx={{
+                              color: "green",
+                            }}
+                          >
+                            <ReplayIcon />
                           </IconButton>
                         </Tooltip>
                       </Box>,

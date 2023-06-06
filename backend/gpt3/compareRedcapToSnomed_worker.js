@@ -4,9 +4,10 @@ const cosineSimilarity = require("compute-cosine-similarity");
 const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
+var pg_pool = require("../db/postgresqlConnection.cjs");
 // console.log("workerData", workerData.collections);
 // console.time('child worker started')
-let totalDocuments = 0
+let totalDocuments = 0;
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
   .collection("gpt3_redcap_lookup_embeddings");
@@ -72,12 +73,17 @@ async function processChunk(
   return finalList;
 }
 
-async function processChunks(redCapCollectionArray, chunkSize, progress, collectionsToUse) {
+async function processChunks(
+  redCapCollectionArray,
+  chunkSize,
+  progress,
+  collectionsToUse
+) {
   // Parse collectionsToUse from a JSON string to an array
   const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
-  console.log('Collection(s) used:', collectionsArray)
+  console.log("Collection(s) used:", collectionsArray);
   // Map each collection name to a MongoDB collection
-  const snomedCollections = collectionsArray.map(collectionName => 
+  const snomedCollections = collectionsArray.map((collectionName) =>
     client.db("GPT3_Embeddings").collection(collectionName)
   );
 
@@ -87,8 +93,10 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
   // Process each collection
   for (const snomedCollection of snomedCollections) {
     const count = await snomedCollection.countDocuments();
-    console.log(`Total Documents in ${snomedCollection.collectionName}: ${count}`);
-    totalDocuments += count
+    console.log(
+      `Total Documents in ${snomedCollection.collectionName}: ${count}`
+    );
+    totalDocuments += count;
     let skip = 0;
     const results = [];
     const redcapLookupArray = await redcapLookupCollection.find({}).toArray();
@@ -109,7 +117,7 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
     allResults.push(...results);
   }
 
-  console.log('Total Documents:', totalDocuments)
+  console.log("Total Documents:", totalDocuments);
   // Now that all collections have been processed, we can sort and filter allResults
   const fieldLabels = [
     ...new Set(
@@ -119,18 +127,44 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
     ),
   ];
 
-  const filteredData = fieldLabels.reduce((acc, fieldLabel) => {
-    const items = allResults
-      .flat()
-      .filter(
-        (item) =>
-          item.redcapFieldLabel + "-" + item.extraData.field_name === fieldLabel
-      );
+  const filteredData = await fieldLabels.reduce(
+    async (accPromise, fieldLabel) => {
+      const acc = await accPromise;
 
-    items.sort((a, b) => b.similarity - a.similarity);
-    acc.push(...items.slice(0, 5));
-    return acc;
-  }, []);
+      const items = allResults
+        .flat()
+        .filter(
+          (item) =>
+            item.redcapFieldLabel + "-" + item.extraData.field_name ===
+            fieldLabel
+        );
+
+      items.sort((a, b) => b.similarity - a.similarity);
+
+      const topItems = items.slice(0, 5);
+        // console.log('top items', topItems)  
+        for (const item of topItems) {
+          // console.log('item', item)
+          if (item.snomedID && typeof item.snomedID === 'number') {
+            // Query the postgres db for additional data
+            const res = await pg_pool.query('SELECT * FROM concept WHERE concept_id = $1', [item.snomedID]);
+            // console.log('pg res', res)
+            if (res.rows.length > 0) {
+              item.extraData = { ...item.extraData, ...res.rows[0] };
+            }
+          } else {
+            console.log('Warning: snomedID is undefined for item', item);
+          }
+        }
+
+      acc.push(...topItems);
+      return acc;
+    },
+    Promise.resolve([])
+  );
+
+  // console.log("filtered data", filteredData);
+  //now use filtered data to go to postgres db to get more data from concept table using concept ids
 
   setTimeout(() => {
     const totalDataPortions = Math.ceil(filteredData.length / portionSize);
@@ -152,5 +186,9 @@ async function processChunks(redCapCollectionArray, chunkSize, progress, collect
 }
 
 // start processing in chunks, second param is size of chunk, assists in errors from running out of memory
-processChunks(workerData.redCapCollectionArray, 30000, workerData.progress, workerData.collectionsToUse);
-
+processChunks(
+  workerData.redCapCollectionArray,
+  30000,
+  workerData.progress,
+  workerData.collectionsToUse
+);

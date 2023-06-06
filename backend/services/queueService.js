@@ -225,7 +225,7 @@ async function compareEmbeddings(job) {
     process.stdin.end();
 
     let totalDocuments, currentDocument, collectionName;
-    let capturedData = ''  
+    let capturedData = "";
     // ********************
     // Using startsWith is not very reliable when you start adding console.logs to the process.
     // It's not reliable due to the standard output occassionally lumping outputs together. Using a delimiter and capturing the entire standard output would likely be more reliable here
@@ -237,8 +237,9 @@ async function compareEmbeddings(job) {
 
       while (true) {
         const endObjectIndex = buffer.indexOf("}\n");
-        
+
         const logMessage = data.toString().trim();
+        console.log(logMessage) //for testing, comment this out in prod
 
         if (logMessage.startsWith("Processing Document At")) {
           const currentDocument = parseInt(logMessage.split(":")[1].trim());
@@ -255,11 +256,33 @@ async function compareEmbeddings(job) {
               ? Math.round((currentDocument / totalDocuments) * 100)
               : 1
           );
-        } else if (logMessage.startsWith("Collection(s) used")) {
+        }
+        if (logMessage.startsWith("Collection(s) used")) {
+          console.log(logMessage);
+
           collectionName = logMessage.split(":")[1];
-        } else if (logMessage.startsWith("Total Documents")) {
-          totalDocuments = parseInt(logMessage.split(":")[1].trim());
+          if (!collectionName || !totalDocuments || !job.id) return;
           console.log("Storing total docs in db for job", totalDocuments);
+          // if(!collectionName || !totalDocuments || !job.id) return;
+          const query =
+            "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+          try {
+            const [rows, fields] = await db
+              .promise()
+              .execute(query, [collectionName, totalDocuments, job.id]);
+            console.log("MongoDB collection info updated in DB for job");
+          } catch (err) {
+            console.log("error!", err);
+            throw new Error("Error");
+          }
+        }
+        if (logMessage.startsWith("Total Documents")) {
+          console.log(logMessage);
+
+          totalDocuments = parseInt(logMessage.split(":")[1].trim());
+          if (!collectionName || !totalDocuments || !job.id) return;
+          console.log("Storing total docs in db for job", totalDocuments);
+          // if(!collectionName || !totalDocuments || !job.id) return;
           const query =
             "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
           try {
@@ -274,7 +297,7 @@ async function compareEmbeddings(job) {
         } else {
           // console.log("log:", logMessage);
         }
-        
+
         if (endObjectIndex === -1) {
           // We don't have a complete JSON object yet
           break;
@@ -287,7 +310,6 @@ async function compareEmbeddings(job) {
           capturedData = JSON.parse(jsonString).endResult;
           capturedData = JSON.stringify(capturedData);
         } else {
-         
         }
       }
     });
