@@ -239,7 +239,7 @@ async function compareEmbeddings(job) {
         const endObjectIndex = buffer.indexOf("}\n");
 
         const logMessage = data.toString().trim();
-        console.log(logMessage) //for testing, comment this out in prod
+        // console.log(logMessage) //for testing, comment this out in prod
 
         if (logMessage.startsWith("Processing Document At")) {
           const currentDocument = parseInt(logMessage.split(":")[1].trim());
@@ -257,7 +257,7 @@ async function compareEmbeddings(job) {
               : 1
           );
         }
-        if (logMessage.startsWith("Collection(s) used")) {
+        if (logMessage.includes("Collection(s) used")) {
           console.log(logMessage);
 
           collectionName = logMessage.split(":")[1];
@@ -277,8 +277,7 @@ async function compareEmbeddings(job) {
           }
         }
         if (logMessage.startsWith("Total Documents")) {
-          console.log(logMessage);
-
+          // console.log(logMessage);
           totalDocuments = parseInt(logMessage.split(":")[1].trim());
           if (!collectionName || !totalDocuments || !job.id) return;
           console.log("Storing total docs in db for job", totalDocuments);

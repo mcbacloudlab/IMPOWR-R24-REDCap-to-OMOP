@@ -153,7 +153,7 @@ async function processChunks(
               item.extraData = { ...item.extraData, ...res.rows[0] };
             }
           } else {
-            console.log('Warning: snomedID is undefined for item', item);
+            // console.log('Warning: snomedID is undefined for item', item);
           }
         }
 
