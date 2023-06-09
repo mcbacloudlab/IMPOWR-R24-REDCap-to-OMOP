@@ -629,11 +629,11 @@ export default function CompletedJobsViewPage(props) {
       },
 
       {
-        header: "SNOMED Text",
+        header: "Concept Text",
         accessorKey: "snomedText",
       },
       {
-        header: "Cosine Similarity",
+        header: "Similarity",
         accessorKey: "similarity",
         maxSize: 130,
         Cell: ({ cell }) => {
@@ -648,7 +648,7 @@ export default function CompletedJobsViewPage(props) {
         },
       },
       {
-        header: "SNOMED ID",
+        header: "Concept ID",
         accessorKey: "snomedID",
         maxSize: 120,
         // Use the Cell option to modify the snomedID data
