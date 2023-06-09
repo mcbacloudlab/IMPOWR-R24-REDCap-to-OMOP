@@ -102,7 +102,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       role = userInfo.role
     }
   }catch(error){
-    console.log('error', error)
+    // console.log('error', error)
   }
  
 

@@ -188,7 +188,7 @@ export default function CompletedJobsViewPage(props) {
       })
       .then((result) => {
         jobVerificationData = JSON.parse(result);
-        console.log("jobVerif", jobVerificationData);
+        // console.log("jobVerif", jobVerificationData);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
           if (_jobId) setJobId(_jobId);
@@ -784,8 +784,8 @@ export default function CompletedJobsViewPage(props) {
               jsonResult[j]['standard_concept'] =  transformedData[i]["Standard Concept"]; 
               jsonResult[j]['concept_class_id'] =  transformedData[i]["Concept Class ID"]; 
               jsonResult[j]['domain_id'] =  transformedData[i]["Domain ID"]; 
-             console.log('jsonRtranesult', jsonResult[j])   
-             console.log('transform', transformedData[i])
+            //  console.log('jsonRtranesult', jsonResult[j])   
+            //  console.log('transform', transformedData[i])
             }
           }
         }

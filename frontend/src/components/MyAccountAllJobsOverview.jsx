@@ -155,8 +155,8 @@ export default function JobsOverview(props) {
   };
 
   const CollectionsCell = ({ cell, row }) => {
-    console.log("collection", typeof row.original.collectionName);
-    console.log(row.original.collectionName);
+    // console.log("collection", typeof row.original.collectionName);
+    // console.log(row.original.collectionName);
 
     let resultArray = [];
 
@@ -169,7 +169,7 @@ export default function JobsOverview(props) {
         return cleanedString.split(",").map((element) => element.trim());
       });
       resultArray.forEach((item) => {
-        console.log("item", item);
+        // console.log("item", item);
       });
     }
 
