@@ -727,7 +727,7 @@ export default function CompletedJobsViewPage(props) {
     setIsFormLoaded(true);
   }
 
-  const handleExportData = () => {
+  const handleExportData = async () => {
     // console.log("handle export data");
     let _data = data;
     // let keys = _data.reduce(function (acc, obj) {
@@ -739,8 +739,8 @@ export default function CompletedJobsViewPage(props) {
     //   return acc;
     // }, []);
     // console.log("_data", _data);
-    const transformedData = transformData(_data);
-    // console.log(transformedData);
+    const transformedData = await transformData(_data);
+    console.log('transformedData', transformedData);
     // console.log("keys", keys);
 
     //get original redcap data dictionary data and update it
@@ -784,8 +784,8 @@ export default function CompletedJobsViewPage(props) {
               jsonResult[j]['standard_concept'] =  transformedData[i]["Standard Concept"]; 
               jsonResult[j]['concept_class_id'] =  transformedData[i]["Concept Class ID"]; 
               jsonResult[j]['domain_id'] =  transformedData[i]["Domain ID"]; 
-            //  console.log('jsonRtranesult', jsonResult[j])   
-            //  console.log('transform', transformedData[i])
+             console.log('jsonResult[j]', jsonResult[j])   
+             console.log('transformedData[i]', transformedData[i])
             }
           }
         }
@@ -805,11 +805,11 @@ export default function CompletedJobsViewPage(props) {
         //   // }),
         // };
         // const csvExporter = new ExportToCsv(csvOptions);
-        // console.log("jsonresult");
-        // console.log(jsonResult);
+        console.log("jsonresult");
+        console.log(jsonResult);
         // Convert the results array to CSV format using papaparse
         const csvData = Papa.unparse(jsonResult);
-
+        console.log('csvData', csvData)
         // Create a Blob from the CSV data
         const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
 
