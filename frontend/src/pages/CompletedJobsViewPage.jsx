@@ -683,7 +683,6 @@ export default function CompletedJobsViewPage(props) {
         maxSize: 120,
       },
 
-
       // {
       //   header: "User Verified",
       //   accessorKey: "userMatch",
@@ -740,7 +739,7 @@ export default function CompletedJobsViewPage(props) {
     // }, []);
     // console.log("_data", _data);
     const transformedData = await transformData(_data);
-    console.log('transformedData', transformedData);
+    console.log("transformedData", transformedData);
     // console.log("keys", keys);
 
     //get original redcap data dictionary data and update it
@@ -763,53 +762,46 @@ export default function CompletedJobsViewPage(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => {
+      .then(async (result) => {
         // console.log("the result");
         // console.log(JSON.parse(result));
         //update field_annotation with the preferred value id
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
-        for (let i = 0; i < transformedData.length; i++) {
-          // Loop through the second array of objects
-          for (let j = 0; j < jsonResult.length; j++) {
-            // Compare "Form Name" and "Field Name" with "form_name" and "field_name"
-            if (
-              transformedData[i]["Form Name"] === jsonResult[j]["form_name"] &&
-              transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
-            ) {
-              // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-              // console.log("match!", transformedData[i]);
-              jsonResult[j]["field_annotation"] =
-                transformedData[i]["Field Annotations"];
-              jsonResult[j]['standard_concept'] =  transformedData[i]["Standard Concept"]; 
-              jsonResult[j]['concept_class_id'] =  transformedData[i]["Concept Class ID"]; 
-              jsonResult[j]['domain_id'] =  transformedData[i]["Domain ID"]; 
-             console.log('jsonResult[j]', jsonResult[j])   
-             console.log('transformedData[i]', transformedData[i])
+        // Wrap the for loops in a Promise
+        const loopPromise = new Promise((resolve, reject) => {
+          for (let i = 0; i < transformedData.length; i++) {
+            // Loop through the second array of objects
+            for (let j = 0; j < jsonResult.length; j++) {
+              // Compare "Form Name" and "Field Name" with "form_name" and "field_name"
+              if (
+                transformedData[i]["Form Name"] ===
+                  jsonResult[j]["form_name"] &&
+                transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
+              ) {
+                // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
+                // console.log("match!", transformedData[i]);
+                jsonResult[j]["field_annotation"] =
+                  transformedData[i]["Field Annotations"];
+                jsonResult[j]["standard_concept"] =
+                  transformedData[i]["Standard Concept"];
+                jsonResult[j]["concept_class_id"] =
+                  transformedData[i]["Concept Class ID"];
+                jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
+                console.log("jsonResult[j]", jsonResult[j]);
+                console.log("transformedData[i]", transformedData[i]);
+              }
             }
           }
-        }
+          resolve(); // Resolve the promise after the loops finish
+        });
 
-        // console.log('jsonResult', jsonResult)
-
-        // const csvOptions = {
-        //   fieldSeparator: ",",
-        //   quoteStrings: '"',
-        //   decimalSeparator: ".",
-        //   filename: csvFilename.replace(/\.[^/.]+$/, ""),
-        //   showLabels: true,
-        //   useBom: false,
-        //   useKeysAsHeaders: true,
-        //   // headers: colDefs.map((c) => {
-        //   //   return c.header;
-        //   // }),
-        // };
-        // const csvExporter = new ExportToCsv(csvOptions);
+        await loopPromise;
         console.log("jsonresult");
         console.log(jsonResult);
         // Convert the results array to CSV format using papaparse
         const csvData = Papa.unparse(jsonResult);
-        console.log('csvData', csvData)
+        console.log("csvData", csvData);
         // Create a Blob from the CSV data
         const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
 
@@ -850,7 +842,7 @@ export default function CompletedJobsViewPage(props) {
         "SNOMED Name": snomedText,
         "Domain ID": extraData.domain_id,
         "Concept Class ID": extraData.concept_class_id,
-        "Standard Concept": extraData.standard_concept
+        "Standard Concept": extraData.standard_concept,
         // ...extraData,
       };
     });
