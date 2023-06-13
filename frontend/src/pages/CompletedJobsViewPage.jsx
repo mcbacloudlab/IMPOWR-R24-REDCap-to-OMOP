@@ -127,15 +127,13 @@ export default function CompletedJobsViewPage(props) {
       setUsername(userCookie.email);
       setName(userCookie.firstName + " " + userCookie.lastName);
       let userInfo = JSON.parse(props.user);
-      // console.log("prfewefwefops.", userInfo);
       setRole(userInfo.role);
     } catch (error) {
-      console.log("error", error);
+      console.error("error", error);
     }
   }, [props.user]);
 
   function searchUMLS(text) {
-    // console.log("search UMLS clicked");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -158,7 +156,7 @@ export default function CompletedJobsViewPage(props) {
       .then((result) => {
         setUMLSResultsData(result);
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => console.error("error", error));
   }
 
   function getJobVerificationInfo() {
@@ -188,7 +186,6 @@ export default function CompletedJobsViewPage(props) {
       })
       .then((result) => {
         jobVerificationData = JSON.parse(result);
-        // console.log("jobVerif", jobVerificationData);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
           if (_jobId) setJobId(_jobId);
@@ -200,7 +197,7 @@ export default function CompletedJobsViewPage(props) {
         }
       })
       .catch((error) => {
-        // console.log("error", error);
+        // console.error("error", error);
         if (_jobId) setJobId(_jobId);
         //on an error reading from the db just load a new blank job
         buildTable(JSON.parse(_data), false);
@@ -208,7 +205,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function storeJobVerificationInfo(dataString) {
-    // console.log("datastring", dataString);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -234,7 +230,7 @@ export default function CompletedJobsViewPage(props) {
         setIsSaving(false);
       })
       .catch((error) => {
-        console.log("error", error);
+        console.error("error", error);
         setIsSaving(false);
       });
   }
@@ -265,7 +261,7 @@ export default function CompletedJobsViewPage(props) {
         setIsSaving(false);
       })
       .catch((error) => {
-        console.log("error", error);
+        console.error("error", error);
         setIsSaving(false);
       });
   }
@@ -300,9 +296,7 @@ export default function CompletedJobsViewPage(props) {
   }
 
   function verifyRow(row, removePref, fromModal) {
-    // console.log('temp', tempAllData)
     const updatedData = _dataObj.map((item) => {
-      // console.log("verifyRow item:", item);
       //removing the pref
       if (removePref) {
         if (
@@ -318,7 +312,6 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
-                  console.log("set all to true");
                   setAllVerified(true);
                 } else {
                   setAllVerified(false);
@@ -356,7 +349,6 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
-                  console.log("set all to true");
                   setAllVerified(true);
                 } else {
                   setAllVerified(false);
@@ -448,7 +440,6 @@ export default function CompletedJobsViewPage(props) {
     } else {
       result = _data;
       //count verified records
-      // console.log("result", result);
       let verifiedCount = 0;
 
       // Loop through each item in the outer array
@@ -477,8 +468,6 @@ export default function CompletedJobsViewPage(props) {
       }
       setVerifiedRecords(verifiedCount);
     }
-
-    // console.log("build table, setTempAllData with", result);
     setTempAllData(result);
     setTotalRecords(result.length);
 
@@ -727,20 +716,8 @@ export default function CompletedJobsViewPage(props) {
   }
 
   const handleExportData = async () => {
-    // console.log("handle export data");
     let _data = data;
-    // let keys = _data.reduce(function (acc, obj) {
-    //   Object.keys(obj).forEach(function (key) {
-    //     // console.log("key", key);
-    //     if (key === "extraData" || key === "selected") return null;
-    //     if (!acc.includes(key)) acc.push(key);
-    //   });
-    //   return acc;
-    // }, []);
-    // console.log("_data", _data);
     const transformedData = await transformData(_data);
-    console.log("transformedData", transformedData);
-    // console.log("keys", keys);
 
     //get original redcap data dictionary data and update it
     var myHeaders = new Headers();
@@ -763,8 +740,6 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then(async (result) => {
-        // console.log("the result");
-        // console.log(JSON.parse(result));
         //update field_annotation with the preferred value id
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
@@ -780,7 +755,7 @@ export default function CompletedJobsViewPage(props) {
                 transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
               ) {
                 // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-                // console.log("match!", transformedData[i]);
+
                 jsonResult[j]["field_annotation"] =
                   transformedData[i]["Field Annotations"];
                 jsonResult[j]["standard_concept"] =
@@ -788,8 +763,10 @@ export default function CompletedJobsViewPage(props) {
                 jsonResult[j]["concept_class_id"] =
                   transformedData[i]["Concept Class ID"];
                 jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
-                console.log("jsonResult[j]", jsonResult[j]);
-                console.log("transformedData[i]", transformedData[i]);
+              } else {
+                jsonResult[j]["standard_concept"] = "";
+                jsonResult[j]["concept_class_id"] = "";
+                jsonResult[j]["domain_id"] = "";
               }
             }
           }
@@ -797,11 +774,8 @@ export default function CompletedJobsViewPage(props) {
         });
 
         await loopPromise;
-        console.log("jsonresult");
-        console.log(jsonResult);
         // Convert the results array to CSV format using papaparse
         const csvData = Papa.unparse(jsonResult);
-        console.log("csvData", csvData);
         // Create a Blob from the CSV data
         const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
 
@@ -810,7 +784,7 @@ export default function CompletedJobsViewPage(props) {
         // csvExporter.generateCsv(jsonResult);
       })
       .catch((error) => {
-        console.log("error", error);
+        console.error("error", error);
         setAlertSeverity("error");
         setAlertMessage(
           "Error during export. Make sure connection to REDCap is working."
@@ -918,7 +892,6 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        // console.log(result)
         setSnackbarOpen(true);
         setAlertSeverity("success");
         setAlertMessage(
@@ -929,7 +902,7 @@ export default function CompletedJobsViewPage(props) {
         }, 5000);
       })
       .catch((error) => {
-        console.log("error", error);
+        console.error("error", error);
         setAlertSeverity("error");
         setAlertMessage(
           "Error occurred during submission. Please try again later."
@@ -1023,10 +996,6 @@ export default function CompletedJobsViewPage(props) {
     setSearchUMLSValue(event.target.value);
   };
 
-  // console.log('umlsResultsData', umlsResultsData.length)
-  // console.log(umlsResultsData)
-  // console.log('typeof', typeof umlsResultsData)
-  // console.log("view", view);
   return (
     <>
       <CssBaseline />
