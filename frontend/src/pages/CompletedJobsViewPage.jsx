@@ -683,7 +683,7 @@ export default function CompletedJobsViewPage(props) {
         //you can access a row instance in column definition option callbacks like this
 
         Cell: PreferredCell,
-        maxSize: 120,
+        maxSize: 150,
         sx: {
           "& .MuiButton-root": {
             backgroundColor: "blue",
