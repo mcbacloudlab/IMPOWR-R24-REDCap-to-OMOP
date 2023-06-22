@@ -744,18 +744,24 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
+        // console.log('transform', transformedData)
+        // console.log('jsonresult', jsonResult)
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
             // Loop through the second array of objects
-            for (let j = 0; j < jsonResult.length; j++) {
+            for (let j = i; j < jsonResult.length; j++) {
               // Compare "Form Name" and "Field Name" with "form_name" and "field_name"
+              // console.log('transform form name', transformedData[i]["Form Name"])
+              // console.log('json form name', jsonResult[j]["form_name"])
+              // console.log('tran field name',  transformedData[i]["Field Name"] )
+              // console.log('json field name',  jsonResult[j]["field_name"])
               if (
                 transformedData[i]["Form Name"] ===
                   jsonResult[j]["form_name"] &&
                 transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
               ) {
                 // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-
+                console.log('we matched on ', transformedData[i]["Field Name"])
                 jsonResult[j]["field_annotation"] =
                   transformedData[i]["Field Annotations"];
                 jsonResult[j]["standard_concept"] =
@@ -763,7 +769,9 @@ export default function CompletedJobsViewPage(props) {
                 jsonResult[j]["concept_class_id"] =
                   transformedData[i]["Concept Class ID"];
                 jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
+                break;
               } else {
+                // console.log('no match on', transformedData[i]["Field Name"])
                 jsonResult[j]["standard_concept"] = "";
                 jsonResult[j]["concept_class_id"] = "";
                 jsonResult[j]["domain_id"] = "";
