@@ -163,15 +163,17 @@ export default function CompletedJobsViewPage(props) {
     let jobVerificationData;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
+    myHeaders.append("Content-Type", "application/json");
 
-    var formdata = new FormData();
-    formdata.append("jobId", _jobId);
-    formdata.append("formName", _redcapFormName);
+    var data = {
+      jobId: _jobId,
+      formName: _redcapFormName,
+    };
 
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
-      body: formdata,
+      body: JSON.stringify(data),
       redirect: "follow",
       credentials: "include", // Include cookies with the request
     };
@@ -197,7 +199,7 @@ export default function CompletedJobsViewPage(props) {
         }
       })
       .catch((error) => {
-        // console.error("error", error);
+        console.error("error", error);
         if (_jobId) setJobId(_jobId);
         //on an error reading from the db just load a new blank job
         buildTable(JSON.parse(_data), false);
@@ -207,16 +209,19 @@ export default function CompletedJobsViewPage(props) {
   function storeJobVerificationInfo(dataString) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
+    myHeaders.append("Content-Type", "application/json");
 
-    var formdata = new FormData();
-    formdata.append("formName", _redcapFormName);
-    formdata.append("jobId", _jobId);
-    formdata.append("jobData", dataString);
+    var data = {
+      formName: _redcapFormName,
+      jobId: _jobId,
+      jobData: dataString,
+    };
+    console.log("data length store", dataString.length);
 
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
-      body: formdata,
+      body: JSON.stringify(data),
       redirect: "follow",
       credentials: "include", // Include cookies with the request
     };
@@ -671,6 +676,11 @@ export default function CompletedJobsViewPage(props) {
         accessorKey: "extraData.standard_concept",
         maxSize: 120,
       },
+      {
+        header: "Vocab",
+        accessorKey: "extraData.vocabulary_id",
+        maxSize: 120,
+      },
 
       // {
       //   header: "User Verified",
@@ -715,6 +725,42 @@ export default function CompletedJobsViewPage(props) {
     setIsFormLoaded(true);
   }
 
+  const insertIntoOMOP = async () => {
+    console.log("inserting into omop....");
+    let _data = data;
+    const transformedData = await transformData(_data);
+    // https://ohdsi.github.io/TheBookOfOhdsi/ExtractTransformLoad.html#writing-etl-logic
+    // first we need to get the redcap records using the form name, then we can start building the ETL logic
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
+
+    var formdata = new FormData();
+    formdata.append("form", _redcapFormName);
+    formdata.append("verifyData", JSON.stringify(transformedData));
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/exportRecords`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then(async (result) => {
+        console.log(result);
+        // let jsonResult = JSON.parse(result)
+        // console.log(jsonResult)
+        // console.log('data',JSON.parse(data))
+        // console.log('transformed', transformedData)
+        //build omop cdm logic here
+      })
+      .catch((error) => console.log("error", error));
+  };
+
   const handleExportData = async () => {
     let _data = data;
     const transformedData = await transformData(_data);
@@ -744,8 +790,8 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
-        // console.log('transform', transformedData)
-        // console.log('jsonresult', jsonResult)
+        console.log("transform", transformedData);
+        console.log("jsonresult", jsonResult);
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
             // Loop through the second array of objects
@@ -761,8 +807,10 @@ export default function CompletedJobsViewPage(props) {
                 transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
               ) {
                 // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-                console.log('we matched on ', transformedData[i]["Field Name"])
+                // console.log("we matched on ", transformedData[i]["Field Name"]);
                 jsonResult[j]["field_annotation"] =
+                  transformedData[i]["Vocab"] +
+                  ":" +
                   transformedData[i]["Field Annotations"];
                 jsonResult[j]["standard_concept"] =
                   transformedData[i]["Standard Concept"];
@@ -814,7 +862,7 @@ export default function CompletedJobsViewPage(props) {
   function transformData(data) {
     return data.map((item) => {
       const { redcapFieldLabel, snomedID, snomedText, extraData } = item;
-
+      // console.log("extraData", extraData);
       return {
         // ...rest,
         "Form Name": _redcapFormName,
@@ -825,6 +873,7 @@ export default function CompletedJobsViewPage(props) {
         "Domain ID": extraData.domain_id,
         "Concept Class ID": extraData.concept_class_id,
         "Standard Concept": extraData.standard_concept,
+        Vocab: extraData.vocabulary_id,
         // ...extraData,
       };
     });
@@ -1122,16 +1171,22 @@ export default function CompletedJobsViewPage(props) {
                 </Typography>
 
                 {selectedTabIdx === 2 && (
-                  <Button
-                    sx={{}}
-                    variant="contained"
-                    color="primary"
-                    component="label"
-                    startIcon={<AddTaskIcon />}
-                    onClick={(e) => submitToProcess(e)}
+                  <Tooltip
+                    title={
+                      "This will submit your verified mappings to the internal collection to be used for future jobs. The aim for this is to improve future suggestions using verified mappings"
+                    }
                   >
-                    Submit
-                  </Button>
+                    <Button
+                      sx={{}}
+                      variant="contained"
+                      color="primary"
+                      component="label"
+                      startIcon={<AddTaskIcon />}
+                      onClick={(e) => submitToProcess(e)}
+                    >
+                      Mark as Complete
+                    </Button>
+                  </Tooltip>
                 )}
                 <Divider sx={{ margin: "30px" }} />
                 <Tabs
@@ -1213,6 +1268,7 @@ export default function CompletedJobsViewPage(props) {
                   columns={columns}
                   data={data}
                   handleExportData={handleExportData}
+                  insertIntoOMOP={insertIntoOMOP}
                   resetScreen={resetScreen}
                   // saveSuccess={saveSuccess}
                   isSaving={isSaving}

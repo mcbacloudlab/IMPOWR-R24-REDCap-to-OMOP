@@ -1,13 +1,15 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 // import CloseIcon from "@mui/icons-material/Close";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+// import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import StorageIcon from "@mui/icons-material/Storage";
 // import SaveIcon from "@mui/icons-material/Save";
 // import CircularProgress from "@mui/material/CircularProgress";
 // import CheckIcon from "@mui/icons-material/Check";
 // import TableRow from "@mui/material/TableRow";
+import CSVIcon from "../assets/csv.png";
 
 export default function CompletedJobTable({
   columns,
@@ -20,6 +22,7 @@ export default function CompletedJobTable({
   saveFile,
   value,
   handleExportData,
+  insertIntoOMOP,
   resetScreen,
   selectedTabIdx,
 }) {
@@ -28,7 +31,7 @@ export default function CompletedJobTable({
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)
       columns={columns}
-      data={data} 
+      data={data}
       enableDensityToggle={false} //density does not work with memoized cells
       memoMode="cells" // memoize table cells to improve render performance, but break some features
       enableBottomToolbar={true}
@@ -116,54 +119,49 @@ export default function CompletedJobTable({
             flexWrap: "wrap",
           }}
         >
-          {/* <Button
-            variant="contained"
-            color="primary"
-            component="label"
-            startIcon={
-              saveSuccess ? (
-                <CheckIcon />
-              ) : isSaving || isSavingErr ? (
-                <CircularProgress size={20} thickness={4} color="secondary" />
-              ) : (
-                <SaveIcon />
-              )
-            }
-            onClick={(event) => saveFile(event, value)}
-          >
-            Save
-          </Button> */}
           {selectedTabIdx === 2 && (
-            <Button
-              color="success"
-              //export all data that is currently in the table (ignore pagination, sorting, filtering, etc.)
-              onClick={handleExportData}
-              startIcon={<FileDownloadIcon />}
-              variant="contained"
-            >
-              Export Data Dictionary
-            </Button>
+            <>
+              <Tooltip title={"This will use the below mappings to find your relevant data and insert it into the appropriate OMOP CDM tables"} placement="top">
+                <Button
+                  color="primary"
+                  onClick={insertIntoOMOP}
+                  startIcon={<StorageIcon />}
+                  variant="contained"
+                >
+                  Import into OMOP CDM
+                </Button>
+              </Tooltip>
+
+              <Box style={{ marginLeft: "auto" }}>
+                {/* <Button
+            variant="outlined"
+            color="error"
+            startIcon={<StorageIcon />}
+            component="label"
+            onClick={(event) => resetScreen(event, value)}
+          >
+            Close File
+          </Button> */}
+                <Tooltip title={"Export to CSV"} placement="top">
+                  <Button onClick={handleExportData}>
+                    <img
+                      src={CSVIcon}
+                      alt="Export to CSV"
+                      style={{ width: "32px", height: "32px" }}
+                    />
+                  </Button>
+                </Tooltip>
+                {/* <Button
+            color="success"
+            onClick={handleExportData}
+            startIcon={<csvIcon />}
+            variant="contained"
+          >
+            Download Data
+          </Button> */}
+              </Box>
+            </>
           )}
-
-          {/* <Typography
-            color="textSecondary"
-            variant="subtitle2"
-            style={{ marginLeft: "auto" }}
-          > */}
-          {/* Last Saved At:{" "} */}
-          {/* </Typography> */}
-
-          <Box style={{ marginLeft: "auto" }}>
-            {/* <Button
-              variant="outlined"
-              color="error"
-              startIcon={<CloseIcon />}
-              component="label"
-              onClick={(event) => resetScreen(event, value)}
-            >
-              Close File
-            </Button> */}
-          </Box>
         </Box>
       )}
     />

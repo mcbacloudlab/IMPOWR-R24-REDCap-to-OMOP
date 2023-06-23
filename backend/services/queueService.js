@@ -658,7 +658,7 @@ async function storeJobVerifyInfo(req, res) {
     // Get the database and the collection
     const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
     const collection = db.collection("jobVerifyInfo");
-
+    console.log(req.body.jobData.length);
     // Define the filter for identifying the document to update
     const filter = {
       jobId: req.body.jobId,
@@ -724,7 +724,7 @@ async function getJobVerifyInfo(req, res) {
     // Get the database and the collection
     const db = mongoClient.db("GPT3_Embeddings"); // replace with your database name
     const collection = db.collection("jobVerifyInfo");
-
+    // console.log('req.body', req.body)
     // Define the filter for identifying the document to find
     const filter = {
       jobId: req.body.jobId,

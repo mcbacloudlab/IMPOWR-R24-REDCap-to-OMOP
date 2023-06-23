@@ -24,7 +24,20 @@ async function exportMetadata(req, res){
   }
 }
 
+async function exportRecords(req, res){
+  // console.log("get redcap metadata");
+  try {
+    await redcapService.exportRecords(req, res);
+    // console.log("keys", keys);
+    // res.status(200).send(keys);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error");
+  }
+}
+
 module.exports = {
   getForms,
-  exportMetadata
+  exportMetadata,
+  exportRecords
 };

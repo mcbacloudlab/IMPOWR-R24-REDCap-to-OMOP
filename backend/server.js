@@ -36,8 +36,8 @@ let appPort = process.env.EXPRESS_PORT;
 // Use Helmet!
 app.use(helmet());
 
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(bodyParser.json({ limit: "50mb" }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Use the cookie-parser middleware
 app.use(cookieParser());
 // Use the cors middleware and configure it to allow credentials
@@ -68,6 +68,21 @@ app.use(
   })
 );
 
+// app.use(function(req, res, next) {
+//   const origin = req.headers.origin;
+//   if (allowedOrigins.includes(origin)) {
+//     console.log('req.body', req.body)
+//     console.log('origin matches', origin)
+//     res.setHeader('Access-Control-Allow-Origin', origin);
+//   }
+//   res.header("Access-Control-Allow-Credentials", true);
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
+
 const skipRoutes = ["/getUserJobs", "/queues", "/validateUser"];
 const skip = (req, res) => {
   return skipRoutes.some((route) => req.url.startsWith(route));
@@ -78,7 +93,8 @@ app.use(morgan("dev", { skip }));
 app.use(fileUpload({
   createParentPath: true,
   useTempFiles : false, //enable/disable file-uploads
-  tempFileDir : false //enable/disable file-uploads
+  tempFileDir : false, //enable/disable file-uploads
+  limits: { fileSize: 50 * 1024 * 1024 }, // Set file size limit to 50MB
 }));
 
 
