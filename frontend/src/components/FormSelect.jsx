@@ -134,7 +134,7 @@ export default function FormSelect(props) {
       // Check if the field_type is 'dropdown'
       if (obj.field_type === "dropdown" || obj.field_type === 'radio') {
         var selectChoices = obj.select_choices_or_calculations;
-        // console.log("Dropdown value: " + selectChoices);
+        console.log("Dropdown/radio value: " + selectChoices);
 
         var choices = selectChoices.split("|"); // Split the string into individual choices
 
@@ -145,7 +145,7 @@ export default function FormSelect(props) {
           return { key: key, value: value };
         });
 
-        // console.log("Parsed choices: ", parsedChoices);
+        console.log("Parsed choices: ", parsedChoices);
 
         // Append new objects with parsed data to convertedData array
         for (var j = 0; j < parsedChoices.length; j++) {
@@ -179,7 +179,7 @@ export default function FormSelect(props) {
         }
       }
     }
-    // console.log('converted', convertedData)
+    console.log('converted', convertedData)
     setData(convertedData);
     setIsFormLoaded(true);
     setIsFormLoading(false);
