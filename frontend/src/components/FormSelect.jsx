@@ -93,6 +93,7 @@ export default function FormSelect(props) {
     )
       .then((response) => response.text())
       .then((result) => {
+        console.log("result", result);
         importExcel(JSON.parse(result));
       })
       .catch((error) => console.log("error", error));
@@ -124,10 +125,62 @@ export default function FormSelect(props) {
     //removing header
     fileData.splice(0, 1);
     setSelectedRows(convertToJson(headers, fileData));
-    setData(convertToJson(headers, fileData));
 
-    // setApprovedData(convertToJson(headers, fileData, true));
-    // setIsLoading(false);
+    // setData(convertToJson(headers, fileData));
+    let convertedData = convertToJson(headers, fileData);
+    for (var i = 0; i < convertedData.length; i++) {
+      var obj = convertedData[i];
+
+      // Check if the field_type is 'dropdown'
+      if (obj.field_type === "dropdown" || obj.field_type === 'radio') {
+        var selectChoices = obj.select_choices_or_calculations;
+        // console.log("Dropdown value: " + selectChoices);
+
+        var choices = selectChoices.split("|"); // Split the string into individual choices
+
+        var parsedChoices = choices.map(function (choice) {
+          var keyValue = choice.split(",");
+          var key = keyValue[0].trim();
+          var value = keyValue[1].trim();
+          return { key: key, value: value };
+        });
+
+        // console.log("Parsed choices: ", parsedChoices);
+
+        // Append new objects with parsed data to convertedData array
+        for (var j = 0; j < parsedChoices.length; j++) {
+          var choice = parsedChoices[j];
+          var appendedFieldName = obj.field_name + "_" + choice.key;
+
+          var newObject = {
+            field_name: appendedFieldName,
+            form_name: obj.form_name,
+            section_header: obj.section_header,
+            field_type: obj.field_type,
+            field_label: choice.value,
+            select_choices_or_calculations: obj.select_choices_or_calculations,
+            field_note: obj.field_note,
+            text_validation_type_or_show_slider_number:
+              obj.text_validation_type_or_show_slider_number,
+            text_validation_min: obj.text_validation_min,
+            text_validation_max: obj.text_validation_max,
+            identifier: obj.identifier,
+            branching_logic: obj.branching_logic,
+            required_field: obj.required_field,
+            custom_alignment: obj.custom_alignment,
+            question_number: obj.question_number,
+            matrix_group_name: obj.matrix_group_name,
+            matrix_ranking: obj.matrix_ranking,
+            field_annotation: obj.field_annotation,
+          };
+
+          convertedData.splice(i + 1, 0, newObject); // Insert new object after the current object
+          i++; // Increment i to skip the newly inserted object in the next iteration
+        }
+      }
+    }
+    // console.log('converted', convertedData)
+    setData(convertedData);
     setIsFormLoaded(true);
     setIsFormLoading(false);
   }
@@ -340,20 +393,19 @@ export default function FormSelect(props) {
             <Grid sx={{ margin: 1 }}>
               {isFormLoaded && (
                 <>
-                <CollectionList
-                  token={token}
-                  setCheckedItems={setCheckedItems}
-                  checkedItems={checkedItems}
-                />
+                  <CollectionList
+                    token={token}
+                    setCheckedItems={setCheckedItems}
+                    checkedItems={checkedItems}
+                  />
 
-                <TransferList
-                
-                  props={props}
-                  setData={setData}
-                  data={data}
-                  setColDefs={setColDefs}
-                  colDefs={colDefs}
-                />
+                  <TransferList
+                    props={props}
+                    setData={setData}
+                    data={data}
+                    setColDefs={setColDefs}
+                    colDefs={colDefs}
+                  />
                 </>
               )}
             </Grid>
