@@ -38,7 +38,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
           result.sort((a, b) => a.name.localeCompare(b.name));
           const filteredData = result.filter(
             (item) =>
-              item.name.includes("snomed") || item.name.includes("loinc")
+              item.name.includes("snomed") || item.name.includes("loinc") || item.name.includes("athena")
           );
           setFilteredCollections(filteredData);
         })
