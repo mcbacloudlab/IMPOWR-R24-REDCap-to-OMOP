@@ -16,7 +16,6 @@ import FormSelectTable from "./FormSelectTable";
 import Alert from "@mui/material/Alert";
 import TransferList from "./TransferList";
 import CollectionList from "./CollectionList";
-// import { ExportToCsv } from "export-to-csv";
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
 import Skeleton from "@mui/material/Skeleton";
@@ -45,25 +44,14 @@ export default function FormSelect(props) {
   var tableInstanceRef = useRef(null);
   useEffect(() => {
     if (tableInstanceRef.current) {
-      // console.log("tableinstance", tableInstanceRef.current.getState());
       setSelectedRows(tableInstanceRef.current.getState().rowSelection);
     }
   }, [tableInstanceRef.current]);
 
   const handleRowSelection = (selected) => {
-    // console.log("typeof", typeof selected);
-    // console.log("tableinstance", tableInstanceRef.current.getState());
     const rowSelection = tableInstanceRef.current.getState().rowSelection;
     setSelectedRows(rowSelection);
-    // console.log("rowselection", rowSelection);
-    // const updatedData = data.map((row) => {
-    //   return {
-    //     ...row,
-    //     selected: selectedRows.includes(row.id) ? true : false,
-    //   };
-    // });
 
-    // setData(updatedData);
   };
 
   const columns = useMemo(() => colDefs, [colDefs]);
@@ -214,8 +202,6 @@ export default function FormSelect(props) {
     let dataToSendToQueue;
     if (!reformattedArray || reformattedArray.length <= 0) {
       dataToSendToQueue = data;
-      // setSelectRowsError(true) //uncomment these lines if you want to require rows to be selected, disabled means if no rows selected then all get sent
-      // return;
     } else {
       dataToSendToQueue = reformattedArray;
     }
@@ -281,39 +267,6 @@ export default function FormSelect(props) {
       .catch((error) => console.log("error", error));
   }
 
-  // const csvOptions = {
-  //   fieldSeparator: ",",
-  //   quoteStrings: '"',
-  //   decimalSeparator: ".",
-  //   filename: csvFilename.replace(/\.[^/.]+$/, ""),
-  //   showLabels: true,
-  //   useBom: false,
-  //   useKeysAsHeaders: false,
-  //   headers: colDefs.map((c) => {
-  //     return c.header;
-  //   }),
-  // };
-  // const csvExporter = new ExportToCsv(csvOptions);
-  // const handleExportData = () => {
-  //   let _data = data;
-  //   // if (selectedTabIdx) {
-  //   //   _data = approvedData; //change export data if on approved tab
-  //   // }
-  //   let keys = _data.reduce(function (acc, obj) {
-  //     Object.keys(obj).forEach(function (key) {
-  //       if (!acc.includes(key)) acc.push(key);
-  //     });
-  //     return acc;
-  //   }, []);
-
-  //   _data.forEach(function (obj) {
-  //     keys.forEach(function (key) {
-  //       if (!obj[key]) obj[key] = "";
-  //     });
-  //   });
-
-  //   csvExporter.generateCsv(_data);
-  // };
 
   const handleExportData = () => {
     let _data = data;
@@ -480,11 +433,6 @@ export default function FormSelect(props) {
                     <Alert
                       severity="success"
                       sx={{
-                        // "& .MuiAlert-icon": {
-                        //   color: "white",
-                        // },
-                        // color: 'white',
-                        // backgroundColor: "#008C95",
                         fontSize: "1.2rem",
                         position: "absolute",
                         top: "0px",

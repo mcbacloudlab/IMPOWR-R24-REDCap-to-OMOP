@@ -1,0 +1,282 @@
+[
+  {
+    "key": "record_id",
+    "value": "4ec871d1e1ce94ac18af16bb8b90025b",
+    "matchingObject": {
+      "redcapFieldLabel": "Record ID",
+      "snomedText": "Identification number",
+      "snomedID": 4245003,
+      "similarity": 0.8830742952434485,
+      "extraData": {
+        "field_name": "record_id",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Record ID",
+        "concept_id": 4245003,
+        "concept_name": "Identification number",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "396278008",
+        "valid_start_date": "2003-07-31T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "first_name",
+    "value": "Christine",
+    "matchingObject": {
+      "redcapFieldLabel": "First name",
+      "snomedText": "Forename",
+      "snomedID": 4256892,
+      "similarity": 0.9150379256560727,
+      "extraData": {
+        "field_name": "first_name",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "First name",
+        "concept_id": 4256892,
+        "concept_name": "Forename",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "408677003",
+        "valid_start_date": "2004-07-31T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "last_name",
+    "value": "Test",
+    "matchingObject": {
+      "redcapFieldLabel": "Last Name",
+      "snomedText": "Patient surname",
+      "snomedID": 4086933,
+      "similarity": 0.9051140091047873,
+      "extraData": {
+        "field_name": "last_name",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Last Name",
+        "concept_id": 4086933,
+        "concept_name": "Patient surname",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "184096005",
+        "valid_start_date": "2002-01-31T05:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "email",
+    "value": "cmrodger@wakehealth.edu",
+    "matchingObject": {
+      "redcapFieldLabel": "Email",
+      "snomedText": "Email",
+      "snomedID": 44803511,
+      "similarity": 0.9999976422829785,
+      "extraData": {
+        "field_name": "email",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Email",
+        "concept_id": 44803511,
+        "concept_name": "Email",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Qualifier Value",
+        "standard_concept": "S",
+        "concept_code": "721421000000101",
+        "valid_start_date": "2010-10-01T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "position",
+    "value": "2",
+    "matchingObject": {
+      "redcapFieldLabel": "Position",
+      "snomedText": "Position",
+      "snomedID": 4078024,
+      "similarity": 0.9999973408384598,
+      "extraData": {
+        "field_name": "position",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Position",
+        "concept_id": 4078024,
+        "concept_name": "Position",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Attribute",
+        "standard_concept": "S",
+        "concept_code": "246268007",
+        "valid_start_date": "2002-01-31T05:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "record_id",
+    "value": "4f5a1bdddba602692e3ed1473ccf660d",
+    "matchingObject": {
+      "redcapFieldLabel": "Record ID",
+      "snomedText": "Identification number",
+      "snomedID": 4245003,
+      "similarity": 0.8830742952434485,
+      "extraData": {
+        "field_name": "record_id",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Record ID",
+        "concept_id": 4245003,
+        "concept_name": "Identification number",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "396278008",
+        "valid_start_date": "2003-07-31T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "first_name",
+    "value": "Umit",
+    "matchingObject": {
+      "redcapFieldLabel": "First name",
+      "snomedText": "Forename",
+      "snomedID": 4256892,
+      "similarity": 0.9150379256560727,
+      "extraData": {
+        "field_name": "first_name",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "First name",
+        "concept_id": 4256892,
+        "concept_name": "Forename",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "408677003",
+        "valid_start_date": "2004-07-31T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "last_name",
+    "value": "test",
+    "matchingObject": {
+      "redcapFieldLabel": "Last Name",
+      "snomedText": "Patient surname",
+      "snomedID": 4086933,
+      "similarity": 0.9051140091047873,
+      "extraData": {
+        "field_name": "last_name",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Last Name",
+        "concept_id": 4086933,
+        "concept_name": "Patient surname",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Observable Entity",
+        "standard_concept": "S",
+        "concept_code": "184096005",
+        "valid_start_date": "2002-01-31T05:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "email",
+    "value": "Umit.Topaloglu@wakehealth.edu",
+    "matchingObject": {
+      "redcapFieldLabel": "Email",
+      "snomedText": "Email",
+      "snomedID": 44803511,
+      "similarity": 0.9999976422829785,
+      "extraData": {
+        "field_name": "email",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Email",
+        "concept_id": 44803511,
+        "concept_name": "Email",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Qualifier Value",
+        "standard_concept": "S",
+        "concept_code": "721421000000101",
+        "valid_start_date": "2010-10-01T04:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  },
+  {
+    "key": "position",
+    "value": "1",
+    "matchingObject": {
+      "redcapFieldLabel": "Position",
+      "snomedText": "Position",
+      "snomedID": 4078024,
+      "similarity": 0.9999973408384598,
+      "extraData": {
+        "field_name": "position",
+        "form_name": "bioinformatics_core_participants",
+        "field_label": "Position",
+        "concept_id": 4078024,
+        "concept_name": "Position",
+        "domain_id": "Observation",
+        "vocabulary_id": "SNOMED",
+        "concept_class_id": "Attribute",
+        "standard_concept": "S",
+        "concept_code": "246268007",
+        "valid_start_date": "2002-01-31T05:00:00.000Z",
+        "valid_end_date": "2099-12-31T05:00:00.000Z",
+        "invalid_reason": null
+      },
+      "userMatch": 0,
+      "selected": true,
+      "verified": true
+    }
+  }
+]

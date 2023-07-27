@@ -721,47 +721,16 @@ export default function CompletedJobsViewPage(props) {
     setColDefs(cols);
     _dataObj = result;
     setData(result);
-    setCSVFilename(`Completed_Job_${_jobId}.csv`);
+    setCSVFilename(`Completed_Job_${_jobId}`);
     setIsFormLoaded(true);
   }
 
-  const insertIntoOMOP = async () => {
-    console.log("inserting into omop....");
-    let _data = data;
-    const transformedData = await transformData(_data);
-    // https://ohdsi.github.io/TheBookOfOhdsi/ExtractTransformLoad.html#writing-etl-logic
-    // first we need to get the redcap records using the form name, then we can start building the ETL logic
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
-
-    var formdata = new FormData();
-    formdata.append("form", _redcapFormName);
-    formdata.append("verifyData", JSON.stringify(transformedData));
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-      redirect: "follow",
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/exportRecords`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then(async (result) => {
-        console.log(result);
-        // let jsonResult = JSON.parse(result)
-        // console.log(jsonResult)
-        // console.log('data',JSON.parse(data))
-        // console.log('transformed', transformedData)
-        //build omop cdm logic here
-      })
-      .catch((error) => console.log("error", error));
+  const updateDD = async () => {
+    handleExportData('updateDD')
   };
 
-  const handleExportData = async () => {
+  const handleExportData = async (action) => {
+    console.log('handleExport Action', action)
     let _data = data;
     const transformedData = await transformData(_data);
 
@@ -790,28 +759,29 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
-        console.log("transform", transformedData);
-        console.log("jsonresult", jsonResult);
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
+            console.log("transformeddata", transformedData);
             // Loop through the second array of objects
             for (let j = i; j < jsonResult.length; j++) {
-              // Compare "Form Name" and "Field Name" with "form_name" and "field_name"
-              // console.log('transform form name', transformedData[i]["Form Name"])
-              // console.log('json form name', jsonResult[j]["form_name"])
-              // console.log('tran field name',  transformedData[i]["Field Name"] )
-              // console.log('json field name',  jsonResult[j]["field_name"])
+              // console.log(
+              //   transformedData[i]["Field Name"] + ' : ' +  jsonResult[j]["field_name"]
+              // );
+              //TODO - this if statement needs to be modified to account for the field_names for drop-downs and radio buttons. The fields name currently take the only one that exists and appends an incrementing integer starting at 0
+              //for example - if the field_name members_num is a dropdown and has 5 options. The first option will get a field_name of members_num_0. We need account for this in storing the field_annotations. Perhaps a solution is be using the key but also by
+              //checking if it's a radio or dropdown and then checking if those are equal
               if (
                 transformedData[i]["Form Name"] ===
                   jsonResult[j]["form_name"] &&
                 transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
               ) {
+                console.log("we matched");
                 // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-                // console.log("we matched on ", transformedData[i]["Field Name"]);
-                jsonResult[j]["field_annotation"] =
-                  transformedData[i]["Vocab"] +
-                  ":" +
-                  transformedData[i]["Field Annotations"];
+                jsonResult[j]["field_annotation"] = {
+                  vocab: transformedData[i]["Vocab"],
+                  fieldAnnotations: transformedData[i]["Field Annotations"],
+                };
+
                 jsonResult[j]["standard_concept"] =
                   transformedData[i]["Standard Concept"];
                 jsonResult[j]["concept_class_id"] =
@@ -819,6 +789,7 @@ export default function CompletedJobsViewPage(props) {
                 jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
                 break;
               } else {
+                console.log("we did not match");
                 // console.log('no match on', transformedData[i]["Field Name"])
                 jsonResult[j]["standard_concept"] = "";
                 jsonResult[j]["concept_class_id"] = "";
@@ -831,13 +802,25 @@ export default function CompletedJobsViewPage(props) {
 
         await loopPromise;
         // Convert the results array to CSV format using papaparse
-        const csvData = Papa.unparse(jsonResult);
+        console.log("jsonResult!", jsonResult);
+        // Convert nested objects to JSON strings before converting to CSV
+        const stringifiedData = jsonResult.map((item) => ({
+          ...item,
+          field_annotation: JSON.stringify(item.field_annotation),
+        }));
+        if(action === 'downloadExcel'){
+          console.log('downloadExcel!')
+        const csvData = Papa.unparse(stringifiedData);
+        // const csvData = Papa.unparse(jsonResult);
         // Create a Blob from the CSV data
         const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
 
         // Use FileSaver to save the generated CSV file
         saveAs(blob, `${csvFilename}.csv`);
         // csvExporter.generateCsv(jsonResult);
+        }else if(action === 'updateDD'){
+          console.log('update DD in REDCap')
+        }
       })
       .catch((error) => {
         console.error("error", error);
@@ -1173,7 +1156,7 @@ export default function CompletedJobsViewPage(props) {
                 {selectedTabIdx === 2 && (
                   <Tooltip
                     title={
-                      "This will submit your verified mappings to the internal collection to be used for future jobs. The aim for this is to improve future suggestions using verified mappings"
+                      "This will submit your below verified mappings to the internal collection to be used for future jobs. The aim for this is to improve future suggestions using verified mappings"
                     }
                   >
                     <Button
@@ -1184,7 +1167,7 @@ export default function CompletedJobsViewPage(props) {
                       startIcon={<AddTaskIcon />}
                       onClick={(e) => submitToProcess(e)}
                     >
-                      Mark as Complete
+                      Approve the Below Mappings
                     </Button>
                   </Tooltip>
                 )}
@@ -1268,7 +1251,7 @@ export default function CompletedJobsViewPage(props) {
                   columns={columns}
                   data={data}
                   handleExportData={handleExportData}
-                  insertIntoOMOP={insertIntoOMOP}
+                  updateDD={updateDD}
                   resetScreen={resetScreen}
                   // saveSuccess={saveSuccess}
                   isSaving={isSaving}

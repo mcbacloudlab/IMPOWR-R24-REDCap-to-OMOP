@@ -43,6 +43,7 @@ app.use(cookieParser());
 // Use the cors middleware and configure it to allow credentials
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
   "http://192.168.50.125:3000",
   "http://34.23.5.184/redcap-omop",
   "http://34.23.5.184",
