@@ -57,7 +57,7 @@ async function getUMLSSearchResults(req, res) {
     var config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://uts-ws.nlm.nih.gov/rest/search/current?string=${encodedSearchText}&sabs=SNOMEDCT_US&apiKey=${apiKeyDecrypted}&pageSize=1000&returnIdType=code`,
+      url: `https://uts-ws.nlm.nih.gov/rest/search/current?string=${encodedSearchText}&sabs=SNOMEDCT_US&apiKey=${apiKeyDecrypted}&pageSize=50&returnIdType=code`,
       headers: {
       },
     };

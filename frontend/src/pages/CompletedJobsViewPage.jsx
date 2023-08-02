@@ -41,6 +41,8 @@ import MyAccountNavBar from "../components/MyAccountNavBar";
 import Cookies from "js-cookie";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ViewContext } from "../components/ViewContext";
+import CircularProgress from "@mui/material/CircularProgress";
+
 // var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
@@ -68,6 +70,7 @@ export default function CompletedJobsViewPage(props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
+  const [searchingUMLS, setSearchingUMLS] = useState(false);
   const { view, setView } = useContext(ViewContext);
 
   const umlsModalStyle = {
@@ -133,7 +136,9 @@ export default function CompletedJobsViewPage(props) {
     }
   }, [props.user]);
 
-  function searchUMLS(text) {
+  function searchUMLS(text, event) {
+    if(event) event.preventDefault();
+    setSearchingUMLS(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
@@ -154,9 +159,13 @@ export default function CompletedJobsViewPage(props) {
     )
       .then((response) => response.text())
       .then((result) => {
+        setSearchingUMLS(false);
         setUMLSResultsData(result);
       })
-      .catch((error) => console.error("error", error));
+      .catch((error) => {
+        setSearchingUMLS(false);
+        console.error("error", error);
+      });
   }
 
   function getJobVerificationInfo() {
@@ -726,11 +735,11 @@ export default function CompletedJobsViewPage(props) {
   }
 
   const updateDD = async () => {
-    handleExportData('updateDD')
+    handleExportData("updateDD");
   };
 
   const handleExportData = async (action) => {
-    console.log('handleExport Action', action)
+    console.log("handleExport Action", action);
     let _data = data;
     const transformedData = await transformData(_data);
 
@@ -808,18 +817,18 @@ export default function CompletedJobsViewPage(props) {
           ...item,
           field_annotation: JSON.stringify(item.field_annotation),
         }));
-        if(action === 'downloadExcel'){
-          console.log('downloadExcel!')
-        const csvData = Papa.unparse(stringifiedData);
-        // const csvData = Papa.unparse(jsonResult);
-        // Create a Blob from the CSV data
-        const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+        if (action === "downloadExcel") {
+          console.log("downloadExcel!");
+          const csvData = Papa.unparse(stringifiedData);
+          // const csvData = Papa.unparse(jsonResult);
+          // Create a Blob from the CSV data
+          const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
 
-        // Use FileSaver to save the generated CSV file
-        saveAs(blob, `${csvFilename}.csv`);
-        // csvExporter.generateCsv(jsonResult);
-        }else if(action === 'updateDD'){
-          console.log('update DD in REDCap')
+          // Use FileSaver to save the generated CSV file
+          saveAs(blob, `${csvFilename}.csv`);
+          // csvExporter.generateCsv(jsonResult);
+        } else if (action === "updateDD") {
+          console.log("update DD in REDCap");
         }
       })
       .catch((error) => {
@@ -1101,25 +1110,27 @@ export default function CompletedJobsViewPage(props) {
                     >
                       Search UMLS
                     </Typography>
-                    <TextField
-                      id="outlined-basic"
-                      label="Text Search"
-                      variant="outlined"
-                      value={searchUMLSValue}
-                      onChange={handleTextFieldChange}
-                      sx={{ marginTop: "10px" }}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => searchUMLS(searchUMLSValue)}
-                            >
-                              <ArrowRightAltIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
+                    <form onSubmit={ (event) => searchUMLS(searchUMLSValue, event)}>
+                      <TextField
+                        id="outlined-basic"
+                        label="UMLS Text Search"
+                        variant="outlined"
+                        value={searchUMLSValue}
+                        onChange={handleTextFieldChange}
+                        sx={{ marginTop: "10px" }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => searchUMLS(searchUMLSValue)}
+                              >
+                                <ArrowRightAltIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </form>
                     {/* <Button
              variant="contained"
              sx={{ marginLeft: "15px", marginTop: "20px" }}
@@ -1127,23 +1138,29 @@ export default function CompletedJobsViewPage(props) {
            >
              Search
            </Button> */}
-                    {umlsResultsData.length && (
-                      <UMLSSearchBasicTable
-                        umlsResults={umlsResultsData}
-                        modalRowData={modalRowData}
-                        setModalRowData={setModalRowData}
-                        data={data}
-                        tempAllData={tempAllData}
-                        setTempAllData={setTempAllData}
-                        handleSetTempAllData={handleSetTempAllData}
-                        verifyRow={verifyRow}
-                        showTab={showTab}
-                        selectedTabIdx={selectedTabIdx}
-                        setData={setData}
-                        buildTable={buildTable}
-                        storeJobVerificationInfo={storeJobVerificationInfo}
-                        setLookupModalOpen={setLookupModalOpen}
-                      />
+                    <Divider />
+                    <br />
+                    {searchingUMLS ? (
+                      <CircularProgress />
+                    ) : (
+                      umlsResultsData.length > 0 && (
+                        <UMLSSearchBasicTable
+                          umlsResults={umlsResultsData}
+                          modalRowData={modalRowData}
+                          setModalRowData={setModalRowData}
+                          data={data}
+                          tempAllData={tempAllData}
+                          setTempAllData={setTempAllData}
+                          handleSetTempAllData={handleSetTempAllData}
+                          verifyRow={verifyRow}
+                          showTab={showTab}
+                          selectedTabIdx={selectedTabIdx}
+                          setData={setData}
+                          buildTable={buildTable}
+                          storeJobVerificationInfo={storeJobVerificationInfo}
+                          setLookupModalOpen={setLookupModalOpen}
+                        />
+                      )
                     )}
                   </Box>
                 </Modal>
