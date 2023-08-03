@@ -21,7 +21,6 @@ async function authenticate(req, res, next) {
   }
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    // console.log('jwtveri', jwtVerified)
     let userInfo
     if(jwtVerified.user == 'orcidUser'){
       userInfo = 'orcidUser'
@@ -55,9 +54,6 @@ async function getUserByEmail(email) {
 }
 
 async function requireAdmin(req, res, next) {
-  // console.log("require admin");
-  // console.log("req", req.body);
-  // console.log('query', req.query)
   const authHeader = req.headers.authorization;
   const tokenFromHeader =
     authHeader &&
@@ -70,18 +66,10 @@ async function requireAdmin(req, res, next) {
   const tokenFromCookie = req.cookies.token;
   // Use the token from the header if it exists; otherwise, use the token from the cookie
   let token = tokenFromHeader || tokenFromCookie;
-
-  // console.log('token', token)
-  // if (req.query.token) {
-  //   token = req.query.token;
-  // } else {
-  //   token = authHeader && authHeader.split(" ")[1];
-  // }
   
 
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    // console.log("jwtVerified", jwtVerified);
     let email = jwtVerified.user;
     const query = "SELECT role FROM users WHERE email = ?";
     //   return new Promise((resolve, reject) => {
@@ -90,10 +78,7 @@ async function requireAdmin(req, res, next) {
         console.log("error!", err);
         res.status(500).send("Error");
       }
-      // console.log("results", results);
       if (results[0].role === "admin") {
-        // console.log("next", next);
-        // console.log("go next");
         return next();
       } else res.status(403).send("Error");
     });

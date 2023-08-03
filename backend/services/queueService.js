@@ -114,8 +114,6 @@ async function embedRedcapText(job) {
   console.log("jobid", job.id);
 
   console.log("Starting REDCap GPT3 Embedding...");
-  // job.progress(60);
-  // console.log("job.data");
 
   return new Promise((resolve) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");

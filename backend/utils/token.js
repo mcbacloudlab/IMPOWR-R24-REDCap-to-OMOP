@@ -15,9 +15,7 @@ async function getUserByEmail(email) {
 }
 
 function decodeToken(req, res) {
-    // console.log('req.headers', req.headers)
   let token = determineTokenHeaderOrCookie(req)
-   console.log('token', token)
   if (!token) {
     return res.sendStatus(401); // Send 401 status if no token is provided
   }
@@ -27,7 +25,6 @@ function decodeToken(req, res) {
         if (err) {
             reject(err);
         } else {
-            console.log('the user!', user.user)
             let userResults = await getUserByEmail(user.user)
             console.log('userResults', userResults[0].id)
             user.id = userResults[0].id
@@ -38,7 +35,6 @@ function decodeToken(req, res) {
 }
 
 function determineTokenHeaderOrCookie(req){
-    // console.log('req', req.headers.authorization)
     const authHeader = req.headers.authorization;
     const tokenFromHeader =
       authHeader &&

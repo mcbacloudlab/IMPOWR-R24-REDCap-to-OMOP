@@ -136,9 +136,6 @@ async function getData(loincDataCollection) {
     .project(projection);
   const loincResults = await cursor.toArray();
 
-  // console.log("loincResults", loincResults);
-  // console.log("Loaded to array!");
-
   for (const elem of pgResults) {
     try {
       const result = loincResults.find(

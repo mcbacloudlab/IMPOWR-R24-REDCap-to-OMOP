@@ -2,7 +2,6 @@ const db = require("../db/mysqlConnection.cjs");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
-const util = require("util");
 const Bull = require("bull");
 const myQueue = new Bull("process-queue", {
   redis: {
@@ -25,7 +24,6 @@ async function getUserByEmail(email) {
 }
 
 async function createUser(userData, orcidUser) {
-  // console.log("create userData", userData);
 
   const passwordSchema = Joi.string()
     .pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/)
@@ -149,7 +147,6 @@ async function validateUser(authData) {
   try {
     let jwtVerified = jwt.verify(authData, process.env.JWT_SECRET_KEY);
     //now get user info again
-    // console.log("jwtverified", jwtVerified);
     let userInfoToReturn;
     let userInfo = [];
 
@@ -249,7 +246,6 @@ async function getUserJobs(req, res) {
   try {
     let jwtVerified = jwt.verify(token, process.env.JWT_SECRET_KEY);
     let email = jwtVerified.user;
-    // console.log("get user jobs for", jwtVerified);
     if (!jwtVerified.orcidId) {
       jwtVerified.orcidId = null;
     }
@@ -262,7 +258,6 @@ async function getUserJobs(req, res) {
     and jobName != 'lookupEmbeddings'
     ORDER BY (jobStatus = 'active') DESC, jobId DESC
     limit 100`;
-    //   return new Promise((resolve, reject) => {
     db.execute(
       query,
       [email, jwtVerified.orcidId],
@@ -271,7 +266,6 @@ async function getUserJobs(req, res) {
           console.log("error!", err);
           res.status(500).send("Error");
         }
-        // console.log("results", results);
         //get status for unknown statuses for jobs....
         for (const job of results) {
           try {
@@ -316,8 +310,6 @@ async function getUserJobs(req, res) {
             await updateJobStatus(job.jobId);
           }
         }
-
-        // console.log("send status results", results);
         res.status(200).send(results);
       }
     );
@@ -352,13 +344,11 @@ async function getAllUserJobs(req, res) {
     WHERE jobName not like 'lookup%'
     ORDER BY (jobStatus = 'active') DESC, jobId DESC`;
 
-    //   return new Promise((resolve, reject) => {
     db.execute(query, [email], async function (err, results, fields) {
       if (err) {
         console.log("error!", err);
         res.status(500).send("Error");
       }
-      // console.log("results", results);
       //get status for unknown statuses for jobs....
 
       for (const job of results) {
@@ -385,8 +375,6 @@ async function getAllUserJobs(req, res) {
             const finishedAt = foundJob.finishedOn;
             const progress = await foundJob.progress();
             const dataLength = foundJob.data.dataLength;
-            // console.log("status", status);
-            // console.log("timeadded", timeAdded);
             job.timeAdded = timeAdded;
             job.startedAt = startedAt;
             job.finishedAt = finishedAt;
@@ -397,14 +385,11 @@ async function getAllUserJobs(req, res) {
           console.log("error", error);
           res.status(500).send("Error");
         }
-        // console.log('jobstat', job.jobStatus)
         if (job.jobStatus != "completed") {
-          // console.log('updating')
           await updateJobStatus(job.jobId);
         }
       }
 
-      // console.log("send status results", results);
       res.status(200).send(results);
     });
     //   });
@@ -448,7 +433,6 @@ async function changeUserPassword(req, res) {
     const userInfo = await getUserByEmail(currentUserValidatedData.email);
     if (userInfo.length == 0) {
       return "Error!";
-      // throw new Error("Error! User does not exist!");
     }
 
     const result = await bcrypt.compare(currentPassword, userInfo[0].password);
@@ -465,7 +449,6 @@ async function changeUserPassword(req, res) {
                 console.log("error!", err);
                 reject("Error");
               }
-              // console.log('results', results)
               res.status(200).send("Success");
             });
           }).catch((error) => {

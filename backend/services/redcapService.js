@@ -179,21 +179,18 @@ async function updateDD(req, res) {
   if (process.env.NODE_ENV == "local") {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   }
-  // console.log("test redcap api");
   const query = "SELECT * FROM api where name like 'redcap%'";
-  //   return new Promise((resolve, reject) => {
+
   db.execute(query, [], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
     }
-    // console.log("results", results);
 
     const redcapKeyResult = results.find((api) => api.name === "redcapAPIKey");
 
     const redcapURLResult = results.find((api) => api.name === "redcapAPIURL");
 
-    // console.log("redcapKeyResult", redcapKeyResult);
     if (!redcapKeyResult || !redcapURLResult) {
       res.status(500).send("Error");
       return;
@@ -210,13 +207,11 @@ async function updateDD(req, res) {
       "aes-256-cbc",
       process.env.AES_32_BIT_KEY
     );
-    // console.log("apiKeyDec", apiKeyDecrypted);
-    // console.log('req', req.body)
+
     var data = new FormData();
     data.append("token", apiKeyDecrypted);
     data.append("content", "metadata");
     data.append("format", "json");
-    // data.append("forms[0]", req.body.form);
 
     var config = {
       method: "post",
@@ -230,11 +225,8 @@ async function updateDD(req, res) {
 
     axios(config)
       .then(function (response) {
-        // console.log(JSON.stringify(response.data));
         const metadata = response.data;
-        // console.log('metadata', metadata)
         metadata.map((item) => {
-          // console.log('item', item.field_label)
           item.field_label = cheerio.load(item.field_label).text();
         });
 

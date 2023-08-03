@@ -30,13 +30,12 @@ async function getUMLSSearchResults(req, res) {
   const encodedSearchText = encodeURIComponent(searchText);
 
   const query = "SELECT * FROM api where name like 'umls%' and userID = ?";
-  //   return new Promise((resolve, reject) => {
+
   db.execute(query, [userID], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
     }
-    // console.log("results", results);
 
     const umlsKeyResult = results.find((api) => api.name === "umlsAPIKey");
 
@@ -55,7 +54,6 @@ async function getUMLSSearchResults(req, res) {
       "aes-256-cbc",
       process.env.AES_32_BIT_KEY
     );
-    // console.log("apiKeyDec", apiKeyDecrypted);
 
     var config = {
       method: "get",

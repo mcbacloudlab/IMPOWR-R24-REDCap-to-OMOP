@@ -1,7 +1,6 @@
 const { mongoClient, connect } = require("../db/mongoDBConnection");
 
 async function getCollectionNames(req, res) {
-  // console.log("get collection names");
   try {
     // Wait for the connection to be established before proceeding
     await connect();

@@ -1,8 +1,5 @@
 const MongoClient = require("mongodb").MongoClient;
 const cosineSimilarity = require("compute-cosine-similarity");
-// var eDistance = require("euclidean-distance");
-// const ProgressBar = require("cli-progress");
-// const Excel = require("exceljs");
 var axios = require("axios");
 const cheerio = require("cheerio");
 const axiosThrottle = require("axios-request-throttle");
@@ -52,9 +49,7 @@ main().then(async () => {
       .db("GPT3_Embeddings")
       .collection("gpt3_redcap_embeddings");
     console.log('Got Redcap Embeddings from Mongo')
-    // const redcapLookupCollection = client
-    //   .db("GPT3_Embeddings")
-    //   .collection("gpt3_redcap_lookup_embeddings");
+  
 
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
@@ -66,10 +61,7 @@ main().then(async () => {
           variableName: obj.field_name,
         });
 
-        // const document2 = await redcapLookupCollection.findOne({
-        //   fieldLabel: obj.field_label,
-        // });
-
+ 
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
         // console.log('merged doc', mergedDocument)
@@ -78,7 +70,6 @@ main().then(async () => {
     );
 
     const redCapCollectionArray = transformedData;
-    // console.log("redcap array", redCapCollectionArray);
     console.info("Loaded Redcap Collection into memory");
     // console.log('collections to use', collectionsToUse)
     console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))
@@ -180,15 +171,7 @@ async function startProcessing(
   console.info(
     "Calculating top similarities between Redcap Text and SNOMED text..."
   );
-  // let barTotal = redCapCollectionArray.length;
-  // const bar = new ProgressBar.Bar(
-  //   {
-  //     format:
-  //       "Processing... |{bar}| {percentage}% |  ETA: {eta}s  | {value}/{total}",
-  //   },
-  //   ProgressBar.Presets.shades_classic
-  // );
-  // bar.start(barTotal, 0);
+
 
   for (let i = 0; i < numWorkers; i++) {
     const start = i * chunkSize;

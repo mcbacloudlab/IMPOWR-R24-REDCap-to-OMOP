@@ -5,8 +5,7 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 var pg_pool = require("../db/postgresqlConnection.cjs");
-// console.log("workerData", workerData.collections);
-// console.time('child worker started')
+
 let totalDocuments = 0;
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
@@ -28,8 +27,7 @@ async function processChunk(
   limit,
   redcapLookupArray // Add redcapLookupArray as an argument
 ) {
-  // console.log("Processing Document At:", skip);
-  // console.log("Processing Document To:", skip + limit);
+
   let finalList = [];
   let snomedCursor, snomedChunk;
   try {
@@ -51,8 +49,6 @@ async function processChunk(
 
     for (const data of combinedData) {
       let dataEmbedding = data.gpt3_data.data[0].embedding;
-      // console.log('dataEmbeddings', data.gpt3_data)
-      //
       let dataText = data.snomed_text || data.matchingText;
       let dataID =
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
@@ -166,7 +162,6 @@ async function processChunks(
     Promise.resolve([])
   );
 
-  // console.log("filtered data", filteredData);
   //now use filtered data to go to postgres db to get more data from concept table using concept ids
 
   setTimeout(() => {
