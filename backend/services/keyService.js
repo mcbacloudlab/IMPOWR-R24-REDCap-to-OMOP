@@ -2,11 +2,14 @@ const db = require("../db/mysqlConnection.cjs");
 const crypto = require("crypto");
 var axios = require("axios");
 var FormData = require("form-data");
+const { decodeToken, determineTokenHeaderOrCookie } = require("../utils/token");
+
 async function queryAllKeys(req, res) {
-  // console.log("query all keys", req.body);
-  const query = "SELECT name, endpoints FROM api";
+  let user = await decodeToken(req)
+  let userID = user.id
+  const query = "SELECT name, endpoints FROM api where userId = ?";
   //   return new Promise((resolve, reject) => {
-  db.execute(query, [], function (err, results, fields) {
+  db.execute(query, [userID], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
@@ -28,7 +31,11 @@ function decrypt(encryptedData, iv, algorithm, secretKey) {
 }
 
 async function updateAPIKey(req, res) {
-  // console.log("store key", req.body);
+  console.log("store key", req.body);
+  // console.log('headers', req.headers)
+  
+  let user = await decodeToken((req))
+  let userID = user.id
   let name = req.body.name;
   let apiKey = req.body.apiKey;
   let endpoints = req.body.endpoints;
@@ -64,14 +71,14 @@ async function updateAPIKey(req, res) {
     );
     // console.log("apiKeyDecrypted:", apiKeyDecrypted);
   }
-
+  console.log('endpoints?', endpoints)
   //start db stuff
   let query;
   if (endpoints) {
-    // console.log("enDPOINTS!!!");
+    console.log('start the query!!')
     query =
-      "INSERT INTO api (name, endpoints) VALUES(?,?) ON DUPLICATE KEY UPDATE endpoints=VALUES(endpoints)";
-    db.execute(query, [name, endpoints], function (err, results, fields) {
+      "INSERT INTO api (userID, name, endpoints) VALUES(?,?,?) ON DUPLICATE KEY UPDATE endpoints=VALUES(endpoints)";
+    db.execute(query, [userID, name, endpoints], function (err, results, fields) {
       if (err) {
         console.log("error!", err);
         res.status(400).send("Error");
@@ -80,12 +87,13 @@ async function updateAPIKey(req, res) {
       res.status(200).send("Ok");
     });
   } else {
-    // console.log("name", name);
+    console.log("name", name);
+    console.log('userID', userID)
     query =
-      "INSERT INTO api (name, apiKey, iv) VALUES(?,?,?) ON DUPLICATE KEY UPDATE apiKey = VALUES(apiKey), iv=VALUES(iv)";
+      "INSERT INTO api (userID, name, apiKey, iv) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE apiKey = VALUES(apiKey), iv=VALUES(iv)";
     db.execute(
       query,
-      [name, apiKeyEncrypted.encryptedData, apiKeyEncrypted.iv],
+      [userID, name, apiKeyEncrypted.encryptedData, apiKeyEncrypted.iv],
       function (err, results, fields) {
         if (err) {
           console.log("error!", err);
@@ -99,13 +107,16 @@ async function updateAPIKey(req, res) {
 }
 
 async function testRedcapAPI(req, res) {
-  if(process.env.NODE_ENV == 'local'){
+  if (process.env.NODE_ENV == "local") {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   }
+
+  let user = await decodeToken(req)
+  let userID = user.id
   // console.log("test redcap api");
-  const query = "SELECT * FROM api where name like 'redcap%'";
+  const query = "SELECT * FROM api where name like 'redcap%' and userID = ?";
   //   return new Promise((resolve, reject) => {
-  db.execute(query, [], function (err, results, fields) {
+  db.execute(query, [userID], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
@@ -164,13 +175,15 @@ async function testRedcapAPI(req, res) {
 }
 
 async function testUMLSAPI(req, res) {
-  if(process.env.NODE_ENV == 'local'){
+  if (process.env.NODE_ENV == "local") {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   }
+  let user = await decodeToken(req)
+  let userID = user.id
   // console.log("test redcap api");
-  const query = "SELECT * FROM api where name like 'umls%'";
+  const query = "SELECT * FROM api where name like 'umls%' and userID = ?";
   //   return new Promise((resolve, reject) => {
-  db.execute(query, [], function (err, results, fields) {
+  db.execute(query, [userID], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
@@ -212,19 +225,21 @@ async function testUMLSAPI(req, res) {
       })
       .catch(function (error) {
         console.log(error);
-        res.status(error.request.res.statusCode).send()
+        res.status(error.request.res.statusCode).send();
       });
   });
 }
 
 async function testGPT3API(req, res) {
-  if(process.env.NODE_ENV == 'local'){
+  if (process.env.NODE_ENV == "local") {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   }
+  let user = await decodeToken(req)
+  let userID = user.id
   // console.log("test redcap api");
-  const query = "SELECT * FROM api where name like 'gpt3%'";
+  const query = "SELECT * FROM api where name like 'gpt3%' and userID = ?";
   //   return new Promise((resolve, reject) => {
-  db.execute(query, [], function (err, results, fields) {
+  db.execute(query, [userID], function (err, results, fields) {
     if (err) {
       console.log("error!", err);
       res.status(500).send("Error");
@@ -252,19 +267,19 @@ async function testGPT3API(req, res) {
     // console.log("apiKeyDec", apiKeyDecrypted);
 
     var data = JSON.stringify({
-      "input": "test",
-      "model": "text-embedding-ada-002"
+      input: "test",
+      model: "text-embedding-ada-002",
     });
-    
+
     var config = {
-      method: 'post',
-    maxBodyLength: Infinity,
-      url: 'https://api.openai.com/v1/embeddings',
-      headers: { 
-        'Authorization': 'Bearer ' + apiKeyDecrypted, 
-        'Content-Type': 'application/json'
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://api.openai.com/v1/embeddings",
+      headers: {
+        Authorization: "Bearer " + apiKeyDecrypted,
+        "Content-Type": "application/json",
       },
-      data : data
+      data: data,
     };
 
     axios(config)
@@ -275,7 +290,7 @@ async function testGPT3API(req, res) {
       })
       .catch(function (error) {
         console.log(error);
-        res.status(500).send('Error')
+        res.status(500).send("Error");
       });
   });
 }
@@ -285,5 +300,5 @@ module.exports = {
   updateAPIKey,
   testRedcapAPI,
   testUMLSAPI,
-  testGPT3API
+  testGPT3API,
 };

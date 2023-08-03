@@ -28,6 +28,7 @@ import Tab from "@mui/material/Tab";
 import { useTheme } from "@mui/material/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ReplayIcon from "@mui/icons-material/Replay";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function JobsOverview(props) {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function JobsOverview(props) {
   const { completedList } = useLists();
   const { pendingList } = useLists();
   const { failedList } = useLists();
+  const { initCheckJobsRan } = useLists();
 
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
@@ -66,6 +68,9 @@ export default function JobsOverview(props) {
   // };
 
   useEffect(() => {
+    console.log('use effet to get lists')
+    console.log('init check jobs ran?', initCheckJobsRan)
+    console.log('completed list' , completedList)
     setColDefs(getCols(selectedTabIdx));
     setLoading(false);
     if (selectedTabIdx === 0) setTableData(completedList);
@@ -331,7 +336,7 @@ export default function JobsOverview(props) {
         Jobs Overview
       </h1>
 
-      {!loading && (
+      {initCheckJobsRan ? (
         <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12} md={12}>
             {!loading && (
@@ -633,7 +638,7 @@ export default function JobsOverview(props) {
             )}
           </Grid>
         </Grid>
-      )}
+      ) : <CircularProgress/>}
     </div>
   );
 }

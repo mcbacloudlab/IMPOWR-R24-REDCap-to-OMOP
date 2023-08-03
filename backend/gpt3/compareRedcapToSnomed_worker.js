@@ -28,8 +28,8 @@ async function processChunk(
   limit,
   redcapLookupArray // Add redcapLookupArray as an argument
 ) {
-  console.log("Processing Document At:", skip);
-  console.log("Processing Document To:", skip + limit);
+  // console.log("Processing Document At:", skip);
+  // console.log("Processing Document To:", skip + limit);
   let finalList = [];
   let snomedCursor, snomedChunk;
   try {
@@ -40,6 +40,7 @@ async function processChunk(
   }
 
   for (const redCapDoc of redCapCollectionArray) {
+    console.log('redcapEmbedding', redCapDoc)
     let redcapFieldLabel = redCapDoc.fieldLabel;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
@@ -50,12 +51,14 @@ async function processChunk(
 
     for (const data of combinedData) {
       let dataEmbedding = data.gpt3_data.data[0].embedding;
+      // console.log('dataEmbeddings', data.gpt3_data)
+      //
       let dataText = data.snomed_text || data.matchingText;
       let dataID =
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
         (!isEmptyObject(data.matchingID) && data.matchingID);
       let _redCapDoc = redCapDoc;
-
+      
       topResults.push({
         redcapFieldLabel,
         snomedText: dataText,

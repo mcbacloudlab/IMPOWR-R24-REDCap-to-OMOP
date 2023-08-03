@@ -235,11 +235,19 @@ async function compareEmbeddings(job) {
     process.stdout.on("data", async (data) => {
       buffer += data.toString();
 
+     
+      console.log('capture buffer with while loop')
       while (true) {
         const endObjectIndex = buffer.indexOf("}\n");
 
         const logMessage = data.toString().trim();
-        // console.log(logMessage) //for testing, comment this out in prod
+        //******************
+        //******************
+        // LOG logMessage to see the console.logs from the worker threads
+        //for development and testing, comment this out in prod
+        console.log(logMessage) 
+        //******************
+        //******************
 
         if (logMessage.startsWith("Processing Document At")) {
           const currentDocument = parseInt(logMessage.split(":")[1].trim());

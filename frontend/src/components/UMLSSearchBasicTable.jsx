@@ -11,10 +11,8 @@ import { styled } from "@mui/material/styles";
 import { Box, Button, Typography, Tooltip } from "@mui/material";
 import Alert from "@mui/material/Alert";
 
-export default function BasicTable(props) {
+export default function UMLSSearchBasicTable(props) {
   const [lookUpDupe, setLookUpDupe] = useState(false);
-  // console.log("basictable props", props);
-  // console.log("table data props", props.data);
   let tableData;
   try {
     tableData = JSON.parse(props.umlsResults);
@@ -87,7 +85,6 @@ export default function BasicTable(props) {
 
     for (const obj of modifiedSubRows) {
       if (obj.snomedID === row.ui || newModalRowData.snomedID === row.ui) {
-        // console.log("Found a matching object:", obj);
         setLookUpDupe(true);
         return;
       }
@@ -103,19 +100,13 @@ export default function BasicTable(props) {
       lookup: true,
     };
     modifiedSubRows.push(newSubRow);
-    // console.log("mod subrows", modifiedSubRows);
 
-    // props.modalRowData.subRows = modifiedSubRows;
-    // console.log("props modalrowsdata", props.modalRowData);
     const updatedModalRowData = {
       ...props.modalRowData,
       subRows: modifiedSubRows,
     };
-    // console.log("update modal row data", updatedModalRowData);
     props.setModalRowData(updatedModalRowData);
     let tableData = props.tempAllData;
-    // console.log('tableData', tableData)
-    // console.log('updatedModalRowData', updatedModalRowData)
     const newArray = tableData.map((item) => {
       if (
         item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel &&
@@ -125,16 +116,10 @@ export default function BasicTable(props) {
       }
       return item;
     });
-
-    // console.log("new array", newArray);
-
-    // console.log("before calling props buildtable data", newArray);
     props.buildTable(newArray, true, true);
     props.storeJobVerificationInfo(JSON.stringify(newArray));
     props.setLookupModalOpen(false);
     props.handleSetTempAllData(newArray);
-    // props.showTab(null,true,props.selectedTabIdx)
-    // console.log("newSubRow", newSubRow);
     props.verifyRow(newSubRow, false, true);
     //count and update selected and verified records
     newArray.map((item) => {
@@ -170,7 +155,7 @@ export default function BasicTable(props) {
               <StyledTableCell align="right">Preferred</StyledTableCell>
             </TableRow>
           </TableHead>
-          {tableData.length ? (
+          {(tableData && tableData.length > 0) ? (
             <TableBody>
               {tableData.map((row) => (
                 <StyledTableRow
@@ -203,7 +188,6 @@ export default function BasicTable(props) {
                 <StyledTableCell>No Results</StyledTableCell>
               </StyledTableRow>
             </TableBody>
-            
           )}
         </Table>
       </TableContainer>

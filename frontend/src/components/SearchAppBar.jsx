@@ -43,6 +43,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     setAllCompletedList,
     setAllPendingList,
     setAllFailedList,
+    setInitCheckJobsRan
   } = useLists();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -282,7 +283,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
   function checkJobs() {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
-
+   
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -356,13 +357,14 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
           // Return the previous state to keep it unchanged
           return prevCompletedList;
         });
-
+        setInitCheckJobsRan(true)
         // setPendingList(_pendingList);
         // setFailedList(_failedList);
         // setCompletedList(_completedList);
       })
       .catch((error) => {
         // handleSignOut();
+        setInitCheckJobsRan(true)
         console.log("error", error);
       });
   }

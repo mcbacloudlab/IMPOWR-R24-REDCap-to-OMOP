@@ -25,7 +25,7 @@ export default function MyAccountAPIKeys(props) {
   const [umlsAPITest, setUMLSAPITest] = useState(false);
   const [gpt3APITest, setGPT3APITest] = useState(false);
 
-  let propsUserObj = JSON.parse(props.props.props.user);
+  // let propsUserObj = JSON.parse(props.props.props.user);
   let propsToken = props.props.props.token;
 
   useEffect(() => {
@@ -53,7 +53,6 @@ export default function MyAccountAPIKeys(props) {
         return response.text();
       })
       .then((result) => {
-        // console.log("result", result);
         let resultObj = JSON.parse(result);
         const redcapKeyResult = resultObj.find(
           (api) => api.name === "redcapAPIKey"
@@ -84,9 +83,6 @@ export default function MyAccountAPIKeys(props) {
 
   const handleAPIKeySubmit = (event, formName) => {
     event.preventDefault();
-    // console.log("form", formName);
-
-    // console.log("event", event.target[formName].value);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + propsToken);
 
@@ -140,8 +136,6 @@ export default function MyAccountAPIKeys(props) {
 
   const handleEdit = (event) => {
     event.preventDefault();
-    // console.log("handle key edit");
-    // console.log("event.!!", event.target.value);
     switch (event.target.value) {
       case "redcapAPIKey": {
         // console.log("set redcap key3");
@@ -311,7 +305,7 @@ export default function MyAccountAPIKeys(props) {
       });
   };
 
-  if (propsUserObj.role === "admin") {
+  // if (propsUserObj.role === "admin") {
     return (
       <>
         <Grid>
@@ -738,7 +732,7 @@ export default function MyAccountAPIKeys(props) {
         </Grid>
       </>
     );
-  } else {
-    return;
-  }
+  // } else {
+  //   return;
+  // }
 }

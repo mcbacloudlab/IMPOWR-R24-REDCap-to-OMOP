@@ -118,9 +118,9 @@ app.use("/api/redcap", authenticate, redcapRoutes);
 app.use("/api/queue", authenticate, queueRoutes);
 app.use("/api/umls", authenticate, umlsRoutes);
 app.use("/api/collections", authenticate, collectionRoutes);
+app.use("/api/keys", authenticate, keyRoutes);
 
 //admin only routes
-app.use("/api/keys", authenticate, requireAdmin, keyRoutes);
 app.use("/api/admin", authenticate, requireAdmin, adminRoutes);
 
 

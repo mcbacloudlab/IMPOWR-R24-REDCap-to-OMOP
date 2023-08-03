@@ -97,6 +97,11 @@ export default function MyAccountNavBar(props) {
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
       tooltip: "Jobs Overview",
     },
+    {
+      title: "API Keys",
+      icon: <KeyIcon style={{ color: "white" }} />,
+      tooltip: "API Keys",
+    },
     // {
     //   title: "Pending Jobs",
     //   icon: <AutorenewIcon style={{ color: "white" }} />,
@@ -131,11 +136,7 @@ export default function MyAccountNavBar(props) {
       icon: <StorageIcon style={{ color: "white" }} />,
       tooltip: "Collections",
     },
-    {
-      title: "API Keys",
-      icon: <KeyIcon style={{ color: "white" }} />,
-      tooltip: "API Keys",
-    },
+  
     {
       title: "Manage Accounts",
       icon: <ManageAccountsIcon style={{ color: "white" }} />,
@@ -383,7 +384,7 @@ export default function MyAccountNavBar(props) {
               </>
             )} */}
 
-            {view === "API Keys" && props.role === "admin" ? (
+            {view === "API Keys"? (
               <MyAccountAPIKeys props={props} />
             ) : (
               ""

@@ -20,7 +20,7 @@ const oauth2 = new OAuth2(
 );
 
 async function orcidLogin(req, res) {
-  // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // These need to be removed in prod. Search and replace these
 
   // Generate the authorization URL and redirect the user to ORCID
   const authURL = oauth2.getAuthorizeUrl({

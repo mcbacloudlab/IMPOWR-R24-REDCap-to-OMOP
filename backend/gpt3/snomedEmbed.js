@@ -2,6 +2,8 @@
 
 const MongoClient = require("mongodb").MongoClient;
 const axios = require("axios");
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Disables SSL certificate verification
+
 require("dotenv").config();
 const fs = require("fs");
 const prompts = require("prompts");
