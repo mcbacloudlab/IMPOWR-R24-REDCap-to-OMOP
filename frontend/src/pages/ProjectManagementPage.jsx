@@ -74,7 +74,7 @@ export default function ProjectManagementPage(props) {
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
             <h1>
-              <AddHomeWorkIcon /> Project Management
+              <AddHomeWorkIcon /> Import REDCap Data Dictionary
             </h1>
             {/* <h2>REDCap Forms</h2> */}
             <Grid item xs={12} md={6} sx={{ margin: "auto" }}>

@@ -88,9 +88,9 @@ export default function MyAccountNavBar(props) {
       tooltip: "My Account",
     },
     {
-      title: "Project Management",
+      title: "Import REDCap Data Dictionary",
       icon: <AddHomeWorkIcon style={{ color: "white" }} />,
-      tooltip: "Project Management",
+      tooltip: "Import REDCap Data Dictionary",
     },
     {
       title: "Jobs Overview",
@@ -357,7 +357,7 @@ export default function MyAccountNavBar(props) {
                 
               </>
             )}
-            {view === "Project Management" && (
+            {view === "Import REDCap Data Dictionary" && (
               <>
                 <ProjectManagementPage
                   props={props}

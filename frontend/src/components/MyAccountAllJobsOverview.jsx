@@ -157,9 +157,6 @@ export default function JobsOverview(props) {
   };
 
   const CollectionsCell = ({ cell, row }) => {
-    // console.log("collection", typeof row.original.collectionName);
-    // console.log(row.original.collectionName);
-
     let resultArray = [];
 
     if (row.original.collectionName) {

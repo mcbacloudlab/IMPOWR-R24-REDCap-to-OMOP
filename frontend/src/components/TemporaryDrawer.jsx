@@ -36,12 +36,12 @@ export default function TemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List >
-      <ListItem key={'Project Management'} component={NavLink} to="/project-management" disablePadding>
+      <ListItem key={'Import REDCap Data Dictionary'} component={NavLink} to="/project-management" disablePadding>
             <ListItemButton>
               <ListItemIcon>
               <AddHomeWorkIcon />
               </ListItemIcon>
-              <ListItemText primary={'Project Management'} />
+              <ListItemText primary={'Import REDCap Data Dictionary'} />
             </ListItemButton>
           </ListItem>
           {/* <ListItem key={'Data Dictionary Mapping'} component={NavLink} to="/match-manager" disablePadding>
