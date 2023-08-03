@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -37,6 +38,7 @@ export default function JobsOverview(props) {
   const { allCompletedList } = useLists();
   const { allPendingList } = useLists();
   const { allFailedList } = useLists();
+  const { initCheckJobsRan } = useLists();
 
   const { token } = props.props.props ?? props.props;
   const { setView } = useContext(ViewContext);
@@ -318,7 +320,7 @@ export default function JobsOverview(props) {
         All Jobs Overview
       </h1>
 
-      {!loading && (
+      {initCheckJobsRan ? (
         <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12} md={12}>
             {!loading && (
@@ -609,7 +611,7 @@ export default function JobsOverview(props) {
             )}
           </Grid>
         </Grid>
-      )}
+      ): <CircularProgress/>}
     </div>
   );
 }
