@@ -235,8 +235,6 @@ async function compareEmbeddings(job) {
     process.stdout.on("data", async (data) => {
       buffer += data.toString();
 
-     
-      console.log('capture buffer with while loop')
       while (true) {
         const endObjectIndex = buffer.indexOf("}\n");
 
@@ -245,7 +243,7 @@ async function compareEmbeddings(job) {
         //******************
         // LOG logMessage to see the console.logs from the worker threads
         //for development and testing, comment this out in prod
-        console.log(logMessage) 
+        // console.log(logMessage) 
         //******************
         //******************
 
