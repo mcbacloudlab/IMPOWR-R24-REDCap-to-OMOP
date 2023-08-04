@@ -152,7 +152,7 @@ export default function UMLSSearchBasicTable(props) {
               <StyledTableCell>Name</StyledTableCell>
               <StyledTableCell align="right">Code</StyledTableCell>
               <StyledTableCell align="right">Root Source</StyledTableCell>
-              <StyledTableCell align="right">Preferred</StyledTableCell>
+              <StyledTableCell align="right"></StyledTableCell>
             </TableRow>
           </TableHead>
           {(tableData && tableData.length > 0) ? (

@@ -1,6 +1,6 @@
 import React from "react";
 import Container from "@mui/material/Container";
-import { useState, useEffect, useMemo, useContext, useRef} from "react";
+import { useState, useEffect, useMemo, useContext, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
 import Papa from "papaparse";
@@ -12,6 +12,14 @@ import {
   IconButton,
   Typography,
   Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
@@ -37,6 +45,7 @@ import Cookies from "js-cookie";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ViewContext } from "../components/ViewContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
@@ -52,6 +61,7 @@ export default function CompletedJobsViewPage(props) {
   const [value, setValue] = useState(0);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
+  const [directMapModalOpen, setDirectMapModalOpen] = useState(false);
   const [searchUMLSValue, setSearchUMLSValue] = useState("");
   const [umlsResultsData, setUMLSResultsData] = useState([]);
   const [modalRowData, setModalRowData] = useState([]);
@@ -83,6 +93,9 @@ export default function CompletedJobsViewPage(props) {
   const handleLookupModalOpen = () => setLookupModalOpen(true);
   const handleLookupModalClose = () => setLookupModalOpen(false);
 
+  const handleDirectMapModalOpen = () => setDirectMapModalOpen(true);
+  const handleDirectMapModalClose = () => setDirectMapModalOpen(false);
+
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -103,17 +116,17 @@ export default function CompletedJobsViewPage(props) {
     let jobInfo;
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;
-      _data.current  = location.state.result;
+      _data.current = location.state.result;
       setJobName(location.state.jobName);
       setSubmittedBy(location.state.submittedBy);
-      _redcapFormName.current  = location.state.redcapFormName;
+      _redcapFormName.current = location.state.redcapFormName;
       getJobVerificationInfo();
       return;
     }
 
     if (localStorage.getItem("jobInfo"))
       jobInfo = JSON.parse(localStorage.getItem("jobInfo"));
-    
+
     if (!jobInfo) return;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
@@ -134,16 +147,16 @@ export default function CompletedJobsViewPage(props) {
         setView("Completed Jobs");
         setJobId(jobInfo.jobId);
 
-        _jobId.current  = jobInfo.jobId;
-        _data.current  = result;
+        _jobId.current = jobInfo.jobId;
+        _data.current = result;
         setJobName(jobInfo.jobName);
         setSubmittedBy(jobInfo.submittedBy);
-        _redcapFormName.current  = jobInfo.redcapFormName;
+        _redcapFormName.current = jobInfo.redcapFormName;
 
         getJobVerificationInfo();
       })
       .catch((error) => console.log("error", error));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -204,7 +217,7 @@ export default function CompletedJobsViewPage(props) {
     myHeaders.append("Content-Type", "application/json");
 
     var data = {
-      jobId: _jobId.current ,
+      jobId: _jobId.current,
       formName: _redcapFormName,
     };
 
@@ -228,19 +241,19 @@ export default function CompletedJobsViewPage(props) {
         jobVerificationData = JSON.parse(result);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
-          if (_jobId.current ) setJobId(_jobId.current );
+          if (_jobId.current) setJobId(_jobId.current);
           buildTable(JSON.parse(jobVerificationData.jobData), true);
           setTempAllData(JSON.parse(jobVerificationData.jobData));
-        } else if (_data.current ) {
-          if (_jobId.current ) setJobId(_jobId.current );
-          buildTable(JSON.parse(_data.current ), false);
+        } else if (_data.current) {
+          if (_jobId.current) setJobId(_jobId.current);
+          buildTable(JSON.parse(_data.current), false);
         }
       })
       .catch((error) => {
         console.error("error", error);
-        if (_jobId.current ) setJobId(_jobId.current );
+        if (_jobId.current) setJobId(_jobId.current);
         //on an error reading from the db just load a new blank job
-        if (_data.current ) buildTable(JSON.parse(_data.current ), false);
+        if (_data.current) buildTable(JSON.parse(_data.current), false);
       });
   }
 
@@ -251,7 +264,7 @@ export default function CompletedJobsViewPage(props) {
 
     var data = {
       formName: _redcapFormName,
-      jobId: _jobId,
+      jobId: _jobId.current,
       jobData: dataString,
     };
 
@@ -283,7 +296,7 @@ export default function CompletedJobsViewPage(props) {
 
     var formdata = new FormData();
     formdata.append("formName", _redcapFormName);
-    formdata.append("jobId", _jobId.current );
+    formdata.append("jobId", _jobId.current);
     formdata.append("jobData", dataString);
 
     var requestOptions = {
@@ -588,6 +601,13 @@ export default function CompletedJobsViewPage(props) {
       searchUMLS(row.original.redcapFieldLabel);
       handleLookupModalOpen();
     }
+
+    function CustomDirectMap(row) {
+      setModalRowData(row.original);
+      setSearchUMLSValue(row.original.redcapFieldLabel);
+      searchUMLS(row.original.redcapFieldLabel);
+      handleDirectMapModalOpen();
+    }
     const LookUpCell = ({ cell, row }) => {
       if (row.original.subRows) {
         return (
@@ -605,6 +625,29 @@ export default function CompletedJobsViewPage(props) {
               }}
             >
               <SearchIcon />
+            </div>
+          </Tooltip>
+        );
+      }
+    };
+
+    const CustomDirectMapCell = ({ cell, row }) => {
+      if (row.original.subRows) {
+        return (
+          <Tooltip title="Custom Direct Map">
+            <div
+              onClick={() => CustomDirectMap(row)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                borderRadius: "50%",
+                padding: "8px",
+                backgroundColor: "rgba(0, 0, 0, 0.08)",
+              }}
+            >
+              <DashboardCustomizeIcon />
             </div>
           </Tooltip>
         );
@@ -747,11 +790,21 @@ export default function CompletedJobsViewPage(props) {
             },
           ]
         : []),
+      ...(selectedTabIdx !== 2
+        ? [
+            {
+              header: "",
+              accessorKey: "directMap",
+              Cell: CustomDirectMapCell,
+              maxSize: 60,
+            },
+          ]
+        : []),
     ];
     setColDefs(cols);
     _dataObj = result;
     setData(result);
-    setCSVFilename(`Completed_Job_${_jobId.current }`);
+    setCSVFilename(`Completed_Job_${_jobId.current}`);
     setIsFormLoaded(true);
   }
 
@@ -1062,6 +1115,88 @@ export default function CompletedJobsViewPage(props) {
     setSearchUMLSValue(event.target.value);
   };
 
+  const omopTables = [
+    "person",
+    "observation_period",
+    "visit_occurrence",
+    "visit_detail",
+    "condition_occurrence",
+    "drug_exposure",
+    "procedure_occurrence",
+    "device_exposure",
+    "measurement",
+    "observation",
+    "note",
+    "note_nlp",
+    "specimen",
+    "fact_relationship",
+    "survey_conduct",
+  ];
+
+  const [selectedOMOPTable, setSelectedOMOPTable] = useState(omopTables[0]);
+  const [lookUpDupe, setLookUpDupe] = useState(omopTables[0]);
+
+  const handleDirectMapSubmit = (formData, removePref) => {
+    // Handle submit
+    console.log(selectedOMOPTable);
+    console.log('row', modalRowData)
+    console.log('formdta', formData)
+    // function verifyRow(row, removePref) {
+    let newModalRowData = modalRowData;
+    let newModalSubRowData = modalRowData.subRows;
+    // const modifiedSubRows = newModalSubRowData;
+    const modifiedSubRows = newModalSubRowData.filter(
+      (object) => !object.lookup
+    ); //remove existing lookups from
+    setLookUpDupe(false);
+
+    // for (const obj of modifiedSubRows) {
+    //   console.log('obj', obj)
+    //   if (obj.snomedID === row.ui || newModalRowData.snomedID === row.ui) {
+    //     setLookUpDupe(true);
+    //     return;
+    //   }
+    // }
+    setLookUpDupe(false);
+    let newSubRow = {
+      redcapFieldLabel: modalRowData.redcapFieldLabel,
+      extraData: { field_name: modalRowData.extraData.field_name, domain_id: formData, concept_class: '', vocabulary_id: 'Custom/Direct' },
+      snomedText: '',
+      snomedID: '',
+      selected: true,
+      verified: true,
+      lookup: true,
+    };
+    modifiedSubRows.push(newSubRow);
+
+    const updatedModalRowData = {
+      ...modalRowData,
+      subRows: modifiedSubRows,
+    };
+    setModalRowData(updatedModalRowData);
+    let tableData = tempAllData;
+    const newArray = tableData.map((item) => {
+      if (
+        item.redcapFieldLabel === updatedModalRowData.redcapFieldLabel &&
+        item.extraData.field_name === updatedModalRowData.extraData.field_name
+      ) {
+        return updatedModalRowData;
+      }
+      return item;
+    });
+    buildTable(newArray, true, true);
+    storeJobVerificationInfo(JSON.stringify(newArray));
+    console.log('newarray to store', newArray)
+    setDirectMapModalOpen(false);
+    handleSetTempAllData(newArray);
+    verifyRow(newSubRow, false, true);
+    //count and update selected and verified records
+    newArray.map((item) => {
+      return null;
+    });
+    // }
+  };
+
   return (
     <>
       <CssBaseline />
@@ -1150,13 +1285,7 @@ export default function CompletedJobsViewPage(props) {
                         }}
                       />
                     </form>
-                    {/* <Button
-             variant="contained"
-             sx={{ marginLeft: "15px", marginTop: "20px" }}
-             onClick={() => searchUMLS(searchUMLSValue)}
-           >
-             Search
-           </Button> */}
+
                     <Divider />
                     <br />
                     {searchingUMLS ? (
@@ -1183,6 +1312,68 @@ export default function CompletedJobsViewPage(props) {
                     )}
                   </Box>
                 </Modal>
+
+                {/* Direct map modal */}
+                <Modal
+                  open={directMapModalOpen}
+                  onClose={handleDirectMapModalClose}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <Box sx={umlsModalStyle}>
+                    <Typography
+                      id="modal-modal-title"
+                      variant="h6"
+                      component="h2"
+                    >
+                      Direct Map to OMOP
+                    </Typography>
+
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>REDCap Field Label</TableCell>
+                            <TableCell>OMOP Table</TableCell>
+                            <TableCell>Action</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>{searchUMLSValue}</TableCell>
+                            <TableCell>
+                              <Select
+                                value={selectedOMOPTable}
+                                onChange={(e) =>
+                                  setSelectedOMOPTable(e.target.value)
+                                }
+                              >
+                                {omopTables.map((table, index) => (
+                                  <MenuItem key={index} value={table}>
+                                    {table}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick = {() => {handleDirectMapSubmit(selectedOMOPTable)}}
+                              >
+                                Submit
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    <Divider />
+                    <br />
+                  </Box>
+                </Modal>
+                {/* End direct map modal */}
 
                 {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
                 <Typography>

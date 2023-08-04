@@ -13,7 +13,6 @@ export default function CompletedJobTable({
   updateDD,
   selectedTabIdx,
 }) {
-  // console.log('completed job table', selectedTabIdx)
   return (
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)
@@ -39,7 +38,6 @@ export default function CompletedJobTable({
       onSortingChange={setSorting}
       initialState={{
         density: "compact",
-        // pagination: { pageSize: 50, pageIndex: 0 },
       }}
       enableColumnResizing={true}
       enableSorting={true}
