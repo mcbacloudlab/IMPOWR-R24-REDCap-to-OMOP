@@ -22,10 +22,9 @@ export async function getJobVerificationInfo(jobId, formName, token) {
   )
     .then((response) => {
       if (response.ok) return response.text();
-      else throw new Error("Error");
+    
     })
     .then((result) => {
-      console.log("returning job verify data", JSON.parse(result));
-      return JSON.parse(result);
+      if(result) return JSON.parse(result);
     });
 }

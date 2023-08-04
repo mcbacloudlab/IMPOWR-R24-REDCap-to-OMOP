@@ -220,13 +220,14 @@ export default function CompletedJobsViewPage(props) {
       _redcapFormName.current,
       props.token
     );
-    console.log("job verfiy data", jobVerificationData);
+    // console.log("job verfiy data", jobVerificationData);
 
     if (jobVerificationData) {
       if (_jobId.current) setJobId(_jobId.current);
       buildTable(JSON.parse(jobVerificationData.jobData), true);
       setTempAllData(JSON.parse(jobVerificationData.jobData));
     } else if (_data.current) {
+      // console.log('_datacurrent', _data.current)
       if (_jobId.current) setJobId(_jobId.current);
       buildTable(JSON.parse(_data.current), false);
     }
