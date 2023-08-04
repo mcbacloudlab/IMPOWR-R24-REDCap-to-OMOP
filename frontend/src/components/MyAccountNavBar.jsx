@@ -59,7 +59,7 @@ export default function MyAccountNavBar(props) {
     //remember last view so refreshing page takes you to current state
     let lastView = localStorage.getItem('view')
     if(lastView) setView(lastView)
-    
+
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {
       setDrawerOpen(JSON.parse(storedDrawerOpen));
@@ -157,7 +157,7 @@ export default function MyAccountNavBar(props) {
                 overflowY: "auto",
                 backgroundColor: theme.palette.primary.main,
                 color: "white",
-                textAlign: 'right' 
+                textAlign: 'left' 
               }}
             >
               <Box sx={{ mb: 0, mx: 2.5, mt: 1}}>
