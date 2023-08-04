@@ -315,7 +315,7 @@ export default function MyAccountAPIKeys(props) {
           textAlign: "center",
           backgroundColor: "rgb(251 251 251)",
         }}
-      >Admin API Keys</h1>
+      >Your API Keys</h1>
         </Grid>
 
         <Grid container spacing={1} sx={{ margin: "30px" }}>

@@ -37,7 +37,7 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import MyAccountUserManagement from "./MyAccountUserManagement";
 import ChangePasswordButton from "./ChangePassword";
 
-const drawerWidth = "270px";
+const drawerWidth = "280px";
 const miniDrawerWidth = 56;
 
 export default function MyAccountNavBar(props) {
@@ -102,16 +102,6 @@ export default function MyAccountNavBar(props) {
       icon: <KeyIcon style={{ color: "white" }} />,
       tooltip: "API Keys",
     },
-    // {
-    //   title: "Pending Jobs",
-    //   icon: <AutorenewIcon style={{ color: "white" }} />,
-    //   tooltip: "Pending Jobs",
-    // },
-    // {
-    //   title: "Failed Jobs",
-    //   icon: <ErrorIcon style={{ color: "white" }} />,
-    //   tooltip: "Failed Jobs",
-    // },
     // Add more menu items here...
   ];
 
@@ -121,16 +111,7 @@ export default function MyAccountNavBar(props) {
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
       tooltip: "All Jobs Overview",
     },
-    // {
-    //   title: "All Pending Jobs",
-    //   icon: <AutorenewIcon style={{ color: "white" }} />,
-    //   tooltip: "All Pending Jobs",
-    // },
-    // {
-    //   title: "All Failed Jobs",
-    //   icon: <ErrorIcon style={{ color: "white" }} />,
-    //   tooltip: "All Failed Jobs",
-    // },
+ 
     {
       title: "Collections",
       icon: <StorageIcon style={{ color: "white" }} />,
@@ -144,10 +125,6 @@ export default function MyAccountNavBar(props) {
     },
     // Add more menu items here...
   ];
-
-  // const changePassword = () => {
-  //   console.log("change password", props.username);
-  // };
 
   return (
     <>
@@ -175,16 +152,17 @@ export default function MyAccountNavBar(props) {
                 overflowY: "auto",
                 backgroundColor: theme.palette.primary.main,
                 color: "white",
+                textAlign: 'right' 
               }}
             >
-              <Box sx={{ mb: 0, mx: 2.5, mt: 1 }}>
+              <Box sx={{ mb: 0, mx: 2.5, mt: 1}}>
                 <Link underline="none">
                   <IconButton
                     color="inherit"
                     aria-label="open/close drawer"
                     edge="start"
                     onClick={handleDrawerToggle}
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 2}}
                   >
                     {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                   </IconButton>
@@ -229,6 +207,7 @@ export default function MyAccountNavBar(props) {
                             primary={
                               <Typography
                                 variant="subtitle1"
+                                fontSize={'12px'}
                                 fontWeight={
                                   view === item.title ? "bold" : "normal"
                                 }
@@ -287,6 +266,7 @@ export default function MyAccountNavBar(props) {
                             primary={
                               <Typography
                                 variant="subtitle1"
+                                fontSize={'12px'}
                                 fontWeight={
                                   view === item.title ? "bold" : "normal"
                                 }
