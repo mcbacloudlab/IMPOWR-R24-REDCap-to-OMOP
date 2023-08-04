@@ -312,6 +312,7 @@ export default function JobsOverview(props) {
       .then((response) => response.text())
       .then((result) => {
         setView("");
+        localStorage.setItem('view', '')
         navigate("/completed-jobs", {
           state: {
             result: result,

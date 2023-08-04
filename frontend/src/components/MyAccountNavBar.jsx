@@ -54,8 +54,12 @@ export default function MyAccountNavBar(props) {
   };
 
   useEffect(() => {
-    // console.log("get drawer perf");
+    console.log("myaccount nav view", view);
 
+    //remember last view so refreshing page takes you to current state
+    let lastView = localStorage.getItem('view')
+    if(lastView) setView(lastView)
+    
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {
       setDrawerOpen(JSON.parse(storedDrawerOpen));
@@ -79,6 +83,7 @@ export default function MyAccountNavBar(props) {
 
   const handleClick = (viewName) => {
     setView(viewName);
+    localStorage.setItem('view', viewName)
     navigate("/myaccount");
   };
   const menuItems = [

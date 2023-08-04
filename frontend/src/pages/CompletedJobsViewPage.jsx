@@ -53,16 +53,11 @@ export default function CompletedJobsViewPage(props) {
   const [jobId, setJobId] = useState();
   const [csvFilename, setCSVFilename] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  // const [isSavingErr, setIsSavingErr] = useState(false);
-  // const [saveSuccess, setSaveSuccess] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [verifiedRecords, setVerifiedRecords] = useState(0);
   const [allVerified, setAllVerified] = useState(false);
   const [value, setValue] = useState(0);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [selectedFile, setSelectedFile] = useState(1);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
-  // const [finalData, setFinalData] = useState("");
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
   const [searchUMLSValue, setSearchUMLSValue] = useState("");
   const [umlsResultsData, setUMLSResultsData] = useState([]);
@@ -71,6 +66,9 @@ export default function CompletedJobsViewPage(props) {
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
   const [searchingUMLS, setSearchingUMLS] = useState(false);
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState(null);
   const { view, setView } = useContext(ViewContext);
 
   const umlsModalStyle = {
@@ -87,12 +85,6 @@ export default function CompletedJobsViewPage(props) {
     overflowY: "auto",
   };
 
-  // const tableContainerStyle = {
-  //   maxHeight: "calc(80% - 100px)", // Adjust this value based on the total height of other elements
-  //   overflowY: "auto",
-  //   marginTop: "15px",
-  // };
-
   const handleLookupModalOpen = () => setLookupModalOpen(true);
   const handleLookupModalClose = () => setLookupModalOpen(false);
 
@@ -105,7 +97,7 @@ export default function CompletedJobsViewPage(props) {
 
   const location = useLocation();
   let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
-  if (location.state.jobId) {
+  if (location && location.state && location.state.jobId) {
     _jobId = location.state.jobId;
     _data = location.state.result;
     _jobName = location.state.jobName;
@@ -121,9 +113,8 @@ export default function CompletedJobsViewPage(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_data, _jobId]);
 
-  const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState(null);
+
+
   useEffect(() => {
     try {
       let userCookie = JSON.parse(Cookies.get("user"));
@@ -211,7 +202,7 @@ export default function CompletedJobsViewPage(props) {
         console.error("error", error);
         if (_jobId) setJobId(_jobId);
         //on an error reading from the db just load a new blank job
-        buildTable(JSON.parse(_data), false);
+        if(_data) buildTable(JSON.parse(_data), false);
       });
   }
 
@@ -765,6 +756,7 @@ export default function CompletedJobsViewPage(props) {
       .then((response) => response.text())
       .then(async (result) => {
         //update field_annotation with the preferred value id
+        // console.log('result', result)
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
@@ -1076,7 +1068,7 @@ export default function CompletedJobsViewPage(props) {
                   <b>Job Name:</b> {_jobName}
                 </span>
                 <span style={{ marginRight: "10px" }}>
-                  <b>Completed Job ID:</b> {jobId}
+                  <b>Completed Job ID:</b> {jobId?jobId:'No Job ID'}
                 </span>
                 <span style={{ marginRight: "10px" }}>
                   <b>Submitted By:</b> {_submittedBy}
