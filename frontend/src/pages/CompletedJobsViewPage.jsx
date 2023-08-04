@@ -46,8 +46,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ViewContext } from "../components/ViewContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+import { getJobVerificationInfo } from "../utils/helperFunctions";
 
-const { getJobVerificationInfo } = require("../utils/helperFunctions");
 
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
