@@ -47,6 +47,8 @@ import { ViewContext } from "../components/ViewContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 
+const { getJobVerificationInfo } = require("../utils/helperFunctions");
+
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
@@ -120,7 +122,8 @@ export default function CompletedJobsViewPage(props) {
       setJobName(location.state.jobName);
       setSubmittedBy(location.state.submittedBy);
       _redcapFormName.current = location.state.redcapFormName;
-      getJobVerificationInfo();
+     
+      determineTableData();
       return;
     }
 
@@ -143,7 +146,7 @@ export default function CompletedJobsViewPage(props) {
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => {
+      .then(async (result) => {
         setView("Completed Jobs");
         setJobId(jobInfo.jobId);
 
@@ -152,9 +155,9 @@ export default function CompletedJobsViewPage(props) {
         setJobName(jobInfo.jobName);
         setSubmittedBy(jobInfo.submittedBy);
         _redcapFormName.current = jobInfo.redcapFormName;
-
-        getJobVerificationInfo();
+        determineTableData();
       })
+
       .catch((error) => console.log("error", error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -210,51 +213,30 @@ export default function CompletedJobsViewPage(props) {
       });
   }
 
-  function getJobVerificationInfo() {
-    let jobVerificationData;
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
-    myHeaders.append("Content-Type", "application/json");
+  async function determineTableData() {
+   
+    let jobVerificationData = await getJobVerificationInfo(
+      _jobId.current,
+      _redcapFormName.current,
+      props.token
+    );
+    console.log("job verfiy data", jobVerificationData);
 
-    var data = {
-      jobId: _jobId.current,
-      formName: _redcapFormName,
-    };
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: JSON.stringify(data),
-      redirect: "follow",
-      credentials: "include", // Include cookies with the request
-    };
-
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobVerifyinfo`,
-      requestOptions
-    )
-      .then((response) => {
-        if (response.ok) return response.text();
-        else throw new Error("Error");
-      })
-      .then((result) => {
-        jobVerificationData = JSON.parse(result);
-        //if we have saved job data stored in the db use that else just use a new blank
-        if (jobVerificationData) {
-          if (_jobId.current) setJobId(_jobId.current);
-          buildTable(JSON.parse(jobVerificationData.jobData), true);
-          setTempAllData(JSON.parse(jobVerificationData.jobData));
-        } else if (_data.current) {
-          if (_jobId.current) setJobId(_jobId.current);
-          buildTable(JSON.parse(_data.current), false);
-        }
-      })
-      .catch((error) => {
-        console.error("error", error);
-        if (_jobId.current) setJobId(_jobId.current);
-        //on an error reading from the db just load a new blank job
-        if (_data.current) buildTable(JSON.parse(_data.current), false);
-      });
+    if (jobVerificationData) {
+      if (_jobId.current) setJobId(_jobId.current);
+      buildTable(JSON.parse(jobVerificationData.jobData), true);
+      setTempAllData(JSON.parse(jobVerificationData.jobData));
+    } else if (_data.current) {
+      if (_jobId.current) setJobId(_jobId.current);
+      buildTable(JSON.parse(_data.current), false);
+    }
+    // })
+    // .catch((error) => {
+    // console.error("error", error);
+    //       if (_jobId.current) setJobId(_jobId.current);
+    //       //on an error reading from the db just load a new blank job
+    //       if (_data.current) buildTable(JSON.parse(_data.current), false);
+    // }
   }
 
   function storeJobVerificationInfo(dataString) {
@@ -263,7 +245,7 @@ export default function CompletedJobsViewPage(props) {
     myHeaders.append("Content-Type", "application/json");
 
     var data = {
-      formName: _redcapFormName,
+      formName: _redcapFormName.current,
       jobId: _jobId.current,
       jobData: dataString,
     };
@@ -1139,8 +1121,8 @@ export default function CompletedJobsViewPage(props) {
   const handleDirectMapSubmit = (formData, removePref) => {
     // Handle submit
     console.log(selectedOMOPTable);
-    console.log('row', modalRowData)
-    console.log('formdta', formData)
+    console.log("row", modalRowData);
+    console.log("formdta", formData);
     // function verifyRow(row, removePref) {
     // let newModalRowData = modalRowData;
     let newModalSubRowData = modalRowData.subRows;
@@ -1160,9 +1142,14 @@ export default function CompletedJobsViewPage(props) {
     // setLookUpDupe(false);
     let newSubRow = {
       redcapFieldLabel: modalRowData.redcapFieldLabel,
-      extraData: { field_name: modalRowData.extraData.field_name, domain_id: formData, concept_class: '', vocabulary_id: 'Custom/Direct' },
-      snomedText: '',
-      snomedID: '',
+      extraData: {
+        field_name: modalRowData.extraData.field_name,
+        domain_id: formData,
+        concept_class: "",
+        vocabulary_id: "Custom/Direct",
+      },
+      snomedText: "",
+      snomedID: "",
       selected: true,
       verified: true,
       lookup: true,
@@ -1186,7 +1173,7 @@ export default function CompletedJobsViewPage(props) {
     });
     buildTable(newArray, true, true);
     storeJobVerificationInfo(JSON.stringify(newArray));
-    console.log('newarray to store', newArray)
+    console.log("newarray to store", newArray);
     setDirectMapModalOpen(false);
     handleSetTempAllData(newArray);
     verifyRow(newSubRow, false, true);
@@ -1359,7 +1346,9 @@ export default function CompletedJobsViewPage(props) {
                               <Button
                                 variant="contained"
                                 color="primary"
-                                onClick = {() => {handleDirectMapSubmit(selectedOMOPTable)}}
+                                onClick={() => {
+                                  handleDirectMapSubmit(selectedOMOPTable);
+                                }}
                               >
                                 Submit
                               </Button>
@@ -1480,7 +1469,6 @@ export default function CompletedJobsViewPage(props) {
                   handleExportData={handleExportData}
                   updateDD={updateDD}
                   resetScreen={resetScreen}
-                  // saveSuccess={saveSuccess}
                   isSaving={isSaving}
                   saveFile={saveFile}
                   selectedTabIdx={selectedTabIdx}
@@ -1500,7 +1488,6 @@ export default function CompletedJobsViewPage(props) {
                     {alertMessage}
                   </Alert>
                 </Snackbar>
-                {/* <Typography>{finalData}</Typography> */}
               </>
             )}
           </Container>
