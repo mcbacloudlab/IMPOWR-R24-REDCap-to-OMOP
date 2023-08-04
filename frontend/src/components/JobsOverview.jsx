@@ -68,9 +68,6 @@ export default function JobsOverview(props) {
   // };
 
   useEffect(() => {
-    console.log('use effet to get lists')
-    console.log('init check jobs ran?', initCheckJobsRan)
-    console.log('completed list' , completedList)
     setColDefs(getCols(selectedTabIdx));
     setLoading(false);
     if (selectedTabIdx === 0) setTableData(completedList);
@@ -157,7 +154,6 @@ export default function JobsOverview(props) {
 
   const CollectionsCell = ({ cell, row }) => {
     let job = cell.getValue();
-    // console.log("job user", job);
     if (job) job = JSON.parse(job);
     return (
       <>
@@ -267,7 +263,6 @@ export default function JobsOverview(props) {
   };
 
   function handleRetry({jobId}) {
-    // console.log("event view", jobId);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -311,8 +306,9 @@ export default function JobsOverview(props) {
     )
       .then((response) => response.text())
       .then((result) => {
-        setView("");
-        localStorage.setItem('view', '')
+        setView("Completed Jobs");
+        localStorage.setItem('view', 'Completed Jobs')
+        localStorage.setItem('jobInfo', JSON.stringify(job))
         navigate("/completed-jobs", {
           state: {
             result: result,

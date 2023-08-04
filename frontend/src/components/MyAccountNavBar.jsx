@@ -54,9 +54,7 @@ export default function MyAccountNavBar(props) {
   };
 
   useEffect(() => {
-    console.log("myaccount nav view", view);
-
-    //remember last view so refreshing page takes you to current state
+    //remember last view so refreshing page takes you to last state of the page
     let lastView = localStorage.getItem('view')
     if(lastView) setView(lastView)
 
@@ -66,7 +64,7 @@ export default function MyAccountNavBar(props) {
     } else {
       setDrawerOpen(false);
     }
-  }, []);
+  }, [setView, view]);
 
   useEffect(() => {
     if (props.props.completedList) {

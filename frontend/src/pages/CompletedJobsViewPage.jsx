@@ -1,10 +1,8 @@
 import React from "react";
-// import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext, useRef} from "react";
 import { useLocation } from "react-router-dom";
 import CompletedJobTable from "../components/CompletedJobTable";
-// import { ExportToCsv } from "export-to-csv";
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
 import {
@@ -19,7 +17,6 @@ import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CheckIcon from "@mui/icons-material/Check";
-// import DoneAllIcon from "@mui/icons-material/DoneAll";
 import UnpublishedIcon from "@mui/icons-material/Unpublished";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import Tabs from "@mui/material/Tabs";
@@ -28,8 +25,6 @@ import Badge from "@mui/material/Badge";
 import Skeleton from "@mui/material/Skeleton";
 import SearchIcon from "@mui/icons-material/Search";
 import Modal from "@mui/material/Modal";
-// import CloseIcon from '@mui/icons-material/Close';
-// import CheckIcon from "@mui/icons-material/Check";
 import TextField from "@mui/material/TextField";
 import UMLSSearchBasicTable from "../components/UMLSSearchBasicTable";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
@@ -42,8 +37,6 @@ import Cookies from "js-cookie";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ViewContext } from "../components/ViewContext";
 import CircularProgress from "@mui/material/CircularProgress";
-
-// var XLSX = require("xlsx");
 
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
@@ -70,6 +63,8 @@ export default function CompletedJobsViewPage(props) {
   const [name, setName] = useState("");
   const [role, setRole] = useState(null);
   const { view, setView } = useContext(ViewContext);
+  const [submittedBy, setSubmittedBy] = useState("");
+  const [jobName, setJobName] = useState("");
 
   const umlsModalStyle = {
     position: "absolute",
@@ -96,24 +91,60 @@ export default function CompletedJobsViewPage(props) {
   };
 
   const location = useLocation();
-  let _jobId, _data, _jobName, _submittedBy, _redcapFormName;
-  if (location && location.state && location.state.jobId) {
-    _jobId = location.state.jobId;
-    _data = location.state.result;
-    _jobName = location.state.jobName;
-    _submittedBy = location.state.submittedBy;
-    _redcapFormName = location.state.redcapFormName;
-  }
+  const _jobId = useRef(null);
+  const _data = useRef(null);
+  const _redcapFormName = useRef(null);
+  // let _jobId, _data, _redcapFormName;
+
   let _dataObj;
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    //get job verification data from db
-    getJobVerificationInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_data, _jobId]);
+    let jobInfo;
+    if (location && location.state && location.state.jobId) {
+      _jobId.current = location.state.jobId;
+      _data.current  = location.state.result;
+      setJobName(location.state.jobName);
+      setSubmittedBy(location.state.submittedBy);
+      _redcapFormName.current  = location.state.redcapFormName;
+      getJobVerificationInfo();
+      return;
+    }
 
+    if (localStorage.getItem("jobInfo"))
+      jobInfo = JSON.parse(localStorage.getItem("jobInfo"));
+    
+    if (!jobInfo) return;
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + props.token);
 
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/getJobReturnData?jobID=${jobInfo.jobId}`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setView("Completed Jobs");
+        setJobId(jobInfo.jobId);
+
+        _jobId.current  = jobInfo.jobId;
+        _data.current  = result;
+        setJobName(jobInfo.jobName);
+        setSubmittedBy(jobInfo.submittedBy);
+        _redcapFormName.current  = jobInfo.redcapFormName;
+
+        getJobVerificationInfo();
+      })
+      .catch((error) => console.log("error", error));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     try {
@@ -127,8 +158,15 @@ export default function CompletedJobsViewPage(props) {
     }
   }, [props.user]);
 
+  useEffect(() => {
+    if (tempAllData) {
+      showTab(null, true, selectedTabIdx);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tempAllData]);
+
   function searchUMLS(text, event) {
-    if(event) event.preventDefault();
+    if (event) event.preventDefault();
     setSearchingUMLS(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
@@ -166,7 +204,7 @@ export default function CompletedJobsViewPage(props) {
     myHeaders.append("Content-Type", "application/json");
 
     var data = {
-      jobId: _jobId,
+      jobId: _jobId.current ,
       formName: _redcapFormName,
     };
 
@@ -190,19 +228,19 @@ export default function CompletedJobsViewPage(props) {
         jobVerificationData = JSON.parse(result);
         //if we have saved job data stored in the db use that else just use a new blank
         if (jobVerificationData) {
-          if (_jobId) setJobId(_jobId);
+          if (_jobId.current ) setJobId(_jobId.current );
           buildTable(JSON.parse(jobVerificationData.jobData), true);
           setTempAllData(JSON.parse(jobVerificationData.jobData));
-        } else if (_data) {
-          if (_jobId) setJobId(_jobId);
-          buildTable(JSON.parse(_data), false);
+        } else if (_data.current ) {
+          if (_jobId.current ) setJobId(_jobId.current );
+          buildTable(JSON.parse(_data.current ), false);
         }
       })
       .catch((error) => {
         console.error("error", error);
-        if (_jobId) setJobId(_jobId);
+        if (_jobId.current ) setJobId(_jobId.current );
         //on an error reading from the db just load a new blank job
-        if(_data) buildTable(JSON.parse(_data), false);
+        if (_data.current ) buildTable(JSON.parse(_data.current ), false);
       });
   }
 
@@ -216,7 +254,6 @@ export default function CompletedJobsViewPage(props) {
       jobId: _jobId,
       jobData: dataString,
     };
-    console.log("data length store", dataString.length);
 
     var requestOptions = {
       method: "POST",
@@ -246,7 +283,7 @@ export default function CompletedJobsViewPage(props) {
 
     var formdata = new FormData();
     formdata.append("formName", _redcapFormName);
-    formdata.append("jobId", _jobId);
+    formdata.append("jobId", _jobId.current );
     formdata.append("jobData", dataString);
 
     var requestOptions = {
@@ -389,13 +426,6 @@ export default function CompletedJobsViewPage(props) {
     const dataString = JSON.stringify(_dataObj);
     storeJobVerificationInfo(dataString);
   }
-
-  useEffect(() => {
-    if (tempAllData) {
-      showTab(null, true, selectedTabIdx);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tempAllData]);
 
   function buildTable(_data, dbFlag, lookupFlag) {
     let result = [];
@@ -721,7 +751,7 @@ export default function CompletedJobsViewPage(props) {
     setColDefs(cols);
     _dataObj = result;
     setData(result);
-    setCSVFilename(`Completed_Job_${_jobId}`);
+    setCSVFilename(`Completed_Job_${_jobId.current }`);
     setIsFormLoaded(true);
   }
 
@@ -730,7 +760,6 @@ export default function CompletedJobsViewPage(props) {
   };
 
   const handleExportData = async (action) => {
-    console.log("handleExport Action", action);
     let _data = data;
     const transformedData = await transformData(_data);
 
@@ -756,13 +785,11 @@ export default function CompletedJobsViewPage(props) {
       .then((response) => response.text())
       .then(async (result) => {
         //update field_annotation with the preferred value id
-        // console.log('result', result)
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
-            console.log("transformeddata", transformedData);
             // Loop through the second array of objects
             for (let j = i; j < jsonResult.length; j++) {
               // console.log(
@@ -776,7 +803,6 @@ export default function CompletedJobsViewPage(props) {
                   jsonResult[j]["form_name"] &&
                 transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
               ) {
-                console.log("we matched");
                 // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
                 jsonResult[j]["field_annotation"] = {
                   vocab: transformedData[i]["Vocab"],
@@ -790,7 +816,6 @@ export default function CompletedJobsViewPage(props) {
                 jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
                 break;
               } else {
-                console.log("we did not match");
                 // console.log('no match on', transformedData[i]["Field Name"])
                 jsonResult[j]["standard_concept"] = "";
                 jsonResult[j]["concept_class_id"] = "";
@@ -803,14 +828,14 @@ export default function CompletedJobsViewPage(props) {
 
         await loopPromise;
         // Convert the results array to CSV format using papaparse
-        console.log("jsonResult!", jsonResult);
+        // console.log("jsonResult!", jsonResult);
         // Convert nested objects to JSON strings before converting to CSV
         const stringifiedData = jsonResult.map((item) => ({
           ...item,
           field_annotation: JSON.stringify(item.field_annotation),
         }));
         if (action === "downloadExcel") {
-          console.log("downloadExcel!");
+          // console.log("downloadExcel!");
           const csvData = Papa.unparse(stringifiedData);
           // const csvData = Papa.unparse(jsonResult);
           // Create a Blob from the CSV data
@@ -1049,7 +1074,7 @@ export default function CompletedJobsViewPage(props) {
           view={view}
           setView={setView}
         />
-        {!view && (
+        {view && (
           <Container
             className="whatthe"
             component="main"
@@ -1065,13 +1090,13 @@ export default function CompletedJobsViewPage(props) {
                 }}
               >
                 <span style={{ marginRight: "10px" }}>
-                  <b>Job Name:</b> {_jobName}
+                  <b>Job Name:</b> {jobName}
                 </span>
                 <span style={{ marginRight: "10px" }}>
-                  <b>Completed Job ID:</b> {jobId?jobId:'No Job ID'}
+                  <b>Completed Job ID:</b> {jobId ? jobId : "No Job ID"}
                 </span>
                 <span style={{ marginRight: "10px" }}>
-                  <b>Submitted By:</b> {_submittedBy}
+                  <b>Submitted By:</b> {submittedBy}
                 </span>
               </span>
             </div>
@@ -1102,7 +1127,9 @@ export default function CompletedJobsViewPage(props) {
                     >
                       Search UMLS
                     </Typography>
-                    <form onSubmit={ (event) => searchUMLS(searchUMLSValue, event)}>
+                    <form
+                      onSubmit={(event) => searchUMLS(searchUMLSValue, event)}
+                    >
                       <TextField
                         id="outlined-basic"
                         label="UMLS Text Search"
