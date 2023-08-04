@@ -1134,7 +1134,7 @@ export default function CompletedJobsViewPage(props) {
   ];
 
   const [selectedOMOPTable, setSelectedOMOPTable] = useState(omopTables[0]);
-  const [lookUpDupe, setLookUpDupe] = useState(omopTables[0]);
+  // const [lookUpDupe, setLookUpDupe] = useState(omopTables[0]);
 
   const handleDirectMapSubmit = (formData, removePref) => {
     // Handle submit
@@ -1142,13 +1142,13 @@ export default function CompletedJobsViewPage(props) {
     console.log('row', modalRowData)
     console.log('formdta', formData)
     // function verifyRow(row, removePref) {
-    let newModalRowData = modalRowData;
+    // let newModalRowData = modalRowData;
     let newModalSubRowData = modalRowData.subRows;
     // const modifiedSubRows = newModalSubRowData;
     const modifiedSubRows = newModalSubRowData.filter(
       (object) => !object.lookup
     ); //remove existing lookups from
-    setLookUpDupe(false);
+    // setLookUpDupe(false);
 
     // for (const obj of modifiedSubRows) {
     //   console.log('obj', obj)
@@ -1157,7 +1157,7 @@ export default function CompletedJobsViewPage(props) {
     //     return;
     //   }
     // }
-    setLookUpDupe(false);
+    // setLookUpDupe(false);
     let newSubRow = {
       redcapFieldLabel: modalRowData.redcapFieldLabel,
       extraData: { field_name: modalRowData.extraData.field_name, domain_id: formData, concept_class: '', vocabulary_id: 'Custom/Direct' },
