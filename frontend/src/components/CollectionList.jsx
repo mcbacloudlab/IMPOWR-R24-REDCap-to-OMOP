@@ -62,8 +62,8 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
           <TableHead sx={{ backgroundColor: "#343541", color: "white" }}>
             <TableRow>
               <TableCell padding="checkbox"></TableCell>
-              <TableCell sx={{ color: "white" }}>Name</TableCell>
-              <TableCell sx={{ color: "white" }}>Documents</TableCell>
+              <TableCell sx={{ color: "white" }}>Collection Name</TableCell>
+              <TableCell sx={{ color: "white" }}>Embeddings</TableCell>
               {/* <TableCell>Storage Size</TableCell> */}
             </TableRow>
           </TableHead>
@@ -77,7 +77,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
                     name={item.name}
                   />
                 </TableCell>
-                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.collection_alt_name? item.collection_alt_name : item.name}</TableCell>
                 <TableCell align="right">
                   {item.documentCount
                     ? item.documentCount.toLocaleString()
