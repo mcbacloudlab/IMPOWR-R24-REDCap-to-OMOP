@@ -153,28 +153,35 @@ export default function JobsOverview(props) {
   };
 
   const CollectionsCell = ({ cell, row }) => {
-    let job = cell.getValue();
-    if (job) job = JSON.parse(job);
+    const collections = row.original.collections
+      ? JSON.parse(row.original.collections)
+      : null;
+
+    if (!collections || row.original.totalCollectionDocs === null) {
+      return "N/A";
+    }
+
+    const collectionNames = Object.keys(collections);
+    const hasMultipleCollections = collectionNames.length > 1;
+
+    const chipLabel = hasMultipleCollections
+      ? "View Collections"
+      : collectionNames[0];
+
+    const tooltipContent = (
+      <div>
+        {collectionNames.map((name) => (
+          <div key={name}>{name}</div>
+        ))}
+      </div>
+    );
+
     return (
-      <>
-        {row.original.collections && row.original.totalCollectionDocs !== null
-          ? Object.entries(JSON.parse(row.original.collections)).map(
-              ([key, value]) => (
-                <React.Fragment key={key + row.id}>
-                  <Chip
-                    label={`${key}`}
-                    color="secondary"
-                    sx={{ margin: "10px" }}
-                  />
-                  <br />
-                </React.Fragment>
-              )
-            )
-          : "N/A"}
-      </>
+      <Tooltip title={hasMultipleCollections ? tooltipContent : ""}>
+        <Chip label={chipLabel} color="secondary" sx={{ margin: "10px" }} />
+      </Tooltip>
     );
   };
-
   const CompletedAtCell = ({ cell, row }) => {
     return row.original.finishedAt
       ? new Date(row.original.finishedAt).toLocaleString()
@@ -232,13 +239,13 @@ export default function JobsOverview(props) {
         minSize: 100,
       },
       {
-        header: "Collections",
+        header: "Collections Used",
         accessorKey: "collections",
         Cell: CollectionsCell,
         minSize: 300,
       },
       {
-        header: "Total Documents",
+        header: "Total Embeddings",
         accessorKey: "totalCollectionDocs",
         Cell: TotalDocumentsCell,
         minSize: 150,
@@ -262,7 +269,7 @@ export default function JobsOverview(props) {
     return cols;
   };
 
-  function handleRetry({jobId}) {
+  function handleRetry({ jobId }) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -307,8 +314,8 @@ export default function JobsOverview(props) {
       .then((response) => response.text())
       .then((result) => {
         setView("Completed Jobs");
-        localStorage.setItem('view', 'Completed Jobs')
-        localStorage.setItem('jobInfo', JSON.stringify(job))
+        localStorage.setItem("view", "Completed Jobs");
+        localStorage.setItem("jobInfo", JSON.stringify(job));
         navigate("/completed-jobs", {
           state: {
             result: result,
@@ -531,11 +538,13 @@ export default function JobsOverview(props) {
                     renderRowActions: ({ row, table }) => [
                       <Box
                         key={row.id + selectedTabIdx + "failed"}
-                        sx={{
-                          // display: "flex",
-                          // flexWrap: "nowrap",
-                          // gap: "8px",
-                        }}
+                        sx={
+                          {
+                            // display: "flex",
+                            // flexWrap: "nowrap",
+                            // gap: "8px",
+                          }
+                        }
                       >
                         <Tooltip title="Remove" placement="left">
                           <IconButton
@@ -547,7 +556,7 @@ export default function JobsOverview(props) {
                             <CloseIcon />
                           </IconButton>
                         </Tooltip>
-                        <br/>
+                        <br />
                         <Tooltip title="Retry Job">
                           <IconButton
                             onClick={(event) => handleRetry(row.original)}
@@ -635,7 +644,9 @@ export default function JobsOverview(props) {
             )}
           </Grid>
         </Grid>
-      ) : <CircularProgress/>}
+      ) : (
+        <CircularProgress />
+      )}
     </div>
   );
 }

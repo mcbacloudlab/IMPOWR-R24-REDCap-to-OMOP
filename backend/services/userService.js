@@ -380,6 +380,7 @@ async function getAllUserJobs(req, res) {
             job.finishedAt = finishedAt;
             job.progress = progress;
             job.dataLength = dataLength;
+            job.collections = foundJob.data.collections
           }
         } catch (error) {
           console.log("error", error);

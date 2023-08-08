@@ -157,35 +157,66 @@ export default function JobsOverview(props) {
   };
 
   const CollectionsCell = ({ cell, row }) => {
-    let resultArray = [];
+    const collections = row.original.collections
+      ? JSON.parse(row.original.collections)
+      : null;
 
-    if (row.original.collectionName) {
-      const trimmedString = row.original.collectionName.slice(1, -1);
-      const arrayStrings = trimmedString.split("][");
-      resultArray = arrayStrings.flatMap((str) => {
-        // eslint-disable-next-line no-useless-escape
-        const cleanedString = str.replace(/[\[\]']+/g, "").trim();
-        return cleanedString.split(",").map((element) => element.trim());
-      });
-      resultArray.forEach((item) => {
-        // console.log("item", item);
-      });
+    if (!collections || row.original.totalCollectionDocs === null) {
+      return "N/A";
     }
 
+    const collectionNames = Object.keys(collections);
+    const hasMultipleCollections = collectionNames.length > 1;
+
+    const chipLabel = hasMultipleCollections
+      ? "View Collections"
+      : collectionNames[0];
+
+    const tooltipContent = (
+      <div>
+        {collectionNames.map((name) => (
+          <div key={name}>{name}</div>
+        ))}
+      </div>
+    );
+
     return (
-      <>
-        {row.original.collectionName &&
-        row.original.totalCollectionDocs !== null
-          ? resultArray.map((label, index) => (
-              <React.Fragment key={index}>
-                <Chip label={label} color="secondary" sx={{ margin: "10px" }} />
-                <br />
-              </React.Fragment>
-            ))
-          : "N/A"}
-      </>
+      <Tooltip title={hasMultipleCollections ? tooltipContent : ""}>
+        <Chip label={chipLabel} color="secondary" sx={{ margin: "10px" }} />
+      </Tooltip>
     );
   };
+
+  // const CollectionsCell = ({ cell, row }) => {
+  //   let resultArray = [];
+
+  //   if (row.original.collectionName) {
+  //     const trimmedString = row.original.collectionName.slice(1, -1);
+  //     const arrayStrings = trimmedString.split("][");
+  //     resultArray = arrayStrings.flatMap((str) => {
+  //       // eslint-disable-next-line no-useless-escape
+  //       const cleanedString = str.replace(/[\[\]']+/g, "").trim();
+  //       return cleanedString.split(",").map((element) => element.trim());
+  //     });
+  //     resultArray.forEach((item) => {
+  //       // console.log("item", item);
+  //     });
+  //   }
+
+  //   return (
+  //     <>
+  //       {row.original.collectionName &&
+  //       row.original.totalCollectionDocs !== null
+  //         ? resultArray.map((label, index) => (
+  //             <React.Fragment key={index}>
+  //               <Chip label={label} color="secondary" sx={{ margin: "10px" }} />
+  //               <br />
+  //             </React.Fragment>
+  //           ))
+  //         : "N/A"}
+  //     </>
+  //   );
+  // };
 
   const CompletedAtCell = ({ cell, row }) => {
     return row.original.finishedAt
@@ -250,7 +281,7 @@ export default function JobsOverview(props) {
         minSize: 300,
       },
       {
-        header: "Total Documents",
+        header: "Total Embeddings",
         accessorKey: "totalCollectionDocs",
         Cell: TotalDocumentsCell,
         minSize: 150,

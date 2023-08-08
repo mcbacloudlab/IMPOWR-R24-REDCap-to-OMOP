@@ -194,6 +194,21 @@ async function embedRedcapLookupText(job) {
     });
   });
 }
+
+function extractCollections(logMessage) {
+  const match = logMessage.match(/\[\s*'(.*?)'\s*\]/);
+  if (match) {
+    const collectionsString = match[0].replace(/'/g, '"'); // Replace single quotes with double quotes for JSON parsing
+    try {
+      const collectionsArray = JSON.parse(collectionsString);
+      return collectionsArray;
+    } catch (error) {
+      console.error('Error parsing collections:', error);
+    }
+  }
+  return [];
+}
+
 let activeJobProcess;
 async function compareEmbeddings(job) {
   console.log("jobid", job.id);
@@ -264,8 +279,12 @@ async function compareEmbeddings(job) {
         if (logMessage.includes("Collection(s) used")) {
           console.log(logMessage);
 
-          collectionName = logMessage.split(":")[1];
+          // collectionName = logMessage.split(":")[1];
+          collectionName = extractCollections(logMessage);
+          console.log('collectionName', collectionName)
+          console.log('totalDocuments', totalDocuments)
           if (!collectionName || !totalDocuments || !job.id) return;
+
           console.log("Storing total docs in db for job", totalDocuments);
           // if(!collectionName || !totalDocuments || !job.id) return;
           const query =
