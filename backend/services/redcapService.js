@@ -161,7 +161,7 @@ async function exportMetadata(req, res) {
           item.field_label = cheerio.load(item.field_label).text();
         });
 
-        console.log('metadata', metadata.slice(0,3))
+        // console.log('metadata', metadata.slice(0,3))
         res.status(200).header('Content-Type', 'application/json').send(JSON.stringify(metadata));
       })
       .catch(function (error) {

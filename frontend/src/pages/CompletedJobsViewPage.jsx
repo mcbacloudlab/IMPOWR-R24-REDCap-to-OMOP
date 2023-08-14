@@ -822,7 +822,7 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
-        // console.log("transformed data", transformedData);
+        console.log("transformed data", transformedData);
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
             for (let j = 0; j < jsonResult.length; j++) {
@@ -852,15 +852,29 @@ export default function CompletedJobsViewPage(props) {
 
                 //set parsed field name as the key so not to overwrite existing data
                 let fn = transformedData[i]["Field Name"];
-                // console.log("fn value", fn);
-                // Merge the existing field_annotation object with the new one
-                jsonResult[j].field_annotation = {
-                  ...jsonResult[j].field_annotation,
-                  [fn]: transformedData[i],
-                };
+                console.log("json result", jsonResult[j]);
+                console.log("fn value", jsonResult[j].field_annotation);
+                console.log("type of", typeof jsonResult[j].field_annotation);
+
+                // Check if field_annotation is a string aka data already stored in DD
+                if (typeof jsonResult[j].field_annotation === "string") {
+                  console.log("we have a string!");
+                  // If it's a string, replace it with a new object
+                  // I have a feeling this could be logically problematic. We want to likely not include any stored field_annotations in the DD at this point. This seems to not include, but very awkwardly.
+                  jsonResult[j].field_annotation = {
+                    [fn]: transformedData[i],
+                  };
+                  console.log("json result after insert string", jsonResult[j]);
+                } else {
+                  // If it's an object, merge with the existing object
+                  jsonResult[j].field_annotation = {
+                    ...jsonResult[j].field_annotation,
+                    [fn]: transformedData[i],
+                  };
+                }
                 break;
               } else {
-                // console.log("no match on", transformedData[i]["Field Name"]);
+                console.log("no match on", transformedData[i]["Field Name"]);
 
                 // Reset unmatched fields
                 // Object.assign(jsonResult[j], {

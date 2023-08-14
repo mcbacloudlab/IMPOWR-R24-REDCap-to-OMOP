@@ -300,23 +300,34 @@ async function compareEmbeddings(job) {
           }
         }
         if (logMessage.startsWith("Total Documents")) {
-          // console.log(logMessage);
           totalDocuments = parseInt(logMessage.split(":")[1].trim());
           if (!collectionName || !totalDocuments || !job.id) return;
-          console.log("Storing total docs in db for job", totalDocuments);
-          // if(!collectionName || !totalDocuments || !job.id) return;
-          const query =
-            "UPDATE jobs set collectionName=?, totalCollectionDocs=? where jobId = ?";
+          console.log("Starts with Total Docs: Storing total docs in db for job", totalDocuments);
+        
           try {
-            const [rows, fields] = await db
+            // First, fetch the current totalCollectionDocs value from the database
+            const [currentRows] = await db
               .promise()
-              .execute(query, [collectionName, totalDocuments, job.id]);
-            console.log("MongoDB collection info updated in DB for job");
+              .execute("SELECT totalCollectionDocs FROM jobs WHERE jobId = ?", [job.id]);
+            const currentTotalDocs = currentRows[0]?.totalCollectionDocs || 0;
+        
+            // Add the new totalDocuments to the current value
+            const newTotalDocs = currentTotalDocs + totalDocuments;
+        
+            // Update the database with the new accumulated value
+            const updateQuery =
+              "UPDATE jobs SET collectionName = ?, totalCollectionDocs = ? WHERE jobId = ?";
+            const [rows] = await db
+              .promise()
+              .execute(updateQuery, [collectionName, newTotalDocs, job.id]);
+        
+            console.log("MongoDB collection info updated in MySQL DB for job:" + job.id + ' with doc size:' + newTotalDocs);
           } catch (err) {
             console.log("error!", err);
             throw new Error("Error");
           }
-        } else {
+        }
+         else {
           // console.log("log:", logMessage);
         }
 
