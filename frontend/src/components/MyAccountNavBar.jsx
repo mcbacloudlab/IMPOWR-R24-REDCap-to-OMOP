@@ -346,6 +346,7 @@ export default function MyAccountNavBar(props) {
                   props={props}
                   jobs={jobs}
                   setJobs={setJobs}
+                  handleClick={handleClick}
                 />
               </>
             )}

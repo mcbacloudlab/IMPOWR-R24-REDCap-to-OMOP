@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
-import { Alert } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import FormSelect from "../components/FormSelect";
 // import DataDictionaryList from "../components/DataDictionaryList";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -11,7 +11,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddHomeWorkIcon from "@mui/icons-material/AddHomeWork";
 
-export default function ProjectManagementPage(props) {
+export default function ProjectManagementPage({ props, handleClick }) {
   let token =
     props.props?.props?.token ??
     props.props?.token ??
@@ -76,6 +76,24 @@ export default function ProjectManagementPage(props) {
             <h1>
               <AddHomeWorkIcon /> Import REDCap Data Dictionary
             </h1>
+            <Grid xs={6} sx={{ margin: "auto" }}>
+              <Typography>
+                Import a REDCap Data Dictionary and then submit to find the
+                top matched terms using the provided collections to the left. Once the
+                job is submitted you can view the status and results on the{" "}
+                <span
+                  style={{
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    color: "blue",
+                  }}
+                  onClick={() => handleClick("Jobs Overview")}
+                >
+                  Jobs Overview
+                </span>{" "}
+                page.
+              </Typography>
+            </Grid>
             {/* <h2>REDCap Forms</h2> */}
             <Grid item xs={12} md={6} sx={{ margin: "auto" }}>
               {addSSError && (

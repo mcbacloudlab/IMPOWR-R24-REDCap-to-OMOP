@@ -97,24 +97,24 @@ export default function CompletedJobTable({
         >
           {selectedTabIdx === 2 && (
             <>
-              <Tooltip
+              {/* <Tooltip
                 title={
                   "This will use the below mappings and store a JSON object into the field_annotations column of the data dictionary in REDCap"
                 }
                 placement="top"
-              >
-                <Button
+              > */}
+                {/* <Button
                   color="warning"
                   onClick={updateDD}
                   startIcon={<StorageIcon />}
                   variant="contained"
                 >
                   Update REDCap Dictionary
-                </Button>
-              </Tooltip>
+                </Button> */}
+              {/* </Tooltip> */}
 
               <Box style={{ marginLeft: "auto" }}>
-                <Tooltip title={"Export to CSV"} placement="top">
+                <Tooltip title={"Export to CSV. This is the CSV file you can use with the desktop companion app. Optionally, you could also upload this data dictionary back into your REDCap. If you choose to upload this to your REDCap be aware this will overwrite the field_annotations in REDCap with the data used here."} placement="top">
                   <Button onClick={() => handleExportData("downloadExcel")}>
                     <img
                       src={CSVIcon}
