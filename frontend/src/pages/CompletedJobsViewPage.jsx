@@ -48,7 +48,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import { getJobVerificationInfo } from "../utils/helperFunctions";
 
-
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
   const [tempAllData, setTempAllData] = useState("");
@@ -122,7 +121,7 @@ export default function CompletedJobsViewPage(props) {
       setJobName(location.state.jobName);
       setSubmittedBy(location.state.submittedBy);
       _redcapFormName.current = location.state.redcapFormName;
-     
+
       determineTableData();
       return;
     }
@@ -214,7 +213,6 @@ export default function CompletedJobsViewPage(props) {
   }
 
   async function determineTableData() {
-   
     let jobVerificationData = await getJobVerificationInfo(
       _jobId.current,
       _redcapFormName.current,
@@ -824,41 +822,56 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
+        // console.log("transformed data", transformedData);
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
-            // Loop through the second array of objects
-            for (let j = i; j < jsonResult.length; j++) {
-              // console.log(
-              //   transformedData[i]["Field Name"] + ' : ' +  jsonResult[j]["field_name"]
-              // );
-              //TODO - this if statement needs to be modified to account for the field_names for drop-downs and radio buttons. The fields name currently take the only one that exists and appends an incrementing integer starting at 0
-              //for example - if the field_name members_num is a dropdown and has 5 options. The first option will get a field_name of members_num_0. We need account for this in storing the field_annotations. Perhaps a solution is be using the key but also by
-              //checking if it's a radio or dropdown and then checking if those are equal
-              if (
-                transformedData[i]["Form Name"] ===
-                  jsonResult[j]["form_name"] &&
-                transformedData[i]["Field Name"] === jsonResult[j]["field_name"]
-              ) {
-                // If matched, update "field_annotation" in the second array with "Field Annotation" from the first array
-                jsonResult[j]["field_annotation"] = {
-                  vocab: transformedData[i]["Vocab"],
-                  fieldAnnotations: transformedData[i]["Field Annotations"],
-                };
+            for (let j = 0; j < jsonResult.length; j++) {
+              const formNameMatches =
+                transformedData[i]["Form Name"].current ===
+                jsonResult[j]["form_name"];
+              const fieldNameMatches =
+                transformedData[i]["Field Name"] ===
+                jsonResult[j]["field_name"];
+              const extraFieldNameMatches =
+                transformedData[i].extraData.og_field_name ===
+                jsonResult[j]["field_name"];
 
-                jsonResult[j]["standard_concept"] =
-                  transformedData[i]["Standard Concept"];
-                jsonResult[j]["concept_class_id"] =
-                  transformedData[i]["Concept Class ID"];
-                jsonResult[j]["domain_id"] = transformedData[i]["Domain ID"];
+              if (
+                formNameMatches &&
+                (fieldNameMatches || extraFieldNameMatches)
+              ) {
+                // console.log("matched on ", transformedData[i]["Field Name"]);
+
+                // Handle extra data if present
+                // const extraData = transformedData[i].extraData;
+                // let parsed = false;
+                // if (extraData.og_field_name && extraData.og_field_name_key) {
+                //   //indicate this was a parsed result from dropdown or radio selection
+                //   parsed = true;
+                // }
+
+                //set parsed field name as the key so not to overwrite existing data
+                let fn = transformedData[i]["Field Name"];
+                // console.log("fn value", fn);
+                // Merge the existing field_annotation object with the new one
+                jsonResult[j].field_annotation = {
+                  ...jsonResult[j].field_annotation,
+                  [fn]: transformedData[i],
+                };
                 break;
               } else {
-                // console.log('no match on', transformedData[i]["Field Name"])
-                jsonResult[j]["standard_concept"] = "";
-                jsonResult[j]["concept_class_id"] = "";
-                jsonResult[j]["domain_id"] = "";
+                // console.log("no match on", transformedData[i]["Field Name"]);
+
+                // Reset unmatched fields
+                // Object.assign(jsonResult[j], {
+                //   standard_concept: "",
+                //   concept_class_id: "",
+                //   domain_id: "",
+                // });
               }
             }
           }
+
           resolve(); // Resolve the promise after the loops finish
         });
 
@@ -881,7 +894,7 @@ export default function CompletedJobsViewPage(props) {
           saveAs(blob, `${csvFilename}.csv`);
           // csvExporter.generateCsv(jsonResult);
         } else if (action === "updateDD") {
-          console.log("update DD in REDCap");
+          // console.log("update DD in REDCap");
         }
       })
       .catch((error) => {
@@ -905,6 +918,7 @@ export default function CompletedJobsViewPage(props) {
   };
 
   function transformData(data) {
+    // console.log("transform", data);
     return data.map((item) => {
       const { redcapFieldLabel, snomedID, snomedText, extraData } = item;
       // console.log("extraData", extraData);
@@ -919,6 +933,8 @@ export default function CompletedJobsViewPage(props) {
         "Concept Class ID": extraData.concept_class_id,
         "Standard Concept": extraData.standard_concept,
         Vocab: extraData.vocabulary_id,
+        extraData: extraData,
+
         // ...extraData,
       };
     });

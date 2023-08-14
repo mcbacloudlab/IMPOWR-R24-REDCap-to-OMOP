@@ -160,6 +160,8 @@ export default function FormSelect(props) {
             matrix_group_name: obj.matrix_group_name,
             matrix_ranking: obj.matrix_ranking,
             field_annotation: obj.field_annotation,
+            og_field_name_key: choice.key,
+            og_field_name: obj.field_name
           };
 
           convertedData.splice(i + 1, 0, newObject); // Insert new object after the current object

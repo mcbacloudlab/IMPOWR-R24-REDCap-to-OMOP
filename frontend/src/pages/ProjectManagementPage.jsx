@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import FormSelect from "../components/FormSelect";
 // import DataDictionaryList from "../components/DataDictionaryList";
 import CssBaseline from "@mui/material/CssBaseline";
