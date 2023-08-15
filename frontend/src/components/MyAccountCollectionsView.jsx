@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import {
+  Chip,
   Grid,
   IconButton,
   Table,
@@ -10,6 +11,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,35 +26,34 @@ export default function MyAccountCollectionsView(props) {
   const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
-   getCollectionNames()
+    getCollectionNames();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function getCollectionNames() {
+    // Replace this function with the actual function to fetch collection stats from your server
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
 
-  function getCollectionNames(){
-     // Replace this function with the actual function to fetch collection stats from your server
-     var myHeaders = new Headers();
-     myHeaders.append("Authorization", "Bearer " + token);
- 
-     var requestOptions = {
-       method: "GET",
-       headers: myHeaders,
-       redirect: "follow",
-       credentials: "include", // Include cookies with the request
-     };
- 
-     fetch(
-       `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`,
-       requestOptions
-     )
-       .then((response) => response.text())
-       .then((result) => {
-         // console.log(JSON.parse(result))
-         result = JSON.parse(result);
-         result.sort((a, b) => a.name.localeCompare(b.name));
-         setCollectionStats(result);
-       })
-       .catch((error) => console.log("error", error));
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log(JSON.parse(result))
+        result = JSON.parse(result);
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        setCollectionStats(result);
+      })
+      .catch((error) => console.log("error", error));
   }
   const handleSaveClick = (collectionName) => {
     // Call the API here
@@ -73,12 +74,57 @@ export default function MyAccountCollectionsView(props) {
     ).then(() => {
       setEditingRow(null);
       // Handle success, such as refreshing the data or showing a success message
-      getCollectionNames()
+      getCollectionNames();
     });
   };
   return (
-    <div>
-      <h1 style={{ padding: "10px", textAlign: "center" }}>Collections</h1>
+    <Grid container spacing={1} justifyContent="center">
+    <Grid item xs={12}>
+      <h1>
+        Collections
+      </h1>
+      <Grid xs={6} sx={{ margin: "auto" }}>
+        <Typography sx={{margin: 'auto', textAlign: 'center'}}>
+          {`These are the list of Mongo DB collections available. Create alt-names to show more user-friendly text elsewhere within the app. You can also add Chips to provide more info by adding the text between brackets <>.`}
+        </Typography>
+        <br />
+        <Grid xs={12}>
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      fontFamily: "monospace",
+                      backgroundColor: "#f5f5f5",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      display: "block",
+                      whiteSpace: "pre-wrap",
+                      textAlign: 'center'
+                    }}
+                  >
+                    {`Collection Name <Recommended -s -o>`}{" "}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  Collection Name
+                  <Chip
+                    label="Recommended"
+                    color="success"
+                    variant="outlined"
+                    sx={{marginLeft:'10px'}}
+                  />
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <br />
+          Other options include -hide (hide collection in app), -i for info (blue), -w
+          for warning (yellow), -e for error (red)
+        </Grid>
+      </Grid>
       <Grid
         container
         spacing={1}
@@ -91,7 +137,7 @@ export default function MyAccountCollectionsView(props) {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <b>Alt Name</b>
+                    <b>Alternate Display Name</b>
                   </TableCell>
                   {/* New column */}
                   <TableCell>
@@ -165,6 +211,7 @@ export default function MyAccountCollectionsView(props) {
           </TableContainer>
         </Grid>
       </Grid>
-    </div>
+    </Grid>
+    </Grid>
   );
 }

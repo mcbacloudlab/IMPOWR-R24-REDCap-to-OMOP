@@ -27,8 +27,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
 import _ from "lodash";
 import Logo from "../assets/logo.png";
+import RedisLogo from "../assets/redis.png";
 import MuiAlert from "@mui/material/Alert";
 import { ViewContext } from "./ViewContext";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 export default function SearchAppBar({ openSnackbar, ...props }) {
   // console.log("search bar", props);
@@ -43,22 +46,18 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     setAllCompletedList,
     setAllPendingList,
     setAllFailedList,
-    setInitCheckJobsRan
+    setInitCheckJobsRan,
   } = useLists();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [value, setValue] = useState(0);
   const [open, setOpen] = useState(false);
   const { view } = useContext(ViewContext);
+  const [redisDown, setRedisDown] = useState(false);
 
   // console.log('view', view)
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
-
-  // const [username, setUsername] = useState("");
-  // const [name, setName] = useState("");
-  // const [role, setRole] = useState(null);
-  // const [redisError, setRedisError] = useState();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -67,15 +66,9 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
 
   useEffect(() => {
     try {
-      // let userCookie = JSON.parse(Cookies.get("user"));
-      // setUsername(userCookie.email);
-      // setName(userCookie.firstName + " " + userCookie.lastName);
-      // let userInfo;
-      // console.log('the props!!!', props)
       if (props.user) {
         try {
           // Attempt to parse the string as JSON
-          // userInfo = JSON.parse(props.user);
         } catch (error) {
           // Handle the case where the string is not valid JSON
           console.info(
@@ -85,8 +78,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
           return;
         }
       }
-      // console.log("prfewefwefops.", userInfo);
-      // setRole(userInfo.role);
     } catch (error) {
       console.log("error", error);
     }
@@ -94,20 +85,16 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
 
   let userCookie = Cookies.get("user");
   let userInfo;
-  let role = 'default'
-  try{
+  let role = "default";
+  try {
     if (userCookie) {
       userCookie = JSON.parse(userCookie);
       userInfo = JSON.parse(props.user);
-      // console.log("userInfo", userInfo.role);
-      role = userInfo.role
+      role = userInfo.role;
     }
-  }catch(error){
+  } catch (error) {
     // console.log('error', error)
   }
- 
-
-
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -145,8 +132,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       .then((response) => response.json())
       .then((data) => {
         // Handle successful sign out (e.g., update user state, navigate to sign-in page)
-        // console.log(data.message);
-        // ...
       })
       .catch((error) => {
         // Handle errors
@@ -159,16 +144,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     handleMobileMenuClose();
     navigate(url);
   };
-
-  // const StyledAccount = styled("div")(({ theme }) => ({
-  //   display: "flex",
-  //   alignItems: "center",
-  //   padding: theme.spacing(2, 2.5),
-  //   marginTop: "10px",
-  //   borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  //   backgroundColor: alpha(theme.palette.grey[500], 0.12),
-  //   color: "white",
-  // }));
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
@@ -187,23 +162,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <Box sx={{ mb: 1, mx: 2.5 }}>
-        {/* <Link underline="none">
-          <StyledAccount>
-            <Avatar src={blank_avatar} alt="photoURL" />
-
-            <Box sx={{ ml: 2 }}>
-              <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
-                <b>{name}</b>
-              </Typography>
-
-              <Typography variant="body2" sx={{ color: "text.primary" }}>
-                {role}
-              </Typography>
-            </Box>
-          </StyledAccount>
-        </Link> */}
-      </Box>
       <MenuItem onClick={() => handleNavigate("/myaccount")}>
         <IconButton
           size="large"
@@ -283,7 +241,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
   function checkJobs() {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
-   
+
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -296,15 +254,27 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       requestOptions
     )
       .then((response) => {
-        const statusCode = response.status;
-        if (statusCode !== 200) {
-          console.log("Error!", statusCode);
-          // handleSignOut('Server error')
-          return;
-        } else return response.text();
+        // const statusCode = response.status;
+        // if (statusCode !== 200) {
+        // console.log("Error!", statusCode);
+        // handleSignOut('Server error')
+        // return;
+        // } else
+        return response.text();
       })
       .then((result) => {
+        if (!result) return;
         let resultObj = JSON.parse(result);
+        if (resultObj.message) {
+          if (resultObj.message.includes("Redis server is down")) {
+            setRedisDown(true);
+            return;
+          } else {
+            setRedisDown(false);
+          }
+        } else {
+          setRedisDown(false);
+        }
 
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
@@ -338,7 +308,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
         setFailedList((prevFailedList) => {
           // Compare the previous state with the new value
           if (!_.isEqual(prevFailedList, _failedList)) {
-            // console.log("set the pending, found diff");
             // Return the new value to update the state
             return _failedList;
           }
@@ -357,19 +326,18 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
           // Return the previous state to keep it unchanged
           return prevCompletedList;
         });
-        setInitCheckJobsRan(true)
+        setInitCheckJobsRan(true);
         // setPendingList(_pendingList);
         // setFailedList(_failedList);
         // setCompletedList(_completedList);
       })
       .catch((error) => {
         // handleSignOut();
-        setInitCheckJobsRan(true)
-        console.log("error", error);
+        setInitCheckJobsRan(true);
+        console.log("the error", error);
       });
   }
 
-  
   function checkAllJobs() {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
@@ -386,16 +354,27 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
       requestOptions
     )
       .then((response) => {
-        const statusCode = response.status;
-        if (statusCode !== 200) {
-          console.log("Error!", statusCode);
-          // handleSignOut('Server error')
-          return;
-        } else return response.text();
+        // const statusCode = response.status;
+        // if (statusCode !== 200) {
+        //   console.log("Error!", statusCode);
+        //   // handleSignOut('Server error')
+        //   return;
+        // } else
+        return response.text();
       })
       .then((result) => {
+        if (!result) return;
         let resultObj = JSON.parse(result);
-        // console.log('resultobj', resultObj)
+        if (resultObj.message) {
+          if (resultObj.message.includes("Redis server is down")) {
+            setRedisDown(true);
+            return;
+          } else {
+            setRedisDown(false);
+          }
+        } else {
+          setRedisDown(false);
+        }
         let _pendingList = resultObj.filter((obj) => {
           if (obj.jobStatus !== "completed" && obj.jobStatus !== "failed")
             return obj;
@@ -466,29 +445,26 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
     );
     // Fetch data every 15 seconds
     let userJobsInterval, allJobsInterval;
-    // console.log('open', openSnackbar)
-    // console.log('view', view)
-    // console.log('role', role)
     if (!openSnackbar) {
       userJobsInterval = setInterval(() => {
         checkJobs();
       }, 2000);
-    }else{
+    } else {
       clearInterval(userJobsInterval);
     }
 
-    if(role === 'admin' && view === 'All Jobs Overview'){
+    if (role === "admin" && view === "All Jobs Overview") {
       allJobsInterval = setInterval(() => {
         checkAllJobs();
       }, 2000);
-    }else{
-      clearInterval(allJobsInterval)
+    } else {
+      clearInterval(allJobsInterval);
     }
 
     // Clean up interval on unmount
     return () => {
       clearInterval(userJobsInterval);
-      clearInterval(allJobsInterval)
+      clearInterval(allJobsInterval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openSnackbar, view]);
@@ -513,18 +489,6 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
               height="30"
               sx={{ marginRight: "30px" }}
             />
-            {/* <Avatar alt="Redcap Logo" sx={{backgroundColor: 'transparent'}}>
-              <img
-                src={REDCapLogo}
-                alt="Redcap Logo"
-                style={{
-                  objectFit: "contain",
-                  maxHeight: "100%",
-                  maxWidth: "100%",
-                  backgroundColor: 'transparent'
-                }}
-              />
-            </Avatar> */}
 
             <Typography
               variant="h6"
@@ -534,18 +498,22 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
             >
               CDE To OMOP
             </Typography>
-            {/* <Avatar alt="Redcap Logo">
-              <img
-                src={OMOPLogo}
-                alt="OMOP Logo"
-                style={{
-                  objectFit: "contain",
-                  maxHeight: "100%",
-                  maxWidth: "100%",
-                }}
-              />
-            </Avatar>
-            */}
+
+            <Box
+              component="img"
+              className="redisLogo"
+              src={RedisLogo}
+              alt="logo"
+              width="100px"
+              height="30"
+              sx={{
+                marginLeft: "30px",
+                marginRight: "10px",
+              }}
+            />
+            <Typography>
+              {redisDown ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}{" "}
+            </Typography>
 
             <Box sx={{ flexGrow: 1 }} />
             {pendingList && pendingList.length > 0 && (
@@ -565,36 +533,7 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
                 </Badge>
               </IconButton>
             )}
-            {/* <IconButton
-              size="large"
-              aria-label="show completed jobs"
-              color="inherit"
-              onClick={() => handleIconClick(1)}
-            >
-              <Tooltip title="Completed Jobs">
-                <PlaylistAddCheckSharpIcon />
-              </Tooltip>
-            </IconButton> */}
-            {/* <IconButton
-              size="large"
-              aria-label="show failed jobs"
-              color="inherit"
-              onClick={() => handleIconClick(2)}
-            >
-              <Tooltip title="Failed Jobs">
-                <ErrorIcon />
-              </Tooltip>
-            </IconButton> */}
-            {/* <IconButton
-              size="large"
-              aria-label="show project management page"
-              color="inherit"
-              component={NavLink} to="/project-management"
-            >
-              <Tooltip title="Project Mangagement">
-                <AddHomeWorkIcon />
-              </Tooltip>
-            </IconButton> */}
+
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               <IconButton
                 size="large"
@@ -624,16 +563,11 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
         </AppBar>
         {renderMobileMenu}
         {renderMenu}
-        {/* <Snackbar
-          open={openSnackbar}
-          // autoHideDuration={5000}
-          // onClose={handleSnackbarClose}
-        > */}
+
         {openSnackbar && (
           <MuiAlert
             elevation={6}
             variant="filled"
-            // onClose={handleSnackbarClose}
             sx={{}}
             severity="warning" // Change severity to "success", "info", "warning", or "error"
           >
