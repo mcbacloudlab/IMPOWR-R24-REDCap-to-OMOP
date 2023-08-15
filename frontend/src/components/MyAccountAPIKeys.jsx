@@ -720,6 +720,7 @@ export default function MyAccountAPIKeys(props) {
                   >
                     Test GPT3 API
                   </Button>
+                  <Typography color='error'>Warning! Testing the GPT3 API does incur a charge for your API key. It sends the word 'test' to the<a href="https://api.openai.com/v1/embeddings"> embedding API</a>. Please keep this in mind when testing.</Typography>
                 </Box>
               </Grid>
               <Grid item xs={12}>

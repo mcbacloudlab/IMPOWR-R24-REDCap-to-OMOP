@@ -1,7 +1,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
-import { Button, Tooltip } from "@mui/material";
+import { Button, Tooltip, Typography } from "@mui/material";
 // import StorageIcon from "@mui/icons-material/Storage";
 import CSVIcon from "../assets/csv.png";
 
@@ -103,7 +103,7 @@ export default function CompletedJobTable({
                 }
                 placement="top"
               > */}
-                {/* <Button
+              {/* <Button
                   color="warning"
                   onClick={updateDD}
                   startIcon={<StorageIcon />}
@@ -113,8 +113,19 @@ export default function CompletedJobTable({
                 </Button> */}
               {/* </Tooltip> */}
 
-              <Box style={{ marginLeft: "auto" }}>
-                <Tooltip title={"Export to CSV. This is the CSV file you can use with the desktop companion app. Optionally, you could also upload this data dictionary back into your REDCap. If you choose to upload this to your REDCap be aware this will overwrite the field_annotations in REDCap with the data used here."} placement="top">
+              <Box
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  marginRight: "auto",
+                }}
+              >
+                <Tooltip
+                  title={`Export to CSV. This is the CSV file you can use with the desktop companion app. Optionally, you could also upload this data dictionary back into your REDCap. 
+          If you choose to upload this to your REDCap be aware this will overwrite the field_annotations in REDCap with the data used here.`}
+                  placement="top"
+                >
                   <Button onClick={() => handleExportData("downloadExcel")}>
                     <img
                       src={CSVIcon}
@@ -123,6 +134,15 @@ export default function CompletedJobTable({
                     />
                   </Button>
                 </Tooltip>
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    textAlign: "center",
+                    marginTop: "4px",
+                  }}
+                >
+                  Download OMOP <br/>Companion File
+                </Typography>
               </Box>
             </>
           )}

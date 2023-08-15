@@ -1218,7 +1218,7 @@ export default function CompletedJobsViewPage(props) {
   return (
     <>
       <CssBaseline />
-      <Container sx={{ margin: "auto", minWidth: "75%", maxWidth: "1400px" }}>
+      <Container sx={{ margin: "auto", minWidth: "75%" }}>
         <MyAccountNavBar
           props={props}
           username={username}
@@ -1229,7 +1229,6 @@ export default function CompletedJobsViewPage(props) {
         />
         {view && (
           <Container
-            className="whatthe"
             component="main"
             maxWidth="100vw"
             sx={{ margin: "0px", padding: "0px" }}
@@ -1251,6 +1250,24 @@ export default function CompletedJobsViewPage(props) {
                 <span style={{ marginRight: "10px" }}>
                   <b>Submitted By:</b> {submittedBy}
                 </span>
+                {selectedTabIdx === 2 && (
+                  <Tooltip
+                    title={
+                      "This will submit your below verified mappings to the internal collection to be used for future jobs. The aim for this is to improve future suggestions using user verified mappings"
+                    }
+                  >
+                    <Button
+                      sx={{}}
+                      variant="contained"
+                      color="info"
+                      component="label"
+                      startIcon={<AddTaskIcon />}
+                      onClick={(e) => submitToProcess(e)}
+                    >
+                      Submit Verified Mappings
+                    </Button>
+                  </Tooltip>
+                )}
               </span>
             </div>
 
@@ -1395,29 +1412,12 @@ export default function CompletedJobsViewPage(props) {
                 </Modal>
                 {/* End direct map modal */}
 
-                {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />}
-                <Typography>
+                {/* {allVerified ? <VerifiedIcon /> : <UnpublishedIcon />} */}
+                {/* <Typography>
                   Verified {verifiedRecords}/{totalRecords}
-                </Typography>
+                </Typography> */}
 
-                {selectedTabIdx === 2 && (
-                  <Tooltip
-                    title={
-                      "This will submit your below verified mappings to the internal collection to be used for future jobs. The aim for this is to improve future suggestions using verified mappings"
-                    }
-                  >
-                    <Button
-                      sx={{}}
-                      variant="contained"
-                      color="primary"
-                      component="label"
-                      startIcon={<AddTaskIcon />}
-                      onClick={(e) => submitToProcess(e)}
-                    >
-                      Approve the Below Mappings
-                    </Button>
-                  </Tooltip>
-                )}
+                
                 <Divider sx={{ margin: "30px" }} />
                 <Tabs
                   centered
