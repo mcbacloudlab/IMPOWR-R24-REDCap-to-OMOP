@@ -37,12 +37,11 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
         .then((result) => {
           result = JSON.parse(result);
           result.sort((a, b) => a.name.localeCompare(b.name));
-          const filteredData = result.filter(
-            (item) =>
-              item.name.includes("snomed") ||
-              item.name.includes("loinc") ||
-              item.name.includes("athena")
-          );
+          const filteredData = result.filter((item) => {
+            return item.collection_alt_name
+              ? item.collection_alt_name.includes("-embeddings")
+              : false;
+          });
           setFilteredCollections(filteredData);
         })
         .catch((error) => console.log("error", error));
@@ -58,7 +57,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
     });
   };
 
-  function parseTextWithChip(text) {
+  function parseTextWithChip(text, name) {
     const result = [];
     let position = 0;
     let start = text.indexOf("<", position);
@@ -74,6 +73,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
         let label = parts[0];
         let color;
         let variant;
+        let hide = false; // Add this line to initialize the hide variable
 
         for (let i = 1; i < parts.length; i++) {
           const part = parts[i];
@@ -90,13 +90,25 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
           if (part === "-e") {
             color = "error";
           }
-
           if (part === "-o") {
             variant = "outlined";
           }
+          if (part === "-hide") {
+            // Check for the -hide option
+            hide = true;
+          }
+          if(part === '-checked'){
+            setCheckedItems({
+              ...checkedItems,
+              [name]: true,
+            })
+          }
         }
 
-        result.push(<Chip label={label} color={color} variant={variant} />);
+        if (!hide) {
+          // Only push the Chip if hide is false
+          result.push(<Chip label={label} color={color} variant={variant} />);
+        }
 
         position = end + 1;
         start = text.indexOf("<", position);
@@ -134,7 +146,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
                 </TableCell>
                 <TableCell>
                   {item.collection_alt_name
-                    ? parseTextWithChip(item.collection_alt_name)
+                    ? parseTextWithChip(item.collection_alt_name, item.name)
                     : item.name}
                 </TableCell>
                 <TableCell align="right">
