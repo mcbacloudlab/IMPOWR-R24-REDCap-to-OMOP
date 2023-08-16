@@ -339,7 +339,7 @@ export default function JobsOverview(props) {
       >
         Jobs Overview
       </h1>
-      <Grid xs={6} sx={{ margin: "auto" }}>
+      <Grid item xs={6} sx={{ margin: "auto" }}>
         <Typography>View and Remove Submitted Jobs Below</Typography>
       </Grid>
 

@@ -76,7 +76,7 @@ export default function ProjectManagementPage({ props, handleClick }) {
             <h1>
               <AddHomeWorkIcon /> Import REDCap Data Dictionary
             </h1>
-            <Grid xs={6} sx={{ margin: "auto" }}>
+            <Grid item xs={6} sx={{ margin: "auto" }}>
               <Typography>
                 Import a REDCap Data Dictionary and then submit to find the
                 top matched terms using the provided collections to the left. Once the

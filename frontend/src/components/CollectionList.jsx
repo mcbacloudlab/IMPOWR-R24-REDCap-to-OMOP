@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Checkbox,
   Chip,
@@ -15,40 +15,66 @@ import {
 
 const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
   const [filteredCollections, setFilteredCollections] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  const initialCheckedItemsUpdated = useRef(false);
   //   const [checkedItems, setCheckedItems] = useState({});
 
   useEffect(() => {
-    const fetchCollections = async () => {
-      var myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer " + token);
-
-      var requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow",
-        credentials: "include",
-      };
-
-      fetch(
-        `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`,
-        requestOptions
-      )
-        .then((response) => response.text())
-        .then((result) => {
-          result = JSON.parse(result);
-          result.sort((a, b) => a.name.localeCompare(b.name));
-          const filteredData = result.filter((item) => {
-            return item.collection_alt_name
-              ? item.collection_alt_name.includes("-embeddings")
-              : false;
-          });
-          setFilteredCollections(filteredData);
-        })
-        .catch((error) => console.log("error", error));
-    };
-    fetchCollections();
+    if (!loaded) {
+      fetchCollections();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchCollections = async () => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+      credentials: "include",
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/getCollectionNames`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+         // Create an object to collect changes to checkedItems
+         let changesToCheckedItems = {};
+        result = JSON.parse(result);
+        setLoaded(true);
+        result.forEach((item) => {
+          if (item.collection_alt_name && item.collection_alt_name.includes("-checked")) {
+            // Here you can extract the relevant information and add it to changesToCheckedItems
+            // For example:
+            changesToCheckedItems[item.name] = true;
+          }
+        });
+        result.sort((a, b) => a.name.localeCompare(b.name));
+       
+        // Apply the changes to checkedItems, but only if we haven't already
+        if (!initialCheckedItemsUpdated.current) {
+          setCheckedItems({
+            ...checkedItems,
+            ...changesToCheckedItems,
+          });
+          initialCheckedItemsUpdated.current = true; // Mark that we've done this
+        }
+
+        const filteredData = result.filter((item) => {
+          return item.collection_alt_name
+            ? item.collection_alt_name.includes("-embeddings")
+            : false;
+        });
+        setFilteredCollections(filteredData);
+      })
+      .catch((error) => console.log("error", error));
+  };
 
   const handleCheckboxChange = (event) => {
     setCheckedItems({
@@ -59,6 +85,8 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
 
   function parseTextWithChip(text, name) {
     const result = [];
+    // Create an object to collect changes
+    let changesToCheckedItems = {};
     let position = 0;
     let start = text.indexOf("<", position);
 
@@ -97,17 +125,17 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
             // Check for the -hide option
             hide = true;
           }
-          if(part === '-checked'){
-            setCheckedItems({
-              ...checkedItems,
-              [name]: true,
-            })
+          if (part === "-checked") {
+            // Collect the change instead of calling setCheckedItems
+            changesToCheckedItems[name] = true;
           }
         }
 
         if (!hide) {
           // Only push the Chip if hide is false
-          result.push(<Chip label={label} color={color} variant={variant} />);
+          result.push(
+            <Chip key={name} label={label} color={color} variant={variant} />
+          );
         }
 
         position = end + 1;
@@ -118,6 +146,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
     }
 
     result.push(text.substring(position));
+
 
     return result;
   }
