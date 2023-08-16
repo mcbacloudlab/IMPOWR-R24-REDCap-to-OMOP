@@ -25,8 +25,8 @@ import PropTypes from "prop-types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CheckIcon from "@mui/icons-material/Check";
-import UnpublishedIcon from "@mui/icons-material/Unpublished";
-import VerifiedIcon from "@mui/icons-material/Verified";
+// import UnpublishedIcon from "@mui/icons-material/Unpublished";
+// import VerifiedIcon from "@mui/icons-material/Verified";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Badge from "@mui/material/Badge";
@@ -114,6 +114,7 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
+    console.log('allverified', allVerified)
     let jobInfo;
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;

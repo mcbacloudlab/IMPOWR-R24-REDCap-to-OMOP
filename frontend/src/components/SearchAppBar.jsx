@@ -30,9 +30,9 @@ import Logo from "../assets/logo.png";
 import RedisLogo from "../assets/redis.png";
 import MuiAlert from "@mui/material/Alert";
 import { ViewContext } from "./ViewContext";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
+// import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+// import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+// import CrisisAlertIcon from "@mui/icons-material/CrisisAlert";
 import WarningIcon from "@mui/icons-material/Warning";
 
 export default function SearchAppBar({ openSnackbar, ...props }) {
