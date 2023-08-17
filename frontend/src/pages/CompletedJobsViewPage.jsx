@@ -803,7 +803,13 @@ export default function CompletedJobsViewPage(props) {
     myHeaders.append("Authorization", "Bearer " + props.token);
 
     var formdata = new FormData();
-    formdata.append("form", _redcapFormName);
+    console.log('_redcapFormName', _redcapFormName)
+    if(action === 'downloadUpload'){
+      console.log('download upload')
+    }else{
+      formdata.append("form", _redcapFormName.current);
+    }
+   
 
     var requestOptions = {
       method: "POST",
@@ -898,7 +904,7 @@ export default function CompletedJobsViewPage(props) {
           ...item,
           field_annotation: JSON.stringify(item.field_annotation),
         }));
-        if (action === "downloadExcel") {
+        if (action === "downloadExcel" || action === 'downloadUpload') {
           // console.log("downloadExcel!");
           const csvData = Papa.unparse(stringifiedData);
           // const csvData = Papa.unparse(jsonResult);

@@ -95,10 +95,6 @@ async function getForms(req, res) {
 }
 
 async function exportMetadata(req, res) {
-  if (!req.body.form) {
-    res.status(500).send("Error");
-    return;
-  }
   if (process.env.NODE_ENV == "local") {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
   }
@@ -134,12 +130,14 @@ async function exportMetadata(req, res) {
       "aes-256-cbc",
       process.env.AES_32_BIT_KEY
     );
+
+    console.log('reqbody', req.body)
  
     var data = new FormData();
     data.append("token", apiKeyDecrypted);
     data.append("content", "metadata");
     data.append("format", "json");
-    data.append("forms[0]", req.body.form);
+    if(req.body.form) data.append("forms[0]", req.body.form);
 
     var config = {
       method: "post",
@@ -230,7 +228,7 @@ async function updateDD(req, res) {
           item.field_label = cheerio.load(item.field_label).text();
         });
 
-        console.log('metadata', metadata.slice(0,3))
+        // console.log('metadata', metadata.slice(0,3))
         res.status(200).header('Content-Type', 'application/json').send(JSON.stringify(metadata));
       })
       .catch(function (error) {

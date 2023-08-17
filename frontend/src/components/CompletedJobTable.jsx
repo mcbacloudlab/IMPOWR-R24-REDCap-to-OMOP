@@ -116,14 +116,13 @@ export default function CompletedJobTable({
               <Box
                 style={{
                   display: "flex",
-                  flexDirection: "column",
+                  flexDirection: "row",
                   alignItems: "center",
-                  marginRight: "auto",
+                  marginRight: "auto"
                 }}
               >
                 <Tooltip
-                  title={`Export to CSV. This is the CSV file you can use with the desktop companion app. Optionally, you could also upload this data dictionary back into your REDCap. 
-          If you choose to upload this to your REDCap be aware this will overwrite the field_annotations in REDCap with the data used here.`}
+                  title={`This is the CSV file you can use with the desktop companion app.`}
                   placement="top"
                 >
                   <Button onClick={() => handleExportData("downloadExcel")}>
@@ -141,7 +140,32 @@ export default function CompletedJobTable({
                     marginTop: "4px",
                   }}
                 >
-                  Download OMOP <br/>Companion File
+                  OMOP <br />
+                  Companion File
+                </Typography>
+
+                <Tooltip
+                  title={`You could also upload this data dictionary back into your REDCap. 
+          If you choose to upload this to your REDCap be aware this will overwrite the field_annotations in REDCap with the data used here.`}
+                  placement="top"
+                >
+                  <Button onClick={() => handleExportData("downloadUpload")}>
+                    <img
+                      src={CSVIcon}
+                      alt="Export to CSV"
+                      style={{ width: "32px", height: "32px" }}
+                    />
+                  </Button>
+                </Tooltip>
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    textAlign: "center",
+                    marginTop: "4px",
+                  }}
+                >
+                  Data Dictionary <br />
+                  Upload File
                 </Typography>
               </Box>
             </>
