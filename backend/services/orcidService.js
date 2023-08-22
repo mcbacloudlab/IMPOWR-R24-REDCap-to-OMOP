@@ -20,7 +20,9 @@ const oauth2 = new OAuth2(
 );
 
 async function orcidLogin(req, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // These need to be removed in prod. Search and replace these
+  if (process.env.NODE_ENV == "local") {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Add this at the top of your file
+  }
 
   // Generate the authorization URL and redirect the user to ORCID
   const authURL = oauth2.getAuthorizeUrl({
@@ -37,10 +39,8 @@ async function orcidCallback(req, res) {
   const code = req.query.code;
 
   // Exchange the authorization code for an access token
-  try{}
-  catch(error){
-
-  }
+  try {
+  } catch (error) {}
   oauth2.getOAuthAccessToken(
     code,
     { grant_type: "authorization_code", redirect_uri: REDIRECT_URI },
@@ -132,14 +132,11 @@ async function orcidCallback(req, res) {
           password: generateRandomPassword(),
         };
 
-          userService.createUser(userInfo, true)
-          .catch(error => {
-            console.error("Error in creating user:", error);
-            // Handle the error appropriately here
-          });;
+        userService.createUser(userInfo, true).catch((error) => {
+          console.error("Error in creating user:", error);
+          // Handle the error appropriately here
+        });
 
-      
-        
         // Need to attempt to get email address from ORCID, won't always get an email address if unverified or private emails, just store orcid id if no email found
         // NOTE: Getting the orcid email address requires the orcid paid member api
 
