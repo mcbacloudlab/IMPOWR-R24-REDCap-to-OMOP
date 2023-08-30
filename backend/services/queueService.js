@@ -195,7 +195,7 @@ async function embedRedcapLookupText(job) {
   });
 }
 
-function extractCollections(logMessage) {
+async function extractCollections(logMessage) {
   console.log("extract collections", logMessage);
 
   // This will match anything within single quotes
@@ -287,11 +287,12 @@ async function compareEmbeddings(job) {
           console.log(logMessage);
 
           // collectionName = logMessage.split(":")[1];
-          collectionName = extractCollections(logMessage);
+          collectionName = await extractCollections(logMessage);
 
-          if (!collectionName || !totalDocuments || !job.id) return;
-          // console.log("collectionName", collectionName);
-          // console.log("totalDocuments", totalDocuments);
+          if (!collectionName.length || !totalDocuments || !job.id) return;
+          console.log("collectionName", collectionName);
+          console.log("totalDocuments", totalDocuments);
+          console.log('job id', job.id)
           console.log("Storing total docs in db for job", totalDocuments);
           // if(!collectionName || !totalDocuments || !job.id) return;
           const query =
@@ -309,8 +310,9 @@ async function compareEmbeddings(job) {
         if (logMessage.startsWith("Total Documents")) {
           totalDocuments = parseInt(logMessage.split(":")[1].trim());
           if (!collectionName.length || !totalDocuments || !job.id) return;
-          // console.log("collectionName", collectionName);
-          // console.log("totalDocuments", totalDocuments);
+          console.log("collectionName", collectionName);
+          console.log("totalDocuments", totalDocuments);
+          console.log('job id', job.id)
           console.log(
             "Starts with Total Docs: Storing total docs in db for job",
             totalDocuments
