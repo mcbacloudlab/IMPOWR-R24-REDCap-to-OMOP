@@ -196,7 +196,7 @@ async function embedRedcapLookupText(job) {
 }
 
 function extractCollections(logMessage) {
-  // console.log("extract collections", logMessage);
+  console.log("extract collections", logMessage);
 
   // This will match anything within single quotes
   const regex = /'([^']+)'/g;
@@ -209,7 +209,7 @@ function extractCollections(logMessage) {
   }
 
   if (collectionsArray.length > 0) {
-    // console.log("return this collection array", collectionsArray);
+    console.log("return this collection array", collectionsArray);
     return collectionsArray;
   } else {
     return [];
