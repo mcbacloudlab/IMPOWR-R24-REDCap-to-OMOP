@@ -219,6 +219,7 @@ async function extractCollections(logMessage) {
 let activeJobProcess;
 async function compareEmbeddings(job) {
   console.log("jobid", job.id);
+  let _jobId = job.id
   let storedTotal = false;
   console.log("Starting Embedding Comparisons...");
   // console.log("job.data", job.data);
@@ -288,8 +289,12 @@ async function compareEmbeddings(job) {
 
           // collectionName = logMessage.split(":")[1];
           collectionName = await extractCollections(logMessage);
-
-          if (!collectionName.length || !totalDocuments || !job.id) return;
+          console.log('collectionNAME!!', collectionName)
+          if(collectionName.length){
+            collectionName = collectionName.join(',')
+          }
+          
+          if (!collectionName || !totalDocuments || !job.id) return;
           console.log("collectionName", collectionName);
           console.log("totalDocuments", totalDocuments);
           console.log('job id', job.id)
@@ -309,7 +314,7 @@ async function compareEmbeddings(job) {
         }
         if (logMessage.startsWith("Total Documents")) {
           totalDocuments = parseInt(logMessage.split(":")[1].trim());
-          if (!collectionName.length || !totalDocuments || !job.id) return;
+          if (!collectionName || !totalDocuments || !job.id) return;
           console.log("collectionName", collectionName);
           console.log("totalDocuments", totalDocuments);
           console.log('job id', job.id)
@@ -329,7 +334,9 @@ async function compareEmbeddings(job) {
 
             // Add the new totalDocuments to the current value
             const newTotalDocs = currentTotalDocs + totalDocuments;
-
+            console.log('newTotal', newTotalDocs)
+            console.log('jobid', job.id)  
+            console.log('collname', collectionName)
             // Update the database with the new accumulated value
             const updateQuery =
               "UPDATE jobs SET collectionName = ?, totalCollectionDocs = ? WHERE jobId = ?";
