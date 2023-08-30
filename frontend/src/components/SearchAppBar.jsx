@@ -27,7 +27,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useLists } from "./ListsContext";
 import _ from "lodash";
 import Logo from "../assets/logo.png";
-import RedisLogo from "../assets/redis.png";
+// import RedisLogo from "../assets/redis.png";
 import MuiAlert from "@mui/material/Alert";
 import { ViewContext } from "./ViewContext";
 // import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -501,26 +501,28 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
               CDE To OMOP
             </Typography>
 
-            <Box
-              component="img"
-              className="redisLogo"
-              src={RedisLogo}
-              alt="logo"
-              width="100px"
-              height="30"
-              sx={{
-                marginLeft: "30px",
-                marginRight: "10px",
-              }}
-            />
             <Typography>
               {redisDown ? (
-                <Tooltip title="Unable to connect to the Redis server">
-                  <WarningIcon
-                    className="blinking-icon"
-                    style={{ color: "#D6291F" }}
-                  />
-                </Tooltip>
+                <>
+                  {/* <Box
+                    component="img"
+                    className="redisLogo"
+                    src={RedisLogo}
+                    alt="logo"
+                    width="100px"
+                    height="30"
+                    sx={{
+                      marginLeft: "30px",
+                      marginRight: "10px",
+                    }}
+                  /> */}
+                  <Tooltip title="Unable to connect to the Redis server">
+                    <WarningIcon
+                      className="blinking-icon"
+                      style={{ margin:'10px', color: "#D6291F" }}
+                    />
+                  </Tooltip>
+                </>
               ) : (
                 ""
               )}{" "}

@@ -196,17 +196,24 @@ async function embedRedcapLookupText(job) {
 }
 
 function extractCollections(logMessage) {
-  const match = logMessage.match(/\[\s*'(.*?)'\s*\]/);
-  if (match) {
-    const collectionsString = match[0].replace(/'/g, '"'); // Replace single quotes with double quotes for JSON parsing
-    try {
-      const collectionsArray = JSON.parse(collectionsString);
-      return collectionsArray;
-    } catch (error) {
-      console.error('Error parsing collections:', error);
-    }
+  // console.log("extract collections", logMessage);
+
+  // This will match anything within single quotes
+  const regex = /'([^']+)'/g;
+  let match;
+  const collectionsArray = [];
+
+  // While there's a match, push it to the collectionsArray
+  while ((match = regex.exec(logMessage)) !== null) {
+    collectionsArray.push(match[1]);
   }
-  return [];
+
+  if (collectionsArray.length > 0) {
+    // console.log("return this collection array", collectionsArray);
+    return collectionsArray;
+  } else {
+    return [];
+  }
 }
 
 let activeJobProcess;
@@ -256,7 +263,7 @@ async function compareEmbeddings(job) {
         //******************
         // LOG logMessage to see the console.logs from the worker threads
         //for development and testing, comment this out in prod
-        // console.log(logMessage) 
+        // console.log(logMessage)
         //******************
         //******************
 
@@ -281,10 +288,10 @@ async function compareEmbeddings(job) {
 
           // collectionName = logMessage.split(":")[1];
           collectionName = extractCollections(logMessage);
-          console.log('collectionName', collectionName)
-          console.log('totalDocuments', totalDocuments)
-          if (!collectionName || !totalDocuments || !job.id) return;
 
+          if (!collectionName || !totalDocuments || !job.id) return;
+          // console.log("collectionName", collectionName);
+          // console.log("totalDocuments", totalDocuments);
           console.log("Storing total docs in db for job", totalDocuments);
           // if(!collectionName || !totalDocuments || !job.id) return;
           const query =
@@ -301,33 +308,44 @@ async function compareEmbeddings(job) {
         }
         if (logMessage.startsWith("Total Documents")) {
           totalDocuments = parseInt(logMessage.split(":")[1].trim());
-          if (!collectionName || !totalDocuments || !job.id) return;
-          console.log("Starts with Total Docs: Storing total docs in db for job", totalDocuments);
-        
+          if (!collectionName.length || !totalDocuments || !job.id) return;
+          // console.log("collectionName", collectionName);
+          // console.log("totalDocuments", totalDocuments);
+          console.log(
+            "Starts with Total Docs: Storing total docs in db for job",
+            totalDocuments
+          );
+
           try {
             // First, fetch the current totalCollectionDocs value from the database
             const [currentRows] = await db
               .promise()
-              .execute("SELECT totalCollectionDocs FROM jobs WHERE jobId = ?", [job.id]);
+              .execute("SELECT totalCollectionDocs FROM jobs WHERE jobId = ?", [
+                job.id,
+              ]);
             const currentTotalDocs = currentRows[0]?.totalCollectionDocs || 0;
-        
+
             // Add the new totalDocuments to the current value
             const newTotalDocs = currentTotalDocs + totalDocuments;
-        
+
             // Update the database with the new accumulated value
             const updateQuery =
               "UPDATE jobs SET collectionName = ?, totalCollectionDocs = ? WHERE jobId = ?";
             const [rows] = await db
               .promise()
               .execute(updateQuery, [collectionName, newTotalDocs, job.id]);
-        
-            console.log("MongoDB collection info updated in MySQL DB for job:" + job.id + ' with doc size:' + newTotalDocs);
+
+            console.log(
+              "MongoDB collection info updated in MySQL DB for job:" +
+                job.id +
+                " with doc size:" +
+                newTotalDocs
+            );
           } catch (err) {
             console.log("error!", err);
             throw new Error("Error");
           }
-        }
-         else {
+        } else {
           // console.log("log:", logMessage);
         }
 
