@@ -36,10 +36,13 @@ async function processChunk(
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
   }
-
+  // console.log('wahat')
+  // console.log('redcapColleciton', redCapCollectionArray)
   for (const redCapDoc of redCapCollectionArray) {
-    console.log('redcapEmbedding', redCapDoc)
+    // console.log('redcapEmbedding', redCapDoc)
     let redcapFieldLabel = redCapDoc.fieldLabel;
+    // console.log('embedding', redCapDoc.gpt3_data)
+    if(!redCapDoc.gpt3_data.data[0]) return;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
 
@@ -182,6 +185,12 @@ async function processChunks(
     process.exit(0);
   }, 5000);
 }
+
+// Catch any unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 // start processing in chunks, second param is size of chunk, assists in errors from running out of memory
 processChunks(

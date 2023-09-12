@@ -1,8 +1,8 @@
 const MongoClient = require("mongodb").MongoClient;
-const cosineSimilarity = require("compute-cosine-similarity");
 var axios = require("axios");
 const cheerio = require("cheerio");
 const axiosThrottle = require("axios-request-throttle");
+const { Worker } = require("worker_threads");
 axiosThrottle.use(axios, { requestsPerSecond: 150 }); //UMLS API limit is 20 requests per second
 require("dotenv").config();
 // Connection URL
@@ -55,10 +55,11 @@ main().then(async () => {
       _jsonData.map(async (obj) => {
         // console.log("obj", obj);
         obj.field_label = cheerio.load(obj.field_label).text();
+        //consider radio buttons using og_field_name
         const document = await redcapCollection.findOne({
           fieldLabel: obj.field_label,
           formName: obj.form_name,
-          variableName: obj.field_name,
+          variableName: obj.og_field_name?obj.og_field_name:obj.field_name,
         });
 
  
@@ -149,7 +150,7 @@ async function loadCollection(collection) {
   });
 }
 
-const { Worker } = require("worker_threads");
+
 
 async function startProcessing(
   redCapCollectionArray,
@@ -243,13 +244,6 @@ async function startProcessing(
     })
   );
 
-  // const totalProcTime = Date.now() - startProcTime;
-  // console.log("Total processing time:", totalProcTime / 1000 + " secs");
-
-  // console.log(
-  //   "Average time per REDCap question: ",
-  //   totalProcTime / redCapCollectionArray.length / 1000 + " secs"
-  // );
 
   //clear from memory
   redCapCollectionArray = [];
@@ -268,8 +262,6 @@ function mergeAndCountMatches(finalList, jobCompleteInfoResults) {
     const newObj = { ...finalObj, userMatch: 0 };
     // Loop through the jobCompleteInfoResults
     for (const jobInfoObj of jobCompleteInfoResults) {
-      // console.log("newObj,", newObj);
-      // console.log("jobInfoObj", jobInfoObj);
       // Compare the redcapFieldLabel in newObj and jobInfoObj
       if (
         newObj.redcapFieldLabel === jobInfoObj.redcapFieldLabel &&
