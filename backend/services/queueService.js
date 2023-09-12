@@ -289,7 +289,7 @@ async function compareEmbeddings(job) {
 
           // collectionName = logMessage.split(":")[1];
           collectionName = await extractCollections(logMessage);
-          console.log('collectionNAME!!', collectionName)
+          // console.log('collectionNAME!!', collectionName)
           if(collectionName.length){
             collectionName = collectionName.join(',')
           }
