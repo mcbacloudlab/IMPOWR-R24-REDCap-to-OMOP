@@ -26,6 +26,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Delete, Edit } from "@mui/icons-material";
+import CollectionList from "../components/CollectionList";
+import TransferList from "../components/TransferList";
 
 export default function ProjectManagementPage({ props, handleClick }) {
   let token =
@@ -40,6 +42,8 @@ export default function ProjectManagementPage({ props, handleClick }) {
   const [importType, setImportType] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [data, setData] = useState([]);
+  const [checkedItems, setCheckedItems] = useState([]);
+  const [colDefs, setColDefs] = useState([]);
   // const [createModalOpen, setCreateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -155,7 +159,7 @@ export default function ProjectManagementPage({ props, handleClick }) {
               variant="outlined"
               onClick={(e) => handleImportTypeClick(e)}
             >
-              REDCap Data Dictionary Import
+              REDCap Data Dictionary
             </Button>
             <Button
               value="customImport"
@@ -190,7 +194,13 @@ export default function ProjectManagementPage({ props, handleClick }) {
                 <TextField
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  label="Name"
+                  label="Custom Text"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddClick();
+                      e.preventDefault(); // Prevents default form submission
+                    }
+                  }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -201,51 +211,71 @@ export default function ProjectManagementPage({ props, handleClick }) {
                     ),
                   }}
                 />
+
                 {data && (
-                  <div>
+                  <>
                     <Button
                       onClick={handleClearTable}
                       variant="contained"
                       color="error"
-                      sx={{ margin: "30px" }}
+                      sx={{ margin: "10px", marginLeft: '60px'}}
                     >
                       Clear Table
                     </Button>
-                    <MaterialTable
-                      title="Names List"
-                      data={data}
-                      columns={columns}
-                      enableColumnResizing
-                      enableEditing
-                      editingMode="table" //default
-                      enableColumnOrdering
-                      renderRowActions={({ row, table }) => (
-                        <Box sx={{ display: "flex", gap: "1rem" }}>
-                          <Tooltip arrow placement="left" title="Edit">
-                            <IconButton
-                              onClick={() => table.setEditingRow(row)}
-                            >
-                              <Edit />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip arrow placement="right" title="Delete">
-                            <IconButton
-                              color="error"
-                              onClick={() => handleDeleteRow(row)}
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      )}
-                    />
-                  </div>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} xl={4}>
+                        <CollectionList
+                          token={token}
+                          setCheckedItems={setCheckedItems}
+                          checkedItems={checkedItems}
+                        />
+                        <TransferList
+                          props={props}
+                          setData={setData}
+                          data={data}
+                          setColDefs={setColDefs}
+                          colDefs={colDefs}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} xl={8}>
+                        <MaterialTable
+                          title="Names List"
+                          data={data}
+                          columns={columns}
+                          enableColumnResizing
+                          enableEditing
+                          editingMode="table"
+                          enableColumnOrdering
+                          renderRowActions={({ row, table }) => (
+                            <Box sx={{ display: "flex", gap: "1rem" }}>
+                              <Tooltip arrow placement="left" title="Edit">
+                                <IconButton
+                                  onClick={() => table.setEditingRow(row)}
+                                >
+                                  <Edit />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip arrow placement="right" title="Delete">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => handleDeleteRow(row)}
+                                >
+                                  <Delete />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
+                  </>
                 )}
 
                 <Grid item xs={12} sx={{ mt: 2 }}>
                   <Tooltip
                     title={
-                      "This will submit your selected rows (all if none selected) to a process that will return the most similar SNOMED ids and texts based on the field_label"
+                      "This will submit your text to a job and return the most similar standard terms."
                     }
                   >
                     <Button
@@ -265,7 +295,8 @@ export default function ProjectManagementPage({ props, handleClick }) {
             {importType === "redcapImport" && (
               <>
                 <h1>
-                  <AddHomeWorkIcon /> Import REDCap Data Dictionary
+                  {/* <AddHomeWorkIcon />  */}
+                  Import REDCap Data Dictionary
                 </h1>
 
                 <Grid item xs={6} sx={{ margin: "auto" }}>
