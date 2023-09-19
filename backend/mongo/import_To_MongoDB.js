@@ -10,6 +10,7 @@ const { start } = require("repl");
 const url = "mongodb://127.0.0.1:27017";
 // MongoDB Database Name
 const dbName = "GPT3_Embeddings";
+const selectedForm = process.argv.slice(2)[0]; // e.g. 'customText' or 'redcap_data'
 
 startProcess();
 
@@ -28,35 +29,40 @@ function startProcess() {
 
       console.info("Connected to MongoDB successfully");
       const db = client.db(dbName);
-      let redCapCollectionName = "redcap_data";
+      // Determine the collection name based on selectedForm's value
+      let collectionName;
+      if (selectedForm === "customText") {
+        collectionName = "customText";
+      } else {
+        collectionName = "redcap_data";
+      }
+
+      // let redCapCollectionName = "redcap_data";
       // Check if the collection already exists
-      db.listCollections({ name: redCapCollectionName }).toArray(
-        async function (err, collections) {
-          if (err) {
-            return console.error(err);
-          }
-          if (collections.length === 0) {
-            // Create a new collection if it doesn't exist
-            db.createCollection(
-              redCapCollectionName,
-              async function (err, collection) {
-                if (err) {
-                  return console.error(err);
-                }
-                console.info("Collection created!");
-                await updateData(collection);
-                console.info("exiting");
-                process.exit(0);
-              }
-            );
-          } else {
-            console.info("Collection already exists");
-            await updateData(db.collection(redCapCollectionName));
+      db.listCollections({ name: collectionName }).toArray(async function (
+        err,
+        collections
+      ) {
+        if (err) {
+          return console.error(err);
+        }
+        if (collections.length === 0) {
+          db.createCollection(collectionName, async function (err, collection) {
+            if (err) {
+              return console.error(err);
+            }
+            console.info("Collection created!");
+            await updateData(collection);
             console.info("exiting");
             process.exit(0);
-          }
+          });
+        } else {
+          console.info("Collection already exists");
+          await updateData(db.collection(collectionName));
+          console.info("exiting");
+          process.exit(0);
         }
-      );
+      });
 
       const updateData = async (collection) => {
         try {
@@ -88,7 +94,7 @@ function startProcess() {
 
 function processJsonData(jsonData, collection, client) {
   let fileName = process.argv.slice(2)[0];
-  jsonData = JSON.parse(jsonData)
+  jsonData = JSON.parse(jsonData);
   return new Promise((resolve, reject) => {
     if (jsonData) {
       console.info("JSON key length", Object.keys(jsonData).length);
@@ -110,7 +116,7 @@ function processJsonData(jsonData, collection, client) {
       // initialize the progress bar with total number of elements
       bar.start(jsonData.length, 0);
       let insertCounter = 0;
-
+        console.log('jsondata', jsonData)
       jsonData.forEach((doc, index) => {
         // Update document based on tinyId
         let standardizedData = [doc].map((obj) => {
@@ -141,30 +147,54 @@ function processJsonData(jsonData, collection, client) {
         });
 
         doc = standardizedData[0];
-
-        promises.push(
-          collection
-            .updateOne(
-              {
-                "Variable / Field Name": doc["Variable / Field Name"],
-                "Form Name": doc["Form Name"],
-                fileName: fileName,
-              },
-              {
-                $set: {
-                  doc,
-                  timestamp: new Date(),
-                  cleanedFieldLabel: cheerio.load(doc["Field Label"]).text(), //clean HTML out of this column
+        console.log('stan doc', doc)
+        if(selectedForm === 'customText'){
+          promises.push(
+            collection
+              .updateOne(
+                {
+                 name: doc.name
                 },
-              },
-              { upsert: true }
-            )
-            .then(() => {
-              insertCounter++;
-              // Increment the progress bar after the updateOne promise is resolved
-              bar.update(insertCounter);
-            })
-        );
+                {
+                  $set: {
+                    doc,
+                    timestamp: new Date(),
+                  },
+                },
+                { upsert: true }
+              )
+              .then(() => {
+                insertCounter++;
+                // Increment the progress bar after the updateOne promise is resolved
+                bar.update(insertCounter);
+              })
+          );
+        }else{
+          promises.push(
+            collection
+              .updateOne(
+                {
+                  "Variable / Field Name": doc["Variable / Field Name"],
+                  "Form Name": doc["Form Name"],
+                  fileName: fileName,
+                },
+                {
+                  $set: {
+                    doc,
+                    timestamp: new Date(),
+                    cleanedFieldLabel: cheerio.load(doc["Field Label"]).text(), //clean HTML out of this column
+                  },
+                },
+                { upsert: true }
+              )
+              .then(() => {
+                insertCounter++;
+                // Increment the progress bar after the updateOne promise is resolved
+                bar.update(insertCounter);
+              })
+          );
+        }
+       
       });
       // Wait for all of the promises to resolve before closing the connection
       Promise.all(promises)

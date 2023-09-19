@@ -234,7 +234,7 @@ export default function JobsOverview(props) {
           ]
         : []),
       {
-        header: "REDCap Form",
+        header: "Name",
         accessorKey: "redcapFormName",
         minSize: 100,
       },

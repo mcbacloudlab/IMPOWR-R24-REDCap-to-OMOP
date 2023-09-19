@@ -116,6 +116,7 @@ export default function CompletedJobsViewPage(props) {
   useEffect(() => {
     console.log('allverified', allVerified)
     let jobInfo;
+    console.log('location?', location.state)
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;
       _data.current = location.state.result;
@@ -635,154 +636,306 @@ export default function CompletedJobsViewPage(props) {
         );
       }
     };
-
-    const cols = [
-      {
-        header: "",
-        accessorKey: "verified",
-        maxSize: 50,
-        Cell: VerifiedCell,
-        sx: {
-          "& .MuiButton-root": {
-            backgroundColor: "blue",
-            color: "white",
-          },
-          "& .MuiTypography-root": {
-            color: "green",
-          },
-          "& .subrow": {
-            backgroundColor: "yellow",
+    let cols 
+    console.log('redcap', _redcapFormName)
+    if(_redcapFormName.current === 'customText'){
+      cols = [
+        {
+          header: "",
+          accessorKey: "verified",
+          maxSize: 50,
+          Cell: VerifiedCell,
+          sx: {
+            "& .MuiButton-root": {
+              backgroundColor: "blue",
+              color: "white",
+            },
+            "& .MuiTypography-root": {
+              color: "green",
+            },
+            "& .subrow": {
+              backgroundColor: "yellow",
+            },
           },
         },
-      },
-      {
-        header: "REDCap Field Name",
-        accessorKey: "extraData.field_name",
-      },
-      {
-        header: "REDCap Field Label",
-        accessorKey: "redcapFieldLabel",
-        Cell: ({ cell, row }) => {
-          const redcapField = cell.getValue();
-          if (row.original.lookup) {
+        {
+          header: "Name",
+          accessorKey: "extraData.name",
+        },
+        // {
+        //   header: "REDCap Field Label",
+        //   accessorKey: "redcapFieldLabel",
+        //   Cell: ({ cell, row }) => {
+        //     const redcapField = cell.getValue();
+        //     if (row.original.lookup) {
+        //       return (
+        //         <>
+        //           <PersonAddAltIcon />
+        //           {redcapField}
+        //         </>
+        //       );
+        //     } else {
+        //       return redcapField;
+        //     }
+        //   },
+        // },
+  
+        {
+          header: "Concept Text",
+          accessorKey: "snomedText",
+        },
+        {
+          header: "Similarity",
+          accessorKey: "similarity",
+          maxSize: 130,
+          Cell: ({ cell }) => {
+            const value = cell.getValue();
+            if (!value) return "N/A";
+            const formattedValue = value.toLocaleString("en-US", {
+              style: "percent",
+              minimumFractionDigits: 2,
+            });
+  
+            return formattedValue;
+          },
+        },
+        {
+          header: "Concept ID",
+          accessorKey: "snomedID",
+          maxSize: 120,
+          // Use the Cell option to modify the snomedID data
+          Cell: ({ cell }) => {
+            const snomedID = cell.getValue();
+            // Create the URL with the snomedID value
+            const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
+            // Return an 'a' tag with the URL as the href and the snomedID as the text
             return (
-              <>
-                <PersonAddAltIcon />
-                {redcapField}
-              </>
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {snomedID}
+              </a>
             );
-          } else {
-            return redcapField;
-          }
-        },
-      },
-
-      {
-        header: "Concept Text",
-        accessorKey: "snomedText",
-      },
-      {
-        header: "Similarity",
-        accessorKey: "similarity",
-        maxSize: 130,
-        Cell: ({ cell }) => {
-          const value = cell.getValue();
-          if (!value) return "N/A";
-          const formattedValue = value.toLocaleString("en-US", {
-            style: "percent",
-            minimumFractionDigits: 2,
-          });
-
-          return formattedValue;
-        },
-      },
-      {
-        header: "Concept ID",
-        accessorKey: "snomedID",
-        maxSize: 120,
-        // Use the Cell option to modify the snomedID data
-        Cell: ({ cell }) => {
-          const snomedID = cell.getValue();
-          // Create the URL with the snomedID value
-          const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
-          // Return an 'a' tag with the URL as the href and the snomedID as the text
-          return (
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              {snomedID}
-            </a>
-          );
-        },
-      },
-
-      {
-        header: "Domain ID",
-        accessorKey: "extraData.domain_id",
-        maxSize: 120,
-      },
-
-      {
-        header: "Concept Class ID",
-        accessorKey: "extraData.concept_class_id",
-        maxSize: 120,
-      },
-
-      {
-        header: "Standard",
-        accessorKey: "extraData.standard_concept",
-        maxSize: 120,
-      },
-      {
-        header: "Vocab",
-        accessorKey: "extraData.vocabulary_id",
-        maxSize: 120,
-      },
-
-      // {
-      //   header: "User Verified",
-      //   accessorKey: "userMatch",
-      //   maxSize: 120,
-      // },
-      {
-        header: "Preferred",
-        accessorKey: "selected",
-        //you can access a row instance in column definition option callbacks like this
-
-        Cell: PreferredCell,
-        maxSize: 150,
-        sx: {
-          "& .MuiButton-root": {
-            backgroundColor: "blue",
-            color: "white",
-          },
-          "& .MuiTypography-root": {
-            color: "green",
-          },
-          "& .subrow": {
-            backgroundColor: "yellow",
           },
         },
-      },
-      ...(selectedTabIdx !== 2
-        ? [
-            {
-              header: "",
-              accessorKey: "lookup",
-              Cell: LookUpCell,
-              maxSize: 60,
+  
+        {
+          header: "Domain ID",
+          accessorKey: "extraData.domain_id",
+          maxSize: 120,
+        },
+  
+        {
+          header: "Concept Class ID",
+          accessorKey: "extraData.concept_class_id",
+          maxSize: 120,
+        },
+  
+        {
+          header: "Standard",
+          accessorKey: "extraData.standard_concept",
+          maxSize: 120,
+        },
+        {
+          header: "Vocab",
+          accessorKey: "extraData.vocabulary_id",
+          maxSize: 120,
+        },
+  
+        // {
+        //   header: "User Verified",
+        //   accessorKey: "userMatch",
+        //   maxSize: 120,
+        // },
+        {
+          header: "Preferred",
+          accessorKey: "selected",
+          //you can access a row instance in column definition option callbacks like this
+  
+          Cell: PreferredCell,
+          maxSize: 150,
+          sx: {
+            "& .MuiButton-root": {
+              backgroundColor: "blue",
+              color: "white",
             },
-          ]
-        : []),
-      ...(selectedTabIdx !== 2
-        ? [
-            {
-              header: "",
-              accessorKey: "directMap",
-              Cell: CustomDirectMapCell,
-              maxSize: 60,
+            "& .MuiTypography-root": {
+              color: "green",
             },
-          ]
-        : []),
-    ];
+            "& .subrow": {
+              backgroundColor: "yellow",
+            },
+          },
+        },
+        ...(selectedTabIdx !== 2
+          ? [
+              {
+                header: "",
+                accessorKey: "lookup",
+                Cell: LookUpCell,
+                maxSize: 60,
+              },
+            ]
+          : []),
+        ...(selectedTabIdx !== 2
+          ? [
+              {
+                header: "",
+                accessorKey: "directMap",
+                Cell: CustomDirectMapCell,
+                maxSize: 60,
+              },
+            ]
+          : []),
+      ];
+    }else{
+      cols = [
+        {
+          header: "",
+          accessorKey: "verified",
+          maxSize: 50,
+          Cell: VerifiedCell,
+          sx: {
+            "& .MuiButton-root": {
+              backgroundColor: "blue",
+              color: "white",
+            },
+            "& .MuiTypography-root": {
+              color: "green",
+            },
+            "& .subrow": {
+              backgroundColor: "yellow",
+            },
+          },
+        },
+        {
+          header: "REDCap Field Name",
+          accessorKey: "extraData.field_name",
+        },
+        {
+          header: "REDCap Field Label",
+          accessorKey: "redcapFieldLabel",
+          Cell: ({ cell, row }) => {
+            const redcapField = cell.getValue();
+            if (row.original.lookup) {
+              return (
+                <>
+                  <PersonAddAltIcon />
+                  {redcapField}
+                </>
+              );
+            } else {
+              return redcapField;
+            }
+          },
+        },
+  
+        {
+          header: "Concept Text",
+          accessorKey: "snomedText",
+        },
+        {
+          header: "Similarity",
+          accessorKey: "similarity",
+          maxSize: 130,
+          Cell: ({ cell }) => {
+            const value = cell.getValue();
+            if (!value) return "N/A";
+            const formattedValue = value.toLocaleString("en-US", {
+              style: "percent",
+              minimumFractionDigits: 2,
+            });
+  
+            return formattedValue;
+          },
+        },
+        {
+          header: "Concept ID",
+          accessorKey: "snomedID",
+          maxSize: 120,
+          // Use the Cell option to modify the snomedID data
+          Cell: ({ cell }) => {
+            const snomedID = cell.getValue();
+            // Create the URL with the snomedID value
+            const url = `https://athena.ohdsi.org/search-terms/terms/${snomedID}`;
+            // Return an 'a' tag with the URL as the href and the snomedID as the text
+            return (
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {snomedID}
+              </a>
+            );
+          },
+        },
+  
+        {
+          header: "Domain ID",
+          accessorKey: "extraData.domain_id",
+          maxSize: 120,
+        },
+  
+        {
+          header: "Concept Class ID",
+          accessorKey: "extraData.concept_class_id",
+          maxSize: 120,
+        },
+  
+        {
+          header: "Standard",
+          accessorKey: "extraData.standard_concept",
+          maxSize: 120,
+        },
+        {
+          header: "Vocab",
+          accessorKey: "extraData.vocabulary_id",
+          maxSize: 120,
+        },
+  
+        // {
+        //   header: "User Verified",
+        //   accessorKey: "userMatch",
+        //   maxSize: 120,
+        // },
+        {
+          header: "Preferred",
+          accessorKey: "selected",
+          //you can access a row instance in column definition option callbacks like this
+  
+          Cell: PreferredCell,
+          maxSize: 150,
+          sx: {
+            "& .MuiButton-root": {
+              backgroundColor: "blue",
+              color: "white",
+            },
+            "& .MuiTypography-root": {
+              color: "green",
+            },
+            "& .subrow": {
+              backgroundColor: "yellow",
+            },
+          },
+        },
+        ...(selectedTabIdx !== 2
+          ? [
+              {
+                header: "",
+                accessorKey: "lookup",
+                Cell: LookUpCell,
+                maxSize: 60,
+              },
+            ]
+          : []),
+        ...(selectedTabIdx !== 2
+          ? [
+              {
+                header: "",
+                accessorKey: "directMap",
+                Cell: CustomDirectMapCell,
+                maxSize: 60,
+              },
+            ]
+          : []),
+      ];
+    }
+    
     setColDefs(cols);
     _dataObj = result;
     setData(result);

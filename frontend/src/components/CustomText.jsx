@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
+  Alert,
   Box,
   Button,
   Divider,
@@ -21,7 +23,7 @@ import CollectionList from "../components/CollectionList";
 import TransferList from "../components/TransferList";
 
 export default function CustomText({ props, handleClick }) {
-    console.log('customtext', props)
+  console.log("customtext", props);
   let token =
     props.props?.props?.token ??
     props.props?.token ??
@@ -32,6 +34,18 @@ export default function CustomText({ props, handleClick }) {
   const [checkedItems, setCheckedItems] = useState([]);
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
+
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
+    useState(false);
+  const [selectRowsError, setSelectRowsError] = useState(false);
+
+  var tableInstanceRef = useRef(null);
+  useEffect(() => {
+    if (tableInstanceRef.current) {
+      setSelectedRows(tableInstanceRef.current.getState().rowSelection);
+    }
+  }, [tableInstanceRef.current]);
 
   const columns = React.useMemo(
     () => [
@@ -70,7 +84,78 @@ export default function CustomText({ props, handleClick }) {
     setData([]);
   };
 
-  function submitToProcess() {}
+  function submitToProcess(e) {
+    let selectedRows = tableInstanceRef.current?.getSelectedRowModel().rows;
+
+    // Reformat the array of objects
+    const reformattedArray = selectedRows.map((obj) => obj.original);
+    let dataToSendToQueue;
+    if (!reformattedArray || reformattedArray.length <= 0) {
+      dataToSendToQueue = data;
+    } else {
+      dataToSendToQueue = reformattedArray;
+    }
+    setSelectRowsError(false);
+
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+    // console.log("send data", data);
+    var formdata = new FormData();
+    // console.log('object length', dataToSendToQueue.length)
+    formdata.append("data", JSON.stringify(dataToSendToQueue));
+    formdata.append("selectedForm", "customText");
+    formdata.append("dataLength", dataToSendToQueue.length);
+
+    // Filter out properties with the value of false
+    const filteredCollections = Object.fromEntries(
+      Object.entries(checkedItems).filter(([key, value]) => value !== false)
+    );
+    // console.log("collections to use", JSON.stringify(filteredCollections));
+    formdata.append("collections", JSON.stringify(filteredCollections));
+    const checkIfAllFalse = (checkedItems) => {
+      // Extract an array of values from the checkedItems object
+      const values = Object.values(checkedItems);
+
+      // Use the every() method to check if every value is false
+      const allFalse = values.every((value) => value === false);
+
+      // If the array is empty or all values are false, set selectRowsErrors to true
+      if (values.length === 0 || allFalse) {
+        setSelectRowsError(true);
+        return false;
+      } else {
+        setSelectRowsError(false);
+        return true;
+      }
+    };
+
+    // Call the checkIfAllFalse function and pass the checkedItems object
+    let checkedItem = checkIfAllFalse(checkedItems);
+    if (!checkedItem) return;
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+      credentials: "include", // Include cookies with the request
+    };
+
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/queue/submit`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        // console.log(result);
+        window.scrollTo(0, 0); //scroll to top of page
+        setShowSubmittedNotifcation(true);
+        setTimeout(() => {
+          setShowSubmittedNotifcation(false);
+        }, 5000);
+      })
+      .catch((error) => console.log("error", error));
+  }
 
   const handleDeleteRow = useCallback(
     (row) => {
@@ -152,7 +237,24 @@ export default function CustomText({ props, handleClick }) {
                 colDefs={colDefs}
               />
             </Grid>
-
+            <Grid sx={{ margin: "auto", mt: 2 }}>
+              {selectRowsError && (
+                <Alert
+                  severity="error"
+                  sx={{
+                    fontSize: "1.2rem",
+                    maxWidth: "400px",
+                  }}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    Error
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Please select as least one collection to use.
+                  </Typography>
+                </Alert>
+              )}
+            </Grid>
             <Grid item xs={12} xl={8}>
               <MaterialTable
                 title="Names List"
@@ -162,6 +264,25 @@ export default function CustomText({ props, handleClick }) {
                 enableEditing
                 editingMode="table"
                 enableColumnOrdering
+                options={{
+                  selection: true,
+                }}
+                enableRowSelection
+                tableInstanceRef={tableInstanceRef}
+                muiTableBodyRowProps={({ row }) => ({
+                  //add onClick to row to select upon clicking anywhere in the row
+                  // onClick: row.getToggleSelectedHandler(),
+                  // sx: { cursor: "pointer" },
+                  onClick: () =>
+                    setSelectedRows((prev) => ({
+                      ...prev,
+                      [row.id]: !prev[row.id],
+                    })),
+                  selected: selectedRows[row.id],
+                  sx: {
+                    cursor: "pointer",
+                  },
+                })}
                 renderRowActions={({ row, table }) => (
                   <Box sx={{ display: "flex", gap: "1rem" }}>
                     <Tooltip arrow placement="left" title="Edit">
@@ -203,6 +324,32 @@ export default function CustomText({ props, handleClick }) {
           </Button>
         </Tooltip>
       </Grid>
+      {showSubmittedNotifcation && (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="100vh"
+        >
+          <Alert
+            severity="success"
+            sx={{
+              fontSize: "1.2rem",
+              position: "absolute",
+              top: "0px",
+              right: "250px",
+              zIndex: 10000,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Submitted to Queue
+            </Typography>
+            <Typography variant="subtitle2" color="text.secondary">
+              Your job has been successfully submitted to the queue.
+            </Typography>
+          </Alert>
+        </Box>
+      )}
     </>
   );
 }

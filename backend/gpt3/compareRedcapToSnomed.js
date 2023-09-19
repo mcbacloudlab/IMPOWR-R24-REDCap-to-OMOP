@@ -14,7 +14,9 @@ async function main() {
   await client.connect();
   console.info("Connected successfully to MongoDB server");
 }
+const selectedForm = process.argv.slice(2)[0]; // e.g. 'customText' or 'redcap_data'
 
+console.log('selected form is123', selectedForm)
 main().then(async () => {
   try {
     const { stdin } = process;
@@ -43,25 +45,43 @@ main().then(async () => {
   async function processJsonData(jsonData) {
     // console.log("jsondata", JSON.parse(jsonData));
     let _jsonData = JSON.parse(jsonData);
-
-    //Load MongoDB Collections into memory/arrays
-    const redcapCollection = client
+    let redcapCollection, customTextCollection 
+    if(selectedForm === 'customText'){
+      customTextCollection = client
+      .db("GPT3_Embeddings")
+      .collection("gpt3_customText_embeddings");
+    console.log('Got Redcap Embeddings from Mongo')
+    }else{
+      redcapCollection = client
       .db("GPT3_Embeddings")
       .collection("gpt3_redcap_embeddings");
     console.log('Got Redcap Embeddings from Mongo')
+    }
+    //Load MongoDB Collections into memory/arrays
+
   
 
     const transformedData = await Promise.all(
       _jsonData.map(async (obj) => {
         // console.log("obj", obj);
-        obj.field_label = cheerio.load(obj.field_label).text();
-        //consider radio buttons using og_field_name
-        const document = await redcapCollection.findOne({
-          fieldLabel: obj.field_label,
-          formName: obj.form_name,
-          variableName: obj.og_field_name?obj.og_field_name:obj.field_name,
-        });
-
+        let textLookup, document
+        if(selectedForm === 'customText'){
+          textLookup = cheerio.load(obj.name).text()
+          document = await customTextCollection.findOne({
+            name: textLookup,
+          });
+  
+        }else{
+          obj.field_label = cheerio.load(obj.field_label).text();
+          document = await redcapCollection.findOne({
+            fieldLabel: obj.field_label,
+            formName: obj.form_name,
+            variableName: obj.og_field_name?obj.og_field_name:obj.field_name,
+          });
+  
+        }
+        
+      
  
         // Merge the properties of obj into document
         const mergedDocument = Object.assign({}, document, { obj });
@@ -71,6 +91,7 @@ main().then(async () => {
     );
 
     const redCapCollectionArray = transformedData;
+    console.log('redcapCollectionArray?', redCapCollectionArray)
     console.info("Loaded Redcap Collection into memory");
     // console.log('collections to use', collectionsToUse)
     console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))

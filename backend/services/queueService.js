@@ -67,7 +67,7 @@ async function importToMongo(job) {
   return new Promise((resolve) => {
     const scriptPath = path.resolve(
       __dirname,
-      "../mongo/importRedcap_To_MongoDB.js"
+      "../mongo/import_To_MongoDB.js"
     );
     const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
@@ -116,7 +116,7 @@ async function embedRedcapText(job) {
   console.log("Starting REDCap GPT3 Embedding...");
 
   return new Promise((resolve) => {
-    const scriptPath = path.resolve(__dirname, "../gpt3/redcapDDEmbed.js");
+    const scriptPath = path.resolve(__dirname, "../gpt3/getGPT3Embedding.js");
     const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
     const filename = job.data.selectedForm;
@@ -134,6 +134,8 @@ async function embedRedcapText(job) {
       if (data.toString().startsWith("[[")) {
         // console.log("data to capture");
         capturedData = data;
+      }else{
+        console.log('data', data.toString()) //comment this out in production...maybe not
       }
     });
 
@@ -264,7 +266,7 @@ async function compareEmbeddings(job) {
         //******************
         // LOG logMessage to see the console.logs from the worker threads
         //for development and testing, comment this out in prod
-        // console.log(logMessage)
+        console.log(logMessage)
         //******************
         //******************
 
