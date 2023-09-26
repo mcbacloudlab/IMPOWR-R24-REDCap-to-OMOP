@@ -27,7 +27,6 @@ async function processChunk(
   limit,
   redcapLookupArray // Add redcapLookupArray as an argument
 ) {
-
   let finalList = [];
   let snomedCursor, snomedChunk;
   try {
@@ -39,10 +38,10 @@ async function processChunk(
   // console.log('wahat')
   // console.log('redcapColleciton', redCapCollectionArray)
   for (const redCapDoc of redCapCollectionArray) {
-    // console.log('redcapEmbedding', redCapDoc)
+    console.log('redcapDoc', redCapDoc)
     let redcapFieldLabel = redCapDoc.fieldLabel;
     // console.log('embedding', redCapDoc.gpt3_data)
-    if(!redCapDoc.gpt3_data.data[0]) return;
+    if (!redCapDoc.gpt3_data.data[0]) return;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
 
@@ -57,7 +56,7 @@ async function processChunk(
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
         (!isEmptyObject(data.matchingID) && data.matchingID);
       let _redCapDoc = redCapDoc;
-      
+
       topResults.push({
         redcapFieldLabel,
         snomedText: dataText,
@@ -123,41 +122,54 @@ async function processChunks(
   // Now that all collections have been processed, we can sort and filter allResults
   const fieldLabels = [
     ...new Set(
-      allResults
-        .flat()
-        .map((item) => item.redcapFieldLabel + "-" + item.extraData.field_name)
+      allResults.flat().map((item) => {
+        let fieldName, fieldLabel;
+
+        if (!item.extraData.field_name) fieldLabel = item.extraData.name;
+        else fieldLabel = item.redcapFieldLabel;
+
+        if (!item.redcapFieldLabel) fieldName = item.extraData.name;
+        else fieldName = item.extraData.field_name;
+
+        return fieldLabel + "-" + fieldName;
+      })
     ),
   ];
 
+  console.log("field labels", fieldLabels);
+
   const filteredData = await fieldLabels.reduce(
-    async (accPromise, fieldLabel) => {
+    async (accPromise, combinedLabel) => {
       const acc = await accPromise;
 
-      const items = allResults
-        .flat()
-        .filter(
-          (item) =>
-            item.redcapFieldLabel + "-" + item.extraData.field_name ===
-            fieldLabel
-        );
+      const items = allResults.flat().filter((item) => {
+        let fieldName, fieldLabel;
+
+        if (!item.extraData.field_name) fieldLabel = item.extraData.name;
+        else fieldLabel = item.redcapFieldLabel;
+
+        if (!item.redcapFieldLabel) fieldName = item.extraData.name;
+        else fieldName = item.extraData.field_name;
+
+        return fieldLabel + "-" + fieldName === combinedLabel;
+      });
 
       items.sort((a, b) => b.similarity - a.similarity);
 
       const topItems = items.slice(0, 5);
-        // console.log('top items', topItems)  
-        for (const item of topItems) {
-          // console.log('item', item)
-          if (item.snomedID && typeof item.snomedID === 'number') {
-            // Query the postgres db for additional data
-            const res = await pg_pool.query('SELECT * FROM concept WHERE concept_id = $1', [item.snomedID]);
-            // console.log('pg res', res)
-            if (res.rows.length > 0) {
-              item.extraData = { ...item.extraData, ...res.rows[0] };
-            }
-          } else {
-            // console.log('Warning: snomedID is undefined for item', item);
+      for (const item of topItems) {
+        if (item.snomedID && typeof item.snomedID === "number") {
+          const res = await pg_pool.query(
+            "SELECT * FROM concept WHERE concept_id = $1",
+            [item.snomedID]
+          );
+          if (res.rows.length > 0) {
+            item.extraData = { ...item.extraData, ...res.rows[0] };
           }
+        } else {
+          console.log("Warning: snomedID is undefined for item", item);
         }
+      }
 
       acc.push(...topItems);
       return acc;
@@ -187,8 +199,8 @@ async function processChunks(
 }
 
 // Catch any unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
 

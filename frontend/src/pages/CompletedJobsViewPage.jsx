@@ -114,9 +114,9 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    console.log('allverified', allVerified)
+    console.log("allverified", allVerified);
     let jobInfo;
-    console.log('location?', location.state)
+    console.log("location?", location.state);
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;
       _data.current = location.state.result;
@@ -335,12 +335,22 @@ export default function CompletedJobsViewPage(props) {
 
   function verifyRow(row, removePref, fromModal) {
     const updatedData = _dataObj.map((item) => {
+      let fieldLabel, fieldName, rowFieldLabel, rowFieldName;
+      if (jobName === "customText") {
+        fieldLabel = item.extraData.name;
+        fieldName = item.extraData.name;
+        rowFieldLabel = row.extraData.name;
+        rowFieldName = row.extraData.name;
+      } else {
+        fieldLabel = item.redcapFieldLabel;
+        fieldName = item.extraData.field_name;
+        rowFieldLabel = row.redcapFieldLabel;
+        rowFieldName = row.extraData.field_name;
+      }
+
       //removing the pref
       if (removePref) {
-        if (
-          item.redcapFieldLabel === row.redcapFieldLabel &&
-          item.extraData.field_name === row.extraData.field_name
-        ) {
+        if (fieldLabel === rowFieldLabel && fieldName === rowFieldName) {
           //increment counter only if row has not been verified previously
           if (item.verified === true && !fromModal) {
             // Update both verifiedRecords and totalRecords using functional updates
@@ -373,11 +383,9 @@ export default function CompletedJobsViewPage(props) {
           };
         }
       } else {
+        console.log("we add pref");
         //adding the pref
-        if (
-          item.redcapFieldLabel === row.redcapFieldLabel &&
-          item.extraData.field_name === row.extraData.field_name
-        ) {
+        if (fieldLabel === rowFieldLabel && fieldName === rowFieldName) {
           //increment counter only if row has not been verified previously
           if (item.verified === false && !fromModal) {
             // Update both verifiedRecords and totalRecords using functional updates
@@ -431,9 +439,17 @@ export default function CompletedJobsViewPage(props) {
     //create verified and selected keys if first time
     if (!dbFlag) {
       _data.forEach((item, index) => {
+        let fieldLabel, fieldName;
+        console.log("the item", item);
+        if (!item.redcapFieldLabel) fieldLabel = item.extraData.name;
+        else fieldLabel = item.redcapFieldLabel;
+
+        if (!item.extraData.field_name) fieldName = item.extraData.name;
+        else fieldName = item.extraData.field_name;
+
         if (
-          item.redcapFieldLabel !== currentRedcapFieldLabel ||
-          item.extraData.field_name !== currentRedcapFieldName
+          fieldLabel !== currentRedcapFieldLabel ||
+          fieldName !== currentRedcapFieldName
         ) {
           if (currentItem) {
             result.push(currentItem);
@@ -442,8 +458,8 @@ export default function CompletedJobsViewPage(props) {
           item.verified = false;
           currentItem = { ...item, subRows: [] };
 
-          currentRedcapFieldLabel = item.redcapFieldLabel;
-          currentRedcapFieldName = item.extraData.field_name;
+          currentRedcapFieldLabel = fieldLabel;
+          currentRedcapFieldName = fieldName;
         } else {
           currentItem.subRows.push({
             ...item,
@@ -468,6 +484,7 @@ export default function CompletedJobsViewPage(props) {
         }
         setVerifiedRecords(verifiedCount);
       });
+      console.log("a result", result);
     } else {
       result = _data;
       //count verified records
@@ -498,6 +515,8 @@ export default function CompletedJobsViewPage(props) {
         setAllVerified(false);
       }
       setVerifiedRecords(verifiedCount);
+
+      console.log("a result 2", result);
     }
     setTempAllData(result);
     setTotalRecords(result.length);
@@ -636,9 +655,9 @@ export default function CompletedJobsViewPage(props) {
         );
       }
     };
-    let cols 
-    console.log('redcap', _redcapFormName)
-    if(_redcapFormName.current === 'customText'){
+    let cols;
+    console.log("redcap", _redcapFormName);
+    if (_redcapFormName.current === "customText") {
       cols = [
         {
           header: "",
@@ -679,7 +698,7 @@ export default function CompletedJobsViewPage(props) {
         //     }
         //   },
         // },
-  
+
         {
           header: "Concept Text",
           accessorKey: "snomedText",
@@ -695,7 +714,7 @@ export default function CompletedJobsViewPage(props) {
               style: "percent",
               minimumFractionDigits: 2,
             });
-  
+
             return formattedValue;
           },
         },
@@ -716,19 +735,19 @@ export default function CompletedJobsViewPage(props) {
             );
           },
         },
-  
+
         {
           header: "Domain ID",
           accessorKey: "extraData.domain_id",
           maxSize: 120,
         },
-  
+
         {
           header: "Concept Class ID",
           accessorKey: "extraData.concept_class_id",
           maxSize: 120,
         },
-  
+
         {
           header: "Standard",
           accessorKey: "extraData.standard_concept",
@@ -739,7 +758,7 @@ export default function CompletedJobsViewPage(props) {
           accessorKey: "extraData.vocabulary_id",
           maxSize: 120,
         },
-  
+
         // {
         //   header: "User Verified",
         //   accessorKey: "userMatch",
@@ -749,7 +768,7 @@ export default function CompletedJobsViewPage(props) {
           header: "Preferred",
           accessorKey: "selected",
           //you can access a row instance in column definition option callbacks like this
-  
+
           Cell: PreferredCell,
           maxSize: 150,
           sx: {
@@ -786,7 +805,7 @@ export default function CompletedJobsViewPage(props) {
             ]
           : []),
       ];
-    }else{
+    } else {
       cols = [
         {
           header: "",
@@ -827,7 +846,7 @@ export default function CompletedJobsViewPage(props) {
             }
           },
         },
-  
+
         {
           header: "Concept Text",
           accessorKey: "snomedText",
@@ -843,7 +862,7 @@ export default function CompletedJobsViewPage(props) {
               style: "percent",
               minimumFractionDigits: 2,
             });
-  
+
             return formattedValue;
           },
         },
@@ -864,19 +883,19 @@ export default function CompletedJobsViewPage(props) {
             );
           },
         },
-  
+
         {
           header: "Domain ID",
           accessorKey: "extraData.domain_id",
           maxSize: 120,
         },
-  
+
         {
           header: "Concept Class ID",
           accessorKey: "extraData.concept_class_id",
           maxSize: 120,
         },
-  
+
         {
           header: "Standard",
           accessorKey: "extraData.standard_concept",
@@ -887,7 +906,7 @@ export default function CompletedJobsViewPage(props) {
           accessorKey: "extraData.vocabulary_id",
           maxSize: 120,
         },
-  
+
         // {
         //   header: "User Verified",
         //   accessorKey: "userMatch",
@@ -897,7 +916,7 @@ export default function CompletedJobsViewPage(props) {
           header: "Preferred",
           accessorKey: "selected",
           //you can access a row instance in column definition option callbacks like this
-  
+
           Cell: PreferredCell,
           maxSize: 150,
           sx: {
@@ -935,7 +954,7 @@ export default function CompletedJobsViewPage(props) {
           : []),
       ];
     }
-    
+
     setColDefs(cols);
     _dataObj = result;
     setData(result);
@@ -956,13 +975,12 @@ export default function CompletedJobsViewPage(props) {
     myHeaders.append("Authorization", "Bearer " + props.token);
 
     var formdata = new FormData();
-    console.log('_redcapFormName', _redcapFormName)
-    if(action === 'downloadUpload'){
-      console.log('download upload')
-    }else{
+    console.log("_redcapFormName", _redcapFormName);
+    if (action === "downloadUpload") {
+      console.log("download upload");
+    } else {
       formdata.append("form", _redcapFormName.current);
     }
-   
 
     var requestOptions = {
       method: "POST",
@@ -1057,7 +1075,7 @@ export default function CompletedJobsViewPage(props) {
           ...item,
           field_annotation: JSON.stringify(item.field_annotation),
         }));
-        if (action === "downloadExcel" || action === 'downloadUpload') {
+        if (action === "downloadExcel" || action === "downloadUpload") {
           // console.log("downloadExcel!");
           const csvData = Papa.unparse(stringifiedData);
           // const csvData = Papa.unparse(jsonResult);
@@ -1577,7 +1595,6 @@ export default function CompletedJobsViewPage(props) {
                   Verified {verifiedRecords}/{totalRecords}
                 </Typography> */}
 
-                
                 <Divider sx={{ margin: "30px" }} />
                 <Tabs
                   centered

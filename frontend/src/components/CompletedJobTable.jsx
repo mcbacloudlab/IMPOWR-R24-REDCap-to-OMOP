@@ -32,7 +32,7 @@ export default function CompletedJobTable({
       muiTableContainerProps={{
         sx: {
           maxWidth: "100vw",
-          maxHeight: "50vh",
+          maxHeight: "60vh",
         },
       }}
       onSortingChange={setSorting}
