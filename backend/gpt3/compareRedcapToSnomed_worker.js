@@ -38,7 +38,7 @@ async function processChunk(
   // console.log('wahat')
   // console.log('redcapColleciton', redCapCollectionArray)
   for (const redCapDoc of redCapCollectionArray) {
-    console.log('redcapDoc', redCapDoc)
+    // console.log("redcapDoc", redCapDoc);
     let redcapFieldLabel = redCapDoc.fieldLabel;
     // console.log('embedding', redCapDoc.gpt3_data)
     if (!redCapDoc.gpt3_data.data[0]) return;
@@ -56,14 +56,23 @@ async function processChunk(
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
         (!isEmptyObject(data.matchingID) && data.matchingID);
       let _redCapDoc = redCapDoc;
-
-      topResults.push({
-        redcapFieldLabel,
-        snomedText: dataText,
-        snomedID: dataID ? dataID : "",
-        similarity: cosineSimilarity(dataEmbedding, redcapEmbedding),
-        extraData: _redCapDoc.obj,
-      });
+      if (_redCapDoc.obj.name && _redCapDoc.obj.name == dataID) {
+        topResults.push({
+          redcapFieldLabel,
+          snomedText: dataText,
+          snomedID: dataID ? dataID : "",
+          similarity: 1,
+          extraData: _redCapDoc.obj,
+        });
+      } else {
+        topResults.push({
+          redcapFieldLabel,
+          snomedText: dataText,
+          snomedID: dataID ? dataID : "",
+          similarity: cosineSimilarity(dataEmbedding, redcapEmbedding),
+          extraData: _redCapDoc.obj,
+        });
+      }
     }
 
     finalList.push(

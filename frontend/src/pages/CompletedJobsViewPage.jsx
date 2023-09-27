@@ -383,7 +383,6 @@ export default function CompletedJobsViewPage(props) {
           };
         }
       } else {
-        console.log("we add pref");
         //adding the pref
         if (fieldLabel === rowFieldLabel && fieldName === rowFieldName) {
           //increment counter only if row has not been verified previously
