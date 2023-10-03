@@ -62,7 +62,6 @@ export default function ProjectManagementPage({ props, handleClick }) {
   }, [forms]);
 
   function handleImportTypeClick(event) {
-    console.log("handle import type click", event.target.value);
     setImportType(event.target.value);
   }
 

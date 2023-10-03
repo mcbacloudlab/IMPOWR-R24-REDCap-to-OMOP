@@ -8,6 +8,7 @@ import {
   Button,
   Divider,
   IconButton,
+  Modal,
   TextField,
   Tooltip,
   Typography,
@@ -21,6 +22,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Delete, Edit } from "@mui/icons-material";
 import CollectionList from "../components/CollectionList";
 import TransferList from "../components/TransferList";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 export default function CustomText({ props, handleClick }) {
   console.log("customtext", props);
@@ -34,6 +45,9 @@ export default function CustomText({ props, handleClick }) {
   const [checkedItems, setCheckedItems] = useState([]);
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
+  const [openAthenaModal, setOpenAthenaModal] = useState(false);
+  const [athenaSearchValue, setAthenaSearchValue] = useState("");
+  const [athenaAPIResults, setAthenaAPIResults] = useState([]);
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
@@ -68,6 +82,11 @@ export default function CustomText({ props, handleClick }) {
     ],
     []
   );
+
+  const handleAthenaChange = (event) => {
+    console.log("handle change", event.target.value);
+    setAthenaSearchValue(event.target.value);
+  };
 
   const handleDelete = (row) => {
     setData((prevData) => prevData.filter((item) => item !== row.original));
@@ -170,6 +189,54 @@ export default function CustomText({ props, handleClick }) {
     [data]
   );
 
+  const openAthena = () => {
+    setOpenAthenaModal(true);
+    setAthenaAPIResults([]);
+    setAthenaSearchValue("");
+  };
+
+  const handleClose = () => {
+    setOpenAthenaModal(false);
+  };
+
+  const getAthenaData = () => {
+    // Call your API using fetch here
+
+    console.log("get athena data");
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("conceptID", athenaSearchValue);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/athena/getDataByConceptID`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setAthenaAPIResults(data.data);
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+      });
+  };
+
+  const handleAthenaKeyPress = (event) => {
+    if (event.key === "Enter") {
+      getAthenaData();
+    }
+  };
+
+  // const MODAL_WIDTH = "600px";
+  // const MODAL_HEIGHT = "400px";
+
   return (
     <>
       <Typography>
@@ -191,6 +258,14 @@ export default function CustomText({ props, handleClick }) {
       <br />
       <Divider />
       <br />
+      <Button
+        onClick={openAthena}
+        variant="contained"
+        color="primary"
+        sx={{ margin: "10px", marginRight: "60px" }}
+      >
+        Athena Search
+      </Button>
       <TextField
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
@@ -222,8 +297,101 @@ export default function CustomText({ props, handleClick }) {
           >
             Clear Table
           </Button>
+          <br />
+          <br />
+          {/* ATHENA SEARCH MODAL */}
+          <Modal
+            open={openAthenaModal}
+            onClose={handleClose}
+            aria-labelledby="simple-modal-title"
+            aria-describedby="simple-modal-description"
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                backgroundColor: "white",
+                outline: "none",
+              }}
+            >
+              <h3>Athena Search</h3>
+              <TextField
+                label="Concept ID"
+                // fullWidth
+                placeholder="Search..."
+                variant="outlined"
+                onChange={handleAthenaChange}
+                onKeyPress={handleAthenaKeyPress}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <SearchIcon cursor="pointer" onClick={getAthenaData} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* Show athena results in a table */}
+              {athenaAPIResults.length > 0 ? (
+                <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Concept ID
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Concept Name
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Domain ID
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Vocabulary ID
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Concept Class ID
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Standard Concept
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Valid Start Date
+                        </TableCell>
+                        <TableCell style={{ fontWeight: "bold" }}>
+                          Valid End Date
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {athenaAPIResults.map((row) => (
+                        <TableRow key={row.concept_id}>
+                          <TableCell>{row.concept_id}</TableCell>
+                          <TableCell>{row.concept_name}</TableCell>
+                          <TableCell>{row.domain_id}</TableCell>
+                          <TableCell>{row.vocabulary_id}</TableCell>
+                          <TableCell>{row.concept_class_id}</TableCell>
+                          <TableCell>{row.standard_concept}</TableCell>
+                          <TableCell>{row.valid_start_date}</TableCell>
+                          <TableCell>{row.valid_end_date}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : null}
+              {!athenaAPIResults && <h3>No results</h3>}
+
+              {/* End show athena results table */}
+            </div>
+          </Modal>
+          {/* END ATHENA SEARCH MODAL */}
+
           <Grid container spacing={2}>
-            <Grid item xs={12} xl={4}>
+            <Grid item xs={12} xl={3}>
               <CollectionList
                 token={token}
                 setCheckedItems={setCheckedItems}
@@ -262,12 +430,12 @@ export default function CustomText({ props, handleClick }) {
                 columns={columns}
                 enableColumnResizing
                 enableEditing
-                editingMode="table"
+                editingMode="cell"
                 enableColumnOrdering
                 options={{
                   selection: true,
                 }}
-                enableRowSelection
+                // enableRowSelection
                 tableInstanceRef={tableInstanceRef}
                 muiTableBodyRowProps={({ row }) => ({
                   //add onClick to row to select upon clicking anywhere in the row

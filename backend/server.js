@@ -14,7 +14,8 @@ const redcapRoutes = require("./routes/redcapRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const umlsRoutes = require("./routes/umlsRoutes");
 const orcidRoutes = require("./routes/orcidRoutes");
-const adminRoutes = require('./routes/adminRoutes')
+const adminRoutes = require("./routes/adminRoutes");
+const athenaRoutes = require("./routes/athenaRoutes");
 const { authenticate, requireAdmin } = require("./middlewares/authenticate");
 const rateLimit = require("express-rate-limit");
 const Queue = require("bull");
@@ -30,7 +31,6 @@ commander.setMaxListeners(20); // Increase the limit to 20
 setInterval(syncRedisAndJobDB, 60000);
 
 const someQueue = new Queue("process-queue");
-
 
 let appPort = process.env.EXPRESS_PORT;
 // Use Helmet!
@@ -91,14 +91,14 @@ const skip = (req, res) => {
 app.use(morgan("dev", { skip }));
 
 //using express-fileupload for parsing body
-app.use(fileUpload({
-  createParentPath: true,
-  useTempFiles : false, //enable/disable file-uploads
-  tempFileDir : false, //enable/disable file-uploads
-  limits: { fileSize: 50 * 1024 * 1024 }, // Set file size limit to 50MB
-}));
-
-
+app.use(
+  fileUpload({
+    createParentPath: true,
+    useTempFiles: false, //enable/disable file-uploads
+    tempFileDir: false, //enable/disable file-uploads
+    limits: { fileSize: 50 * 1024 * 1024 }, // Set file size limit to 50MB
+  })
+);
 
 const apiLimiter = rateLimit({
   windowMs: 1000, // time window in milliseconds
@@ -119,11 +119,10 @@ app.use("/api/queue", authenticate, queueRoutes);
 app.use("/api/umls", authenticate, umlsRoutes);
 app.use("/api/collections", authenticate, collectionRoutes);
 app.use("/api/keys", authenticate, keyRoutes);
+app.use("/api/athena", authenticate, athenaRoutes);
 
 //admin only routes
 app.use("/api/admin", authenticate, requireAdmin, adminRoutes);
-
-
 
 // Exclude all routes under /admin/queues/static from the requireAdmin middleware
 // app.use("/admin/queues/static/*", router);
@@ -132,9 +131,8 @@ app.use("/api/admin", authenticate, requireAdmin, adminRoutes);
 if (process.env.NODE_ENV == "local" || process.env.NODE_ENV == "development") {
   const { router, setQueues, replaceQueues, addQueue, removeQueue } =
     createBullBoard([new BullAdapter(someQueue)]);
-    app.use("/admin/queues", router);
+  app.use("/admin/queues", router);
 }
-
 
 var server = app.listen(appPort, function () {
   var host = server.address().address;
