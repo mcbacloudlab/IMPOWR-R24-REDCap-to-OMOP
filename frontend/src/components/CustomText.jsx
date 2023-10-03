@@ -32,9 +32,13 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
+import CSVIcon from "../assets/csv.png";
+import XLSXIcon from "../assets/xlsx.png";
+import Papa from "papaparse";
+var XLSX = require("xlsx");
 
 export default function CustomText({ props, handleClick }) {
-  console.log("customtext", props);
+  // console.log("customtext", props);
   let token =
     props.props?.props?.token ??
     props.props?.token ??
@@ -54,6 +58,7 @@ export default function CustomText({ props, handleClick }) {
     useState(false);
   const [selectRowsError, setSelectRowsError] = useState(false);
 
+  const fileInputRef = useRef(null);
   var tableInstanceRef = useRef(null);
   useEffect(() => {
     if (tableInstanceRef.current) {
@@ -234,6 +239,48 @@ export default function CustomText({ props, handleClick }) {
     }
   };
 
+  const readFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => resolve(event.target.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const handleCSVUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileContent = await readFile(file);
+      const csvText = new TextDecoder().decode(fileContent);
+      const results = Papa.parse(csvText, { header: true });
+      const formattedData = results.data
+        .filter((row) => row.name) // ensures there's data in 'name' column
+        .map((row) => ({ name: row.name }));
+      setData((prevData) => [...prevData, ...formattedData]);
+      fileInputRef.current.value = "";
+
+      console.log("fileinput ref", fileInputRef);
+    }
+  };
+
+  const handleXLSXUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileContent = await readFile(file);
+      const workbook = XLSX.read(fileContent, { type: "buffer" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const formattedData = jsonData
+        .filter((row) => row.name) // ensures there's data in 'name' column
+        .map((row) => ({ name: row.name }));
+      setData((prevData) => [...prevData, ...formattedData]);
+      fileInputRef.current.value = "";
+      console.log("fileinput ref", fileInputRef);
+    }
+  };
+
   // const MODAL_WIDTH = "600px";
   // const MODAL_HEIGHT = "400px";
 
@@ -256,8 +303,6 @@ export default function CustomText({ props, handleClick }) {
         page.
       </Typography>
       <br />
-      <Divider />
-      <br />
       <Button
         onClick={openAthena}
         variant="contained"
@@ -266,10 +311,66 @@ export default function CustomText({ props, handleClick }) {
       >
         Athena Search
       </Button>
+      <Divider />
+      <br />
+      <Tooltip
+        title={`Import CSV List. Ensure the list is in a column with a header of 'name'`}
+        placement="top"
+      >
+        <span>
+          <input
+            type="file"
+            accept=".csv"
+            hidden
+            onChange={handleCSVUpload}
+            ref={fileInputRef}
+          />
+          <Button
+            onClick={(e) => {
+              e.currentTarget.previousSibling.click();
+              e.currentTarget.previousSibling.value = ""; // Reset the file input value
+            }}
+          >
+            <img
+              src={CSVIcon}
+              alt="Import CSV"
+              style={{ width: "32px", height: "32px" }}
+            />
+          </Button>
+        </span>
+      </Tooltip>
+
+      <Tooltip
+        title={`Import XLSX List. Ensure the list is in a column with a header of 'name'`}
+        placement="top"
+      >
+        <span>
+          <input
+            type="file"
+            accept=".xlsx"
+            hidden
+            onChange={handleXLSXUpload}
+            ref={fileInputRef}
+          />
+          <Button
+            onClick={(e) => {
+              e.currentTarget.previousSibling.click();
+              e.currentTarget.previousSibling.value = ""; // Reset the file input value
+            }}
+          >
+            <img
+              src={XLSXIcon}
+              alt="Import XLSX List"
+              style={{ width: "32px", height: "32px" }}
+            />
+          </Button>
+        </span>
+      </Tooltip>
+
       <TextField
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        label="Custom Text"
+        label="Add Custom Text"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleAddClick();
@@ -295,7 +396,7 @@ export default function CustomText({ props, handleClick }) {
             color="error"
             sx={{ margin: "10px", marginLeft: "60px" }}
           >
-            Clear Table
+            Clear All
           </Button>
           <br />
           <br />
@@ -335,7 +436,7 @@ export default function CustomText({ props, handleClick }) {
               />
 
               {/* Show athena results in a table */}
-              {athenaAPIResults.length > 0 ? (
+              {athenaAPIResults && athenaAPIResults.length > 0 ? (
                 <TableContainer component={Paper} style={{ marginTop: "20px" }}>
                   <Table>
                     <TableHead>

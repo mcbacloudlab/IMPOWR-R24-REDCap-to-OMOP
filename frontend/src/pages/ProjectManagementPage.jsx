@@ -20,7 +20,6 @@ export default function ProjectManagementPage({ props, handleClick }) {
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [importType, setImportType] = useState("");
- 
 
   // const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -78,14 +77,14 @@ export default function ProjectManagementPage({ props, handleClick }) {
           <Grid item xs={12}>
             <Button
               value="redcapImport"
-              variant="outlined"
+              variant={importType === "redcapImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
             >
               REDCap Data Dictionary
             </Button>
             <Button
               value="customImport"
-              variant="outlined"
+              variant={importType === "customImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
               sx={{ margin: "20px" }}
             >
