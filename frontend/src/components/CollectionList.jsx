@@ -152,7 +152,7 @@ const CollectionList = ({ token, checkedItems, setCheckedItems }) => {
   }
 
   return (
-    <Grid container spacing={1} justifyContent="center" alignItems="center">
+    <Grid container spacing={0} justifyContent="center" alignItems="center">
       <TableContainer component={Paper} sx={{ margin: 0 }}>
         <Table size="small">
           <TableHead sx={{ backgroundColor: "#343541", color: "white" }}>

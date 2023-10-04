@@ -944,8 +944,8 @@ export default function CustomText({ props, handleClick }) {
           </Modal>
           {/* END ATHENA DETAIL SEARCH MODAL */}
 
-          <Grid container spacing={0}>
-            <Grid item xs={12} xl={3}>
+          <Grid container>
+            <Grid item xs={12} xl={4}>
               <CollectionList
                 token={token}
                 setCheckedItems={setCheckedItems}
@@ -977,7 +977,7 @@ export default function CustomText({ props, handleClick }) {
                 </Alert>
               )}
             </Grid>
-            <Grid item xs={12} xl={8}>
+            <Grid item xs={12} xl={7}>
               <MaterialTable
                 title="Names List"
                 data={data}
