@@ -23,10 +23,10 @@ export default function ProjectManagementPage({ props, handleClick }) {
 
   // const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const StyledButton = styled(Button)(({ theme, isActive }) => ({
+  const StyledButton = styled(Button)(({ theme, isactive }) => ({
     position: "relative",
     "&::after": {
-      content: isActive ? '""' : "none",
+      content: isactive === 'true'  ? '""' : "none",
       position: "absolute",
       bottom: "-8px",
       left: "50%",
