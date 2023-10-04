@@ -8,13 +8,22 @@ import {
   Button,
   Divider,
   IconButton,
+  Link,
   Modal,
+  Paper,
   TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 // import ImportExportIcon from "@mui/icons-material/ImportExport";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import MaterialTable from "material-react-table";
 import InputAdornment from "@mui/material/InputAdornment";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,15 +32,6 @@ import { Delete, Edit } from "@mui/icons-material";
 import CollectionList from "../components/CollectionList";
 import TransferList from "../components/TransferList";
 import SearchIcon from "@mui/icons-material/Search";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Paper,
-// } from "@mui/material";
 import CSVIcon from "../assets/csv.png";
 import XLSXIcon from "../assets/xlsx.png";
 import Papa from "papaparse";
@@ -56,6 +56,12 @@ export default function CustomText({ props, handleClick }) {
   const [athenaAPIResults, setAthenaAPIResults] = useState([]);
   const [loadingAthenaAPI, setLoadingAthenaAPI] = useState(false);
 
+  const [openAthenaDetailModal, setOpenAthenaDetailModal] = useState(false);
+  const [athenaDetailAPIResults, setAthenaDetailAPIResults] = useState([]);
+  const [loadingAthenaDetailAPI, setLoadingAthenaDetailAPI] = useState(false);
+  // const [athenaDetailConceptID, setAthenaDetailConceptID] = useState("");
+  const [matchedDetailData, setMatchedDetailData] = useState("");
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
     useState(false);
@@ -68,6 +74,12 @@ export default function CustomText({ props, handleClick }) {
       setSelectedRows(tableInstanceRef.current.getState().rowSelection);
     }
   }, [tableInstanceRef.current]);
+
+  const athenaAPIResultsRef = useRef(athenaAPIResults);
+
+  useEffect(() => {
+    athenaAPIResultsRef.current = athenaAPIResults;
+  }, [athenaAPIResults]);
 
   const columns = React.useMemo(
     () => [
@@ -91,11 +103,41 @@ export default function CustomText({ props, handleClick }) {
     []
   );
 
+  function groupBy(data, key) {
+    return data.reduce((result, currentValue) => {
+      (result[currentValue[key]] = result[currentValue[key]] || []).push(
+        currentValue
+      );
+      return result;
+    }, {});
+  }
+
+  function handleLinkClick(event, conceptId) {
+    event.preventDefault(); // Prevent default navigation behavior
+    console.log("Link was clicked with concept ID:", conceptId);
+    setOpenAthenaDetailModal(true);
+    // setAthenaDetailConceptID(conceptId);
+    getAthenaDetailData(conceptId);
+    // ... any other logic you want to execute.
+  }
+
+  const ConceptIDCell = ({ cell, row }) => {
+    return (
+      <Link
+        underline="hover"
+        href="#" // You can keep this as "#" since the default behavior is prevented.
+        onClick={(e) => handleLinkClick(e, row.original.concept_id)}
+      >
+        {row.original.concept_id}
+      </Link>
+    );
+  };
+
   const athenaColumns = React.useMemo(
     () => [
       {
         header: "Concept ID",
-        accessorKey: "concept_id",
+        Cell: ConceptIDCell,
         enableClickToCopy: true,
       },
       {
@@ -238,16 +280,28 @@ export default function CustomText({ props, handleClick }) {
 
   const openAthena = () => {
     setOpenAthenaModal(true);
+    console.log("clear api results");
     setAthenaAPIResults([]);
     setAthenaSearchValue("");
   };
+
+  // const openAthenaDetail = () => {
+  //   setOpenAthenaDetailModal(true);
+  //   setAthenaDetailAPIResults([]);
+  //   // setAthenaSearchValue("");
+  // };
 
   const handleClose = () => {
     setOpenAthenaModal(false);
   };
 
+  const handleCloseDetail = () => {
+    setOpenAthenaDetailModal(false);
+  };
+
   const getAthenaData = () => {
     // Call your API using fetch here
+    console.log("clear api results");
     setAthenaAPIResults([]);
     setLoadingAthenaAPI(true);
     console.log("get athena data");
@@ -276,6 +330,41 @@ export default function CustomText({ props, handleClick }) {
       .catch((error) => {
         console.error("There was an error!", error);
         setLoadingAthenaAPI(false);
+      });
+  };
+
+  const getAthenaDetailData = (conceptId) => {
+    // Call your API using fetch here
+    setAthenaDetailAPIResults([]);
+    setLoadingAthenaDetailAPI(true);
+    findMatchedDataForDetail(conceptId);
+    console.log("get athena data");
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + token);
+
+    var formdata = new FormData();
+    formdata.append("conceptID", conceptId);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+      redirect: "follow",
+    };
+    fetch(
+      `${process.env.REACT_APP_BACKEND_API_URL}/api/athena/getDetailDataByConceptID`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setLoadingAthenaDetailAPI(false);
+        const groupedData = groupBy(data.data, "relationship_id");
+        console.log("athena detail results", groupedData);
+        setAthenaDetailAPIResults(groupedData);
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+        setLoadingAthenaDetailAPI(false);
       });
   };
 
@@ -325,6 +414,18 @@ export default function CustomText({ props, handleClick }) {
       fileInputRef.current.value = "";
       console.log("fileinput ref", fileInputRef);
     }
+  };
+
+  const findMatchedDataForDetail = (conceptId) => {
+    const currentResults = athenaAPIResultsRef.current;
+    console.log("Current results", currentResults);
+
+    const foundItem = currentResults.find(
+      (item) => item.concept_id.toString() === conceptId.toString()
+    );
+    console.log("found item", foundItem);
+
+    setMatchedDetailData(foundItem)
   };
 
   // const MODAL_WIDTH = "600px";
@@ -526,6 +627,311 @@ export default function CustomText({ props, handleClick }) {
             </div>
           </Modal>
           {/* END ATHENA SEARCH MODAL */}
+
+          {/* ATHENA DETAIL SEARCH MODAL */}
+          <Modal
+            open={openAthenaDetailModal}
+            onClose={handleCloseDetail}
+            aria-labelledby="simple-modal-title"
+            aria-describedby="simple-modal-description"
+          >
+            <div
+              style={{
+                position: "absolute",
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+                minWidth: "90vw",
+                minHeight: "90vh",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                backgroundColor: "white",
+                outline: "none",
+                overflow: "auto", // Adds scroll if content overflows
+              }}
+            >
+              <h3>Term Connections</h3>
+
+              <br />
+              <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                // style={{ height: "100vh" }}
+              >
+                {loadingAthenaDetailAPI && (
+                  <Grid item>
+                    <CircularProgress />
+                  </Grid>
+                )}
+              </Grid>
+              <Grid container spacing={1}>
+                <Grid item xs={12} md={4}>
+                  {matchedDetailData && (
+                    <Paper elevation={2}>
+                      <Table>
+                        <TableBody>
+                          <TableRow sx={{ backgroundColor: "#343541" }}>
+                            <TableCell
+                              sx={{
+                                color: "white",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Details
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                color: "white",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            ></TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Concept ID
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.concept_id}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Concept Name
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.concept_name}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Domain ID
+                            </TableCell>
+                            <TableCell>{matchedDetailData.domain_id}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Vocabulary ID
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.vocabulary_id}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Concept Class ID
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.concept_class_id}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Standard Concept
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.standard_concept}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Concept Code
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.concept_code}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Valid Start Date
+                            </TableCell>
+                            <TableCell>
+                              {new Date(
+                                matchedDetailData.valid_start_date
+                              ).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Valid End Date
+                            </TableCell>
+                            <TableCell>
+                              {new Date(
+                                matchedDetailData.valid_end_date
+                              ).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell
+                              sx={{
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Invalid Reason
+                            </TableCell>
+                            <TableCell>
+                              {matchedDetailData.invalid_reason || "N/A"}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </Paper>
+                  )}
+                </Grid>
+                <Grid item xs={12} md={8}>
+                  <Paper elevation={2}>
+                    <Table>
+                      <TableHead>
+                        <TableRow
+                          sx={{ backgroundColor: "#343541", color: "white" }}
+                        >
+                          <TableCell
+                            sx={{
+                              color: "white",
+                              fontWeight: 600,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Relationship ID
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              color: "white",
+                              fontWeight: 600,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Relates to
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              color: "white",
+                              fontWeight: 600,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Concept ID
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              color: "white",
+                              fontWeight: 600,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Vocabulary
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              color: "white",
+                              fontWeight: 600,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Standard
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Object.keys(athenaDetailAPIResults).map(
+                          (relationshipId, index) => (
+                            <React.Fragment key={index}>
+                              {athenaDetailAPIResults[relationshipId].map(
+                                (item, itemIndex) => (
+                                  <TableRow
+                                    key={itemIndex}
+                                    sx={{
+                                      "&:hover": {
+                                        backgroundColor: "#f5f5f5", // Add hover effect color here
+                                      },
+                                    }}
+                                  >
+                                    {itemIndex === 0 && (
+                                      <TableCell
+                                        rowSpan={
+                                          athenaDetailAPIResults[relationshipId]
+                                            .length
+                                        }
+                                        align="left"
+                                        style={{ verticalAlign: "top" }}
+                                      >
+                                        <Typography variant="subtitle1">
+                                          {relationshipId}
+                                        </Typography>
+                                      </TableCell>
+                                    )}
+                                    <TableCell>{item.concept_name}</TableCell>
+                                    <TableCell>{item.concept_id_2}</TableCell>
+
+                                    <TableCell>
+                                      {item.vocabulary_id || "N/A"}
+                                    </TableCell>
+                                    <TableCell>
+                                      {item.standard_concept || "N/A"}
+                                    </TableCell>
+                                  </TableRow>
+                                )
+                              )}
+                            </React.Fragment>
+                          )
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </div>
+          </Modal>
+          {/* END ATHENA DETAIL SEARCH MODAL */}
 
           <Grid container spacing={0}>
             <Grid item xs={12} xl={3}>

@@ -95,7 +95,8 @@ export default function ProjectManagementPage({ props, handleClick }) {
               value="redcapImport"
               variant={importType === "redcapImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
-              isActive={importType === "redcapImport"}
+              isactive={importType === "redcapImport" ? "true" : "false"}
+
             >
               REDCap Data Dictionary
             </StyledButton>
@@ -104,7 +105,8 @@ export default function ProjectManagementPage({ props, handleClick }) {
               value="customImport"
               variant={importType === "customImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
-              isActive={importType === "customImport"}
+              isactive={importType === "customImport" ? "true" : "false"}
+
               sx={{ margin: "20px" }}
             >
               Custom Text
