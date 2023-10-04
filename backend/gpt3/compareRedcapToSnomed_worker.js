@@ -127,7 +127,7 @@ async function processChunks(
     allResults.push(...results);
   }
 
-  console.log("Total Documents:", totalDocuments);
+  // console.log("Total Documents:", totalDocuments);
   // Now that all collections have been processed, we can sort and filter allResults
   const fieldLabels = [
     ...new Set(
