@@ -23,18 +23,20 @@ import { Delete, Edit } from "@mui/icons-material";
 import CollectionList from "../components/CollectionList";
 import TransferList from "../components/TransferList";
 import SearchIcon from "@mui/icons-material/Search";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from "@mui/material";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Paper,
+// } from "@mui/material";
 import CSVIcon from "../assets/csv.png";
 import XLSXIcon from "../assets/xlsx.png";
 import Papa from "papaparse";
+import CircularProgress from "@mui/material/CircularProgress";
+
 var XLSX = require("xlsx");
 
 export default function CustomText({ props, handleClick }) {
@@ -52,6 +54,7 @@ export default function CustomText({ props, handleClick }) {
   const [openAthenaModal, setOpenAthenaModal] = useState(false);
   const [athenaSearchValue, setAthenaSearchValue] = useState("");
   const [athenaAPIResults, setAthenaAPIResults] = useState([]);
+  const [loadingAthenaAPI, setLoadingAthenaAPI] = useState(false);
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [showSubmittedNotifcation, setShowSubmittedNotifcation] =
@@ -83,6 +86,45 @@ export default function CustomText({ props, handleClick }) {
       {
         header: "Name",
         accessorKey: "name",
+      },
+    ],
+    []
+  );
+
+  const athenaColumns = React.useMemo(
+    () => [
+      {
+        header: "Concept ID",
+        accessorKey: "concept_id",
+        enableClickToCopy: true,
+      },
+      {
+        header: "Concept Name",
+        accessorKey: "concept_name",
+      },
+      {
+        header: "Domain ID",
+        accessorKey: "domain_id",
+      },
+      {
+        header: "Vocabulary ID",
+        accessorKey: "vocabulary_id",
+      },
+      {
+        header: "Concept Class ID",
+        accessorKey: "concept_class_id",
+      },
+      {
+        header: "Standard Concept",
+        accessorKey: "standard_concept",
+      },
+      {
+        header: "Valid Start Date",
+        accessorKey: "valid_start_date",
+      },
+      {
+        header: "Valid End Date",
+        accessorKey: "valid_end_date",
       },
     ],
     []
@@ -206,7 +248,8 @@ export default function CustomText({ props, handleClick }) {
 
   const getAthenaData = () => {
     // Call your API using fetch here
-
+    setAthenaAPIResults([]);
+    setLoadingAthenaAPI(true);
     console.log("get athena data");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
@@ -226,10 +269,13 @@ export default function CustomText({ props, handleClick }) {
     )
       .then((response) => response.json())
       .then((data) => {
+        setLoadingAthenaAPI(false);
+        console.log("athena results", data.data);
         setAthenaAPIResults(data.data);
       })
       .catch((error) => {
         console.error("There was an error!", error);
+        setLoadingAthenaAPI(false);
       });
   };
 
@@ -287,9 +333,9 @@ export default function CustomText({ props, handleClick }) {
   return (
     <>
       <Typography>
-        Add your own non-standardized text below to the table to submit to find
-        the most related standard terms. Once the job is submitted you can view
-        the status and results on the{" "}
+        Add your own custom text below to the table to submit to find the most
+        related standard terms. Once the job is submitted you can view the
+        status and results on the{" "}
         <span
           style={{
             textDecoration: "underline",
@@ -313,60 +359,62 @@ export default function CustomText({ props, handleClick }) {
       </Button>
       <Divider />
       <br />
-      <Tooltip
-        title={`Import CSV List. Ensure the list is in a column with a header of 'name'`}
-        placement="top"
-      >
-        <span>
-          <input
-            type="file"
-            accept=".csv"
-            hidden
-            onChange={handleCSVUpload}
-            ref={fileInputRef}
-          />
-          <Button
-            onClick={(e) => {
-              e.currentTarget.previousSibling.click();
-              e.currentTarget.previousSibling.value = ""; // Reset the file input value
-            }}
-          >
-            <img
-              src={CSVIcon}
-              alt="Import CSV"
-              style={{ width: "32px", height: "32px" }}
+      <span>
+        <Typography variant="caption">Import List</Typography>
+        <Tooltip
+          title={`Import CSV List. Ensure the list is in a column with a header of 'name'`}
+          placement="top"
+        >
+          <span>
+            <input
+              type="file"
+              accept=".csv"
+              hidden
+              onChange={handleCSVUpload}
+              ref={fileInputRef}
             />
-          </Button>
-        </span>
-      </Tooltip>
+            <Button
+              onClick={(e) => {
+                e.currentTarget.previousSibling.click();
+                e.currentTarget.previousSibling.value = ""; // Reset the file input value
+              }}
+            >
+              <img
+                src={CSVIcon}
+                alt="Import CSV"
+                style={{ width: "32px", height: "32px" }}
+              />
+            </Button>
+          </span>
+        </Tooltip>
 
-      <Tooltip
-        title={`Import XLSX List. Ensure the list is in a column with a header of 'name'`}
-        placement="top"
-      >
-        <span>
-          <input
-            type="file"
-            accept=".xlsx"
-            hidden
-            onChange={handleXLSXUpload}
-            ref={fileInputRef}
-          />
-          <Button
-            onClick={(e) => {
-              e.currentTarget.previousSibling.click();
-              e.currentTarget.previousSibling.value = ""; // Reset the file input value
-            }}
-          >
-            <img
-              src={XLSXIcon}
-              alt="Import XLSX List"
-              style={{ width: "32px", height: "32px" }}
+        <Tooltip
+          title={`Import XLSX List. Ensure the list is in a column with a header of 'name'`}
+          placement="top"
+        >
+          <span>
+            <input
+              type="file"
+              accept=".xlsx"
+              hidden
+              onChange={handleXLSXUpload}
+              ref={fileInputRef}
             />
-          </Button>
-        </span>
-      </Tooltip>
-
+            <Button
+              onClick={(e) => {
+                e.currentTarget.previousSibling.click();
+                e.currentTarget.previousSibling.value = ""; // Reset the file input value
+              }}
+            >
+              <img
+                src={XLSXIcon}
+                alt="Import XLSX List"
+                style={{ width: "32px", height: "32px" }}
+              />
+            </Button>
+          </span>
+        </Tooltip>
+      </span>
       <TextField
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
@@ -410,17 +458,22 @@ export default function CustomText({ props, handleClick }) {
             <div
               style={{
                 position: "absolute",
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+                minWidth: "90vw",
+                minHeight: "90vh",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 padding: "20px",
                 backgroundColor: "white",
                 outline: "none",
+                overflow: "auto", // Adds scroll if content overflows
               }}
             >
               <h3>Athena Search</h3>
               <TextField
-                label="Concept ID"
+                label="Concept ID or Partial Text"
                 // fullWidth
                 placeholder="Search..."
                 variant="outlined"
@@ -434,55 +487,38 @@ export default function CustomText({ props, handleClick }) {
                   ),
                 }}
               />
+              <br />
+              <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                // style={{ height: "100vh" }}
+              >
+                {loadingAthenaAPI && (
+                  <Grid item>
+                    <CircularProgress />
+                  </Grid>
+                )}
+              </Grid>
 
               {/* Show athena results in a table */}
               {athenaAPIResults && athenaAPIResults.length > 0 ? (
-                <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Concept ID
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Concept Name
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Domain ID
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Vocabulary ID
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Concept Class ID
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Standard Concept
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Valid Start Date
-                        </TableCell>
-                        <TableCell style={{ fontWeight: "bold" }}>
-                          Valid End Date
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {athenaAPIResults.map((row) => (
-                        <TableRow key={row.concept_id}>
-                          <TableCell>{row.concept_id}</TableCell>
-                          <TableCell>{row.concept_name}</TableCell>
-                          <TableCell>{row.domain_id}</TableCell>
-                          <TableCell>{row.vocabulary_id}</TableCell>
-                          <TableCell>{row.concept_class_id}</TableCell>
-                          <TableCell>{row.standard_concept}</TableCell>
-                          <TableCell>{row.valid_start_date}</TableCell>
-                          <TableCell>{row.valid_end_date}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <MaterialTable
+                  data={athenaAPIResults}
+                  columns={athenaColumns}
+                  initialState={{
+                    density: "compact",
+                    pagination: { pageSize: 10, pageIndex: 0 },
+                  }}
+                  enablePagination={true}
+                  enableClickToCopy
+                  muiTablePaginationProps={{
+                    // rowsPerPage: [5],
+                    rowsPerPageOptions: [5, 10, 25, 50],
+                    showFirstButton: true,
+                    showLastButton: true,
+                  }}
+                />
               ) : null}
               {!athenaAPIResults && <h3>No results</h3>}
 
@@ -491,7 +527,7 @@ export default function CustomText({ props, handleClick }) {
           </Modal>
           {/* END ATHENA SEARCH MODAL */}
 
-          <Grid container spacing={2}>
+          <Grid container spacing={0}>
             <Grid item xs={12} xl={3}>
               <CollectionList
                 token={token}
@@ -584,7 +620,7 @@ export default function CustomText({ props, handleClick }) {
           <Button
             // sx={{ float: "right" }}
             variant="contained"
-            color="primary"
+            color="success"
             component="label"
             startIcon={<AddTaskIcon />}
             onClick={(e) => submitToProcess(e)}

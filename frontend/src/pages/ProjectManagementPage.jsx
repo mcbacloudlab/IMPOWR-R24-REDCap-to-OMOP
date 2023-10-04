@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
-import { Alert, Button, Typography } from "@mui/material";
+import { Alert, Button, Typography, styled } from "@mui/material";
 import FormSelect from "../components/FormSelect";
 import CssBaseline from "@mui/material/CssBaseline";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -22,6 +22,22 @@ export default function ProjectManagementPage({ props, handleClick }) {
   const [importType, setImportType] = useState("");
 
   // const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  const StyledButton = styled(Button)(({ theme, isActive }) => ({
+    position: "relative",
+    "&::after": {
+      content: isActive ? '""' : "none",
+      position: "absolute",
+      bottom: "-8px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "0",
+      height: "0",
+      borderLeft: "5px solid transparent",
+      borderRight: "5px solid transparent",
+      borderTop: `8px solid ${theme.palette.primary.main}`,
+    },
+  }));
 
   useEffect(() => {
     //get available forms
@@ -75,21 +91,25 @@ export default function ProjectManagementPage({ props, handleClick }) {
       >
         <Grid container spacing={1} justifyContent="center">
           <Grid item xs={12}>
-            <Button
+            <StyledButton
               value="redcapImport"
               variant={importType === "redcapImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
+              isActive={importType === "redcapImport"}
             >
               REDCap Data Dictionary
-            </Button>
-            <Button
+            </StyledButton>
+
+            <StyledButton
               value="customImport"
               variant={importType === "customImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
+              isActive={importType === "customImport"}
               sx={{ margin: "20px" }}
             >
               Custom Text
-            </Button>
+            </StyledButton>
+
             <br />
             {importType === "customImport" && (
               <CustomText props={props} handleClick={handleClick} />
