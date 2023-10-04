@@ -40,7 +40,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 var XLSX = require("xlsx");
 
 export default function CustomText({ props, handleClick }) {
-  // console.log("customtext", props);
   let token =
     props.props?.props?.token ??
     props.props?.token ??
@@ -52,7 +51,6 @@ export default function CustomText({ props, handleClick }) {
   const [colDefs, setColDefs] = useState([]);
   const [data, setData] = useState([]);
   const [openAthenaModal, setOpenAthenaModal] = useState(false);
-  const [athenaSearchValue, setAthenaSearchValue] = useState("");
   const [athenaAPIResults, setAthenaAPIResults] = useState([]);
   const [loadingAthenaAPI, setLoadingAthenaAPI] = useState(false);
 
@@ -68,6 +66,8 @@ export default function CustomText({ props, handleClick }) {
   const [selectRowsError, setSelectRowsError] = useState(false);
 
   const fileInputRef = useRef(null);
+  const conceptIDSearchRef = useRef(null);
+  const textSearchRef = useRef(null);
   var tableInstanceRef = useRef(null);
   useEffect(() => {
     if (tableInstanceRef.current) {
@@ -114,7 +114,6 @@ export default function CustomText({ props, handleClick }) {
 
   function handleLinkClick(event, conceptId) {
     event.preventDefault(); // Prevent default navigation behavior
-    console.log("Link was clicked with concept ID:", conceptId);
     setOpenAthenaDetailModal(true);
     // setAthenaDetailConceptID(conceptId);
     getAthenaDetailData(conceptId);
@@ -172,11 +171,6 @@ export default function CustomText({ props, handleClick }) {
     []
   );
 
-  const handleAthenaChange = (event) => {
-    console.log("handle change", event.target.value);
-    setAthenaSearchValue(event.target.value);
-  };
-
   const handleDelete = (row) => {
     setData((prevData) => prevData.filter((item) => item !== row.original));
   };
@@ -207,9 +201,8 @@ export default function CustomText({ props, handleClick }) {
 
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
-    // console.log("send data", data);
+
     var formdata = new FormData();
-    // console.log('object length', dataToSendToQueue.length)
     formdata.append("data", JSON.stringify(dataToSendToQueue));
     formdata.append("selectedForm", "customText");
     formdata.append("dataLength", dataToSendToQueue.length);
@@ -218,7 +211,6 @@ export default function CustomText({ props, handleClick }) {
     const filteredCollections = Object.fromEntries(
       Object.entries(checkedItems).filter(([key, value]) => value !== false)
     );
-    // console.log("collections to use", JSON.stringify(filteredCollections));
     formdata.append("collections", JSON.stringify(filteredCollections));
     const checkIfAllFalse = (checkedItems) => {
       // Extract an array of values from the checkedItems object
@@ -255,7 +247,6 @@ export default function CustomText({ props, handleClick }) {
     )
       .then((response) => response.text())
       .then((result) => {
-        // console.log(result);
         window.scrollTo(0, 0); //scroll to top of page
         setShowSubmittedNotifcation(true);
         setTimeout(() => {
@@ -280,9 +271,7 @@ export default function CustomText({ props, handleClick }) {
 
   const openAthena = () => {
     setOpenAthenaModal(true);
-    console.log("clear api results");
     setAthenaAPIResults([]);
-    setAthenaSearchValue("");
   };
 
   // const openAthenaDetail = () => {
@@ -299,17 +288,23 @@ export default function CustomText({ props, handleClick }) {
     setOpenAthenaDetailModal(false);
   };
 
-  const getAthenaData = () => {
+  const getAthenaData = (type) => {
+    let url;
+    var formdata = new FormData();
+
+    if (type === "text") {
+      url = `${process.env.REACT_APP_BACKEND_API_URL}/api/athena/getDataByText`;
+      formdata.append("text", textSearchRef.current.value);
+    } else {
+      url = `${process.env.REACT_APP_BACKEND_API_URL}/api/athena/getDataByConceptID`;
+      formdata.append("conceptID", conceptIDSearchRef.current.value);
+    }
     // Call your API using fetch here
-    console.log("clear api results");
     setAthenaAPIResults([]);
     setLoadingAthenaAPI(true);
-    console.log("get athena data");
+
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
-
-    var formdata = new FormData();
-    formdata.append("conceptID", athenaSearchValue);
 
     var requestOptions = {
       method: "POST",
@@ -317,14 +312,10 @@ export default function CustomText({ props, handleClick }) {
       body: formdata,
       redirect: "follow",
     };
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/athena/getDataByConceptID`,
-      requestOptions
-    )
+    fetch(url, requestOptions)
       .then((response) => response.json())
       .then((data) => {
         setLoadingAthenaAPI(false);
-        console.log("athena results", data.data);
         setAthenaAPIResults(data.data);
       })
       .catch((error) => {
@@ -338,7 +329,6 @@ export default function CustomText({ props, handleClick }) {
     setAthenaDetailAPIResults([]);
     setLoadingAthenaDetailAPI(true);
     findMatchedDataForDetail(conceptId);
-    console.log("get athena data");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + token);
 
@@ -359,7 +349,6 @@ export default function CustomText({ props, handleClick }) {
       .then((data) => {
         setLoadingAthenaDetailAPI(false);
         const groupedData = groupBy(data.data, "relationship_id");
-        console.log("athena detail results", groupedData);
         setAthenaDetailAPIResults(groupedData);
       })
       .catch((error) => {
@@ -371,6 +360,12 @@ export default function CustomText({ props, handleClick }) {
   const handleAthenaKeyPress = (event) => {
     if (event.key === "Enter") {
       getAthenaData();
+    }
+  };
+
+  const handleAthenaTextKeyPress = (event) => {
+    if (event.key === "Enter") {
+      getAthenaData("text");
     }
   };
 
@@ -394,8 +389,6 @@ export default function CustomText({ props, handleClick }) {
         .map((row) => ({ name: row.name }));
       setData((prevData) => [...prevData, ...formattedData]);
       fileInputRef.current.value = "";
-
-      console.log("fileinput ref", fileInputRef);
     }
   };
 
@@ -412,20 +405,16 @@ export default function CustomText({ props, handleClick }) {
         .map((row) => ({ name: row.name }));
       setData((prevData) => [...prevData, ...formattedData]);
       fileInputRef.current.value = "";
-      console.log("fileinput ref", fileInputRef);
     }
   };
 
   const findMatchedDataForDetail = (conceptId) => {
     const currentResults = athenaAPIResultsRef.current;
-    console.log("Current results", currentResults);
 
     const foundItem = currentResults.find(
       (item) => item.concept_id.toString() === conceptId.toString()
     );
-    console.log("found item", foundItem);
-
-    setMatchedDetailData(foundItem)
+    setMatchedDetailData(foundItem);
   };
 
   // const MODAL_WIDTH = "600px";
@@ -574,16 +563,38 @@ export default function CustomText({ props, handleClick }) {
             >
               <h3>Athena Search</h3>
               <TextField
-                label="Concept ID or Partial Text"
+                label="Concept ID"
                 // fullWidth
+                type="number"
                 placeholder="Search..."
                 variant="outlined"
-                onChange={handleAthenaChange}
+                inputRef={conceptIDSearchRef} // Use the ref here
+                // onChange={handleAthenaChange}
                 onKeyPress={handleAthenaKeyPress}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
                       <SearchIcon cursor="pointer" onClick={getAthenaData} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                label="Concept Name"
+                // fullWidth
+                placeholder="Search..."
+                variant="outlined"
+                inputRef={textSearchRef} // Use the ref here
+                // onChange={handleAthenaTextChange}
+                onKeyPress={handleAthenaTextKeyPress}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <SearchIcon
+                        cursor="pointer"
+                        onClick={() => getAthenaData("text")}
+                      />
                     </InputAdornment>
                   ),
                 }}

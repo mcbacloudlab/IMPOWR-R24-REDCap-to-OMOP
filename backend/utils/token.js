@@ -26,7 +26,7 @@ function decodeToken(req, res) {
             reject(err);
         } else {
             let userResults = await getUserByEmail(user.user)
-            console.log('userResults', userResults[0].id)
+            // console.log('userResults', userResults[0].id)
             user.id = userResults[0].id
             resolve(user);
         }
