@@ -16,7 +16,7 @@ async function main() {
 }
 const selectedForm = process.argv.slice(2)[0]; // e.g. 'customText' or 'redcap_data'
 
-console.log('selected form is123', selectedForm)
+// console.log('selected form is123', selectedForm)
 main().then(async () => {
   try {
     const { stdin } = process;
@@ -91,10 +91,10 @@ main().then(async () => {
     );
 
     const redCapCollectionArray = transformedData;
-    console.log('redcapCollectionArray?', redCapCollectionArray)
+    // console.log('redcapCollectionArray?', redCapCollectionArray)
     console.info("Loaded Redcap Collection into memory");
     // console.log('collections to use', collectionsToUse)
-    console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))
+    // console.log("ObjectKeys", Object.keys(JSON.parse(collectionsToUse)))
     const snomedCollection = client
       .db("GPT3_Embeddings")
       .collection("gpt3_snomed_embeddings");

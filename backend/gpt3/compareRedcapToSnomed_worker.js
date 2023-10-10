@@ -145,7 +145,7 @@ async function processChunks(
     ),
   ];
 
-  console.log("field labels", fieldLabels);
+  // console.log("field labels", fieldLabels);
 
   const filteredData = await fieldLabels.reduce(
     async (accPromise, combinedLabel) => {

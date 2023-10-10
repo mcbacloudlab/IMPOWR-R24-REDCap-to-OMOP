@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Divider,
+  Grid,
   IconButton,
   Typography,
   Tooltip,
@@ -1395,7 +1396,7 @@ export default function CompletedJobsViewPage(props) {
   return (
     <>
       <CssBaseline />
-      <Container sx={{ margin: "auto", minWidth: "75%" }}>
+      <Container sx={{ margin: "auto", minWidth: "95%" }}>
         <MyAccountNavBar
           props={props}
           username={username}
@@ -1405,7 +1406,7 @@ export default function CompletedJobsViewPage(props) {
           setView={setView}
         />
         {view && (
-          <Container
+          <Grid
             component="main"
             maxWidth="100vw"
             sx={{ margin: "0px", padding: "0px" }}
@@ -1453,7 +1454,7 @@ export default function CompletedJobsViewPage(props) {
                 variant="rounded"
                 sx={{ margin: "auto" }}
                 width={"100%"}
-                height={"90vh"}
+                height={"85vh"}
               />
             )}
 
@@ -1594,7 +1595,7 @@ export default function CompletedJobsViewPage(props) {
                   Verified {verifiedRecords}/{totalRecords}
                 </Typography> */}
 
-                <Divider sx={{ margin: "30px" }} />
+                <Divider sx={{ margin: "20px" }} />
                 <Tabs
                   centered
                   value={value}
@@ -1697,7 +1698,7 @@ export default function CompletedJobsViewPage(props) {
                 </Snackbar>
               </>
             )}
-          </Container>
+          </Grid>
         )}
       </Container>
     </>
