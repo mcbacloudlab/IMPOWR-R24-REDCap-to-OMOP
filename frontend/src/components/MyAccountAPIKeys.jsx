@@ -308,7 +308,7 @@ export default function MyAccountAPIKeys(props) {
   // if (propsUserObj.role === "admin") {
     return (
       <>
-        <Grid>
+        {/* <Grid>
         <h1
         style={{
           paddingLeft: "20px",
@@ -316,7 +316,7 @@ export default function MyAccountAPIKeys(props) {
           backgroundColor: "rgb(251 251 251)",
         }}
       >Your API Keys</h1>
-        </Grid>
+        </Grid> */}
 
         <Grid container spacing={1} sx={{ margin: "30px" }}>
           {/* REDCAP KEY */}

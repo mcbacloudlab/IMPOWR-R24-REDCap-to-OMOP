@@ -80,14 +80,14 @@ export default function MyAccountCollectionsView(props) {
   return (
     <Grid container spacing={1} justifyContent="center">
       <Grid item xs={12}>
-        <h1>Collections</h1>
+        {/* <h1>Collections</h1> */}
         <Grid item xs={6} sx={{ margin: "auto" }}>
           <Typography sx={{ margin: "auto", textAlign: "center" }}>
-            {`These are the list of Mongo DB collections available. Create alt-names to show more user-friendly text elsewhere within the app. You can also add Chips to provide more info by adding the text between brackets <>.`}
+            {`List of Mongo DB collections. Create alt-names to show more user-friendly text. Add Chips to provide more info by adding the text between brackets <>.`}
           </Typography>
           <br />
         </Grid>
-        <Grid container spacing={3}>
+        <Grid container spacing={20}>
           <Grid item xs={12} md={6}>
             <TableContainer component={Paper}>
               <Table>
@@ -170,7 +170,7 @@ export default function MyAccountCollectionsView(props) {
             </TableContainer>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Paper elevation={1}>
               <Table>
                 <TableBody>
@@ -199,6 +199,48 @@ export default function MyAccountCollectionsView(props) {
                         variant="outlined"
                         sx={{ marginLeft: "10px" }}
                       />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontFamily: "monospace",
+                          backgroundColor: "#f5f5f5",
+                          padding: "10px",
+                          border: "1px solid #ccc",
+                          borderRadius: "5px",
+                          display: "block",
+                          whiteSpace: "pre-wrap",
+                          textAlign: "center",
+                        }}
+                      >
+                        -o{" "}
+                      </Typography>{" "}
+                    </TableCell>
+                    <TableCell>
+                      <Chip label="Outlined Style" variant="outlined"></Chip>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontFamily: "monospace",
+                          backgroundColor: "#f5f5f5",
+                          padding: "10px",
+                          border: "1px solid #ccc",
+                          borderRadius: "5px",
+                          display: "block",
+                          whiteSpace: "pre-wrap",
+                          textAlign: "center",
+                        }}
+                      >
+                        -s{" "}
+                      </Typography>{" "}
+                    </TableCell>
+                    <TableCell>
+                      <Chip label="Success Style" color="success"></Chip>
                     </TableCell>
                   </TableRow>
 
@@ -313,9 +355,7 @@ export default function MyAccountCollectionsView(props) {
               <br />
               <Typography variant="caption">
                 {" "}
-                Other options include (default checked), -i for info (blue), -w
-                for warning (yellow), -e for error (red). If you want to include
-                an embeddings collection then add -embeddings.
+                If you want to include an embeddings collection then add -embeddings.
               </Typography>
             </Paper>
           </Grid>

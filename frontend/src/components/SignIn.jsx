@@ -135,7 +135,7 @@ export default function SignIn({ props }) {
           alignItems: "center",
         }}
       >
-        <img src={Logo} alt="logo" width="48" height="48" />
+        <img src={Logo} alt="logo" width="128" height="128" />
         {/* <Avatar sx={{ m: 1, bgcolor: "primary.main" }}> */}
           {/* <LockOutlinedIcon /> */}
           {/* startIcon={ */}

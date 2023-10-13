@@ -343,14 +343,14 @@ export default function JobsOverview(props) {
 
   return (
     <div>
-      <h1
+      {/* <h1
         style={{
           paddingLeft: "20px",
           textAlign: "center",
         }}
       >
         All Jobs Overview
-      </h1>
+      </h1> */}
 
       {initCheckJobsRan ? (
         <Grid container spacing={4} justifyContent="center">

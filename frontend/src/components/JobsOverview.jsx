@@ -331,17 +331,17 @@ export default function JobsOverview(props) {
 
   return (
     <div>
-      <h1
+      {/* <h1
         style={{
           paddingLeft: "20px",
           textAlign: "center",
         }}
       >
         Jobs Overview
-      </h1>
-      <Grid item xs={6} sx={{ margin: "auto" }}>
+      </h1> */}
+      {/* <Grid item xs={6} sx={{ margin: "auto" }}>
         <Typography>View and Remove Submitted Jobs Below</Typography>
-      </Grid>
+      </Grid> */}
 
       {initCheckJobsRan ? (
         <Grid container spacing={4} justifyContent="center">

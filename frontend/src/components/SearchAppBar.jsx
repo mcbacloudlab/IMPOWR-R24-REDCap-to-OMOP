@@ -38,6 +38,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 export default function SearchAppBar({ openSnackbar, ...props }) {
   // console.log("search bar", props);
   // console.log('opensnackbar', openSnackbar)
+
   const {
     pendingList,
     // failedList,
@@ -482,95 +483,120 @@ export default function SearchAppBar({ openSnackbar, ...props }) {
           position="sticky"
           sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         >
-          <Toolbar>
-            {/* <TemporaryDrawer /> */}
-            <img
-              src={Logo}
-              alt="logo"
-              width="30"
-              height="30"
-              sx={{ marginRight: "30px" }}
-            />
-
-            <Typography
+          <Toolbar
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr auto", // This divides the toolbar into three sections
+            }}
+          >
+            {/* Left content */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+              }}
+            >
+              <img
+                src={Logo}
+                alt="logo"
+                width="50"
+                height="50"
+                sx={{ marginRight: "30px" }}
+              />
+              {/* <Typography
               variant="h6"
               noWrap
               component="div"
               sx={{ display: { xs: "none", sm: "block" }, marginLeft: "20px" }}
             >
               CDE To OMOP
-            </Typography>
+            </Typography> */}
 
-            <Typography>
-              {redisDown ? (
-                <>
-                  {/* <Box
-                    component="img"
-                    className="redisLogo"
-                    src={RedisLogo}
-                    alt="logo"
-                    width="100px"
-                    height="30"
-                    sx={{
-                      marginLeft: "30px",
-                      marginRight: "10px",
-                    }}
-                  /> */}
-                  <Tooltip title="Unable to connect to the Redis server">
-                    <WarningIcon
-                      className="blinking-icon"
-                      style={{ margin:'10px', color: "#D6291F" }}
-                    />
-                  </Tooltip>
-                </>
-              ) : (
-                ""
-              )}{" "}
-            </Typography>
-
-            <Box sx={{ flexGrow: 1 }} />
-            {pendingList && pendingList.length > 0 && (
-              <IconButton
-                size="large"
-                aria-label="show pending jobs"
-                // color="inherit"
-                onClick={() => handleIconClick(0)}
-              >
-                <Badge badgeContent={pendingList.length} color="error">
-                  <Tooltip title="Pending Jobs">
-                    <AutorenewIcon
-                      className="pending-jobs-icon"
-                      style={{ color: "white" }}
-                    />
-                  </Tooltip>
-                </Badge>
-              </IconButton>
-            )}
-
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
+              <Typography>
+                {redisDown ? (
+                  <>
+                    <Tooltip title="Unable to connect to the Redis server">
+                      <WarningIcon
+                        className="blinking-icon"
+                        style={{ margin: "10px", color: "#D6291F" }}
+                      />
+                    </Tooltip>
+                  </>
+                ) : (
+                  ""
+                )}{" "}
+              </Typography>
             </Box>
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
-                color="inherit"
+
+            {/* Centered content */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ display: { xs: "none", sm: "block" } }}
               >
-                <MoreIcon />
-              </IconButton>
+                {view}
+              </Typography>
+            </Box>
+
+            {/* Right content */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
+            >
+              {pendingList && pendingList.length > 0 && (
+                <IconButton
+                  size="large"
+                  aria-label="show pending jobs"
+                  // color="inherit"
+                  onClick={() => handleIconClick(0)}
+                >
+                  <Badge badgeContent={pendingList.length} color="error">
+                    <Tooltip title="Pending Jobs">
+                      <AutorenewIcon
+                        className="pending-jobs-icon"
+                        style={{ color: "white" }}
+                      />
+                    </Tooltip>
+                  </Badge>
+                </IconButton>
+              )}
+              <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                <IconButton
+                  size="large"
+                  edge="end"
+                  aria-label="account of current user"
+                  aria-controls={menuId}
+                  aria-haspopup="true"
+                  onClick={handleProfileMenuOpen}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+              </Box>
+              <Box sx={{ display: { xs: "flex", md: "none" } }}>
+                <IconButton
+                  size="large"
+                  aria-label="show more"
+                  aria-controls={mobileMenuId}
+                  aria-haspopup="true"
+                  onClick={handleMobileMenuOpen}
+                  color="inherit"
+                >
+                  <MoreIcon />
+                </IconButton>
+              </Box>
             </Box>
           </Toolbar>
         </AppBar>

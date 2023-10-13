@@ -26,7 +26,7 @@ export default function ProjectManagementPage({ props, handleClick }) {
   const StyledButton = styled(Button)(({ theme, isactive }) => ({
     position: "relative",
     "&::after": {
-      content: isactive === 'true'  ? '""' : "none",
+      content: isactive === "true" ? '""' : "none",
       position: "absolute",
       bottom: "-8px",
       left: "50%",
@@ -96,7 +96,6 @@ export default function ProjectManagementPage({ props, handleClick }) {
               variant={importType === "redcapImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
               isactive={importType === "redcapImport" ? "true" : "false"}
-
             >
               REDCap Data Dictionary
             </StyledButton>
@@ -106,7 +105,6 @@ export default function ProjectManagementPage({ props, handleClick }) {
               variant={importType === "customImport" ? "contained" : "outlined"}
               onClick={(e) => handleImportTypeClick(e)}
               isactive={importType === "customImport" ? "true" : "false"}
-
               sx={{ margin: "20px" }}
             >
               Custom Text
@@ -118,11 +116,6 @@ export default function ProjectManagementPage({ props, handleClick }) {
             )}
             {importType === "redcapImport" && (
               <>
-                <h1>
-                  {/* <AddHomeWorkIcon />  */}
-                  Import REDCap Data Dictionary
-                </h1>
-
                 <Grid item xs={6} sx={{ margin: "auto" }}>
                   <Typography>
                     Import a REDCap Data Dictionary and then submit to find the

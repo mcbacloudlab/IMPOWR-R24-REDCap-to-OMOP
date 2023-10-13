@@ -5,6 +5,7 @@ import List from "@mui/material/List";
 import {
   Box,
   Link,
+  Grid,
   Divider,
   Drawer,
   Typography,
@@ -31,7 +32,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useNavigate } from "react-router-dom";
 import { ViewContext } from "./ViewContext";
-import EmailIcon from "@mui/icons-material/Email";
+// import EmailIcon from "@mui/icons-material/Email";
 import OrcidIcon from "../assets/orcid_16x16.gif";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import MyAccountUserManagement from "./MyAccountUserManagement";
@@ -55,8 +56,8 @@ export default function MyAccountNavBar(props) {
 
   useEffect(() => {
     //remember last view so refreshing page takes you to last state of the page
-    let lastView = localStorage.getItem('view')
-    if(lastView) setView(lastView)
+    let lastView = localStorage.getItem("view");
+    if (lastView) setView(lastView);
 
     const storedDrawerOpen = localStorage.getItem("drawerOpen");
     if (storedDrawerOpen !== null) {
@@ -81,7 +82,8 @@ export default function MyAccountNavBar(props) {
 
   const handleClick = (viewName) => {
     setView(viewName);
-    localStorage.setItem('view', viewName)
+    console.log("viewname? ", viewName);
+    localStorage.setItem("view", viewName);
     navigate("/myaccount");
   };
   const menuItems = [
@@ -114,13 +116,13 @@ export default function MyAccountNavBar(props) {
       icon: <PlaylistAddCheckSharpIcon style={{ color: "white" }} />,
       tooltip: "All Jobs Overview",
     },
- 
+
     {
       title: "Collections",
       icon: <StorageIcon style={{ color: "white" }} />,
       tooltip: "Collections",
     },
-  
+
     {
       title: "Manage Accounts",
       icon: <ManageAccountsIcon style={{ color: "white" }} />,
@@ -155,17 +157,17 @@ export default function MyAccountNavBar(props) {
                 overflowY: "auto",
                 backgroundColor: theme.palette.primary.main,
                 color: "white",
-                textAlign: 'left' 
+                textAlign: "left",
               }}
             >
-              <Box sx={{ mb: 0, mx: 2.5, mt: 1}}>
+              <Box sx={{ mb: 0, mx: 2.5, mt: 1 }}>
                 <Link underline="none">
                   <IconButton
                     color="inherit"
                     aria-label="open/close drawer"
                     edge="start"
                     onClick={handleDrawerToggle}
-                    sx={{ mr: 2}}
+                    sx={{ mr: 2 }}
                   >
                     {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                   </IconButton>
@@ -210,7 +212,7 @@ export default function MyAccountNavBar(props) {
                             primary={
                               <Typography
                                 variant="subtitle1"
-                                fontSize={'12px'}
+                                fontSize={"12px"}
                                 fontWeight={
                                   view === item.title ? "bold" : "normal"
                                 }
@@ -269,7 +271,7 @@ export default function MyAccountNavBar(props) {
                             primary={
                               <Typography
                                 variant="subtitle1"
-                                fontSize={'12px'}
+                                fontSize={"12px"}
                                 fontWeight={
                                   view === item.title ? "bold" : "normal"
                                 }
@@ -301,43 +303,44 @@ export default function MyAccountNavBar(props) {
             {/* <Toolbar /> */}
             {view === "My Account" && (
               <>
-                <h1 style={{ textAlign: "left" }}>My Account</h1>
-                <Typography sx={{ textAlign: "left" }}>
-                  <b>Name:</b> {props.name}
-                </Typography>
-                {props.orcidBool ? (
+                <Grid sx={{ marginTop: "20px" }}>
+                  {/* <h1 style={{ textAlign: "left" }}>My Account</h1> */}
                   <Typography sx={{ textAlign: "left" }}>
-                    <img
-                      src={OrcidIcon}
-                      alt="ORCID"
-                      style={{ width: 24, height: 24, marginRight: 8 }}
-                    />
-                    <a
-                      href={`${process.env.REACT_APP_ORCID_URL}/${props.username}`}
-                    >
-                      {process.env.REACT_APP_ORCID_URL}/{props.username}{" "}
-                    </a>
+                    <b>Name:</b> {props.name}
                   </Typography>
-                ) : (
-                  <Typography sx={{ textAlign: "left" }}>
-                    <EmailIcon sx={{ marginRight: 1 }} />
-                    <b>Email:</b> {props.username}
-                  </Typography>
-                )}
-                <Typography sx={{ textAlign: "left" }}>
-                  {props.role && (
-                    <>
-                      <b>Role:</b> {props.role}
-                    </>
+                  {props.orcidBool ? (
+                    <Typography sx={{ textAlign: "left" }}>
+                      <img
+                        src={OrcidIcon}
+                        alt="ORCID"
+                        style={{ width: 24, height: 24, marginRight: 8 }}
+                      />
+                      <a
+                        href={`${process.env.REACT_APP_ORCID_URL}/${props.username}`}
+                      >
+                        {process.env.REACT_APP_ORCID_URL}/{props.username}{" "}
+                      </a>
+                    </Typography>
+                  ) : (
+                    <Typography sx={{ textAlign: "left" }}>
+                      {/* <EmailIcon sx={{ marginRight: 1 }} /> */}
+                      <b>Email:</b> {props.username}
+                    </Typography>
                   )}
-                </Typography>
-                <br />
-                {!props.orcidBool && (
-                  <Box>
-                  <ChangePasswordButton token={props.props.token}/>
-                </Box>
-                )}
-                
+                  <Typography sx={{ textAlign: "left" }}>
+                    {props.role && (
+                      <>
+                        <b>Role:</b> {props.role}
+                      </>
+                    )}
+                  </Typography>
+                  <br />
+                  {!props.orcidBool && (
+                    <Box>
+                      <ChangePasswordButton token={props.props.token} />
+                    </Box>
+                  )}
+                </Grid>
               </>
             )}
             {view === "Submit Your Data" && (
@@ -368,11 +371,7 @@ export default function MyAccountNavBar(props) {
               </>
             )} */}
 
-            {view === "API Keys"? (
-              <MyAccountAPIKeys props={props} />
-            ) : (
-              ""
-            )}
+            {view === "API Keys" ? <MyAccountAPIKeys props={props} /> : ""}
 
             {view === "All Jobs Overview" && props.role === "admin" ? (
               <MyAccountAllCompletedJobs props={props} />

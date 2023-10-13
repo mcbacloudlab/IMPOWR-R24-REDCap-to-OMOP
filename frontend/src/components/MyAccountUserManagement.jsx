@@ -351,7 +351,7 @@ export default function MyAccountUserManagement(props) {
   if (propsUserObj.role === "admin") {
     return (
       <>
-        <Grid>
+        {/* <Grid>
           <h1
             style={{
               paddingLeft: "20px",
@@ -361,7 +361,7 @@ export default function MyAccountUserManagement(props) {
           >
             Manage User Accounts
           </h1>
-        </Grid>
+        </Grid> */}
         <Grid container spacing={1} sx={{ margin: "30px" }}>
           <Grid item xs={12} md={2}>
             <Tabs
