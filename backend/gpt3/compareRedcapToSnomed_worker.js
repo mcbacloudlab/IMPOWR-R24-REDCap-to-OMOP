@@ -5,7 +5,7 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 var pg_pool = require("../db/postgresqlConnection.cjs");
-
+const topResultsNum = 10
 let totalDocuments = 0;
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
@@ -76,7 +76,7 @@ async function processChunk(
     }
 
     finalList.push(
-      topResults.sort((a, b) => b.similarity - a.similarity).slice(0, 5)
+      topResults.sort((a, b) => b.similarity - a.similarity).slice(0, topResultsNum)
     );
     topResults = [];
   }
@@ -165,7 +165,7 @@ async function processChunks(
 
       items.sort((a, b) => b.similarity - a.similarity);
 
-      const topItems = items.slice(0, 5);
+      const topItems = items.slice(0, topResultsNum);
       for (const item of topItems) {
         if (item.snomedID && typeof item.snomedID === "number") {
           const res = await pg_pool.query(
