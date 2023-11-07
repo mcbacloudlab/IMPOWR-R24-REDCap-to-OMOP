@@ -25,7 +25,9 @@ async function processChunk(
   snomedCollection,
   skip,
   limit,
-  redcapLookupArray // Add redcapLookupArray as an argument
+  redcapLookupArray, // Add redcapLookupArray as an argument
+  isValidChecked,
+
 ) {
   let finalList = [];
   let snomedCursor, snomedChunk;
@@ -35,7 +37,6 @@ async function processChunk(
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
   }
-  // console.log('wahat')
   // console.log('redcapColleciton', redCapCollectionArray)
   for (const redCapDoc of redCapCollectionArray) {
     // console.log("redcapDoc", redCapDoc);
@@ -87,7 +88,8 @@ async function processChunks(
   redCapCollectionArray,
   chunkSize,
   progress,
-  collectionsToUse
+  collectionsToUse,
+  isValidChecked
 ) {
   // Parse collectionsToUse from a JSON string to an array
   const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
@@ -117,7 +119,8 @@ async function processChunks(
         snomedCollection,
         skip,
         limit,
-        redcapLookupArray
+        redcapLookupArray,
+        isValidChecked
       );
       results.push(...finalList);
       skip += limit;
@@ -187,7 +190,6 @@ async function processChunks(
   );
 
   //now use filtered data to go to postgres db to get more data from concept table using concept ids
-
   setTimeout(() => {
     const totalDataPortions = Math.ceil(filteredData.length / portionSize);
     for (let i = 0; i < totalDataPortions; i++) {
@@ -218,5 +220,6 @@ processChunks(
   workerData.redCapCollectionArray,
   30000,
   workerData.progress,
-  workerData.collectionsToUse
+  workerData.collectionsToUse,
+  workerData.isValidChecked
 );
