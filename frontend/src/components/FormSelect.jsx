@@ -2,7 +2,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -40,6 +42,8 @@ export default function FormSelect(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectRowsError, setSelectRowsError] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
+  const [isValidChecked, setIsValidChecked] = useState([]);
+
 
   var tableInstanceRef = useRef(null);
   useEffect(() => {
@@ -51,7 +55,6 @@ export default function FormSelect(props) {
   const handleRowSelection = (selected) => {
     const rowSelection = tableInstanceRef.current.getState().rowSelection;
     setSelectedRows(rowSelection);
-
   };
 
   const columns = useMemo(() => colDefs, [colDefs]);
@@ -120,7 +123,7 @@ export default function FormSelect(props) {
       var obj = convertedData[i];
 
       // Check if the field_type is 'dropdown'
-      if (obj.field_type === "dropdown" || obj.field_type === 'radio') {
+      if (obj.field_type === "dropdown" || obj.field_type === "radio") {
         var selectChoices = obj.select_choices_or_calculations;
         console.log("Dropdown/radio value: " + selectChoices);
 
@@ -161,7 +164,7 @@ export default function FormSelect(props) {
             matrix_ranking: obj.matrix_ranking,
             field_annotation: obj.field_annotation,
             og_field_name_key: choice.key,
-            og_field_name: obj.field_name
+            og_field_name: obj.field_name,
           };
 
           convertedData.splice(i + 1, 0, newObject); // Insert new object after the current object
@@ -169,7 +172,7 @@ export default function FormSelect(props) {
         }
       }
     }
-    console.log('converted', convertedData)
+    console.log("converted", convertedData);
     setData(convertedData);
     setIsFormLoaded(true);
     setIsFormLoading(false);
@@ -269,7 +272,6 @@ export default function FormSelect(props) {
       .catch((error) => console.log("error", error));
   }
 
-
   const handleExportData = () => {
     let _data = data;
     // if (selectedTabIdx) {
@@ -353,6 +355,18 @@ export default function FormSelect(props) {
                     setCheckedItems={setCheckedItems}
                     checkedItems={checkedItems}
                   />
+                  <Tooltip title="Check this if you only want to include valid Athena terms using the valid start and end dates">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isValidChecked}
+                          onChange={(e) => setIsValidChecked(e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="Only Include Valid Terms"
+                    />
+                  </Tooltip>
 
                   <TransferList
                     props={props}

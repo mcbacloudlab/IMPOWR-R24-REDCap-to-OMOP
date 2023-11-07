@@ -115,9 +115,9 @@ export default function CompletedJobsViewPage(props) {
   const columns = useMemo(() => colDefs, [colDefs]);
 
   useEffect(() => {
-    console.log("allverified", allVerified);
+    // console.log("allverified", allVerified);
     let jobInfo;
-    console.log("location?", location.state);
+    // console.log("location?", location.state);
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;
       _data.current = location.state.result;
@@ -440,7 +440,7 @@ export default function CompletedJobsViewPage(props) {
     if (!dbFlag) {
       _data.forEach((item, index) => {
         let fieldLabel, fieldName;
-        console.log("the item", item);
+        // console.log("the item", item);
         if (!item.redcapFieldLabel) fieldLabel = item.extraData.name;
         else fieldLabel = item.redcapFieldLabel;
 
@@ -484,7 +484,7 @@ export default function CompletedJobsViewPage(props) {
         }
         setVerifiedRecords(verifiedCount);
       });
-      console.log("a result", result);
+      // console.log("a result", result);
     } else {
       result = _data;
       //count verified records
@@ -516,7 +516,7 @@ export default function CompletedJobsViewPage(props) {
       }
       setVerifiedRecords(verifiedCount);
 
-      console.log("a result 2", result);
+      // console.log("a result 2", result);
     }
     setTempAllData(result);
     setTotalRecords(result.length);
@@ -656,7 +656,7 @@ export default function CompletedJobsViewPage(props) {
       }
     };
     let cols;
-    console.log("redcap", _redcapFormName);
+    // console.log("redcap", _redcapFormName);
     if (_redcapFormName.current === "customText") {
       cols = [
         {
@@ -969,15 +969,14 @@ export default function CompletedJobsViewPage(props) {
   const handleExportData = async (action) => {
     let _data = data;
     const transformedData = await transformData(_data);
-
     //get original redcap data dictionary data and update it
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Bearer " + props.token);
 
     var formdata = new FormData();
-    console.log("_redcapFormName", _redcapFormName);
+    // console.log("_redcapFormName", _redcapFormName);
     if (action === "downloadUpload") {
-      console.log("download upload");
+      // console.log("download upload");
     } else {
       formdata.append("form", _redcapFormName.current);
     }
@@ -1000,7 +999,6 @@ export default function CompletedJobsViewPage(props) {
         let jsonResult = JSON.parse(result);
         // Loop through the first array of objects
         // Wrap the for loops in a Promise
-        console.log("transformed data", transformedData);
         const loopPromise = new Promise((resolve, reject) => {
           for (let i = 0; i < transformedData.length; i++) {
             for (let j = 0; j < jsonResult.length; j++) {
@@ -1030,19 +1028,19 @@ export default function CompletedJobsViewPage(props) {
 
                 //set parsed field name as the key so not to overwrite existing data
                 let fn = transformedData[i]["Field Name"];
-                console.log("json result", jsonResult[j]);
-                console.log("fn value", jsonResult[j].field_annotation);
-                console.log("type of", typeof jsonResult[j].field_annotation);
+                // console.log("json result", jsonResult[j]);
+                // console.log("fn value", jsonResult[j].field_annotation);
+                // console.log("type of", typeof jsonResult[j].field_annotation);
 
                 // Check if field_annotation is a string aka data already stored in DD
                 if (typeof jsonResult[j].field_annotation === "string") {
-                  console.log("we have a string!");
+               
                   // If it's a string, replace it with a new object
                   // I have a feeling this could be logically problematic. We want to likely not include any stored field_annotations in the DD at this point. This seems to not include, but very awkwardly.
                   jsonResult[j].field_annotation = {
                     [fn]: transformedData[i],
                   };
-                  console.log("json result after insert string", jsonResult[j]);
+                  // console.log("json result after insert string", jsonResult[j]);
                 } else {
                   // If it's an object, merge with the existing object
                   jsonResult[j].field_annotation = {
@@ -1052,7 +1050,7 @@ export default function CompletedJobsViewPage(props) {
                 }
                 break;
               } else {
-                console.log("no match on", transformedData[i]["Field Name"]);
+                // console.log("no match on", transformedData[i]["Field Name"]);
 
                 // Reset unmatched fields
                 // Object.assign(jsonResult[j], {
@@ -1329,9 +1327,9 @@ export default function CompletedJobsViewPage(props) {
 
   const handleDirectMapSubmit = (formData, removePref) => {
     // Handle submit
-    console.log(selectedOMOPTable);
-    console.log("row", modalRowData);
-    console.log("formdta", formData);
+    // console.log(selectedOMOPTable);
+    // console.log("row", modalRowData);
+    // console.log("formdta", formData);
     // function verifyRow(row, removePref) {
     // let newModalRowData = modalRowData;
     let newModalSubRowData = modalRowData.subRows;
@@ -1382,7 +1380,7 @@ export default function CompletedJobsViewPage(props) {
     });
     buildTable(newArray, true, true);
     storeJobVerificationInfo(JSON.stringify(newArray));
-    console.log("newarray to store", newArray);
+    // console.log("newarray to store", newArray);
     setDirectMapModalOpen(false);
     handleSetTempAllData(newArray);
     verifyRow(newSubRow, false, true);
