@@ -2,9 +2,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
-  Checkbox,
+  // Checkbox,
   FormControl,
-  FormControlLabel,
+  // FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -42,7 +42,6 @@ export default function FormSelect(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectRowsError, setSelectRowsError] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
-  const [isValidChecked, setIsValidChecked] = useState(true);
 
 
   var tableInstanceRef = useRef(null);
@@ -220,7 +219,6 @@ export default function FormSelect(props) {
     formdata.append("data", JSON.stringify(dataToSendToQueue));
     formdata.append("selectedForm", selectedForm);
     formdata.append("dataLength", dataToSendToQueue.length);
-    formdata.append("isValidChecked", isValidChecked)
 
     // Filter out properties with the value of false
     const filteredCollections = Object.fromEntries(
@@ -356,7 +354,7 @@ export default function FormSelect(props) {
                     setCheckedItems={setCheckedItems}
                     checkedItems={checkedItems}
                   />
-                  <Tooltip title="Check this if you only want to include valid Athena terms using the valid start and end dates">
+                  {/* <Tooltip title="Check this if you only want to include valid Athena terms using the valid start and end dates">
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -367,7 +365,7 @@ export default function FormSelect(props) {
                       }
                       label="Only Include Valid Terms"
                     />
-                  </Tooltip>
+                  </Tooltip> */}
 
                   <TransferList
                     props={props}

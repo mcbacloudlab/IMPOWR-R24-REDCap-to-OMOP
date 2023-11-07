@@ -5,7 +5,8 @@ const MongoClient = require("mongodb").MongoClient;
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
 var pg_pool = require("../db/postgresqlConnection.cjs");
-const topResultsNum = 10
+const { start } = require("repl");
+const topResultsNum = 10;
 let totalDocuments = 0;
 const redcapLookupCollection = client
   .db("GPT3_Embeddings")
@@ -26,8 +27,6 @@ async function processChunk(
   skip,
   limit,
   redcapLookupArray, // Add redcapLookupArray as an argument
-  isValidChecked,
-
 ) {
   let finalList = [];
   let snomedCursor, snomedChunk;
@@ -57,6 +56,7 @@ async function processChunk(
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
         (!isEmptyObject(data.matchingID) && data.matchingID);
       let _redCapDoc = redCapDoc;
+
       if (_redCapDoc.obj.name && _redCapDoc.obj.name == dataID) {
         topResults.push({
           redcapFieldLabel,
@@ -77,7 +77,9 @@ async function processChunk(
     }
 
     finalList.push(
-      topResults.sort((a, b) => b.similarity - a.similarity).slice(0, topResultsNum)
+      topResults
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, topResultsNum)
     );
     topResults = [];
   }
@@ -89,7 +91,6 @@ async function processChunks(
   chunkSize,
   progress,
   collectionsToUse,
-  isValidChecked
 ) {
   // Parse collectionsToUse from a JSON string to an array
   const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
@@ -120,7 +121,6 @@ async function processChunks(
         skip,
         limit,
         redcapLookupArray,
-        isValidChecked
       );
       results.push(...finalList);
       skip += limit;
@@ -149,7 +149,7 @@ async function processChunks(
   ];
 
   // console.log("field labels", fieldLabels);
-
+  //now use filtered data to go to postgres db to get more data from concept table using concept ids
   const filteredData = await fieldLabels.reduce(
     async (accPromise, combinedLabel) => {
       const acc = await accPromise;
@@ -182,14 +182,13 @@ async function processChunks(
           console.log("Warning: snomedID is undefined for item", item);
         }
       }
-
+      console.log('topItems', topItems)
       acc.push(...topItems);
       return acc;
     },
     Promise.resolve([])
   );
 
-  //now use filtered data to go to postgres db to get more data from concept table using concept ids
   setTimeout(() => {
     const totalDataPortions = Math.ceil(filteredData.length / portionSize);
     for (let i = 0; i < totalDataPortions; i++) {
@@ -221,5 +220,4 @@ processChunks(
   30000,
   workerData.progress,
   workerData.collectionsToUse,
-  workerData.isValidChecked
 );

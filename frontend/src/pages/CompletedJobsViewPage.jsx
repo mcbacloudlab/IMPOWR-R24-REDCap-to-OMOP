@@ -48,6 +48,7 @@ import { ViewContext } from "../components/ViewContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import { getJobVerificationInfo } from "../utils/helperFunctions";
+import { useLists } from "../components/ListsContext";
 
 export default function CompletedJobsViewPage(props) {
   const [data, setData] = useState("");
@@ -59,7 +60,7 @@ export default function CompletedJobsViewPage(props) {
   const [isSaving, setIsSaving] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [verifiedRecords, setVerifiedRecords] = useState(0);
-  const [allVerified, setAllVerified] = useState(false);
+  // const [allVerified, setAllVerified] = useState(false);
   const [value, setValue] = useState(0);
   const [selectedTabIdx, setSelectedTabIdx] = useState(0);
   const [lookupModalOpen, setLookupModalOpen] = useState(false);
@@ -77,6 +78,8 @@ export default function CompletedJobsViewPage(props) {
   const { view, setView } = useContext(ViewContext);
   const [submittedBy, setSubmittedBy] = useState("");
   const [jobName, setJobName] = useState("");
+
+  const { setIsValidChecked } = useLists();
 
   const umlsModalStyle = {
     position: "absolute",
@@ -361,9 +364,9 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
-                  setAllVerified(true);
+                  // setAllVerified(true);
                 } else {
-                  setAllVerified(false);
+                  // setAllVerified(false);
                 }
                 return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
               });
@@ -395,9 +398,9 @@ export default function CompletedJobsViewPage(props) {
               // Use functional update to access the latest value of totalRecords
               setTotalRecords((prevTotalRecords) => {
                 if (updatedVerifiedRecords === prevTotalRecords) {
-                  setAllVerified(true);
+                  // setAllVerified(true);
                 } else {
-                  setAllVerified(false);
+                  // setAllVerified(false);
                 }
                 return prevTotalRecords; // Return the latest value of totalRecords (no changes needed)
               });
@@ -478,9 +481,9 @@ export default function CompletedJobsViewPage(props) {
         }, 0); // Initialize the accumulator (count) with 0
         // Update the state with the new verified count
         if (verifiedCount === result.length) {
-          setAllVerified(true);
+          // setAllVerified(true);
         } else {
-          setAllVerified(false);
+          // setAllVerified(false);
         }
         setVerifiedRecords(verifiedCount);
       });
@@ -510,9 +513,9 @@ export default function CompletedJobsViewPage(props) {
       });
       // Update the state with the new verified count
       if (verifiedCount === result.length) {
-        setAllVerified(true);
+        // setAllVerified(true);
       } else {
-        setAllVerified(false);
+        // setAllVerified(false);
       }
       setVerifiedRecords(verifiedCount);
 
@@ -1034,7 +1037,6 @@ export default function CompletedJobsViewPage(props) {
 
                 // Check if field_annotation is a string aka data already stored in DD
                 if (typeof jsonResult[j].field_annotation === "string") {
-               
                   // If it's a string, replace it with a new object
                   // I have a feeling this could be logically problematic. We want to likely not include any stored field_annotations in the DD at this point. This seems to not include, but very awkwardly.
                   jsonResult[j].field_annotation = {
@@ -1051,7 +1053,6 @@ export default function CompletedJobsViewPage(props) {
                 break;
               } else {
                 // console.log("no match on", transformedData[i]["Field Name"]);
-
                 // Reset unmatched fields
                 // Object.assign(jsonResult[j], {
                 //   standard_concept: "",
@@ -1229,6 +1230,7 @@ export default function CompletedJobsViewPage(props) {
     setSelectedTabIdx(panelIndex);
     if (!switching) handleChange(e, 0); //reset tab to default tab
     //set table data based on panelIndex
+    setIsValidChecked(false);
     switch (panelIndex) {
       case 0: {
         setData(tempAllData);
@@ -1672,6 +1674,7 @@ export default function CompletedJobsViewPage(props) {
                   props={props}
                   columns={columns}
                   data={data}
+                  setData={setData}
                   handleExportData={handleExportData}
                   updateDD={updateDD}
                   resetScreen={resetScreen}

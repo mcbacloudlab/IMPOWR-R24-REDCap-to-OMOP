@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
-import { Button, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 // import StorageIcon from "@mui/icons-material/Storage";
+import { useLists } from "./ListsContext";
 import CSVIcon from "../assets/csv.png";
 
 export default function CompletedJobTable({
@@ -12,7 +19,69 @@ export default function CompletedJobTable({
   handleExportData,
   updateDD,
   selectedTabIdx,
+  setData,
 }) {
+  // const [isValidChecked, setIsValidChecked] = useState(false);
+  const { isValidChecked, setIsValidChecked } = useLists();
+
+  const allData = useRef(data);
+
+  useEffect(() => {
+    if (isValidChecked) {
+      setData(filterByDate(data));
+    }
+  }, [data, isValidChecked, setData]);
+
+
+  function handleValidChecked(event) {
+    console.log("event", event);
+    setIsValidChecked(event);
+
+    console.log("data", data);
+    if (event) {
+      console.log("filterData", filterByDate(data));
+      setData(filterByDate(data));
+    } else {
+      setData(allData.current);
+    }
+  }
+
+  function filterByDate(records) {
+    const today = new Date();
+
+    // Check if the date range in extraData includes today's date
+    const isDateValid = (extraData) => {
+      const startDate = new Date(extraData.valid_start_date);
+      const endDate = new Date(extraData.valid_end_date);
+      return startDate <= today && today <= endDate;
+    };
+
+    // Recursive function to filter out records based on valid dates
+    const filterRecords = (arr) => {
+      return arr.reduce((acc, record) => {
+        // First filter the subRows, if they exist
+        const validSubRows = (record.subRows || []).filter((subRow) =>
+          isDateValid(subRow.extraData)
+        );
+
+        // Check if the main record is valid
+        if (isDateValid(record.extraData)) {
+          // If valid, keep the record and its valid subRows
+          acc.push({ ...record, subRows: validSubRows });
+        } else if (validSubRows.length > 0) {
+          // If the main record is invalid, promote the first valid subRow
+          const [firstValidSubRow, ...remainingSubRows] = validSubRows;
+          acc.push({ ...firstValidSubRow, subRows: remainingSubRows });
+        }
+        // If the main record is invalid and has no valid subRows, it is omitted
+
+        return acc;
+      }, []);
+    };
+
+    return filterRecords(records);
+  }
+
   return (
     <MaterialReactTable
       //passing the callback function variant. (You should get type hints for all the callback parameters available)
@@ -95,6 +164,18 @@ export default function CompletedJobTable({
             flexWrap: "wrap",
           }}
         >
+          <Tooltip title="Check this if you only want to include valid Athena terms using the valid start and end dates">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isValidChecked}
+                  onChange={(e) => handleValidChecked(!isValidChecked)}
+                  color="primary"
+                />
+              }
+              label="Only Include Valid Terms"
+            />
+          </Tooltip>
           {selectedTabIdx === 2 && (
             <>
               {/* <Tooltip
@@ -118,7 +199,7 @@ export default function CompletedJobTable({
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
-                  marginRight: "auto"
+                  marginRight: "auto",
                 }}
               >
                 <Tooltip

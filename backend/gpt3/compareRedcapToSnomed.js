@@ -8,7 +8,7 @@ require("dotenv").config();
 // Connection URL
 const url = "mongodb://127.0.0.1:27017";
 const client = new MongoClient(url, { useNewUrlParser: true, maxPoolSize: 50 });
-let collectionsToUse, isValidChecked
+let collectionsToUse
 async function main() {
   console.log("Start comparing embeddings");
   await client.connect();
@@ -22,7 +22,6 @@ main().then(async () => {
     const { stdin } = process;
     console.log('process argv', process.argv)
     collectionsToUse = process.argv[3]
-    isValidChecked = process.argv[4]
     console.log('collectionsToUse', JSON.parse(collectionsToUse))
     let inputData = "";
 
@@ -203,7 +202,6 @@ async function startProcessing(
       redCapCollectionArray: redCapCollectionArray.slice(start, end),
       dbName: "GPT3_Embeddings",
       collectionsToUse: collectionsToUse,
-      isValidChecked: isValidChecked,
       progress: progress,
     };
     const worker = new Worker("./gpt3/compareRedcapToSnomed_worker.js", {

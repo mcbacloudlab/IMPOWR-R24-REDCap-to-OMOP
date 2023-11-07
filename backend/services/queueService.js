@@ -235,10 +235,9 @@ async function compareEmbeddings(job) {
     const data = job.data.data;
     const filename = job.data.selectedForm;
     const collectionsToUse = job.data.collections;
-    const isValidChecked = job.data.isValidChecked;
     const process = spawn(
       "node",
-      args.concat([scriptPath, filename, collectionsToUse, isValidChecked]),
+      args.concat([scriptPath, filename, collectionsToUse]),
       {
         stdio: "pipe",
       }

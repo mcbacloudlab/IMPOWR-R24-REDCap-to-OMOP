@@ -14,6 +14,7 @@ export const ListsProvider = ({ children }) => {
   const [allPendingList, setAllPendingList] = useState([]);
   const [allFailedList, setAllFailedList] = useState([]);
   const [initCheckJobsRan, setInitCheckJobsRan] = useState(false);
+  const [isValidChecked, setIsValidChecked] = useState(false);
 
   const value = {
     pendingList,
@@ -29,7 +30,9 @@ export const ListsProvider = ({ children }) => {
     setAllPendingList,
     setAllFailedList,
     initCheckJobsRan, 
-    setInitCheckJobsRan
+    setInitCheckJobsRan,
+    isValidChecked,
+    setIsValidChecked
   };
 
   return (
