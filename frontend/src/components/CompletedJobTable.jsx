@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import Box from "@mui/material/Box";
 import MaterialReactTable from "material-react-table";
 import {
@@ -26,18 +26,15 @@ export default function CompletedJobTable({
 
   const allData = useRef(data);
 
-  useEffect(() => {
-    if (isValidChecked) {
-      setData(filterByDate(data));
-    }
-  }, [data, isValidChecked, setData]);
+  // useEffect(() => {
+  //   // if (isValidChecked) {
+  //   //   setData(filterByDate(data));
+  //   // }
+  // }, [data, isValidChecked, setData]);
 
 
   function handleValidChecked(event) {
-    console.log("event", event);
     setIsValidChecked(event);
-
-    console.log("data", data);
     if (event) {
       console.log("filterData", filterByDate(data));
       setData(filterByDate(data));
