@@ -2,9 +2,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
+  Checkbox,
   // Checkbox,
   FormControl,
-  // FormControlLabel,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -42,7 +43,7 @@ export default function FormSelect(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectRowsError, setSelectRowsError] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
-
+  const [isHiddenChecked, setIsHiddenChecked] = useState(false);
 
   var tableInstanceRef = useRef(null);
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function FormSelect(props) {
 
   const columns = useMemo(() => colDefs, [colDefs]);
 
-  function getDataDictionary(event) {
+  function getDataDictionary(_isHiddenChecked) {
     setIsFormLoaded(false);
     setIsFormLoading(true);
     if (!selectedForm) setSelectedForm(props.forms[0]);
@@ -84,7 +85,7 @@ export default function FormSelect(props) {
       .then((response) => response.text())
       .then((result) => {
         console.log("result", result);
-        importExcel(JSON.parse(result));
+        importExcel(JSON.parse(result), _isHiddenChecked);
       })
       .catch((error) => console.log("error", error));
   }
@@ -98,7 +99,7 @@ export default function FormSelect(props) {
     resetScreen();
   };
 
-  function importExcel(e) {
+  function importExcel(e, _isHiddenChecked) {
     const file = e;
     // setCSVFilename(file.name);
 
@@ -120,9 +121,19 @@ export default function FormSelect(props) {
     let convertedData = convertToJson(headers, fileData);
     for (var i = 0; i < convertedData.length; i++) {
       var obj = convertedData[i];
-
+      console.log('is hidden checked?', _isHiddenChecked)
+      //determine whether to remove hidden
+      if (!_isHiddenChecked) {
+        convertedData = convertedData.filter(
+          (obj) => !obj.field_annotation.includes("HIDDEN")
+        );
+      }
       // Check if the field_type is 'dropdown'
-      if (obj.field_type === "dropdown" || obj.field_type === "radio") {
+      if (
+        obj.field_type === "dropdown" ||
+        obj.field_type === "radio" ||
+        obj.field_type === "checkbox"
+      ) {
         var selectChoices = obj.select_choices_or_calculations;
         console.log("Dropdown/radio value: " + selectChoices);
 
@@ -307,6 +318,12 @@ export default function FormSelect(props) {
     // setSelectedFile("");
   }
 
+  function handleHiddenChecked(value) {
+    console.log("val", value);
+    setIsHiddenChecked(value);
+    getDataDictionary(value);
+  }
+
   if (props.forms.length > 0) {
     return (
       <>
@@ -332,7 +349,7 @@ export default function FormSelect(props) {
                   variant="contained"
                   component="label"
                   startIcon={<ImportExportIcon />}
-                  onClick={(e) => getDataDictionary(e)}
+                  onClick={(e) => getDataDictionary()}
                 >
                   Import Data Dictionary
                 </Button>
@@ -436,6 +453,22 @@ export default function FormSelect(props) {
                     >
                       Submit Job To Queue
                     </Button>
+                  </Tooltip>
+                </Grid>
+                <Grid item xs={12}>
+                  <Tooltip title="Check this if you only want to include valid Athena terms using the valid start and end dates">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isHiddenChecked}
+                          onChange={(e) =>
+                            handleHiddenChecked(e.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Include Hidden REDCap Fields?"
+                    />
                   </Tooltip>
                 </Grid>
                 {showSubmittedNotifcation && (
