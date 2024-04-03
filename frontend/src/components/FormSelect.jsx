@@ -121,14 +121,14 @@ export default function FormSelect(props) {
     let convertedData = convertToJson(headers, fileData);
     for (var i = 0; i < convertedData.length; i++) {
       var obj = convertedData[i];
-      console.log('is hidden checked?', _isHiddenChecked)
+      console.log("is hidden checked?", _isHiddenChecked);
       //determine whether to remove hidden
       if (!_isHiddenChecked) {
         convertedData = convertedData.filter(
           (obj) => !obj.field_annotation.includes("HIDDEN")
         );
       }
-      // Check if the field_type is 'dropdown'
+      // Check the field_type to handle parsing so the values align with the field_name keys
       if (
         obj.field_type === "dropdown" ||
         obj.field_type === "radio" ||
@@ -151,7 +151,12 @@ export default function FormSelect(props) {
         // Append new objects with parsed data to convertedData array
         for (var j = 0; j < parsedChoices.length; j++) {
           var choice = parsedChoices[j];
-          var appendedFieldName = obj.field_name + "_" + choice.key;
+          let appendedFieldName = obj.field_name;
+          if (obj.field_type === "radio" || obj.field_type === 'dropdown') {
+            appendedFieldName = obj.field_name + "_" + choice.key;
+          } else if (obj.field_type === 'checkbox') {
+            appendedFieldName = obj.field_name + "___" + choice.key;
+          }
 
           var newObject = {
             field_name: appendedFieldName,
