@@ -14,35 +14,33 @@ However, it's crucial to note that OMOP tables require a minimum amount of data 
 
 # Process Overview
 
-## Web App Workflow
-
 ## 1. Import REDCap Data Dictionary
    The process begins with the importation of a REDCap data dictionary into the web application.
 
 - **Step**: Import your data dictionary file.
 - **Action**: Navigate to the import section and select your file.
-- ![Import Data Dictionary](frontend/src/assets/readme/webapp_submitData.png)
+![Import Data Dictionary](frontend/src/assets/readme/webapp_submitData.png)
 
 ## 2. Data Mapping
    Submitted data dictionaries undergo a mapping process against a MongoDB collection of SNOMED terms converted to word embeddings.
 
 - **Step**: Submit the data dictionary for mapping.
 - **Action**: Click the "Submit" button.
-- ![Submit Data for Mapping](frontend/src/assets/readme/webapp_submit_job.gif)
+ ![Submit Data for Mapping](frontend/src/assets/readme/webapp_submit_job.gif)
 
 ## 3. Mapping Review and Selection
    Users review the suggested mappings in a table format and select the most accurate matches.
 
 - **Step**: Review and select correct mappings.
 - **Action**: Select the correct mapping for each field.
-- ![Review Mapping Results](frontend/src/assets/readme/webapp_prefer.gif)
+ ![Review Mapping Results](frontend/src/assets/readme/webapp_prefer.gif)
 
 ## 4. Download REDCap Companion File
    Finally, users can download a companion file with their selected mappings added to the field_annotation column.
 
 - **Step**: Download the companion file.
 - **Action**: Click on the "OMOP Companion File" icon/button.
-- ![Download Companion File](frontend/src/assets/readme/webapp_download.gif)
+ ![Download Companion File](frontend/src/assets/readme/webapp_download.gif)
 
 # Desktop Electron.js App Workflow
 ## 1. Setup and Configuration
@@ -50,18 +48,18 @@ Users set up their REDCap connection and add the companion file in the desktop a
 
 - **Step**: Configure REDCap connection
 - **Action**: Through the app's settings, configure the connections
-- ![Setup REDCap Connection](frontend/src/assets/readme/desktopapp_setup_connection.png)
+ ![Setup REDCap Connection](frontend/src/assets/readme/desktopapp_setup_connection.png)
 
 ## 2. Add the companion file
 The desktop app uses the mapped data that is linked to the REDCap data dictionary. Additional info is required such as Person ID, date formats, and the field names for start and end dates.
 
 - **Step**: Add companion file.
 - **Action**: Click "Add Mapped File" and select the downloaded companion file from the web app.
-- ![Add companion file](frontend/src/assets/readme/desktopapp_add_file.gif)
+ ![Add companion file](frontend/src/assets/readme/desktopapp_add_file.gif)
 
 ## 3. Data Extraction, Transformation, and Loading (ETL)
 The desktop app uses the mapped data to extract records from REDCap, transform them according to OMOP standards, and load them into the chosen database format.
 
 - **Step**: Perform ETL on mapped data.
 - **Action**: Choose the output format (SQL or CSV) and execute the ETL process.
-- ![ETL Process](frontend/src/assets/readme/desktopapp_output.gif)
+ ![ETL Process](frontend/src/assets/readme/desktopapp_output.gif)
