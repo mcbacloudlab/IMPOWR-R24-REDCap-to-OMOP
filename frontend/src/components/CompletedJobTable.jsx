@@ -173,6 +173,56 @@ export default function CompletedJobTable({
               label="Only Include Valid Terms"
             />
           </Tooltip>
+          {selectedTabIdx === 0 && (
+            <>
+              {/* <Tooltip
+                title={
+                  "This will use the below mappings and store a JSON object into the field_annotations column of the data dictionary in REDCap"
+                }
+                placement="top"
+              > */}
+              {/* <Button
+                  color="warning"
+                  onClick={updateDD}
+                  startIcon={<StorageIcon />}
+                  variant="contained"
+                >
+                  Update REDCap Dictionary
+                </Button> */}
+              {/* </Tooltip> */}
+
+              <Box
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginRight: "auto",
+                }}
+              >
+                {/* <Tooltip
+                  title={`This is the CSV file you can use with the desktop companion app.`}
+                  placement="top"
+                > */}
+                  <Button onClick={() => handleExportData("simpleTable")}>
+                    <img
+                      src={CSVIcon}
+                      alt="Export to CSV"
+                      style={{ width: "32px", height: "32px" }}
+                    />
+                  </Button>
+                {/* </Tooltip> */}
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    textAlign: "center",
+                    marginTop: "4px",
+                  }}
+                >
+                  Export <br />
+                </Typography>
+              </Box>
+            </>
+          )}
           {selectedTabIdx === 2 && (
             <>
               {/* <Tooltip

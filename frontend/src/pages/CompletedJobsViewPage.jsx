@@ -972,134 +972,159 @@ export default function CompletedJobsViewPage(props) {
   const handleExportData = async (action) => {
     let _data = data;
     const transformedData = await transformData(_data);
-    //get original redcap data dictionary data and update it
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + props.token);
 
-    var formdata = new FormData();
-    // console.log("_redcapFormName", _redcapFormName);
-    if (action === "downloadUpload") {
-      // console.log("download upload");
-    } else {
+    //get extra redcap data for export unless we are just outputting table on screen
+    if (action !== "simpleTable") {
+      var myHeaders = new Headers();
+      myHeaders.append("Authorization", "Bearer " + props.token);
+
+      var formdata = new FormData();
       formdata.append("form", _redcapFormName.current);
-    }
+      var requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+        redirect: "follow",
+        credentials: "include", // Include cookies with the request
+      };
 
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-      redirect: "follow",
-      credentials: "include", // Include cookies with the request
-    };
+      fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/exportMetadata`,
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then(async (result) => {
+          //update field_annotation with the preferred value id
+          let jsonResult = JSON.parse(result);
+          // Loop through the first array of objects
+          // Wrap the for loops in a Promise
+          const loopPromise = new Promise((resolve, reject) => {
+            for (let i = 0; i < transformedData.length; i++) {
+              for (let j = 0; j < jsonResult.length; j++) {
+                const formNameMatches =
+                  transformedData[i]["Form Name"].current ===
+                  jsonResult[j]["form_name"];
+                const fieldNameMatches =
+                  transformedData[i]["Field Name"] ===
+                  jsonResult[j]["field_name"];
+                const extraFieldNameMatches =
+                  transformedData[i].extraData.og_field_name ===
+                  jsonResult[j]["field_name"];
 
-    fetch(
-      `${process.env.REACT_APP_BACKEND_API_URL}/api/redcap/exportMetadata`,
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then(async (result) => {
-        //update field_annotation with the preferred value id
-        let jsonResult = JSON.parse(result);
-        // Loop through the first array of objects
-        // Wrap the for loops in a Promise
-        const loopPromise = new Promise((resolve, reject) => {
-          for (let i = 0; i < transformedData.length; i++) {
-            for (let j = 0; j < jsonResult.length; j++) {
-              const formNameMatches =
-                transformedData[i]["Form Name"].current ===
-                jsonResult[j]["form_name"];
-              const fieldNameMatches =
-                transformedData[i]["Field Name"] ===
-                jsonResult[j]["field_name"];
-              const extraFieldNameMatches =
-                transformedData[i].extraData.og_field_name ===
-                jsonResult[j]["field_name"];
+                if (
+                  formNameMatches &&
+                  (fieldNameMatches || extraFieldNameMatches)
+                ) {
+                  // console.log("matched on ", transformedData[i]["Field Name"]);
 
-              if (
-                formNameMatches &&
-                (fieldNameMatches || extraFieldNameMatches)
-              ) {
-                // console.log("matched on ", transformedData[i]["Field Name"]);
+                  // Handle extra data if present
+                  // const extraData = transformedData[i].extraData;
+                  // let parsed = false;
+                  // if (extraData.og_field_name && extraData.og_field_name_key) {
+                  //   //indicate this was a parsed result from dropdown or radio selection
+                  //   parsed = true;
+                  // }
 
-                // Handle extra data if present
-                // const extraData = transformedData[i].extraData;
-                // let parsed = false;
-                // if (extraData.og_field_name && extraData.og_field_name_key) {
-                //   //indicate this was a parsed result from dropdown or radio selection
-                //   parsed = true;
-                // }
+                  //set parsed field name as the key so not to overwrite existing data
+                  let fn = transformedData[i]["Field Name"];
+                  // console.log("json result", jsonResult[j]);
+                  // console.log("fn value", jsonResult[j].field_annotation);
+                  // console.log("type of", typeof jsonResult[j].field_annotation);
 
-                //set parsed field name as the key so not to overwrite existing data
-                let fn = transformedData[i]["Field Name"];
-                // console.log("json result", jsonResult[j]);
-                // console.log("fn value", jsonResult[j].field_annotation);
-                // console.log("type of", typeof jsonResult[j].field_annotation);
-
-                // Check if field_annotation is a string aka data already stored in DD
-                if (typeof jsonResult[j].field_annotation === "string") {
-                  // If it's a string, replace it with a new object
-                  // I have a feeling this could be logically problematic. We want to likely not include any stored field_annotations in the DD at this point. This seems to not include, but very awkwardly.
-                  jsonResult[j].field_annotation = {
-                    [fn]: transformedData[i],
-                  };
-                  // console.log("json result after insert string", jsonResult[j]);
+                  // Check if field_annotation is a string aka data already stored in DD
+                  if (typeof jsonResult[j].field_annotation === "string") {
+                    // If it's a string, replace it with a new object
+                    // I have a feeling this could be logically problematic. We want to likely not include any stored field_annotations in the DD at this point. This seems to not include, but very awkwardly.
+                    jsonResult[j].field_annotation = {
+                      [fn]: transformedData[i],
+                    };
+                    // console.log("json result after insert string", jsonResult[j]);
+                  } else {
+                    // If it's an object, merge with the existing object
+                    jsonResult[j].field_annotation = {
+                      ...jsonResult[j].field_annotation,
+                      [fn]: transformedData[i],
+                    };
+                  }
+                  break;
                 } else {
-                  // If it's an object, merge with the existing object
-                  jsonResult[j].field_annotation = {
-                    ...jsonResult[j].field_annotation,
-                    [fn]: transformedData[i],
-                  };
+                  // console.log("no match on", transformedData[i]["Field Name"]);
+                  // Reset unmatched fields
+                  // Object.assign(jsonResult[j], {
+                  //   standard_concept: "",
+                  //   concept_class_id: "",
+                  //   domain_id: "",
+                  // });
                 }
-                break;
-              } else {
-                // console.log("no match on", transformedData[i]["Field Name"]);
-                // Reset unmatched fields
-                // Object.assign(jsonResult[j], {
-                //   standard_concept: "",
-                //   concept_class_id: "",
-                //   domain_id: "",
-                // });
               }
             }
+
+            resolve(); // Resolve the promise after the loops finish
+          });
+
+          await loopPromise;
+          // Convert the results array to CSV format using papaparse
+          // console.log("jsonResult!", jsonResult);
+          // Convert nested objects to JSON strings before converting to CSV
+          const stringifiedData = jsonResult.map((item) => ({
+            ...item,
+            field_annotation: JSON.stringify(item.field_annotation),
+          }));
+          if (action === "downloadExcel" || action === "downloadUpload") {
+            // console.log("downloadExcel!");
+            const csvData = Papa.unparse(stringifiedData);
+            // const csvData = Papa.unparse(jsonResult);
+            // Create a Blob from the CSV data
+            const blob = new Blob([csvData], {
+              type: "text/csv;charset=utf-8;",
+            });
+
+            // Use FileSaver to save the generated CSV file
+            saveAs(blob, `${csvFilename}.csv`);
+            // csvExporter.generateCsv(jsonResult);
+          } else if (action === "updateDD") {
+            // console.log("update DD in REDCap");
           }
-
-          resolve(); // Resolve the promise after the loops finish
+        })
+        .catch((error) => {
+          console.error("error", error);
+          setAlertSeverity("error");
+          setAlertMessage(
+            "Error during export. Make sure connection to REDCap is working."
+          );
+          setSnackbarOpen(true);
+          setTimeout(() => {
+            setSnackbarOpen(false);
+          }, 5000);
         });
+    } else {
+      // Assuming 'data' is your original data array
+      function flattenData(data) {
+        let flattened = [];
+        data.forEach((item) => {
+          // Add the current item
+          flattened.push(item);
+          // Check if there are subRows and handle them
+          if (item.subRows && Array.isArray(item.subRows)) {
+            item.subRows.forEach((subRow) => {
+              // Here, you may want to combine 'subRow' with some of 'item's data
+              // Or just push 'subRow' as is, depending on your requirements
+              flattened.push(subRow);
+            });
+          }
+        });
+        return flattened;
+      }
 
-        await loopPromise;
-        // Convert the results array to CSV format using papaparse
-        // console.log("jsonResult!", jsonResult);
-        // Convert nested objects to JSON strings before converting to CSV
-        const stringifiedData = jsonResult.map((item) => ({
-          ...item,
-          field_annotation: JSON.stringify(item.field_annotation),
-        }));
-        if (action === "downloadExcel" || action === "downloadUpload") {
-          // console.log("downloadExcel!");
-          const csvData = Papa.unparse(stringifiedData);
-          // const csvData = Papa.unparse(jsonResult);
-          // Create a Blob from the CSV data
-          const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+      const flattenedData = flattenData(data);
 
-          // Use FileSaver to save the generated CSV file
-          saveAs(blob, `${csvFilename}.csv`);
-          // csvExporter.generateCsv(jsonResult);
-        } else if (action === "updateDD") {
-          // console.log("update DD in REDCap");
-        }
-      })
-      .catch((error) => {
-        console.error("error", error);
-        setAlertSeverity("error");
-        setAlertMessage(
-          "Error during export. Make sure connection to REDCap is working."
-        );
-        setSnackbarOpen(true);
-        setTimeout(() => {
-          setSnackbarOpen(false);
-        }, 5000);
-      });
+      // Now 'flattenedData' can be passed to PapaParse
+      const csvData = Papa.unparse(flattenedData);
 
+      // Proceed with the Blob and FileSaver logic as before
+      const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+      saveAs(blob, `table_${csvFilename}.csv`);
+    }
     //remove zeroes from csv
     // _data.forEach(function (obj) {
     //   keys.forEach(function (key) {
