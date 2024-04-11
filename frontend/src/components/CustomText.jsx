@@ -378,6 +378,13 @@ export default function CustomText({ props, handleClick }) {
     });
   };
 
+  function normalizeKeys(obj) {
+    return Object.keys(obj).reduce((acc, key) => {
+      acc[key.toLowerCase()] = obj[key];
+      return acc;
+    }, {});
+  }
+
   const handleCSVUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -385,8 +392,9 @@ export default function CustomText({ props, handleClick }) {
       const csvText = new TextDecoder().decode(fileContent);
       const results = Papa.parse(csvText, { header: true });
       const formattedData = results.data
-        .filter((row) => row.name) // ensures there's data in 'name' column
-        .map((row) => ({ name: row.name }));
+        .map((row) => normalizeKeys(row)) // Normalize keys of each row
+        .filter((row) => row["name"]) // Now safely access with 'name' in lowercase
+        .map((row) => ({ name: row["name"].trim() })); // Optional trimming
       setData((prevData) => [...prevData, ...formattedData]);
       fileInputRef.current.value = "";
     }
@@ -401,13 +409,14 @@ export default function CustomText({ props, handleClick }) {
       const worksheet = workbook.Sheets[firstSheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
       const formattedData = jsonData
-        .filter((row) => row.name) // ensures there's data in 'name' column
-        .map((row) => ({ name: row.name }));
+        .map(row => normalizeKeys(row))  // Normalize keys of each row
+        .filter((row) => row['name'])    // Now safely access with 'name' in lowercase
+        .map((row) => ({ name: row['name'].trim() }));  // Optional trimming
       setData((prevData) => [...prevData, ...formattedData]);
       fileInputRef.current.value = "";
     }
   };
-
+  
   const findMatchedDataForDetail = (conceptId) => {
     const currentResults = athenaAPIResultsRef.current;
 
