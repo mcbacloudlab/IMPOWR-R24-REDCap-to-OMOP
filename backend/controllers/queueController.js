@@ -18,7 +18,7 @@ async function retryJob(req, res) {
 }
 
 async function cancelJob(req, res) {
-  console.log("retry job");
+  console.log("cancel job");
   try {
     await queueService.cancelJob(req, res);
   } catch (error) {
@@ -27,7 +27,7 @@ async function cancelJob(req, res) {
 }
 
 async function updateJobName(req, res) {
-  console.log("retry job");
+  console.log("update job name");
   try {
     await queueService.updateJobName(req, res);
   } catch (error) {

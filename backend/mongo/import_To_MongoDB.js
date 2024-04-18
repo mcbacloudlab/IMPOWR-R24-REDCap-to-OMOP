@@ -116,7 +116,7 @@ function processJsonData(jsonData, collection, client) {
       // initialize the progress bar with total number of elements
       bar.start(jsonData.length, 0);
       let insertCounter = 0;
-        console.log('jsondata', jsonData)
+        // console.log('jsondata', jsonData)
       jsonData.forEach((doc, index) => {
         // Update document based on tinyId
         let standardizedData = [doc].map((obj) => {
@@ -147,7 +147,7 @@ function processJsonData(jsonData, collection, client) {
         });
 
         doc = standardizedData[0];
-        console.log('stan doc', doc)
+        // console.log('stan doc', doc)
         if(selectedForm === 'customText'){
           promises.push(
             collection

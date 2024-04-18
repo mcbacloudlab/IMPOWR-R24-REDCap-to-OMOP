@@ -182,7 +182,7 @@ async function processChunks(
           console.log("Warning: snomedID is undefined for item", item);
         }
       }
-      console.log('topItems', topItems)
+      // console.log('topItems', topItems)
       acc.push(...topItems);
       return acc;
     },

@@ -266,7 +266,7 @@ async function compareEmbeddings(job) {
         //******************
         // LOG logMessage to see the console.logs from the worker threads
         //for development and testing, comment this out in prod
-        console.log(logMessage)
+        // console.log(logMessage)
         //******************
         //******************
 

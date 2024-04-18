@@ -93,7 +93,7 @@ client.connect(async function (err) {
 
           elem = standardizedData[0];
 
-          console.log("elem", elem);
+          // console.log("elem", elem);
 
           promises.push(
             new Promise((resolve) => {
