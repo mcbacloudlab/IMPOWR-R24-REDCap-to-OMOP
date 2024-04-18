@@ -971,8 +971,9 @@ export default function CompletedJobsViewPage(props) {
 
   const handleExportData = async (action) => {
     let _data = data;
+    console.log("export data", _data);
     const transformedData = await transformData(_data);
-
+    console.log("transformed data", transformedData);
     //get extra redcap data for export unless we are just outputting table on screen
     if (action !== "simpleTable") {
       var myHeaders = new Headers();
@@ -1002,7 +1003,7 @@ export default function CompletedJobsViewPage(props) {
             for (let i = 0; i < transformedData.length; i++) {
               for (let j = 0; j < jsonResult.length; j++) {
                 const formNameMatches =
-                  transformedData[i]["Form Name"].current ===
+                  transformedData[i]["Form Name"] ===
                   jsonResult[j]["form_name"];
                 const fieldNameMatches =
                   transformedData[i]["Field Name"] ===
@@ -1116,8 +1117,8 @@ export default function CompletedJobsViewPage(props) {
         return flattened;
       }
 
-      const flattenedData = flattenData(data);
-
+      const flattenedData = flattenData(transformedData);
+      console.log("flat data", flattenedData);
       // Now 'flattenedData' can be passed to PapaParse
       const csvData = Papa.unparse(flattenedData);
 
@@ -1133,26 +1134,41 @@ export default function CompletedJobsViewPage(props) {
     // });
   };
 
-  function transformData(data) {
-    // console.log("transform", data);
-    return data.map((item) => {
-      const { redcapFieldLabel, snomedID, snomedText, extraData } = item;
-      // console.log("extraData", extraData);
-      return {
-        // ...rest,
-        "Form Name": _redcapFormName,
+  function transformData(data, isSubRow = false) {
+    return data.flatMap((item) => {
+      const {
+        redcapFieldLabel,
+        snomedID,
+        snomedText,
+        extraData,
+        subRows,
+        similarity,
+      } = item;
+      console.log("redcapformname'", _redcapFormName)
+      
+      // Structure to return for both top-level and subRow items
+      const transformedItem = {
+        "Form Name":  _redcapFormName.current, // Adjusted to indicate this might be a variable outside the function
         "Field Name": extraData.field_name,
-        "Field Label": redcapFieldLabel,
+        "Field Label": redcapFieldLabel || extraData.name,
         "Field Annotations": snomedID,
+        Similarity: similarity,
         "SNOMED Name": snomedText,
         "Domain ID": extraData.domain_id,
         "Concept Class ID": extraData.concept_class_id,
         "Standard Concept": extraData.standard_concept,
         Vocab: extraData.vocabulary_id,
-        extraData: extraData,
-
-        // ...extraData,
+        extraData: extraData
       };
+
+      // Directly appending transformed subRows to the main array
+      let itemsToReturn = [transformedItem];
+      if (Array.isArray(subRows)) {
+        const transformedSubRows = transformData(subRows, true); // Pass true to indicate these are subRow items
+        itemsToReturn = itemsToReturn.concat(transformedSubRows);
+      }
+
+      return itemsToReturn;
     });
   }
 
