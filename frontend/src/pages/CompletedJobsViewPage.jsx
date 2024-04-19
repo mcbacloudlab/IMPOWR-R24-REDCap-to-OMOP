@@ -77,7 +77,7 @@ export default function CompletedJobsViewPage(props) {
   const [role, setRole] = useState(null);
   const { view, setView } = useContext(ViewContext);
   const [submittedBy, setSubmittedBy] = useState("");
-  const [jobName, setJobName] = useState("");
+  const [jobName, setJobName] = useState("N/A");
 
   const { setIsValidChecked } = useLists();
 
@@ -120,10 +120,11 @@ export default function CompletedJobsViewPage(props) {
   useEffect(() => {
     // console.log("allverified", allVerified);
     let jobInfo;
-    // console.log("location?", location.state);
+    console.log("location?", location.state);
     if (location && location.state && location.state.jobId) {
       _jobId.current = location.state.jobId;
       _data.current = location.state.result;
+      console.log('set job name with location', location.state.jobName)
       setJobName(location.state.jobName);
       setSubmittedBy(location.state.submittedBy);
       _redcapFormName.current = location.state.redcapFormName;
@@ -157,6 +158,7 @@ export default function CompletedJobsViewPage(props) {
 
         _jobId.current = jobInfo.jobId;
         _data.current = result;
+        console.log('set jobname', jobInfo.jobName)
         setJobName(jobInfo.jobName);
         setSubmittedBy(jobInfo.submittedBy);
         _redcapFormName.current = jobInfo.redcapFormName;
@@ -337,10 +339,14 @@ export default function CompletedJobsViewPage(props) {
     };
   }
 
-  function verifyRow(row, removePref, fromModal) {
-    const updatedData = _dataObj.map((item) => {
+  async function verifyRow(row, removePref, fromModal) {
+    console.log("dataobj", _dataObj);
+    console.log("jobName", jobName);
+    console.log('redcapformname', _redcapFormName)
+    const updatedData = await _dataObj.map((item) => {
       let fieldLabel, fieldName, rowFieldLabel, rowFieldName;
-      if (jobName === "customText") {
+      console.log("jobName", jobName);
+      if (_redcapFormName.current === "customText") {
         fieldLabel = item.extraData.name;
         fieldName = item.extraData.name;
         rowFieldLabel = row.extraData.name;
@@ -351,7 +357,8 @@ export default function CompletedJobsViewPage(props) {
         rowFieldLabel = row.redcapFieldLabel;
         rowFieldName = row.extraData.field_name;
       }
-
+      console.log("field label", fieldLabel);
+      console.log("field name", fieldName);
       //removing the pref
       if (removePref) {
         if (fieldLabel === rowFieldLabel && fieldName === rowFieldName) {
@@ -1144,11 +1151,11 @@ export default function CompletedJobsViewPage(props) {
         subRows,
         similarity,
       } = item;
-      console.log("redcapformname'", _redcapFormName)
-      
+      console.log("redcapformname'", _redcapFormName);
+
       // Structure to return for both top-level and subRow items
       const transformedItem = {
-        "Form Name":  _redcapFormName.current, // Adjusted to indicate this might be a variable outside the function
+        "Form Name": _redcapFormName.current, // Adjusted to indicate this might be a variable outside the function
         "Field Name": extraData.field_name,
         "Field Label": redcapFieldLabel || extraData.name,
         "Field Annotations": snomedID,
@@ -1158,7 +1165,7 @@ export default function CompletedJobsViewPage(props) {
         "Concept Class ID": extraData.concept_class_id,
         "Standard Concept": extraData.standard_concept,
         Vocab: extraData.vocabulary_id,
-        extraData: extraData
+        extraData: extraData,
       };
 
       // Directly appending transformed subRows to the main array
