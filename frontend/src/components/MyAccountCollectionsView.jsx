@@ -20,7 +20,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function MyAccountCollectionsView(props) {
   const [collectionStats, setCollectionStats] = useState([]);
-  const { token } = props.props.props ?? props.props;
+  // const { token } = props.props.props ?? props.props;
   const [editingRow, setEditingRow] = useState(null);
   const [editValue, setEditValue] = useState("");
 
