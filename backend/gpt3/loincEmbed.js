@@ -282,7 +282,7 @@ function callGPT3(loincDataCollection, loincObj) {
         };
         modData = JSON.stringify(modData);
         // Write the GPT3 response data to backup file in case of error
-        fs.appendFileSync("./gpt3/backup/gpt3responses.json", modData);
+        fs.appendFileSync("./gpt3/backup/gpt3LoincResponses.json", modData);
         loincDataCollection
           .updateOne(
             { loinc_id: loincObj.loinc_id },

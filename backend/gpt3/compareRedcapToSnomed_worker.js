@@ -23,7 +23,7 @@ function isEmptyObject(obj) {
 
 async function processChunk(
   redCapCollectionArray,
-  snomedCollection,
+  embeddingCollection,
   skip,
   limit,
   redcapLookupArray, // Add redcapLookupArray as an argument
@@ -31,7 +31,7 @@ async function processChunk(
   let finalList = [];
   let snomedCursor, snomedChunk;
   try {
-    snomedCursor = snomedCollection.find({}).skip(skip).limit(limit);
+    snomedCursor = embeddingCollection.find({}).skip(skip).limit(limit);
     snomedChunk = await snomedCursor.toArray();
   } catch (error) {
     console.error("Error while retrieving data from MongoDB:", error);
@@ -51,10 +51,11 @@ async function processChunk(
 
     for (const data of combinedData) {
       let dataEmbedding = data.gpt3_data.data[0].embedding;
-      let dataText = data.snomed_text || data.matchingText;
+      let dataText = data.snomed_text || data.matchingText || data.loinc_text;
       let dataID =
         (!isEmptyObject(data.snomed_id) && data.snomed_id) ||
-        (!isEmptyObject(data.matchingID) && data.matchingID);
+        (!isEmptyObject(data.matchingID) && data.matchingID) ||
+        (!isEmptyObject(data.loinc_id) && data.loinc_id);
       let _redCapDoc = redCapDoc;
 
       if (_redCapDoc.obj.name && _redCapDoc.obj.name == dataID) {
@@ -96,7 +97,7 @@ async function processChunks(
   const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
   console.log("Collection(s) used:", collectionsArray);
   // Map each collection name to a MongoDB collection
-  const snomedCollections = collectionsArray.map((collectionName) =>
+  const embeddingCollections = collectionsArray.map((collectionName) =>
     client.db("GPT3_Embeddings").collection(collectionName)
   );
 
@@ -104,10 +105,10 @@ async function processChunks(
   const allResults = [];
 
   // Process each collection
-  for (const snomedCollection of snomedCollections) {
-    const count = await snomedCollection.countDocuments();
+  for (const embeddingCollection of embeddingCollections) {
+    const count = await embeddingCollection.countDocuments();
     console.log(
-      `Total Documents in ${snomedCollection.collectionName}: ${count}`
+      `Total Documents in ${embeddingCollection.collectionName}: ${count}`
     );
     totalDocuments += count;
     let skip = 0;
@@ -117,7 +118,7 @@ async function processChunks(
       const limit = Math.min(chunkSize, count - skip);
       const finalList = await processChunk(
         redCapCollectionArray,
-        snomedCollection,
+        embeddingCollection,
         skip,
         limit,
         redcapLookupArray,
@@ -169,6 +170,7 @@ async function processChunks(
       items.sort((a, b) => b.similarity - a.similarity);
 
       const topItems = items.slice(0, topResultsNum);
+      console.log('topItems', topItems)
       for (const item of topItems) {
         if (item.snomedID && typeof item.snomedID === "number") {
           const res = await pg_pool.query(

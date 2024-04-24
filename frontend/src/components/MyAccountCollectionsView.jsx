@@ -19,11 +19,12 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function MyAccountCollectionsView(props) {
-  // console.log('completedjobs props', props)
   const [collectionStats, setCollectionStats] = useState([]);
   const { token } = props.props.props ?? props.props;
   const [editingRow, setEditingRow] = useState(null);
   const [editValue, setEditValue] = useState("");
+
+
 
   useEffect(() => {
     getCollectionNames();
@@ -33,8 +34,6 @@ export default function MyAccountCollectionsView(props) {
   function getCollectionNames() {
     // Replace this function with the actual function to fetch collection stats from your server
     var myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer " + token);
-
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -55,17 +54,16 @@ export default function MyAccountCollectionsView(props) {
       })
       .catch((error) => console.log("error", error));
   }
-  const handleSaveClick = (collectionName) => {
+  const handleSaveClick = async (collectionName) => {
     // Call the API here
-
     fetch(
       `${process.env.REACT_APP_BACKEND_API_URL}/api/collections/updateCollectionAltName`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
         },
+        credentials: 'include', 
         body: JSON.stringify({
           collection_name: collectionName,
           collection_alt_name: editValue,
@@ -355,7 +353,8 @@ export default function MyAccountCollectionsView(props) {
               <br />
               <Typography variant="caption">
                 {" "}
-                If you want to include an embeddings collection then add -embeddings.
+                If you want to include an embeddings collection then add
+                -embeddings.
               </Typography>
             </Paper>
           </Grid>
