@@ -2,7 +2,9 @@ const MongoClient = require("mongodb").MongoClient;
 const axios = require("axios");
 require("dotenv").config();
 const axiosThrottle = require("axios-request-throttle");
-axiosThrottle.use(axios, { requestsPerSecond: 40 }); //GPT3 limit is 3,000 per minute
+axiosThrottle.use(axios, { requestsPerSecond: 10 }); //GPT3 limit is 3,000 per minute
+const pLimit = require('p-limit');
+const limit = pLimit(5);     // tweak concurrency as needed
 // Connection URL
 const url = "mongodb://127.0.0.1:27017";
 const dbName = "GPT3_Embeddings";
@@ -140,9 +142,9 @@ client.connect(async function (err) {
          }
         console.info("Continuing...");
         console.log('toEmbedList', toEmbedList)
-        const calls = toEmbedList.map((element) => {
-          return callGPT3(gptCustomTextEmbeddingsCollection, element);
-        });
+        const calls = toEmbedList.map(element =>
+          limit(() => callGPT3(gptEmbeddingsCollection, element))
+        );
 
         Promise.all(calls).then(() => {
           console.info("All GPT3 writes done! Closing MongoDB conn");
@@ -244,9 +246,9 @@ client.connect(async function (err) {
           }
           console.info("Continuing...");
           // console.log('toEmbedList', toEmbedList)
-          const calls = toEmbedList.map((element) => {
-            return callGPT3(gptEmbeddingsCollection, element);
-          });
+          const calls = toEmbedList.map(element =>
+            limit(() => callGPT3(gptEmbeddingsCollection, element))
+          );
 
           Promise.all(calls).then(() => {
             console.info("All GPT3 writes done! Closing MongoDB conn");
