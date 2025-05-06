@@ -4,7 +4,7 @@ require("dotenv").config();
 const axiosThrottle = require("axios-request-throttle");
 axiosThrottle.use(axios, { requestsPerSecond: 10 }); //GPT3 limit is 3,000 per minute
 const pLimit = require('p-limit');
-const limit = pLimit(5);     // tweak concurrency as needed
+const limit = pLimit(1);     // tweak concurrency as needed
 // Connection URL
 const url = "mongodb://127.0.0.1:27017";
 const dbName = "GPT3_Embeddings";
