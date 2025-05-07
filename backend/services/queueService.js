@@ -265,8 +265,10 @@ async function compareEmbeddings(job) {
         //******************
         //******************
         // LOG logMessage to see the console.logs from the worker threads
-        //for development and testing, comment this out in prod
-        // console.log(logMessage)
+        // for development and testing, comment this out in prod
+        // if (process.env.NODE_ENV == 'local' || process.env.LOG_LEVEL == 'verbose') {
+          // console.log(logMessage)
+        // }
         //******************
         //******************
 

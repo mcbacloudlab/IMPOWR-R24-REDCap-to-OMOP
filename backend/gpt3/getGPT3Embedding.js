@@ -52,6 +52,7 @@ client.connect(async function (err) {
     jsonData = JSON.parse(jsonData);
     // console.log("jsondata", jsonData);
     // Find all documents in the redcap_data collection
+    console.log('selectedform', selectedForm)
     if (selectedForm === "customText") {
       customTextCollection
       .find({})
@@ -143,7 +144,7 @@ client.connect(async function (err) {
         console.info("Continuing...");
         console.log('toEmbedList', toEmbedList)
         const calls = toEmbedList.map(element =>
-          limit(() => callGPT3(gptEmbeddingsCollection, element))
+          limit(() => callGPT3(gptCustomTextEmbeddingsCollection, element))
         );
 
         Promise.all(calls).then(() => {
