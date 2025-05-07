@@ -26,7 +26,7 @@ async function processChunk(
   embeddingCollection,
   skip,
   limit,
-  redcapLookupArray, // Add redcapLookupArray as an argument
+  redcapLookupArray // Add redcapLookupArray as an argument
 ) {
   let finalList = [];
   let snomedCursor, snomedChunk;
@@ -41,7 +41,9 @@ async function processChunk(
     // console.log("redcapDoc", redCapDoc);
     let redcapFieldLabel = redCapDoc.fieldLabel;
     // console.log('embedding', redCapDoc.gpt3_data)
-    if (!redCapDoc.gpt3_data.data[0]) return;
+    // if (!redCapDoc.gpt3_data.data[0]) return;
+    // short-circuit if there's no array or it's empty
+    if (!redCapDoc?.gpt3_data?.data?.length) return;
     let redcapEmbedding = redCapDoc.gpt3_data.data[0].embedding;
     let topResults = [];
 
@@ -91,7 +93,7 @@ async function processChunks(
   redCapCollectionArray,
   chunkSize,
   progress,
-  collectionsToUse,
+  collectionsToUse
 ) {
   // Parse collectionsToUse from a JSON string to an array
   const collectionsArray = Object.keys(JSON.parse(collectionsToUse));
@@ -121,7 +123,7 @@ async function processChunks(
         embeddingCollection,
         skip,
         limit,
-        redcapLookupArray,
+        redcapLookupArray
       );
       results.push(...finalList);
       skip += limit;
@@ -170,7 +172,7 @@ async function processChunks(
       items.sort((a, b) => b.similarity - a.similarity);
 
       const topItems = items.slice(0, topResultsNum);
-      console.log('topItems', topItems)
+      console.log("topItems", topItems);
       for (const item of topItems) {
         if (item.snomedID && typeof item.snomedID === "number") {
           const res = await pg_pool.query(
@@ -221,5 +223,5 @@ processChunks(
   workerData.redCapCollectionArray,
   30000,
   workerData.progress,
-  workerData.collectionsToUse,
+  workerData.collectionsToUse
 );
