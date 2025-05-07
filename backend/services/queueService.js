@@ -64,7 +64,7 @@ async function importToMongo(job) {
   job.progress(0);
   console.log("job.data");
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(
       __dirname,
       "../mongo/import_To_MongoDB.js"
@@ -115,7 +115,7 @@ async function embedRedcapText(job) {
 
   console.log("Starting REDCap GPT3 Embedding...");
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/getGPT3Embedding.js");
     const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
@@ -159,7 +159,7 @@ async function embedRedcapLookupText(job) {
   console.log("jobid", job.id);
   console.log("Starting REDCap Lookup GPT3 Embedding...");
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const scriptPath = path.resolve(__dirname, "../gpt3/redcapLookupEmbed.js");
     const args = ["--max-old-space-size=16384"];
     const data = job.data.data;
